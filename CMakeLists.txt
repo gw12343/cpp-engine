@@ -76,16 +76,18 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${SNDFILE_LIBRARIES})
 
 
 
-# Add ozz-animation library
+# Add ozz-animation with tools enabled
 include(FetchContent)
+
+set(OZZ_BUILD_TOOLS ON CACHE BOOL "" FORCE)      # ✅ Enables fbx2ozz and other tools
+set(OZZ_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)   # Optional: disable samples
+set(OZZ_BUILD_TESTS OFF CACHE BOOL "" FORCE)     # Optional: disable tests
+
 FetchContent_Declare(
   ozz
   GIT_REPOSITORY https://github.com/guillaumeblanc/ozz-animation.git
-  GIT_TAG master  # You might want to pin this to a specific version/tag later
+  GIT_TAG master
 )
-# Disable building samples and tests to speed up the build
-# set(ozz_build_samples OFF CACHE BOOL "" FORCE)
-# set(ozz_build_tests OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(ozz)
 
 # Link ozz-animation

@@ -32,8 +32,8 @@ namespace Engine {
 
 	GEngine::GEngine(int width, int height, const char* title)
 	    : m_window(width, height, title), m_camera(glm::vec3(0.0f, 3.0f, 6.0f), glm::vec3(0, 1, 0), -90.0f, -30.0f),
-	      m_soundManager(std::make_shared<Audio::SoundManager>()),
-	      m_animationManager(std::make_unique<AnimationManager>()), m_deltaTime(0.0f), m_lastFrame(0.0f)
+	      m_soundManager(std::make_shared<Audio::SoundManager>()), m_animationManager(std::make_unique<AnimationManager>(this)), m_deltaTime(0.0f),
+	      m_lastFrame(0.0f)
 	{
 		m_uiManager = std::make_unique<UIManager>(this);
 	}
@@ -110,9 +110,8 @@ namespace Engine {
 		RegisterTypes();
 
 		allocater = std::make_shared<TempAllocatorImpl>(10 * 1024 * 1024);
-		jobs      = std::make_shared<JobSystemThreadPool>(
-            cMaxPhysicsJobs, cMaxPhysicsBarriers, thread::hardware_concurrency() - 1);
-		physics = std::make_shared<PhysicsSystem>();
+		jobs      = std::make_shared<JobSystemThreadPool>(cMaxPhysicsJobs, cMaxPhysicsBarriers, thread::hardware_concurrency() - 1);
+		physics   = std::make_shared<PhysicsSystem>();
 
 		PhysicsManager::Initialize(physics, allocater, jobs);
 		return true;
@@ -124,11 +123,7 @@ namespace Engine {
 		const RVec3    box_half_extents(0.5f, 0.5f, 0.5f);
 
 		// Create physics body
-		BodyCreationSettings cube_settings(new BoxShape(box_half_extents),
-		                                   RVec3(0.0, 5.0, 0.0),
-		                                   Quat::sIdentity(),
-		                                   EMotionType::Dynamic,
-		                                   Layers::MOVING);
+		BodyCreationSettings cube_settings(new BoxShape(box_half_extents), RVec3(0.0, 5.0, 0.0), Quat::sIdentity(), EMotionType::Dynamic, Layers::MOVING);
 		BodyID               cube_id = body_interface.CreateAndAddBody(cube_settings, EActivation::Activate);
 
 		// Create floor
@@ -137,40 +132,52 @@ namespace Engine {
 		                                    // RefTarget) should be marked as such to prevent it
 		                                    // from being freed when its reference count goes to 0.
 		ShapeSettings::ShapeResult floor_shape_result = floor_shape_settings.Create();
-		ShapeRefC floor_shape = floor_shape_result.Get(); // We don't expect an error here, but you can check
-		                                                  // floor_shape_result for HasError() / GetError()
+		ShapeRefC                  floor_shape        = floor_shape_result.Get(); // We don't expect an error here, but you can check
+		                                                                          // floor_shape_result for HasError() / GetError()
 
-		BodyCreationSettings floor_settings(
-		    floor_shape, RVec3(0.0_r, -1.0_r, 0.0_r), Quat::sIdentity(), EMotionType::Static, Layers::NON_MOVING);
-		Body* floor_body = body_interface.CreateBody(floor_settings); // Note that if we run out of bodies this can
-		                                                              // return nullptr
+		BodyCreationSettings floor_settings(floor_shape, RVec3(0.0_r, -1.0_r, 0.0_r), Quat::sIdentity(), EMotionType::Static, Layers::NON_MOVING);
+		Body*                floor_body = body_interface.CreateBody(floor_settings); // Note that if we run out of bodies this can
+		                                                                             // return nullptr
 		body_interface.AddBody(floor_body->GetID(), EActivation::DontActivate);
 		BodyID floor_id = floor_body->GetID();
 
 		// Load models
-		sphere = ModelLoader::LoadModel("/home/gabe/CLionProjects/cpp-engine/resources/models/sphere.obj");
-		cube   = ModelLoader::LoadModel("/home/gabe/CLionProjects/cpp-engine/resources/models/cube.obj");
+		sphere                       = ModelLoader::LoadModel("/home/gabe/CLionProjects/cpp-engine/resources/models/sphere.obj");
+		cube                         = ModelLoader::LoadModel("/home/gabe/CLionProjects/cpp-engine/resources/models/cube.obj");
 		std::shared_ptr<Model> model = ModelLoader::LoadModel("/home/gabe/CLionProjects/cpp-engine/resources/models/"
 		                                                      "TwistedTree_1.obj");
 
 		// Create entities
 		Entity floor = Entity::Create(this, "FloorEntity");
 		floor.AddComponent<Components::ModelRenderer>(cube);
-		floor.AddComponent<Components::Transform>(
-		    glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(60.0f, 2.0f, 60.0f));
+		floor.AddComponent<Components::Transform>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(60.0f, 2.0f, 60.0f));
 		floor.AddComponent<Components::RigidBodyComponent>(physics.get(), floor_id);
 
 		Entity entity = Entity::Create(this, "TestEntity");
 		entity.AddComponent<Components::ModelRenderer>(cube);
-		entity.AddComponent<Components::Transform>(
-		    glm::vec3(0.0f, -5.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		entity.AddComponent<Components::Transform>(glm::vec3(0.0f, -5.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
-		Entity entity2 = Entity::Create(this, "TestEntity2");
-		entity2.AddComponent<Components::ModelRenderer>(model);
-		entity2.AddComponent<Components::Transform>(
-		    glm::vec3(2.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		entity2.AddComponent<Components::RigidBodyComponent>(physics.get(), cube_id);
-		entity2.AddComponent<Components::AudioSource>("birds", true, 0.1f, 1.0f, true, 5.0f, 50.0f, 1.0f);
+		// Entity entity2 = Entity::Create(this, "TestEntity2");
+		// entity2.AddComponent<Components::ModelRenderer>(model);
+		// entity2.AddComponent<Components::Transform>(glm::vec3(2.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		// entity2.AddComponent<Components::RigidBodyComponent>(physics.get(), cube_id);
+		// entity2.AddComponent<Components::AudioSource>("birds", true, 0.1f, 1.0f, true, 5.0f, 50.0f, 1.0f);
+
+		Entity animatedEntity = Entity::Create(this, "AnimatedEntity");
+		animatedEntity.AddComponent<Components::Transform>(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		animatedEntity.AddComponent<Components::SkeletonComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_skeleton.ozz");
+		animatedEntity.AddComponent<Components::AnimationComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_animation.ozz");
+		animatedEntity.AddComponent<Components::AnimationPoseComponent>();
+		animatedEntity.AddComponent<Components::AnimationWorkerComponent>();
+		animatedEntity.AddComponent<Components::SkinnedMeshComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_mesh.ozz");
+
+		Entity animatedEntity2 = Entity::Create(this, "AnimatedEntity2");
+		animatedEntity2.AddComponent<Components::Transform>(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(2.0f, 0.5f, 1.0f));
+		animatedEntity2.AddComponent<Components::SkeletonComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_skeleton.ozz");
+		animatedEntity2.AddComponent<Components::AnimationComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_animation.ozz");
+		animatedEntity2.AddComponent<Components::AnimationPoseComponent>();
+		animatedEntity2.AddComponent<Components::AnimationWorkerComponent>();
+		animatedEntity2.AddComponent<Components::SkinnedMeshComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_mesh.ozz");
 	}
 
 
@@ -226,18 +233,13 @@ namespace Engine {
 			glm::vec3 forward = m_camera.GetFront();
 
 			BodyInterface&       body_interface = physics->GetBodyInterface();
-			BodyCreationSettings sphere_settings(new SphereShape(0.5f),
-			                                     RVec3(cpos.x, cpos.y, cpos.z),
-			                                     Quat::sIdentity(),
-			                                     EMotionType::Dynamic,
-			                                     Layers::MOVING);
+			BodyCreationSettings sphere_settings(new SphereShape(0.5f), RVec3(cpos.x, cpos.y, cpos.z), Quat::sIdentity(), EMotionType::Dynamic, Layers::MOVING);
 			BodyID               sphere_id = body_interface.CreateAndAddBody(sphere_settings, EActivation::Activate);
 
 			body_interface.AddLinearVelocity(sphere_id, RVec3(forward.x * 5, forward.y * 5, forward.z * 5));
 
 			auto s = Entity::Create(this, "SphereEntity");
-			s.AddComponent<Components::Transform>(
-			    glm::vec3(cpos.x, cpos.y, cpos.z), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+			s.AddComponent<Components::Transform>(glm::vec3(cpos.x, cpos.y, cpos.z), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 			s.AddComponent<Components::ModelRenderer>(sphere);
 			s.AddComponent<Components::RigidBodyComponent>(physics.get(), sphere_id);
 		}
@@ -249,18 +251,14 @@ namespace Engine {
 			glm::vec3   forward = m_camera.GetFront();
 
 			BodyInterface&       body_interface = physics->GetBodyInterface();
-			BodyCreationSettings cube_settings(new BoxShape(box_half_extents),
-			                                   RVec3(cpos.x, cpos.y, cpos.z),
-			                                   Quat::sIdentity(),
-			                                   EMotionType::Dynamic,
-			                                   Layers::MOVING);
-			BodyID               cube_id = body_interface.CreateAndAddBody(cube_settings, EActivation::Activate);
+			BodyCreationSettings cube_settings(
+			    new BoxShape(box_half_extents), RVec3(cpos.x, cpos.y, cpos.z), Quat::sIdentity(), EMotionType::Dynamic, Layers::MOVING);
+			BodyID cube_id = body_interface.CreateAndAddBody(cube_settings, EActivation::Activate);
 
 			body_interface.AddLinearVelocity(cube_id, RVec3(forward.x * 1, forward.y * 1, forward.z * 1));
 
 			auto s = Entity::Create(this, "CubeEntity");
-			s.AddComponent<Components::Transform>(
-			    glm::vec3(cpos.x, cpos.y, cpos.z), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+			s.AddComponent<Components::Transform>(glm::vec3(cpos.x, cpos.y, cpos.z), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 			s.AddComponent<Components::ModelRenderer>(cube);
 			s.AddComponent<Components::RigidBodyComponent>(physics.get(), cube_id);
 		}
