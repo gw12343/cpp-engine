@@ -1,24 +1,27 @@
 #pragma once
 
-#include <glad/glad.h>
-#include <string>
-#include <memory>
 #include "Shader.h"
 #include "Texture.h"
 
-class Skybox {
-public:
-    Skybox();
-    ~Skybox();
+#include <glad/glad.h>
+#include <memory>
+#include <string>
 
-    bool LoadFromFile(const std::string& path);
-    void Draw(const Shader& shader) const;
+namespace Engine {
+	class Skybox {
+	  public:
+		Skybox();
+		~Skybox();
 
-private:
-    void SetupMesh();
+		bool LoadFromFile(const std::string& path);
+		void Draw(const Shader& shader) const;
 
-    GLuint m_vao;
-    GLuint m_vbo;
-    std::unique_ptr<Texture> m_texture;
-    bool m_initialized;
-};
+	  private:
+		void SetupMesh();
+
+		GLuint                   m_vao;
+		GLuint                   m_vbo;
+		std::unique_ptr<Texture> m_texture;
+		bool                     m_initialized;
+	};
+} // namespace Engine

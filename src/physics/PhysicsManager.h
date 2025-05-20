@@ -27,35 +27,34 @@
 using namespace JPH;
 using namespace JPH::literals;
 
-void      DecomposeMatrix(const JPH::RMat44& mat, glm::vec3& position, glm::quat& rotation, glm::vec3& scale);
-glm::mat4 CalculateModelMatrix(const Engine::Components::Transform& transform);
+namespace Engine {
+
+	void      DecomposeMatrix(const JPH::RMat44& mat, glm::vec3& position, glm::quat& rotation, glm::vec3& scale);
+	glm::mat4 CalculateModelMatrix(const Engine::Components::Transform& transform);
 
 
-const uint cMaxBodies             = 1024;
-const uint cNumBodyMutexes        = 0;
-const uint cMaxBodyPairs          = 1024;
-const uint cMaxContactConstraints = 1024;
+	const uint cMaxBodies             = 1024;
+	const uint cNumBodyMutexes        = 0;
+	const uint cMaxBodyPairs          = 1024;
+	const uint cMaxContactConstraints = 1024;
 
 
-class PhysicsManager {
-  public:
-	static void TraceImpl(const char* inFMT, ...);
-	static bool AssertFailedImpl(const char* inExpression, const char* inMessage, const char* inFile, uint inLine);
+	class PhysicsManager {
+	  public:
+		static void TraceImpl(const char* inFMT, ...);
+		static bool AssertFailedImpl(const char* inExpression, const char* inMessage, const char* inFile, uint inLine);
 
 
-	static void Initialize(std::shared_ptr<PhysicsSystem>       physics,
-	                       std::shared_ptr<TempAllocatorImpl>   allocater,
-	                       std::shared_ptr<JobSystemThreadPool> jobs);
-	static void CleanUp(entt::registry& registry, std::shared_ptr<PhysicsSystem> physics);
-	static void Update(std::shared_ptr<PhysicsSystem>       physics,
-	                   std::shared_ptr<TempAllocatorImpl>   allocater,
-	                   std::shared_ptr<JobSystemThreadPool> jobs,
-	                   float                                dt);
-	static void UpdatePhysicsEntities(entt::registry& registry, std::shared_ptr<PhysicsSystem> physics);
+		static void Initialize(std::shared_ptr<PhysicsSystem> physics, std::shared_ptr<TempAllocatorImpl> allocater, std::shared_ptr<JobSystemThreadPool> jobs);
+		static void CleanUp(entt::registry& registry, std::shared_ptr<PhysicsSystem> physics);
+		static void
+		Update(std::shared_ptr<PhysicsSystem> physics, std::shared_ptr<TempAllocatorImpl> allocater, std::shared_ptr<JobSystemThreadPool> jobs, float dt);
+		static void UpdatePhysicsEntities(entt::registry& registry, std::shared_ptr<PhysicsSystem> physics);
 
-	static BPLayerInterfaceImpl              broad_phase_layer_interface;
-	static ObjectVsBroadPhaseLayerFilterImpl object_vs_broadphase_layer_filter;
-	static ObjectLayerPairFilterImpl         object_vs_object_layer_filter;
-	static MyContactListener                 contact_listener;
-	static MyBodyActivationListener          body_activation_listener;
-};
+		static BPLayerInterfaceImpl              broad_phase_layer_interface;
+		static ObjectVsBroadPhaseLayerFilterImpl object_vs_broadphase_layer_filter;
+		static ObjectLayerPairFilterImpl         object_vs_object_layer_filter;
+		static MyContactListener                 contact_listener;
+		static MyBodyActivationListener          body_activation_listener;
+	};
+} // namespace Engine

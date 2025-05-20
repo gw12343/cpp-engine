@@ -11,36 +11,38 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-class Renderer {
-  public:
-	Renderer(Window& window, Camera& camera);
-	~Renderer();
+namespace Engine {
+	class Renderer {
+	  public:
+		Renderer(Engine::Window& window, Engine::Camera& camera);
+		~Renderer();
 
-	bool Initialize();
-	void PreRender();
-	void PostRender();
-	void Shutdown();
-	void RenderEntities(entt::registry& registry);
+		bool Initialize();
+		void PreRender();
+		void PostRender();
+		void Shutdown();
+		void RenderEntities(entt::registry& registry);
 
-	const Shader& GetShader() const { return m_shader; }
+		const Shader& GetShader() const { return m_shader; }
 
-	// Get default textures
-	std::shared_ptr<Texture> GetDefaultWhiteTexture() const { return m_defaultWhiteTexture; }
-	std::shared_ptr<Texture> GetDefaultNormalTexture() const { return m_defaultNormalTexture; }
-	std::shared_ptr<Texture> GetDefaultBlackTexture() const { return m_defaultBlackTexture; }
+		// Get default textures
+		std::shared_ptr<Texture> GetDefaultWhiteTexture() const { return m_defaultWhiteTexture; }
+		std::shared_ptr<Texture> GetDefaultNormalTexture() const { return m_defaultNormalTexture; }
+		std::shared_ptr<Texture> GetDefaultBlackTexture() const { return m_defaultBlackTexture; }
 
-  private:
-	// Create default textures
-	bool CreateDefaultTextures();
+	  private:
+		// Create default textures
+		bool CreateDefaultTextures();
 
-	Window&                 m_window;
-	Camera&                 m_camera;
-	Shader                  m_shader;
-	Shader                  m_skyboxShader;
-	std::unique_ptr<Skybox> m_skybox;
+		Engine::Window&         m_window;
+		Engine::Camera&         m_camera;
+		Engine::Shader          m_shader;
+		Engine::Shader          m_skyboxShader;
+		std::unique_ptr<Skybox> m_skybox;
 
-	// Default textures
-	std::shared_ptr<Texture> m_defaultWhiteTexture;
-	std::shared_ptr<Texture> m_defaultNormalTexture;
-	std::shared_ptr<Texture> m_defaultBlackTexture;
-};
+		// Default textures
+		std::shared_ptr<Texture> m_defaultWhiteTexture;
+		std::shared_ptr<Texture> m_defaultNormalTexture;
+		std::shared_ptr<Texture> m_defaultBlackTexture;
+	};
+} // namespace Engine

@@ -1,36 +1,38 @@
 #pragma once
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
-
 #include <memory>
 #include <string>
 
-class Window {
-public:
-    Window(int width, int height, const std::string& title);
-    ~Window();
+namespace Engine {
 
-    bool Initialize();
-    void Update();
-    bool ShouldClose() const;
-    void SwapBuffers() const;
-    void PollEvents() const;
-    void Shutdown();
-    void OnResize(int width, int height);
+	class Window {
+	  public:
+		Window(int width, int height, const std::string& title);
+		~Window();
 
-    int GetWidth() const;
-    int GetHeight() const;
+		bool Initialize();
+		void Update();
+		bool ShouldClose() const;
+		void SwapBuffers() const;
+		void PollEvents() const;
+		void Shutdown();
+		void OnResize(int width, int height);
 
-    GLFWwindow* GetNativeWindow() const { return m_window; }
+		int GetWidth() const;
+		int GetHeight() const;
 
-private:
-    GLFWwindow* m_window;
-    int m_width;
-    int m_height;
-    std::string m_title;
-    bool m_initialized;
+		GLFWwindow* GetNativeWindow() const { return m_window; }
 
-    bool InitGLFW();
-    bool InitGLAD();
-    bool InitImGui();
-};
+	  private:
+		GLFWwindow* m_window;
+		int         m_width;
+		int         m_height;
+		std::string m_title;
+		bool        m_initialized;
+
+		bool InitGLFW();
+		bool InitGLAD();
+		bool InitImGui();
+	};
+} // namespace Engine
