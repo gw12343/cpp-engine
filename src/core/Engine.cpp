@@ -31,27 +31,20 @@ using namespace JPH::literals;
 namespace Engine {
 
 	GEngine::GEngine(int width, int height, const char* title)
-	    : m_window(width, height, title), m_camera(glm::vec3(0.0f, 3.0f, 6.0f), glm::vec3(0, 1, 0), -90.0f, -30.0f),
-	      m_soundManager(std::make_shared<Audio::SoundManager>()), m_animationManager(std::make_unique<AnimationManager>(this)), m_deltaTime(0.0f),
-	      m_lastFrame(0.0f)
+	    : m_window(width, height, title), m_camera(glm::vec3(0.0f, 3.0f, 6.0f), glm::vec3(0, 1, 0), -90.0f, -30.0f), m_soundManager(std::make_shared<Audio::SoundManager>()), m_animationManager(std::make_unique<AnimationManager>(this)),
+	      m_deltaTime(0.0f), m_lastFrame(0.0f)
 	{
-		m_uiManager = std::make_unique<UIManager>(this);
+		m_uiManager = std::make_unique<UI::UIManager>(this);
 	}
 	GEngine::~GEngine()
 	{
 		Shutdown();
 	}
 
-	// Physics system
-	std::shared_ptr<PhysicsSystem>       physics;
-	std::shared_ptr<TempAllocatorImpl>   allocater;
-	std::shared_ptr<JobSystemThreadPool> jobs;
-
 	// Audio system
 	std::shared_ptr<Audio::SoundBuffer> m_backgroundMusic;
 	std::shared_ptr<Audio::SoundSource> m_backgroundMusicSource;
 	Entity                              m_selectedEntity;
-	ozz::unique_ptr<RendererImpl>       renderer_;
 
 	// Test models
 	std::shared_ptr<Model> sphere;
@@ -62,7 +55,8 @@ namespace Engine {
 		m_logger = spdlog::stdout_color_mt("engine");
 		spdlog::set_level(spdlog::level::debug);
 		spdlog::set_pattern("[%H:%M:%S.%e] [%^%l%$] [%s:%#] %v");
-		spdlog::info("Starting Engine");
+
+		SPDLOG_INFO("Starting Engine");
 
 		// After window initialization, set the window reference in the camera
 		if (!m_window.Initialize()) {
@@ -81,10 +75,10 @@ namespace Engine {
 			return false;
 		}
 
-		if (!InitializeRenderer() || !m_soundManager->Initialize() || !InitializePhysics()) {
+		if (!InitializeRenderer() || !m_soundManager->Initialize()) {
 			return false;
 		}
-
+		PhysicsManager::Initialize();
 		m_uiManager->Initialize();
 
 		CreateInitialEntities();
@@ -101,25 +95,10 @@ namespace Engine {
 		return true;
 	}
 
-	bool GEngine::InitializePhysics()
-	{
-		RegisterDefaultAllocator();
-		Trace = PhysicsManager::TraceImpl;
-		JPH_IF_ENABLE_ASSERTS(AssertFailed = PhysicsManager::AssertFailedImpl;)
-		Factory::sInstance = new Factory();
-		RegisterTypes();
-
-		allocater = std::make_shared<TempAllocatorImpl>(10 * 1024 * 1024);
-		jobs      = std::make_shared<JobSystemThreadPool>(cMaxPhysicsJobs, cMaxPhysicsBarriers, thread::hardware_concurrency() - 1);
-		physics   = std::make_shared<PhysicsSystem>();
-
-		PhysicsManager::Initialize(physics, allocater, jobs);
-		return true;
-	}
 
 	void GEngine::CreateInitialEntities()
 	{
-		BodyInterface& body_interface = physics->GetBodyInterface();
+		BodyInterface& body_interface = PhysicsManager::GetPhysicsSystem()->GetBodyInterface();
 		const RVec3    box_half_extents(0.5f, 0.5f, 0.5f);
 
 		// Create physics body
@@ -151,33 +130,33 @@ namespace Engine {
 		Entity floor = Entity::Create(this, "FloorEntity");
 		floor.AddComponent<Components::ModelRenderer>(cube);
 		floor.AddComponent<Components::Transform>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(60.0f, 2.0f, 60.0f));
-		floor.AddComponent<Components::RigidBodyComponent>(physics.get(), floor_id);
+		floor.AddComponent<Components::RigidBodyComponent>(PhysicsManager::GetPhysicsSystem().get(), floor_id);
 
 		Entity entity = Entity::Create(this, "TestEntity");
 		entity.AddComponent<Components::ModelRenderer>(cube);
 		entity.AddComponent<Components::Transform>(glm::vec3(0.0f, -5.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
-		// Entity entity2 = Entity::Create(this, "TestEntity2");
-		// entity2.AddComponent<Components::ModelRenderer>(model);
-		// entity2.AddComponent<Components::Transform>(glm::vec3(2.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		// entity2.AddComponent<Components::RigidBodyComponent>(physics.get(), cube_id);
-		// entity2.AddComponent<Components::AudioSource>("birds", true, 0.1f, 1.0f, true, 5.0f, 50.0f, 1.0f);
+		Entity entity2 = Entity::Create(this, "TestEntity2");
+		entity2.AddComponent<Components::ModelRenderer>(model);
+		entity2.AddComponent<Components::Transform>(glm::vec3(2.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		entity2.AddComponent<Components::RigidBodyComponent>(PhysicsManager::GetPhysicsSystem().get(), cube_id);
+		entity2.AddComponent<Components::AudioSource>("birds", true, 0.1f, 1.0f, true, 5.0f, 50.0f, 1.0f);
 
-		Entity animatedEntity = Entity::Create(this, "AnimatedEntity");
-		animatedEntity.AddComponent<Components::Transform>(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		animatedEntity.AddComponent<Components::SkeletonComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_skeleton.ozz");
-		animatedEntity.AddComponent<Components::AnimationComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_animation.ozz");
-		animatedEntity.AddComponent<Components::AnimationPoseComponent>();
-		animatedEntity.AddComponent<Components::AnimationWorkerComponent>();
-		animatedEntity.AddComponent<Components::SkinnedMeshComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_mesh.ozz");
+		//		Entity animatedEntity = Entity::Create(this, "AnimatedEntity");
+		//		animatedEntity.AddComponent<Components::Transform>(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		//		animatedEntity.AddComponent<Components::SkeletonComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_skeleton.ozz");
+		//		animatedEntity.AddComponent<Components::AnimationComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_animation.ozz");
+		//		animatedEntity.AddComponent<Components::AnimationPoseComponent>();
+		//		animatedEntity.AddComponent<Components::AnimationWorkerComponent>();
+		//		animatedEntity.AddComponent<Components::SkinnedMeshComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_mesh.ozz");
 
-		Entity animatedEntity2 = Entity::Create(this, "AnimatedEntity2");
-		animatedEntity2.AddComponent<Components::Transform>(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(2.0f, 0.5f, 1.0f));
-		animatedEntity2.AddComponent<Components::SkeletonComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_skeleton.ozz");
-		animatedEntity2.AddComponent<Components::AnimationComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_animation.ozz");
-		animatedEntity2.AddComponent<Components::AnimationPoseComponent>();
-		animatedEntity2.AddComponent<Components::AnimationWorkerComponent>();
-		animatedEntity2.AddComponent<Components::SkinnedMeshComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_mesh.ozz");
+		// Entity animatedEntity2 = Entity::Create(this, "AnimatedEntity2");
+		// animatedEntity2.AddComponent<Components::Transform>(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(2.0f, 0.5f, 1.0f));
+		// animatedEntity2.AddComponent<Components::SkeletonComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_skeleton.ozz");
+		// animatedEntity2.AddComponent<Components::AnimationComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_animation.ozz");
+		// animatedEntity2.AddComponent<Components::AnimationPoseComponent>();
+		// animatedEntity2.AddComponent<Components::AnimationWorkerComponent>();
+		// animatedEntity2.AddComponent<Components::SkinnedMeshComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_mesh.ozz");
 	}
 
 
@@ -218,7 +197,7 @@ namespace Engine {
 		// Toggle physics when P is pressed
 		if (Input::IsKeyPressedThisFrame(GLFW_KEY_P)) {
 			m_physicsEnabled = !m_physicsEnabled;
-			spdlog::info("Physics simulation {}", m_physicsEnabled ? "enabled" : "disabled");
+			SPDLOG_INFO("Physics simulation {}", m_physicsEnabled ? "enabled" : "disabled");
 		}
 
 		// Process mouse scroll regardless of capture state
@@ -232,7 +211,7 @@ namespace Engine {
 			glm::vec3 cpos    = m_camera.GetPosition();
 			glm::vec3 forward = m_camera.GetFront();
 
-			BodyInterface&       body_interface = physics->GetBodyInterface();
+			BodyInterface&       body_interface = PhysicsManager::GetPhysicsSystem()->GetBodyInterface();
 			BodyCreationSettings sphere_settings(new SphereShape(0.5f), RVec3(cpos.x, cpos.y, cpos.z), Quat::sIdentity(), EMotionType::Dynamic, Layers::MOVING);
 			BodyID               sphere_id = body_interface.CreateAndAddBody(sphere_settings, EActivation::Activate);
 
@@ -241,7 +220,7 @@ namespace Engine {
 			auto s = Entity::Create(this, "SphereEntity");
 			s.AddComponent<Components::Transform>(glm::vec3(cpos.x, cpos.y, cpos.z), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 			s.AddComponent<Components::ModelRenderer>(sphere);
-			s.AddComponent<Components::RigidBodyComponent>(physics.get(), sphere_id);
+			s.AddComponent<Components::RigidBodyComponent>(PhysicsManager::GetPhysicsSystem().get(), sphere_id);
 		}
 
 		if (ImGui::IsKeyPressed(ImGuiKey_C)) {
@@ -250,25 +229,24 @@ namespace Engine {
 			glm::vec3   cpos    = m_camera.GetPosition();
 			glm::vec3   forward = m_camera.GetFront();
 
-			BodyInterface&       body_interface = physics->GetBodyInterface();
-			BodyCreationSettings cube_settings(
-			    new BoxShape(box_half_extents), RVec3(cpos.x, cpos.y, cpos.z), Quat::sIdentity(), EMotionType::Dynamic, Layers::MOVING);
-			BodyID cube_id = body_interface.CreateAndAddBody(cube_settings, EActivation::Activate);
+			BodyInterface&       body_interface = PhysicsManager::GetPhysicsSystem()->GetBodyInterface();
+			BodyCreationSettings cube_settings(new BoxShape(box_half_extents), RVec3(cpos.x, cpos.y, cpos.z), Quat::sIdentity(), EMotionType::Dynamic, Layers::MOVING);
+			BodyID               cube_id = body_interface.CreateAndAddBody(cube_settings, EActivation::Activate);
 
 			body_interface.AddLinearVelocity(cube_id, RVec3(forward.x * 1, forward.y * 1, forward.z * 1));
 
 			auto s = Entity::Create(this, "CubeEntity");
 			s.AddComponent<Components::Transform>(glm::vec3(cpos.x, cpos.y, cpos.z), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 			s.AddComponent<Components::ModelRenderer>(cube);
-			s.AddComponent<Components::RigidBodyComponent>(physics.get(), cube_id);
+			s.AddComponent<Components::RigidBodyComponent>(PhysicsManager::GetPhysicsSystem().get(), cube_id);
 		}
 	}
 
 	void GEngine::UpdatePhysics()
 	{
-		if (m_physicsEnabled) PhysicsManager::Update(physics, allocater, jobs, m_deltaTime);
+		if (m_physicsEnabled) PhysicsManager::Update(m_deltaTime);
 
-		PhysicsManager::UpdatePhysicsEntities(m_registry, physics);
+		PhysicsManager::UpdatePhysicsEntities(m_registry, NULL);
 	}
 
 	void GEngine::Update()
@@ -296,21 +274,13 @@ namespace Engine {
 
 	void GEngine::Shutdown()
 	{
-		renderer_.reset();
-		PhysicsManager::CleanUp(m_registry, physics);
-		// Stop background music if playing
-		if (m_backgroundMusicSource) {
-			m_backgroundMusicSource->Stop();
-			m_backgroundMusicSource.reset();
-		}
+		PhysicsManager::CleanUp(m_registry, NULL);
 
-		// Clear background music buffer
-		m_backgroundMusic.reset();
 		// Shutdown sound manager
 		if (m_soundManager) {
 			m_soundManager->Shutdown();
 		}
 
-		m_logger->info("Engine shutdown complete");
+		SPDLOG_INFO("Engine shutdown complete");
 	}
 } // namespace Engine
