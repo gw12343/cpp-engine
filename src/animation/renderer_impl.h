@@ -7,15 +7,15 @@
 #define GLFW_INCLUDE_NONE
 #include "Camera.h"
 #include "animation/renderer.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
+#include "imgui.h"
 #include "ozz/base/containers/vector.h"
 #include "ozz/base/log.h"
 #include "ozz/base/memory/unique_ptr.h"
 
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
-#include <imgui/imgui.h>
-#include <imgui/imgui_impl_glfw.h>
-#include <imgui/imgui_impl_opengl3.h>
 
 // Provides helper macro to test for glGetError on a gl call.
 #ifndef NDEBUG

@@ -14,9 +14,17 @@ namespace Engine {
 	BPLayerInterfaceImpl              PhysicsManager::broad_phase_layer_interface;
 	ObjectVsBroadPhaseLayerFilterImpl PhysicsManager::object_vs_broadphase_layer_filter;
 	ObjectLayerPairFilterImpl         PhysicsManager::object_vs_object_layer_filter;
-	MyContactListener                 PhysicsManager::contact_listener;
-	MyBodyActivationListener          PhysicsManager::body_activation_listener;
+	ContactListenerImpl               PhysicsManager::contact_listener;
+	BodyActivationListenerImpl        PhysicsManager::body_activation_listener;
 
+	std::shared_ptr<PhysicsSystem>       physics;
+	std::shared_ptr<TempAllocatorImpl>   allocater;
+	std::shared_ptr<JobSystemThreadPool> jobs;
+
+	std::shared_ptr<PhysicsSystem> PhysicsManager::GetPhysicsSystem()
+	{
+		return physics;
+	}
 
 	void PhysicsManager::TraceImpl(const char* inFMT, ...)
 	{
@@ -40,29 +48,30 @@ namespace Engine {
 	};
 
 
-	void PhysicsManager::Initialize(std::shared_ptr<PhysicsSystem>       physics_system,
-	                                std::shared_ptr<TempAllocatorImpl>   allocater,
-	                                std::shared_ptr<JobSystemThreadPool> jobs)
+	void PhysicsManager::Initialize()
 	{
-		physics_system->Init(cMaxBodies,
-		                     cNumBodyMutexes,
-		                     cMaxBodyPairs,
-		                     cMaxContactConstraints,
-		                     broad_phase_layer_interface,
-		                     object_vs_broadphase_layer_filter,
-		                     object_vs_object_layer_filter);
+		RegisterDefaultAllocator();
+		Trace = PhysicsManager::TraceImpl;
+		JPH_IF_ENABLE_ASSERTS(AssertFailed = AssertFailedImpl;)
+
+		Factory::sInstance = new Factory();
+		RegisterTypes();
+
+		allocater = std::make_shared<TempAllocatorImpl>(10 * 1024 * 1024);
+		jobs      = std::make_shared<JobSystemThreadPool>(cMaxPhysicsJobs, cMaxPhysicsBarriers, thread::hardware_concurrency() - 1);
+		physics   = std::make_shared<PhysicsSystem>();
+
+
+		physics->Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, broad_phase_layer_interface, object_vs_broadphase_layer_filter, object_vs_object_layer_filter);
 
 		// Set the contact listener
-		physics_system->SetContactListener(&contact_listener);
+		physics->SetContactListener(&contact_listener);
 
 		// Set the body activation listener
-		physics_system->SetBodyActivationListener(&body_activation_listener);
+		physics->SetBodyActivationListener(&body_activation_listener);
 	}
 
-	void PhysicsManager::Update(std::shared_ptr<PhysicsSystem>       physics,
-	                            std::shared_ptr<TempAllocatorImpl>   allocater,
-	                            std::shared_ptr<JobSystemThreadPool> jobs,
-	                            float                                dt)
+	void PhysicsManager::Update(float dt)
 	{
 		// Collision Steps to simulate. Should be around 1 per 16ms
 		int cCollisionSteps = static_cast<int>(glm::ceil(dt * 60.0f));
@@ -71,9 +80,9 @@ namespace Engine {
 	}
 
 
-	void PhysicsManager::CleanUp(entt::registry& registry, std::shared_ptr<PhysicsSystem> physics)
+	void PhysicsManager::CleanUp(entt::registry& registry)
 	{
-		spdlog::info("cleaning up physics");
+		SPDLOG_INFO("cleaning up physics");
 
 		auto           physicsView    = registry.view<Engine::Components::RigidBodyComponent>();
 		BodyInterface& body_interface = physics->GetBodyInterface();
@@ -151,7 +160,7 @@ namespace Engine {
 		return modelMatrix;
 	}
 
-	void PhysicsManager::UpdatePhysicsEntities(entt::registry& registry, std::shared_ptr<PhysicsSystem> physics)
+	void PhysicsManager::SyncPhysicsEntities(entt::registry& registry)
 	{
 		auto           physicsView    = registry.view<Engine::Components::Transform, Engine::Components::RigidBodyComponent>();
 		BodyInterface& body_interface = physics->GetBodyInterface();

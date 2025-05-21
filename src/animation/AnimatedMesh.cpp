@@ -1,5 +1,5 @@
 // mesh.cpp
-#include "mesh.h"
+#include "AnimatedMesh.h"
 
 #include "ozz/base/containers/vector_archive.h"
 #include "ozz/base/io/archive.h"

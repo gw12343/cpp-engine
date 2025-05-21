@@ -69,38 +69,37 @@ namespace Engine {
 
 
 	// See: ContactListener
-	ValidateResult
-	MyContactListener::OnContactValidate(const Body& inBody1, const Body& inBody2, RVec3Arg inBaseOffset, const CollideShapeResult& inCollisionResult)
+	ValidateResult ContactListenerImpl::OnContactValidate(const Body& inBody1, const Body& inBody2, RVec3Arg inBaseOffset, const CollideShapeResult& inCollisionResult)
 	{
-		// spdlog::info("Contact validate callback");
+		// SPDLOG_INFO("Contact validate callback");
 
 		// Allows you to ignore a contact before it is created (using layers to not make objects collide is cheaper!)
 		return ValidateResult::AcceptAllContactsForThisBodyPair;
 	}
 
-	void MyContactListener::OnContactAdded(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings)
+	void ContactListenerImpl::OnContactAdded(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings)
 	{
-		spdlog::info("A contact was added");
+		// SPDLOG_INFO("A contact was added");
 	}
 
-	void MyContactListener::OnContactPersisted(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings)
+	void ContactListenerImpl::OnContactPersisted(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings)
 	{
-		// spdlog::info("A contact was persisted");
+		// SPDLOG_INFO("A contact was persisted");
 	}
 
-	void MyContactListener::OnContactRemoved(const SubShapeIDPair& inSubShapePair)
+	void ContactListenerImpl::OnContactRemoved(const SubShapeIDPair& inSubShapePair)
 	{
-		// spdlog::info("A contact was removed");
+		// SPDLOG_INFO("A contact was removed");
 	}
 
 
-	void MyBodyActivationListener::OnBodyActivated(const BodyID& inBodyID, uint64 inBodyUserData)
+	void BodyActivationListenerImpl::OnBodyActivated(const BodyID& inBodyID, uint64 inBodyUserData)
 	{
-		spdlog::info("\033[1;34mA body got activated\033[0m");
+		// SPDLOG_INFO("\033[1;34mA body got activated\033[0m");
 	}
 
-	void MyBodyActivationListener::OnBodyDeactivated(const BodyID& inBodyID, uint64 inBodyUserData)
+	void BodyActivationListenerImpl::OnBodyDeactivated(const BodyID& inBodyID, uint64 inBodyUserData)
 	{
-		spdlog::info("\033[1;34mA body went to sleep\033[0m");
+		// SPDLOG_INFO("\033[1;34mA body went to sleep\033[0m");
 	}
 } // namespace Engine

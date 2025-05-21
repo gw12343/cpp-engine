@@ -148,7 +148,7 @@ namespace Engine {
 					spdlog::error("Failed to load skeleton from path: {}", skeletonPath);
 				}
 				else {
-					spdlog::info("Loaded skeleton from path: {}", skeletonPath);
+					SPDLOG_INFO("Loaded skeleton from path: {}", skeletonPath);
 				}
 			}
 		}
@@ -169,7 +169,7 @@ namespace Engine {
 					spdlog::error("Failed to load animation from path: {}", animationPath);
 				}
 				else {
-					spdlog::info("Loaded animation from path: {}", animationPath);
+					SPDLOG_INFO("Loaded animation from path: {}", animationPath);
 				}
 			}
 		}
@@ -188,7 +188,7 @@ namespace Engine {
 				spdlog::error("AnimationPoseComponent requires a SkeletonComponent");
 				return;
 			}
-			SkeletonComponent& skeletonComponent = entity.GetComponent<SkeletonComponent>();
+			auto& skeletonComponent = entity.GetComponent<SkeletonComponent>();
 			if (!skeletonComponent.skeleton) {
 				spdlog::error("AnimationPoseComponent requires a valid SkeletonComponent with a valid skeleton!");
 				return;
@@ -196,14 +196,14 @@ namespace Engine {
 
 
 			// Allocate pose data
-			local_pose = entity.m_engine->GetAnimationManager().AllocateLocalPose(skeletonComponent.skeleton);
-			model_pose = entity.m_engine->GetAnimationManager().AllocateModelPose(skeletonComponent.skeleton);
+			local_pose = AnimationManager::AllocateLocalPose(skeletonComponent.skeleton);
+			model_pose = AnimationManager::AllocateModelPose(skeletonComponent.skeleton);
 
 			if (!local_pose || !model_pose) {
 				spdlog::error("Failed to allocate pose data for entity");
 			}
 			else {
-				spdlog::info("Allocated pose data for entity");
+				SPDLOG_INFO("Allocated pose data for entity");
 			}
 		}
 
@@ -213,15 +213,28 @@ namespace Engine {
 			ImGui::Text("Model Pose: %s", model_pose ? std::to_string(model_pose->size()).c_str() : "Null");
 		}
 
+
+		std::unordered_set<ozz::animation::SamplingJob::Context*> AnimationWorkerComponent::s_contexts;
+
+		void AnimationWorkerComponent::CleanAnimationContexts()
+		{
+			SPDLOG_ERROR("deleting context");
+			for (ozz::animation::SamplingJob::Context* ctx : s_contexts) {
+				SPDLOG_ERROR("deleting context: {}", (void*) ctx);
+				delete ctx;
+			}
+		}
+
 		void AnimationWorkerComponent::OnAdded(Entity& entity)
 		{
 			context = new ozz::animation::SamplingJob::Context();
+			s_contexts.insert(context);
 			// Get the animation component, then resize context for correct number of tracks
 			if (entity.HasComponent<AnimationComponent>()) {
-				AnimationComponent& animationComponent = entity.GetComponent<AnimationComponent>();
+				auto& animationComponent = entity.GetComponent<AnimationComponent>();
 				if (animationComponent.animation) {
 					context->Resize(animationComponent.animation->num_tracks());
-					spdlog::info("Resized context for {} tracks", animationComponent.animation->num_tracks());
+					SPDLOG_INFO("Resized context for {} tracks", animationComponent.animation->num_tracks());
 				}
 				else {
 					// fix: if the animation is loaded at a later time, we need to resize the context when the animation is loaded
@@ -238,15 +251,33 @@ namespace Engine {
 			ImGui::Text("Sampling Job Context: %s", context ? "Initialized" : "Null");
 		}
 
+
+		std::unordered_set<std::vector<ozz::math::Float4x4>*> SkinnedMeshComponent::s_skin_mats;
+		std::unordered_set<ozz::vector<myns::Mesh>*>          SkinnedMeshComponent::s_all_meshes;
+
+		void SkinnedMeshComponent::CleanSkinnedModels()
+		{
+			for (std::vector<ozz::math::Float4x4>* mat : s_skin_mats) {
+				SPDLOG_INFO("deleting matrix: {}", (void*) mat);
+				delete mat;
+			}
+
+			for (ozz::vector<myns::Mesh>* mesh : s_all_meshes) {
+				SPDLOG_INFO("deleting mesh: {}", (void*) mesh);
+				delete mesh;
+			}
+		}
+
 		void SkinnedMeshComponent::OnAdded(Entity& entity)
 		{
 			if (!meshPath.empty()) {
-				meshes = entity.m_engine->GetAnimationManager().LoadMeshesFromPath(meshPath);
+				meshes = AnimationManager::LoadMeshesFromPath(meshPath);
+				s_all_meshes.insert(meshes);
 				if (!meshes) {
-					spdlog::error("Failed to load meshes from path: {}", meshPath);
+					SPDLOG_ERROR("Failed to load meshes from path: {}", meshPath);
 				}
 				else {
-					spdlog::info("Loaded SKINNED MESHES from path: {}", meshPath);
+					SPDLOG_INFO("Loaded SKINNED MESHES from path: {}", meshPath);
 				}
 			}
 
@@ -255,7 +286,7 @@ namespace Engine {
 				return;
 			}
 			skinning_matrices = new std::vector<ozz::math::Float4x4>();
-
+			s_skin_mats.insert(skinning_matrices);
 			// Computes the number of skinning matrices required to skin all meshes
 			// A mesh is skinned by only a subset of joints, so the number of skinning
 			// matrices might be less that the number of skeleton joints

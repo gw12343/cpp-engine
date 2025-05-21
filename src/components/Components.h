@@ -17,6 +17,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <ozz/animation/runtime/sampling_job.h>
 #include <ozz/base/containers/vector.h>
+#include <utility>
 using namespace JPH;
 using namespace JPH::literals;
 
@@ -65,8 +66,8 @@ namespace Engine {
 			bool        active = true;
 
 			EntityMetadata() = default;
-			EntityMetadata(const std::string& name) : name(name), tag("") {}
-			EntityMetadata(const std::string& name, const std::string& tag) : name(name), tag(tag) {}
+			explicit EntityMetadata(std::string name) : name(std::move(name)) {}
+			explicit EntityMetadata(std::string name, std::string tag) : name(std::move(name)), tag(std::move(tag)) {}
 
 			void OnAdded(Entity& entity) override;
 			void RenderInspector(Entity& entity) override;
@@ -81,26 +82,23 @@ namespace Engine {
 
 			Transform() = default;
 
-			Transform(const glm::vec3& position) : position(position) {}
+			explicit Transform(const glm::vec3& position) : position(position) {}
 
-			Transform(const glm::vec3& position, const glm::vec3& eulerAngles = glm::vec3(0.0f), const glm::vec3& scale = glm::vec3(1.0f))
-			    : position(position), rotation(glm::quat(glm::radians(eulerAngles))), scale(scale)
-			{
-			}
+			explicit Transform(const glm::vec3& position, const glm::vec3& eulerAngles = glm::vec3(0.0f), const glm::vec3& scale = glm::vec3(1.0f)) : position(position), rotation(glm::quat(glm::radians(eulerAngles))), scale(scale) {}
 
 			// Set rotation using Euler angles (in degrees)
 			void SetRotation(const glm::vec3& eulerAngles) { rotation = glm::quat(glm::radians(eulerAngles)); }
 
 			// Get rotation as Euler angles (in degrees)
-			glm::vec3 GetEulerAngles() const { return glm::degrees(glm::eulerAngles(rotation)); }
+			[[nodiscard]] glm::vec3 GetEulerAngles() const { return glm::degrees(glm::eulerAngles(rotation)); }
 
 			// Get the transformation matrix
-			glm::mat4 GetMatrix() const
+			[[nodiscard]] glm::mat4 GetMatrix() const
 			{
-				glm::mat4 matrix = glm::mat4(1.0f);
-				matrix           = glm::translate(matrix, position);
-				matrix           = matrix * glm::toMat4(rotation);
-				matrix           = glm::scale(matrix, scale);
+				auto matrix = glm::mat4(1.0f);
+				matrix      = glm::translate(matrix, position);
+				matrix      = matrix * glm::toMat4(rotation);
+				matrix      = glm::scale(matrix, scale);
 				return matrix;
 			}
 
@@ -116,7 +114,7 @@ namespace Engine {
 
 			ModelRenderer() = default;
 
-			ModelRenderer(const std::shared_ptr<Model>& model) : model(model) {}
+			explicit ModelRenderer(const std::shared_ptr<Model>& model) : model(model) {}
 
 			// Draw the model with the given shader and transform
 			void Draw(const Shader& shader, const Transform& transform) const
@@ -138,7 +136,7 @@ namespace Engine {
 
 		class RigidBodyComponent : public Component {
 		  public:
-			JPH::PhysicsSystem* physicsSystem;
+			JPH::PhysicsSystem* physicsSystem{};
 			JPH::BodyID         bodyID;
 
 			RigidBodyComponent() = default;
@@ -167,16 +165,8 @@ namespace Engine {
 
 			AudioSource() = default;
 
-			AudioSource(const std::string& name,
-			            bool               loop    = false,
-			            float              vol     = 1.0f,
-			            float              p       = 1.0f,
-			            bool               play    = false,
-			            float              refDist = 1.0f,
-			            float              maxDist = 100.0f,
-			            float              rolloff = 1.0f)
-			    : soundName(name), looping(loop), volume(vol), pitch(p), autoPlay(play), referenceDistance(refDist), maxDistance(maxDist),
-			      rolloffFactor(rolloff)
+			explicit AudioSource(std::string name, bool loop = false, float vol = 1.0f, float p = 1.0f, bool play = false, float refDist = 1.0f, float maxDist = 100.0f, float rolloff = 1.0f)
+			    : soundName(std::move(name)), looping(loop), volume(vol), pitch(p), autoPlay(play), referenceDistance(refDist), maxDistance(maxDist), rolloffFactor(rolloff)
 			{
 				source = std::make_shared<Audio::SoundSource>(looping);
 				source->SetGain(volume);
@@ -186,7 +176,7 @@ namespace Engine {
 				source->ConfigureAttenuation(referenceDistance, maxDistance, rolloffFactor);
 
 				// Log the configuration
-				spdlog::info("Created AudioSource with attenuation: ref={}, max={}, rolloff={}", referenceDistance, maxDistance, rolloffFactor);
+				SPDLOG_INFO("Created AudioSource with attenuation: ref={}, max={}, rolloff={}", referenceDistance, maxDistance, rolloffFactor);
 			}
 
 			void Play(Audio::SoundManager& soundManager)
@@ -218,8 +208,8 @@ namespace Engine {
 			std::string               skeletonPath;
 
 			SkeletonComponent() = default;
-			SkeletonComponent(ozz::animation::Skeleton* skeleton) : skeleton(skeleton) {}
-			SkeletonComponent(std::string skeletonPath) : skeletonPath(skeletonPath) {}
+			explicit SkeletonComponent(ozz::animation::Skeleton* skeleton) : skeleton(skeleton) {}
+			explicit SkeletonComponent(std::string skeletonPath) : skeletonPath(std::move(skeletonPath)) {}
 
 			void OnAdded(Entity& entity) override;
 			void RenderInspector(Entity& entity) override;
@@ -231,8 +221,8 @@ namespace Engine {
 			std::string                animationPath;
 
 			AnimationComponent() = default;
-			AnimationComponent(ozz::animation::Animation* animation) : animation(animation) {}
-			AnimationComponent(std::string animationPath) : animationPath(animationPath) {}
+			explicit AnimationComponent(ozz::animation::Animation* animation) : animation(animation) {}
+			explicit AnimationComponent(std::string animationPath) : animationPath(std::move(animationPath)) {}
 			void OnAdded(Entity& entity) override;
 			void RenderInspector(Entity& entity) override;
 		};
@@ -256,6 +246,10 @@ namespace Engine {
 
 			void OnAdded(Entity& entity) override;
 			void RenderInspector(Entity& entity) override;
+
+			static void CleanAnimationContexts();
+
+			static std::unordered_set<ozz::animation::SamplingJob::Context*> s_contexts;
 		};
 
 		class SkinnedMeshComponent : public Component {
@@ -265,11 +259,16 @@ namespace Engine {
 			std::string                       meshPath;
 
 			SkinnedMeshComponent() = default;
-			SkinnedMeshComponent(ozz::vector<myns::Mesh>* meshes) : meshes(meshes) {}
-			SkinnedMeshComponent(std::string meshPath) : meshPath(meshPath) {}
+			explicit SkinnedMeshComponent(ozz::vector<myns::Mesh>* meshes) : meshes(meshes) {}
+			explicit SkinnedMeshComponent(std::string meshPath) : meshPath(std::move(meshPath)) {}
 
 			void OnAdded(Entity& entity) override;
 			void RenderInspector(Entity& entity) override;
+
+			static void CleanSkinnedModels();
+
+			static std::unordered_set<std::vector<ozz::math::Float4x4>*> s_skin_mats;
+			static std::unordered_set<ozz::vector<myns::Mesh>*>          s_all_meshes;
 		};
 
 

@@ -1,13 +1,13 @@
 //
-//#include <glm/gtc/type_ptr.hpp>
-//#include <imgui.h>
+// #include <glm/gtc/type_ptr.hpp>
+// #include <imgui.h>
 #include "renderer_impl.h"
 
 #include "Camera.h"
+#include "animation/AnimatedMesh.h"
+#include "animation/AnimationShader.h"
 #include "animation/icosphere.h"
 #include "animation/immediate.h"
-#include "animation/mesh.h"
-#include "animation/shader.h"
 #include "ozz/animation/runtime/local_to_model_job.h"
 #include "ozz/animation/runtime/skeleton.h"
 #include "ozz/animation/runtime/skeleton_utils.h"
@@ -264,12 +264,8 @@ bool RendererImpl::InitPostureRendering()
 {
 	const float kInter = .2f;
 	{ // Prepares bone mesh.
-		const ozz::math::Float3 pos[6]     = {ozz::math::Float3(1.f, 0.f, 0.f),
-		                                      ozz::math::Float3(kInter, .1f, .1f),
-		                                      ozz::math::Float3(kInter, .1f, -.1f),
-		                                      ozz::math::Float3(kInter, -.1f, -.1f),
-		                                      ozz::math::Float3(kInter, -.1f, .1f),
-		                                      ozz::math::Float3(0.f, 0.f, 0.f)};
+		const ozz::math::Float3 pos[6] = {
+		    ozz::math::Float3(1.f, 0.f, 0.f), ozz::math::Float3(kInter, .1f, .1f), ozz::math::Float3(kInter, .1f, -.1f), ozz::math::Float3(kInter, -.1f, -.1f), ozz::math::Float3(kInter, -.1f, .1f), ozz::math::Float3(0.f, 0.f, 0.f)};
 		const ozz::math::Float3 normals[8] = {Normalize(Cross(pos[2] - pos[1], pos[2] - pos[0])),
 		                                      Normalize(Cross(pos[1] - pos[2], pos[1] - pos[5])),
 		                                      Normalize(Cross(pos[3] - pos[2], pos[3] - pos[0])),
@@ -279,12 +275,10 @@ bool RendererImpl::InitPostureRendering()
 		                                      Normalize(Cross(pos[1] - pos[4], pos[1] - pos[0])),
 		                                      Normalize(Cross(pos[4] - pos[1], pos[4] - pos[5]))};
 		const Color             color      = kWhite;
-		const VertexPNC         bones[24] = {{pos[0], normals[0], color}, {pos[2], normals[0], color}, {pos[1], normals[0], color}, {pos[5], normals[1], color},
-		                                     {pos[1], normals[1], color}, {pos[2], normals[1], color}, {pos[0], normals[2], color}, {pos[3], normals[2], color},
-		                                     {pos[2], normals[2], color}, {pos[5], normals[3], color}, {pos[2], normals[3], color}, {pos[3], normals[3], color},
-		                                     {pos[0], normals[4], color}, {pos[4], normals[4], color}, {pos[3], normals[4], color}, {pos[5], normals[5], color},
-		                                     {pos[3], normals[5], color}, {pos[4], normals[5], color}, {pos[0], normals[6], color}, {pos[1], normals[6], color},
-		                                     {pos[4], normals[6], color}, {pos[5], normals[7], color}, {pos[4], normals[7], color}, {pos[1], normals[7], color}};
+		const VertexPNC         bones[24]  = {{pos[0], normals[0], color}, {pos[2], normals[0], color}, {pos[1], normals[0], color}, {pos[5], normals[1], color}, {pos[1], normals[1], color}, {pos[2], normals[1], color},
+		                                      {pos[0], normals[2], color}, {pos[3], normals[2], color}, {pos[2], normals[2], color}, {pos[5], normals[3], color}, {pos[2], normals[3], color}, {pos[3], normals[3], color},
+		                                      {pos[0], normals[4], color}, {pos[4], normals[4], color}, {pos[3], normals[4], color}, {pos[5], normals[5], color}, {pos[3], normals[5], color}, {pos[4], normals[5], color},
+		                                      {pos[0], normals[6], color}, {pos[1], normals[6], color}, {pos[4], normals[6], color}, {pos[5], normals[7], color}, {pos[4], normals[7], color}, {pos[1], normals[7], color}};
 
 		// Builds and fills the vbo.
 		Model& bone = models_[0];
@@ -420,8 +414,7 @@ bool RendererImpl::InitCheckeredTexture()
 }
 
 namespace {
-	int
-	DrawPosture_FillUniforms(const ozz::animation::Skeleton& _skeleton, ozz::span<const ozz::math::Float4x4> _matrices, float* _uniforms, int _max_instances)
+	int DrawPosture_FillUniforms(const ozz::animation::Skeleton& _skeleton, ozz::span<const ozz::math::Float4x4> _matrices, float* _uniforms, int _max_instances)
 	{
 		assert(ozz::IsAligned(_uniforms, alignof(ozz::math::SimdFloat4)));
 
@@ -562,10 +555,7 @@ void RendererImpl::DrawPosture_InstancedImpl(const ozz::math::Float4x4& _transfo
 // Uses GL_ARB_instanced_arrays_supported as a first choice to render the whole
 // skeleton in a single draw call. Does a draw call per joint if no extension
 // can help.
-bool RendererImpl::DrawPosture(const ozz::animation::Skeleton&      _skeleton,
-                               ozz::span<const ozz::math::Float4x4> _matrices,
-                               const ozz::math::Float4x4&           _transform,
-                               bool                                 _draw_joints)
+bool RendererImpl::DrawPosture(const ozz::animation::Skeleton& _skeleton, ozz::span<const ozz::math::Float4x4> _matrices, const ozz::math::Float4x4& _transform, bool _draw_joints)
 {
 	if (_matrices.size() < static_cast<size_t>(_skeleton.num_joints())) {
 		return false;
@@ -589,11 +579,7 @@ bool RendererImpl::DrawPosture(const ozz::animation::Skeleton&      _skeleton,
 	return true;
 }
 
-bool RendererImpl::DrawPoints(const ozz::span<const float>& _positions,
-                              const ozz::span<const float>& _sizes,
-                              const ozz::span<const Color>& _colors,
-                              const ozz::math::Float4x4&    _transform,
-                              bool                          _screen_space)
+bool RendererImpl::DrawPoints(const ozz::span<const float>& _positions, const ozz::span<const float>& _sizes, const ozz::span<const Color>& _colors, const ozz::math::Float4x4& _transform, bool _screen_space)
 {
 	// Early out if no instance to render.
 	if (_positions.size() == 0) {
@@ -627,8 +613,7 @@ bool RendererImpl::DrawPoints(const ozz::span<const float>& _positions,
 	// Size is managed in vertex shader side.
 	GL(Enable(GL_PROGRAM_POINT_SIZE));
 
-	const PointsShader::GenericAttrib attrib = points_shader->Bind(
-	    _transform, camera()->view_proj(), 12, positions_offset, colors_size ? 4 : 0, colors_offset, sizes_size ? 4 : 0, sizes_offset, _screen_space);
+	const PointsShader::GenericAttrib attrib = points_shader->Bind(_transform, camera()->view_proj(), 12, positions_offset, colors_size ? 4 : 0, colors_offset, sizes_size ? 4 : 0, sizes_offset, _screen_space);
 
 	GL(BindBuffer(GL_ARRAY_BUFFER, 0));
 
@@ -769,29 +754,21 @@ bool RendererImpl::DrawBoxShaded(const ozz::math::Box& _box, ozz::span<const ozz
 		return true;
 	}
 
-	const ozz::math::Float3 pos[8]     = {ozz::math::Float3(_box.min.x, _box.min.y, _box.min.z),
-	                                      ozz::math::Float3(_box.max.x, _box.min.y, _box.min.z),
-	                                      ozz::math::Float3(_box.max.x, _box.max.y, _box.min.z),
-	                                      ozz::math::Float3(_box.min.x, _box.max.y, _box.min.z),
-	                                      ozz::math::Float3(_box.min.x, _box.min.y, _box.max.z),
-	                                      ozz::math::Float3(_box.max.x, _box.min.y, _box.max.z),
-	                                      ozz::math::Float3(_box.max.x, _box.max.y, _box.max.z),
-	                                      ozz::math::Float3(_box.min.x, _box.max.y, _box.max.z)};
-	const ozz::math::Float3 normals[6] = {ozz::math::Float3(-1, 0, 0),
-	                                      ozz::math::Float3(1, 0, 0),
-	                                      ozz::math::Float3(0, -1, 0),
-	                                      ozz::math::Float3(0, 1, 0),
-	                                      ozz::math::Float3(0, 0, -1),
-	                                      ozz::math::Float3(0, 0, 1)};
-	const VertexPNC vertices[36] = {{pos[0], normals[4], _color}, {pos[3], normals[4], _color}, {pos[1], normals[4], _color}, {pos[3], normals[4], _color},
-	                                {pos[2], normals[4], _color}, {pos[1], normals[4], _color}, {pos[2], normals[3], _color}, {pos[3], normals[3], _color},
-	                                {pos[7], normals[3], _color}, {pos[7], normals[3], _color}, {pos[6], normals[3], _color}, {pos[2], normals[3], _color},
-	                                {pos[5], normals[5], _color}, {pos[6], normals[5], _color}, {pos[7], normals[5], _color}, {pos[5], normals[5], _color},
-	                                {pos[7], normals[5], _color}, {pos[4], normals[5], _color}, {pos[0], normals[2], _color}, {pos[1], normals[2], _color},
-	                                {pos[4], normals[2], _color}, {pos[4], normals[2], _color}, {pos[1], normals[2], _color}, {pos[5], normals[2], _color},
-	                                {pos[0], normals[0], _color}, {pos[4], normals[0], _color}, {pos[3], normals[0], _color}, {pos[4], normals[0], _color},
-	                                {pos[7], normals[0], _color}, {pos[3], normals[0], _color}, {pos[5], normals[1], _color}, {pos[1], normals[1], _color},
-	                                {pos[2], normals[1], _color}, {pos[5], normals[1], _color}, {pos[2], normals[1], _color}, {pos[6], normals[1], _color}};
+	const ozz::math::Float3 pos[8]       = {ozz::math::Float3(_box.min.x, _box.min.y, _box.min.z),
+	                                        ozz::math::Float3(_box.max.x, _box.min.y, _box.min.z),
+	                                        ozz::math::Float3(_box.max.x, _box.max.y, _box.min.z),
+	                                        ozz::math::Float3(_box.min.x, _box.max.y, _box.min.z),
+	                                        ozz::math::Float3(_box.min.x, _box.min.y, _box.max.z),
+	                                        ozz::math::Float3(_box.max.x, _box.min.y, _box.max.z),
+	                                        ozz::math::Float3(_box.max.x, _box.max.y, _box.max.z),
+	                                        ozz::math::Float3(_box.min.x, _box.max.y, _box.max.z)};
+	const ozz::math::Float3 normals[6]   = {ozz::math::Float3(-1, 0, 0), ozz::math::Float3(1, 0, 0), ozz::math::Float3(0, -1, 0), ozz::math::Float3(0, 1, 0), ozz::math::Float3(0, 0, -1), ozz::math::Float3(0, 0, 1)};
+	const VertexPNC         vertices[36] = {{pos[0], normals[4], _color}, {pos[3], normals[4], _color}, {pos[1], normals[4], _color}, {pos[3], normals[4], _color}, {pos[2], normals[4], _color}, {pos[1], normals[4], _color},
+	                                        {pos[2], normals[3], _color}, {pos[3], normals[3], _color}, {pos[7], normals[3], _color}, {pos[7], normals[3], _color}, {pos[6], normals[3], _color}, {pos[2], normals[3], _color},
+	                                        {pos[5], normals[5], _color}, {pos[6], normals[5], _color}, {pos[7], normals[5], _color}, {pos[5], normals[5], _color}, {pos[7], normals[5], _color}, {pos[4], normals[5], _color},
+	                                        {pos[0], normals[2], _color}, {pos[1], normals[2], _color}, {pos[4], normals[2], _color}, {pos[4], normals[2], _color}, {pos[1], normals[2], _color}, {pos[5], normals[2], _color},
+	                                        {pos[0], normals[0], _color}, {pos[4], normals[0], _color}, {pos[3], normals[0], _color}, {pos[4], normals[0], _color}, {pos[7], normals[0], _color}, {pos[3], normals[0], _color},
+	                                        {pos[5], normals[1], _color}, {pos[1], normals[1], _color}, {pos[2], normals[1], _color}, {pos[5], normals[1], _color}, {pos[2], normals[1], _color}, {pos[6], normals[1], _color}};
 
 	const GLsizei stride           = sizeof(VertexPNC);
 	const GLsizei positions_offset = 0;
@@ -937,8 +914,7 @@ bool RendererImpl::DrawSphereShaded(float _radius, ozz::span<const ozz::math::Fl
 	for (size_t i = 0; i < _transforms.size(); i++) {
 		const ozz::math::Float4x4& transform = Scale(_transforms[i], radius);
 
-		ambient_shader->Bind(
-		    transform, camera()->view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, true);
+		ambient_shader->Bind(transform, camera()->view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, true);
 
 		static_assert(sizeof(icosphere::kIndices[0]) == 2, "Indices must be 2 bytes");
 		GL(DrawElements(GL_TRIANGLES, OZZ_ARRAY_SIZE(icosphere::kIndices), GL_UNSIGNED_SHORT, 0));
@@ -1006,18 +982,11 @@ bool RendererImpl::DrawLineStrip(ozz::span<const ozz::math::Float3> _vertices, c
 	return true;
 }
 
-bool RendererImpl::DrawVectors(ozz::span<const float>     _positions,
-                               size_t                     _positions_stride,
-                               ozz::span<const float>     _directions,
-                               size_t                     _directions_stride,
-                               int                        _num_vectors,
-                               float                      _vector_length,
-                               const Color&               _color,
-                               const ozz::math::Float4x4& _transform)
+bool RendererImpl::DrawVectors(
+    ozz::span<const float> _positions, size_t _positions_stride, ozz::span<const float> _directions, size_t _directions_stride, int _num_vectors, float _vector_length, const Color& _color, const ozz::math::Float4x4& _transform)
 {
 	// Invalid range length.
-	if (ozz::PointerStride(_positions.begin(), _positions_stride * _num_vectors) > _positions.end() ||
-	    ozz::PointerStride(_directions.begin(), _directions_stride * _num_vectors) > _directions.end()) {
+	if (ozz::PointerStride(_positions.begin(), _positions_stride * _num_vectors) > _positions.end() || ozz::PointerStride(_directions.begin(), _directions_stride * _num_vectors) > _directions.end()) {
 		return false;
 	}
 
@@ -1055,10 +1024,8 @@ bool RendererImpl::DrawBinormals(ozz::span<const float>     _positions,
                                  const ozz::math::Float4x4& _transform)
 {
 	// Invalid range length.
-	if (ozz::PointerStride(_positions.begin(), _positions_stride * _num_vectors) > _positions.end() ||
-	    ozz::PointerStride(_normals.begin(), _normals_stride * _num_vectors) > _normals.end() ||
-	    ozz::PointerStride(_tangents.begin(), _tangents_stride * _num_vectors) > _tangents.end() ||
-	    ozz::PointerStride(_handenesses.begin(), _handenesses_stride * _num_vectors) > _handenesses.end()) {
+	if (ozz::PointerStride(_positions.begin(), _positions_stride * _num_vectors) > _positions.end() || ozz::PointerStride(_normals.begin(), _normals_stride * _num_vectors) > _normals.end() ||
+	    ozz::PointerStride(_tangents.begin(), _tangents_stride * _num_vectors) > _tangents.end() || ozz::PointerStride(_handenesses.begin(), _handenesses_stride * _num_vectors) > _handenesses.end()) {
 		return false;
 	}
 
@@ -1090,37 +1057,27 @@ bool RendererImpl::DrawBinormals(ozz::span<const float>     _positions,
 }
 
 namespace {
-	const uint8_t kDefaultColorsArray[][4] = {
-	    {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255},
-	    {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255},
-	    {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255},
-	    {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255},
-	    {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255},
-	    {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255},
-	    {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255},
-	    {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255},
-	    {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255},
-	    {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255},
-	    {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255},
-	    {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}};
+	const uint8_t kDefaultColorsArray[][4] = {{255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255},
+	                                          {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255},
+	                                          {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255},
+	                                          {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255},
+	                                          {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255},
+	                                          {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255},
+	                                          {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255},
+	                                          {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255},
+	                                          {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}, {255, 255, 255, 255}};
 
-	const float kDefaultNormalsArray[][3] = {
-	    {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f},
-	    {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f},
-	    {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f},
-	    {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f},
-	    {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f},
-	    {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f},
-	    {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f},
-	    {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}};
+	const float kDefaultNormalsArray[][3] = {{0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f},
+	                                         {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f},
+	                                         {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f},
+	                                         {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f},
+	                                         {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f},
+	                                         {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}};
 
-	const float kDefaultUVsArray[][2] = {{0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f},
-	                                     {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f},
-	                                     {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f},
-	                                     {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f},
-	                                     {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f},
-	                                     {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f},
-	                                     {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}};
+	const float kDefaultUVsArray[][2] = {{0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f},
+	                                     {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f},
+	                                     {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f},
+	                                     {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}};
 } // namespace
 
 bool RendererImpl::DrawMesh(const Mesh& _mesh, const ozz::math::Float4x4& _transform, const Options& _options)
@@ -1157,8 +1114,7 @@ bool RendererImpl::DrawMesh(const Mesh& _mesh, const ozz::math::Float4x4& _trans
 		const size_t      part_vertex_count = part.vertex_count();
 
 		// Handles positions.
-		GL(BufferSubData(
-		    GL_ARRAY_BUFFER, positions_offset + vertex_offset * positions_stride, part_vertex_count * positions_stride, array_begin(part.positions)));
+		GL(BufferSubData(GL_ARRAY_BUFFER, positions_offset + vertex_offset * positions_stride, part_vertex_count * positions_stride, array_begin(part.positions)));
 
 		// Handles normals.
 		const size_t part_normal_count = part.normals.size() / Mesh::Part::kNormalsCpnts;
@@ -1172,8 +1128,7 @@ bool RendererImpl::DrawMesh(const Mesh& _mesh, const ozz::math::Float4x4& _trans
 			static_assert(sizeof(kDefaultNormalsArray[0]) == normals_stride, "Stride mismatch");
 			for (size_t j = 0; j < part_vertex_count; j += OZZ_ARRAY_SIZE(kDefaultNormalsArray)) {
 				const size_t this_loop_count = ozz::math::Min(OZZ_ARRAY_SIZE(kDefaultNormalsArray), part_vertex_count - j);
-				GL(BufferSubData(
-				    GL_ARRAY_BUFFER, normals_offset + (vertex_offset + j) * normals_stride, normals_stride * this_loop_count, kDefaultNormalsArray));
+				GL(BufferSubData(GL_ARRAY_BUFFER, normals_offset + (vertex_offset + j) * normals_stride, normals_stride * this_loop_count, kDefaultNormalsArray));
 			}
 		}
 
@@ -1217,25 +1172,14 @@ bool RendererImpl::DrawMesh(const Mesh& _mesh, const ozz::math::Float4x4& _trans
 		// Binds shader with this array buffer, depending on rendering options.
 		AnimationShader* shader = nullptr;
 		if (_options.texture) {
-			ambient_textured_shader->Bind(_transform,
-			                              camera()->view_proj(),
-			                              positions_stride,
-			                              positions_offset,
-			                              normals_stride,
-			                              normals_offset,
-			                              colors_stride,
-			                              colors_offset,
-			                              false,
-			                              uvs_stride,
-			                              uvs_offset);
+			ambient_textured_shader->Bind(_transform, camera()->view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false, uvs_stride, uvs_offset);
 			shader = ambient_textured_shader.get();
 
 			// Binds default texture
 			GL(BindTexture(GL_TEXTURE_2D, checkered_texture_));
 		}
 		else {
-			ambient_shader->Bind(
-			    _transform, camera()->view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false);
+			ambient_shader->Bind(_transform, camera()->view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false);
 			shader = ambient_shader.get();
 		}
 
@@ -1273,14 +1217,7 @@ bool RendererImpl::DrawMesh(const Mesh& _mesh, const ozz::math::Float4x4& _trans
 	if (_options.normals) {
 		for (size_t i = 0; i < _mesh.parts.size(); ++i) {
 			const Mesh::Part& part = _mesh.parts[i];
-			DrawVectors(make_span(part.positions),
-			            Mesh::Part::kPositionsCpnts * sizeof(float),
-			            make_span(part.normals),
-			            Mesh::Part::kNormalsCpnts * sizeof(float),
-			            part.vertex_count(),
-			            .03f,
-			            myns::kGreen,
-			            _transform);
+			DrawVectors(make_span(part.positions), Mesh::Part::kPositionsCpnts * sizeof(float), make_span(part.normals), Mesh::Part::kNormalsCpnts * sizeof(float), part.vertex_count(), .03f, myns::kGreen, _transform);
 		}
 	}
 
@@ -1289,14 +1226,7 @@ bool RendererImpl::DrawMesh(const Mesh& _mesh, const ozz::math::Float4x4& _trans
 		for (size_t i = 0; i < _mesh.parts.size(); ++i) {
 			const Mesh::Part& part = _mesh.parts[i];
 			if (part.normals.size() != 0) {
-				DrawVectors(make_span(part.positions),
-				            Mesh::Part::kPositionsCpnts * sizeof(float),
-				            make_span(part.tangents),
-				            Mesh::Part::kTangentsCpnts * sizeof(float),
-				            part.vertex_count(),
-				            .03f,
-				            myns::kRed,
-				            _transform);
+				DrawVectors(make_span(part.positions), Mesh::Part::kPositionsCpnts * sizeof(float), make_span(part.tangents), Mesh::Part::kTangentsCpnts * sizeof(float), part.vertex_count(), .03f, myns::kRed, _transform);
 			}
 		}
 	}
@@ -1325,10 +1255,7 @@ bool RendererImpl::DrawMesh(const Mesh& _mesh, const ozz::math::Float4x4& _trans
 	return true;
 }
 
-bool RendererImpl::DrawSkinnedMesh(const myns::Mesh&                    _mesh,
-                                   const ozz::span<ozz::math::Float4x4> _skinning_matrices,
-                                   const ozz::math::Float4x4&           _transform,
-                                   const Options&                       _options)
+bool RendererImpl::DrawSkinnedMesh(const myns::Mesh& _mesh, const ozz::span<ozz::math::Float4x4> _skinning_matrices, const ozz::math::Float4x4& _transform, const Options& _options)
 {
 	// Forward to DrawMesh function is skinning is disabled.
 	if (_options.skip_skinning || !_mesh.skinned()) {
@@ -1467,26 +1394,12 @@ bool RendererImpl::DrawSkinnedMesh(const myns::Mesh&                    _mesh,
 
 		// Renders debug normals.
 		if (_options.normals && skinning_job.out_normals.size() > 0) {
-			DrawVectors(skinning_job.out_positions,
-			            skinning_job.out_positions_stride,
-			            skinning_job.out_normals,
-			            skinning_job.out_normals_stride,
-			            skinning_job.vertex_count,
-			            .03f,
-			            myns::kGreen,
-			            _transform);
+			DrawVectors(skinning_job.out_positions, skinning_job.out_positions_stride, skinning_job.out_normals, skinning_job.out_normals_stride, skinning_job.vertex_count, .03f, myns::kGreen, _transform);
 		}
 
 		// Renders debug tangents.
 		if (_options.tangents && skinning_job.out_tangents.size() > 0) {
-			DrawVectors(skinning_job.out_positions,
-			            skinning_job.out_positions_stride,
-			            skinning_job.out_tangents,
-			            skinning_job.out_tangents_stride,
-			            skinning_job.vertex_count,
-			            .03f,
-			            myns::kRed,
-			            _transform);
+			DrawVectors(skinning_job.out_positions, skinning_job.out_positions_stride, skinning_job.out_tangents, skinning_job.out_tangents_stride, skinning_job.vertex_count, .03f, myns::kRed, _transform);
 		}
 
 		// Renders debug binormals.
@@ -1508,9 +1421,7 @@ bool RendererImpl::DrawSkinnedMesh(const myns::Mesh&                    _mesh,
 		// Handles colors which aren't affected by skinning.
 		if (_options.colors && part_vertex_count == part.colors.size() / Mesh::Part::kColorsCpnts) {
 			// Optimal path used when the right number of colors is provided.
-			memcpy(ozz::PointerStride(vbo_map, colors_offset + processed_vertex_count * colors_stride),
-			       array_begin(part.colors),
-			       part_vertex_count * colors_stride);
+			memcpy(ozz::PointerStride(vbo_map, colors_offset + processed_vertex_count * colors_stride), array_begin(part.colors), part_vertex_count * colors_stride);
 		}
 		else {
 			// Un-optimal path used when the right number of colors is not provided.
@@ -1518,9 +1429,7 @@ bool RendererImpl::DrawSkinnedMesh(const myns::Mesh&                    _mesh,
 
 			for (size_t j = 0; j < part_vertex_count; j += OZZ_ARRAY_SIZE(kDefaultColorsArray)) {
 				const size_t this_loop_count = ozz::math::Min(OZZ_ARRAY_SIZE(kDefaultColorsArray), part_vertex_count - j);
-				memcpy(ozz::PointerStride(vbo_map, colors_offset + (processed_vertex_count + j) * colors_stride),
-				       kDefaultColorsArray,
-				       colors_stride * this_loop_count);
+				memcpy(ozz::PointerStride(vbo_map, colors_offset + (processed_vertex_count + j) * colors_stride), kDefaultColorsArray, colors_stride * this_loop_count);
 			}
 		}
 
@@ -1553,25 +1462,14 @@ bool RendererImpl::DrawSkinnedMesh(const myns::Mesh&                    _mesh,
 		// Binds shader with this array buffer, depending on rendering options.
 		AnimationShader* shader = nullptr;
 		if (_options.texture) {
-			ambient_textured_shader->Bind(_transform,
-			                              camera()->view_proj(),
-			                              positions_stride,
-			                              positions_offset,
-			                              normals_stride,
-			                              normals_offset,
-			                              colors_stride,
-			                              colors_offset,
-			                              false,
-			                              uvs_stride,
-			                              uvs_offset);
+			ambient_textured_shader->Bind(_transform, camera()->view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false, uvs_stride, uvs_offset);
 			shader = ambient_textured_shader.get();
 
 			// Binds default texture
 			GL(BindTexture(GL_TEXTURE_2D, checkered_texture_));
 		}
 		else {
-			ambient_shader->Bind(
-			    _transform, camera()->view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false);
+			ambient_shader->Bind(_transform, camera()->view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false);
 			shader = ambient_shader.get();
 		}
 
@@ -1598,8 +1496,7 @@ bool RendererImpl::DrawSkinnedMesh(const myns::Mesh&                    _mesh,
 	// Renders debug vertices.
 	if (_options.vertices) {
 		myns::Color                  color = myns::kWhite;
-		const ozz::span<const float> vertices{reinterpret_cast<const float*>(ozz::PointerStride(vbo_map, positions_offset)),
-		                                      static_cast<size_t>(vertex_count * 3)};
+		const ozz::span<const float> vertices{reinterpret_cast<const float*>(ozz::PointerStride(vbo_map, positions_offset)), static_cast<size_t>(vertex_count * 3)};
 		const float                  size = 2.f;
 		DrawPoints(vertices, {&size, 1}, {&color, 1}, _transform, true);
 	}
@@ -1608,14 +1505,14 @@ bool RendererImpl::DrawSkinnedMesh(const myns::Mesh&                    _mesh,
 }
 
 // Helper macro used to initialize extension function pointer.
-#define OZZ_INIT_GL_EXT_N(_fct, _fct_name, _fct_type, _success)                                                                                                \
-	do {                                                                                                                                                       \
-		_fct = reinterpret_cast<_fct_type>(glfwGetProcAddress(_fct_name));                                                                                     \
-		if (_fct == nullptr) {                                                                                                                                 \
-			spdlog::error("Unable to install {} function." _fct_name);                                                                                         \
-			_success &= false;                                                                                                                                 \
-		}                                                                                                                                                      \
-                                                                                                                                                               \
+#define OZZ_INIT_GL_EXT_N(_fct, _fct_name, _fct_type, _success)                                                                                                                                                                                \
+	do {                                                                                                                                                                                                                                       \
+		_fct = reinterpret_cast<_fct_type>(glfwGetProcAddress(_fct_name));                                                                                                                                                                     \
+		if (_fct == nullptr) {                                                                                                                                                                                                                 \
+			spdlog::error("Unable to install {} function." _fct_name);                                                                                                                                                                         \
+			_success &= false;                                                                                                                                                                                                                 \
+		}                                                                                                                                                                                                                                      \
+                                                                                                                                                                                                                                               \
 	} while (void(0), 0)
 
 #define OZZ_INIT_GL_EXT(_fct, _fct_type, _success) OZZ_INIT_GL_EXT_N(_fct, #_fct, _fct_type, _success)

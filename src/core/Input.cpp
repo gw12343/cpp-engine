@@ -21,6 +21,7 @@ namespace Engine {
 		s_lastMousePosition = glm::vec2((float) x, (float) y);
 	}
 
+
 	void Input::Update()
 	{
 		// Update mouse position
@@ -56,15 +57,14 @@ namespace Engine {
 		return glfwGetKey(s_window, key) == GLFW_RELEASE;
 	}
 
-	glm::vec2 Input::GetMousePosition()
+	[[maybe_unused]] glm::vec2 Input::GetMousePosition()
 	{
 		return s_mousePosition;
 	}
 
 	glm::vec2 Input::GetMouseDelta()
 	{
-		return glm::vec2(s_mousePosition.x, s_lastMousePosition.y) -
-		       glm::vec2(s_lastMousePosition.x, s_mousePosition.y); // s_mousePosition - s_lastMousePosition;
+		return glm::vec2(s_mousePosition.x, s_lastMousePosition.y) - glm::vec2(s_lastMousePosition.x, s_mousePosition.y); // s_mousePosition - s_lastMousePosition;
 	}
 
 	float Input::GetMouseScrollDelta()
@@ -74,7 +74,7 @@ namespace Engine {
 		return f;
 	}
 
-	void Input::SetMousePosition(const glm::vec2& pos)
+	[[maybe_unused]] void Input::SetMousePosition(const glm::vec2& pos)
 	{
 		glfwSetCursorPos(s_window, pos.x, pos.y);
 	}
@@ -89,7 +89,7 @@ namespace Engine {
 		return glfwGetInputMode(s_window, GLFW_CURSOR);
 	}
 
-	void Input::MouseCallback(GLFWwindow* /*wnd*/, double /*x*/, double /*y*/)
+	[[maybe_unused]] void Input::MouseCallback(GLFWwindow* /*wnd*/, double /*x*/, double /*y*/)
 	{
 	}
 

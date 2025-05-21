@@ -11,16 +11,16 @@ namespace Engine {
 		Window(int width, int height, const std::string& title);
 		~Window();
 
-		bool Initialize();
-		void Update();
-		bool ShouldClose() const;
-		void SwapBuffers() const;
-		void PollEvents() const;
-		void Shutdown();
-		void OnResize(int width, int height);
+		bool               Initialize();
+		void               Update();
+		[[nodiscard]] bool ShouldClose() const;
+		void               SwapBuffers() const;
+		void               PollEvents() const;
+		void               Shutdown();
+		void               OnResize(int width, int height);
 
-		int GetWidth() const;
-		int GetHeight() const;
+		[[nodiscard]] int GetWidth() const;
+		[[nodiscard]] int GetHeight() const;
 
 		GLFWwindow* GetNativeWindow() const { return m_window; }
 

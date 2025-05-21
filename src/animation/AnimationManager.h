@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Camera.h"
-#include "animation/mesh.h"
+#include "animation/AnimatedMesh.h"
 #include "animation/renderer.h"
 #include "animation/renderer_impl.h"
 
@@ -33,6 +33,7 @@ namespace Engine {
 		~AnimationManager() = default;
 
 		bool Initialize(Camera* camera);
+		void Shutdown();
 		void Update(float deltaTime);
 		void Render();
 
@@ -48,17 +49,15 @@ namespace Engine {
 		ozz::animation::Animation* LoadAnimationFromPath(const std::string& path);
 
 		// Allocate local pose data for a skeleton
-		std::vector<ozz::math::SoaTransform>* AllocateLocalPose(const ozz::animation::Skeleton* skeleton);
+		static std::vector<ozz::math::SoaTransform>* AllocateLocalPose(const ozz::animation::Skeleton* skeleton);
 
 		// Allocate model pose data for a skeleton
-		std::vector<ozz::math::Float4x4>* AllocateModelPose(const ozz::animation::Skeleton* skeleton);
+		static std::vector<ozz::math::Float4x4>* AllocateModelPose(const ozz::animation::Skeleton* skeleton);
 
 		// Load meshes from a file path
-		ozz::vector<myns::Mesh>* LoadMeshesFromPath(const std::string& path);
+		static ozz::vector<myns::Mesh>* LoadMeshesFromPath(const std::string& path);
 
 	  private:
-		bool LoadAnimationAssets();
-
 		// Reference to the engine
 		GEngine* m_engine;
 
@@ -73,8 +72,8 @@ namespace Engine {
 		  public:
 			PlaybackController() : time_ratio_(0.f) {}
 
-			float time_ratio() const { return time_ratio_; }
-			void  set_time_ratio(float _ratio) { time_ratio_ = _ratio; }
+			[[nodiscard]] float time_ratio() const { return time_ratio_; }
+			void                set_time_ratio(float _ratio) { time_ratio_ = _ratio; }
 
 		  private:
 			float time_ratio_;

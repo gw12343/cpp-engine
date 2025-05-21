@@ -2,10 +2,10 @@
 
 #include "core/Engine.h"
 
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
 #include <glad/glad.h>
-#include <imgui/imgui.h>
-#include <imgui/imgui_impl_glfw.h>
-#include <imgui/imgui_impl_opengl3.h>
+#include <imgui.h>
 #include <spdlog/spdlog.h>
 
 namespace Engine {
@@ -15,9 +15,6 @@ namespace Engine {
 
 	Window::~Window()
 	{
-		if (m_initialized) {
-			Shutdown();
-		}
 	}
 
 	bool Window::Initialize()
@@ -111,13 +108,13 @@ namespace Engine {
 
 	void Window::Shutdown()
 	{
-		spdlog::info("Shutting down ImGui context");
+		SPDLOG_INFO("Shutting down ImGui context");
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 
 		// Terminate GLFW
-		spdlog::info("Shutting down glfw window");
+		SPDLOG_INFO("Shutting down glfw window");
 		glfwTerminate();
 	}
 

@@ -1,13 +1,11 @@
 #include "ozz/base/memory/unique_ptr.h"
 #include "renderer_impl.h"
 
-namespace ozz {
-	namespace math {
-		struct Float4x4;
-	}
 
+namespace ozz::math {
+	struct Float4x4;
+}
 
-} // namespace ozz
 
 // Declares a shader program.
 class AnimationShader {
@@ -20,21 +18,21 @@ class AnimationShader {
 	virtual ~AnimationShader();
 
 	// Returns the shader program that can be bound to the OpenGL context.
-	GLuint program() const { return program_; }
+	[[nodiscard]] GLuint program() const { return program_; }
 
 	// Request an uniform location and pushes it to the uniform stack.
 	// The uniform location is then accessible thought uniform().
 	bool BindUniform(const char* _semantic);
 
 	// Get an uniform location from the stack at index _index.
-	GLint uniform(int _index) const { return uniforms_[_index]; }
+	[[nodiscard]] GLint uniform(int _index) const { return uniforms_[_index]; }
 
 	// Request an attribute location and pushes it to the uniform stack.
 	// The varying location is then accessible thought attrib().
 	bool FindAttrib(const char* _semantic);
 
 	// Get an varying location from the stack at index _index.
-	GLint attrib(int _index) const { return attribs_[_index]; }
+	[[nodiscard]] GLint attrib(int _index) const { return attribs_[_index]; }
 
 	// Unblind shader.
 	virtual void Unbind();
@@ -64,8 +62,8 @@ class AnimationShader {
 
 class ImmediatePCShader : public AnimationShader {
   public:
-	ImmediatePCShader() {}
-	virtual ~ImmediatePCShader() {}
+	ImmediatePCShader()           = default;
+	~ImmediatePCShader() override = default;
 
 	// Constructs the shader.
 	// Returns nullptr if shader compilation failed or a valid Shader pointer on
@@ -74,18 +72,13 @@ class ImmediatePCShader : public AnimationShader {
 	static ozz::unique_ptr<ImmediatePCShader> Build();
 
 	// Binds the shader.
-	void Bind(const ozz::math::Float4x4& _model,
-	          const ozz::math::Float4x4& _view_proj,
-	          GLsizei                    _pos_stride,
-	          GLsizei                    _pos_offset,
-	          GLsizei                    _color_stride,
-	          GLsizei                    _color_offset);
+	void Bind(const ozz::math::Float4x4& _model, const ozz::math::Float4x4& _view_proj, GLsizei _pos_stride, GLsizei _pos_offset, GLsizei _color_stride, GLsizei _color_offset);
 };
 
 class ImmediatePTCShader : public AnimationShader {
   public:
-	ImmediatePTCShader() {}
-	virtual ~ImmediatePTCShader() {}
+	ImmediatePTCShader()           = default;
+	~ImmediatePTCShader() override = default;
 
 	// Constructs the shader.
 	// Returns nullptr if shader compilation failed or a valid Shader pointer on
@@ -94,20 +87,13 @@ class ImmediatePTCShader : public AnimationShader {
 	static ozz::unique_ptr<ImmediatePTCShader> Build();
 
 	// Binds the shader.
-	void Bind(const ozz::math::Float4x4& _model,
-	          const ozz::math::Float4x4& _view_proj,
-	          GLsizei                    _pos_stride,
-	          GLsizei                    _pos_offset,
-	          GLsizei                    _tex_stride,
-	          GLsizei                    _tex_offset,
-	          GLsizei                    _color_stride,
-	          GLsizei                    _color_offset);
+	void Bind(const ozz::math::Float4x4& _model, const ozz::math::Float4x4& _view_proj, GLsizei _pos_stride, GLsizei _pos_offset, GLsizei _tex_stride, GLsizei _tex_offset, GLsizei _color_stride, GLsizei _color_offset);
 };
 
 class PointsShader : public AnimationShader {
   public:
-	PointsShader() {}
-	virtual ~PointsShader() {}
+	PointsShader()           = default;
+	~PointsShader() override = default;
 
 	// Constructs the shader.
 	// Returns nullptr if shader compilation failed or a valid Shader pointer on
@@ -120,43 +106,29 @@ class PointsShader : public AnimationShader {
 		GLint color;
 		GLint size;
 	};
-	GenericAttrib Bind(const ozz::math::Float4x4& _model,
-	                   const ozz::math::Float4x4& _view_proj,
-	                   GLsizei                    _pos_stride,
-	                   GLsizei                    _pos_offset,
-	                   GLsizei                    _color_stride,
-	                   GLsizei                    _color_offset,
-	                   GLsizei                    _size_stride,
-	                   GLsizei                    _size_offset,
-	                   bool                       _screen_space);
+	GenericAttrib
+	Bind(const ozz::math::Float4x4& _model, const ozz::math::Float4x4& _view_proj, GLsizei _pos_stride, GLsizei _pos_offset, GLsizei _color_stride, GLsizei _color_offset, GLsizei _size_stride, GLsizei _size_offset, bool _screen_space);
 };
 
 class SkeletonShader : public AnimationShader {
   public:
-	SkeletonShader() {}
-	virtual ~SkeletonShader() {}
+	SkeletonShader()           = default;
+	~SkeletonShader() override = default;
 
 	// Binds the shader.
-	void Bind(const ozz::math::Float4x4& _model,
-	          const ozz::math::Float4x4& _view_proj,
-	          GLsizei                    _pos_stride,
-	          GLsizei                    _pos_offset,
-	          GLsizei                    _normal_stride,
-	          GLsizei                    _normal_offset,
-	          GLsizei                    _color_stride,
-	          GLsizei                    _color_offset);
+	void Bind(const ozz::math::Float4x4& _model, const ozz::math::Float4x4& _view_proj, GLsizei _pos_stride, GLsizei _pos_offset, GLsizei _normal_stride, GLsizei _normal_offset, GLsizei _color_stride, GLsizei _color_offset);
 
 	// Get an attribute location for the join, in cased of instanced rendering.
-	GLint joint_instanced_attrib() const { return attrib(3); }
+	[[nodiscard]] GLint joint_instanced_attrib() const { return attrib(3); }
 
 	// Get an uniform location for the join, in cased of non-instanced rendering.
-	GLint joint_uniform() const { return uniform(2); }
+	[[nodiscard]] GLint joint_uniform() const { return uniform(2); }
 };
 
 class JointShader : public SkeletonShader {
   public:
-	JointShader() {}
-	virtual ~JointShader() {}
+	JointShader()           = default;
+	~JointShader() override = default;
 
 	// Constructs the shader.
 	// Returns nullptr if shader compilation failed or a valid Shader pointer on
@@ -167,8 +139,8 @@ class JointShader : public SkeletonShader {
 
 class BoneShader : public SkeletonShader {
   public:
-	BoneShader() {}
-	virtual ~BoneShader() {}
+	BoneShader()           = default;
+	~BoneShader() override = default;
 
 	// Constructs the shader.
 	// Returns nullptr if shader compilation failed or a valid Shader pointer on
@@ -179,8 +151,8 @@ class BoneShader : public SkeletonShader {
 
 class AmbientShader : public AnimationShader {
   public:
-	AmbientShader() {}
-	virtual ~AmbientShader() {}
+	AmbientShader()           = default;
+	~AmbientShader() override = default;
 
 	// Constructs the shader.
 	// Returns nullptr if shader compilation failed or a valid Shader pointer on
@@ -189,15 +161,8 @@ class AmbientShader : public AnimationShader {
 	static ozz::unique_ptr<AmbientShader> Build();
 
 	// Binds the shader.
-	void Bind(const ozz::math::Float4x4& _model,
-	          const ozz::math::Float4x4& _view_proj,
-	          GLsizei                    _pos_stride,
-	          GLsizei                    _pos_offset,
-	          GLsizei                    _normal_stride,
-	          GLsizei                    _normal_offset,
-	          GLsizei                    _color_stride,
-	          GLsizei                    _color_offset,
-	          bool                       _color_float);
+	void
+	Bind(const ozz::math::Float4x4& _model, const ozz::math::Float4x4& _view_proj, GLsizei _pos_stride, GLsizei _pos_offset, GLsizei _normal_stride, GLsizei _normal_offset, GLsizei _color_stride, GLsizei _color_offset, bool _color_float);
 
   protected:
 	bool InternalBuild(int _vertex_count, const char** _vertex, int _fragment_count, const char** _fragment);
@@ -205,8 +170,8 @@ class AmbientShader : public AnimationShader {
 
 class AmbientShaderInstanced : public AnimationShader {
   public:
-	AmbientShaderInstanced() {}
-	virtual ~AmbientShaderInstanced() {}
+	AmbientShaderInstanced()           = default;
+	~AmbientShaderInstanced() override = default;
 
 	// Constructs the shader.
 	// Returns nullptr if shader compilation failed or a valid Shader pointer on
@@ -215,17 +180,9 @@ class AmbientShaderInstanced : public AnimationShader {
 	static ozz::unique_ptr<AmbientShaderInstanced> Build();
 
 	// Binds the shader.
-	void Bind(GLsizei                    _models_offset,
-	          const ozz::math::Float4x4& _view_proj,
-	          GLsizei                    _pos_stride,
-	          GLsizei                    _pos_offset,
-	          GLsizei                    _normal_stride,
-	          GLsizei                    _normal_offset,
-	          GLsizei                    _color_stride,
-	          GLsizei                    _color_offset,
-	          bool                       _color_float);
+	void Bind(GLsizei _models_offset, const ozz::math::Float4x4& _view_proj, GLsizei _pos_stride, GLsizei _pos_offset, GLsizei _normal_stride, GLsizei _normal_offset, GLsizei _color_stride, GLsizei _color_offset, bool _color_float);
 
-	virtual void Unbind();
+	void Unbind() override;
 };
 
 class AmbientTexturedShader : public AmbientShader {

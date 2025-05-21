@@ -6,18 +6,15 @@
 #include <spdlog/spdlog.h>
 
 namespace Engine {
-	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::shared_ptr<Material>& material)
-	    : m_vertices(vertices), m_indices(indices), m_material(material), m_vao(0), m_vbo(0), m_ebo(0)
+
+	// Static tracking sets
+	std::unordered_set<GLuint> Mesh::s_vaos;
+	std::unordered_set<GLuint> Mesh::s_vbos;
+	std::unordered_set<GLuint> Mesh::s_ebos;
+
+	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::shared_ptr<Material>& material) : m_vertices(vertices), m_indices(indices), m_material(material), m_vao(0), m_vbo(0), m_ebo(0)
 	{
 		SetupMesh();
-	}
-
-	Mesh::~Mesh()
-	{
-		spdlog::debug("Deleting mesh ");
-		glDeleteVertexArrays(1, &m_vao);
-		glDeleteBuffers(1, &m_vbo);
-		glDeleteBuffers(1, &m_ebo);
 	}
 
 	void Mesh::SetupMesh()
@@ -26,33 +23,30 @@ namespace Engine {
 		glGenBuffers(1, &m_vbo);
 		glGenBuffers(1, &m_ebo);
 
+		s_vaos.insert(m_vao);
+		s_vbos.insert(m_vbo);
+		s_ebos.insert(m_ebo);
+
 		glBindVertexArray(m_vao);
 
-		// Load vertex data
 		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 		glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), &m_vertices[0], GL_STATIC_DRAW);
 
-		// Load index data
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(unsigned int), &m_indices[0], GL_STATIC_DRAW);
 
-		// Position attribute
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) 0);
 
-		// Normal attribute
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, Normal));
 
-		// Texture coordinate attribute
 		glEnableVertexAttribArray(2);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, TexCoords));
 
-		// Tangent attribute
 		glEnableVertexAttribArray(3);
 		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, Tangent));
 
-		// Bitangent attribute
 		glEnableVertexAttribArray(4);
 		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, Bitangent));
 
@@ -61,7 +55,6 @@ namespace Engine {
 
 	void Mesh::Draw(const Shader& shader) const
 	{
-		// Bind material textures
 		if (m_material->GetDiffuseTexture()) {
 			glActiveTexture(GL_TEXTURE0);
 			shader.SetInt("material.diffuse", 0);
@@ -80,35 +73,66 @@ namespace Engine {
 			m_material->GetNormalTexture()->Bind(2);
 		}
 
-		// Set material colors
 		shader.SetVec3("material.diffuseColor", m_material->GetDiffuseColor());
 		shader.SetVec3("material.specularColor", m_material->GetSpecularColor());
 		shader.SetVec3("material.ambientColor", m_material->GetAmbientColor());
 		shader.SetVec3("material.emissiveColor", m_material->GetEmissiveColor());
 		shader.SetFloat("material.shininess", m_material->GetShininess());
 
-		// Draw mesh
 		glBindVertexArray(m_vao);
 		glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
-		// Unbind all textures
 		if (m_material->GetNormalTexture()) {
 			glActiveTexture(GL_TEXTURE2);
 			m_material->GetNormalTexture()->Unbind();
 		}
-
 		if (m_material->GetSpecularTexture()) {
 			glActiveTexture(GL_TEXTURE1);
 			m_material->GetSpecularTexture()->Unbind();
 		}
-
 		if (m_material->GetDiffuseTexture()) {
 			glActiveTexture(GL_TEXTURE0);
 			m_material->GetDiffuseTexture()->Unbind();
 		}
-
-		// Reset active texture unit to default
 		glActiveTexture(GL_TEXTURE0);
+	}
+
+	[[maybe_unused]] void Mesh::CleanUp()
+	{
+		if (m_vao) {
+			glDeleteVertexArrays(1, &m_vao);
+			s_vaos.erase(m_vao);
+			m_vao = 0;
+		}
+		if (m_vbo) {
+			glDeleteBuffers(1, &m_vbo);
+			s_vbos.erase(m_vbo);
+			m_vbo = 0;
+		}
+		if (m_ebo) {
+			glDeleteBuffers(1, &m_ebo);
+			s_ebos.erase(m_ebo);
+			m_ebo = 0;
+		}
+	}
+
+	[[maybe_unused]] void Mesh::CleanAllMeshes()
+	{
+		SPDLOG_INFO("Cleaning up all VAOs, VBOs, and EBOs");
+
+		for (GLuint vao : s_vaos) {
+			glDeleteVertexArrays(1, &vao);
+		}
+		for (GLuint vbo : s_vbos) {
+			glDeleteBuffers(1, &vbo);
+		}
+		for (GLuint ebo : s_ebos) {
+			glDeleteBuffers(1, &ebo);
+		}
+
+		s_vaos.clear();
+		s_vbos.clear();
+		s_ebos.clear();
 	}
 } // namespace Engine

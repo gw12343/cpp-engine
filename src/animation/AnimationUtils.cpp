@@ -25,9 +25,9 @@
 //                                                                            //
 //----------------------------------------------------------------------------//
 
-#include "animation/utils.h"
+#include "animation/AnimationUtils.h"
 
-#include "animation/mesh.h"
+#include "animation/AnimatedMesh.h"
 #include "ozz/animation/offline/raw_animation.h"
 #include "ozz/animation/offline/raw_skeleton.h"
 #include "ozz/animation/runtime/animation.h"
@@ -281,7 +281,7 @@ void MultiplySoATransformQuaternion(int _index, const ozz::math::SimdQuaternion&
 bool LoadSkeleton(const char* _filename, ozz::animation::Skeleton* _skeleton)
 {
 	assert(_filename && _skeleton);
-	ozz::log::Out() << "Loading skeleton archive " << _filename << "." << std::endl;
+
 	ozz::io::File file(_filename, "rb");
 	if (!file.opened()) {
 		ozz::log::Err() << "Failed to open skeleton file " << _filename << "." << std::endl;
@@ -295,7 +295,7 @@ bool LoadSkeleton(const char* _filename, ozz::animation::Skeleton* _skeleton)
 
 	// Once the tag is validated, reading cannot fail.
 	{
-		ProfileFctLog profile{"Skeleton loading time"};
+		// ProfileFctLog profile{"Skeleton loading time"};
 		archive >> *_skeleton;
 	}
 	return true;
@@ -304,7 +304,6 @@ bool LoadSkeleton(const char* _filename, ozz::animation::Skeleton* _skeleton)
 bool LoadAnimation(const char* _filename, ozz::animation::Animation* _animation)
 {
 	assert(_filename && _animation);
-	ozz::log::Out() << "Loading animation archive: " << _filename << "." << std::endl;
 	ozz::io::File file(_filename, "rb");
 	if (!file.opened()) {
 		ozz::log::Err() << "Failed to open animation file " << _filename << "." << std::endl;
@@ -318,7 +317,7 @@ bool LoadAnimation(const char* _filename, ozz::animation::Animation* _animation)
 
 	// Once the tag is validated, reading cannot fail.
 	{
-		ProfileFctLog profile{"Animation loading time"};
+		// ProfileFctLog profile{"Animation loading time"};
 		archive >> *_animation;
 	}
 
@@ -342,7 +341,7 @@ bool LoadRawAnimation(const char* _filename, ozz::animation::offline::RawAnimati
 
 	// Once the tag is validated, reading cannot fail.
 	{
-		ProfileFctLog profile{"RawAnimation loading time"};
+		// ProfileFctLog profile{"RawAnimation loading time"};
 		archive >> *_animation;
 	}
 
@@ -424,7 +423,6 @@ bool LoadMesh(const char* _filename, myns::Mesh* _mesh)
 bool LoadMeshes(const char* _filename, ozz::vector<myns::Mesh>* _meshes)
 {
 	assert(_filename && _meshes);
-	ozz::log::Out() << "Loading meshes archive: " << _filename << "." << std::endl;
 	ozz::io::File file(_filename, "rb");
 	if (!file.opened()) {
 		ozz::log::Err() << "Failed to open mesh file " << _filename << "." << std::endl;
@@ -433,7 +431,7 @@ bool LoadMeshes(const char* _filename, ozz::vector<myns::Mesh>* _meshes)
 	ozz::io::IArchive archive(&file);
 
 	{
-		ProfileFctLog profile{"Meshes loading time"};
+		// ProfileFctLog profile{"Meshes loading time"};
 		while (archive.TestTag<myns::Mesh>()) {
 			_meshes->resize(_meshes->size() + 1);
 			archive >> _meshes->back();
@@ -446,13 +444,8 @@ bool LoadMeshes(const char* _filename, ozz::vector<myns::Mesh>* _meshes)
 namespace {
 	// Moller-Trumbore intersection algorithm
 	// https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
-	bool RayIntersectsTriangle(const ozz::math::Float3& _ray_origin,
-	                           const ozz::math::Float3& _ray_direction,
-	                           const ozz::math::Float3& _p0,
-	                           const ozz::math::Float3& _p1,
-	                           const ozz::math::Float3& _p2,
-	                           ozz::math::Float3*       _intersect,
-	                           ozz::math::Float3*       _normal)
+	bool RayIntersectsTriangle(
+	    const ozz::math::Float3& _ray_origin, const ozz::math::Float3& _ray_direction, const ozz::math::Float3& _p0, const ozz::math::Float3& _p1, const ozz::math::Float3& _p2, ozz::math::Float3* _intersect, ozz::math::Float3* _normal)
 	{
 		const float kEpsilon = 0.0000001f;
 
@@ -494,11 +487,7 @@ namespace {
 	}
 } // namespace
 
-bool RayIntersectsMesh(const ozz::math::Float3& _ray_origin,
-                       const ozz::math::Float3& _ray_direction,
-                       const myns::Mesh&        _mesh,
-                       ozz::math::Float3*       _intersect,
-                       ozz::math::Float3*       _normal)
+bool RayIntersectsMesh(const ozz::math::Float3& _ray_origin, const ozz::math::Float3& _ray_direction, const myns::Mesh& _mesh, ozz::math::Float3* _intersect, ozz::math::Float3* _normal)
 {
 	assert(_mesh.parts.size() == 1 && !_mesh.skinned());
 
@@ -511,13 +500,7 @@ bool RayIntersectsMesh(const ozz::math::Float3& _ray_origin,
 		const float*      pf1 = vertices + indices[i + 1] * 3;
 		const float*      pf2 = vertices + indices[i + 2] * 3;
 		ozz::math::Float3 lcl_intersect, lcl_normal;
-		if (RayIntersectsTriangle(_ray_origin,
-		                          _ray_direction,
-		                          ozz::math::Float3(pf0[0], pf0[1], pf0[2]),
-		                          ozz::math::Float3(pf1[0], pf1[1], pf1[2]),
-		                          ozz::math::Float3(pf2[0], pf2[1], pf2[2]),
-		                          &lcl_intersect,
-		                          &lcl_normal)) {
+		if (RayIntersectsTriangle(_ray_origin, _ray_direction, ozz::math::Float3(pf0[0], pf0[1], pf0[2]), ozz::math::Float3(pf1[0], pf1[1], pf1[2]), ozz::math::Float3(pf2[0], pf2[1], pf2[2]), &lcl_intersect, &lcl_normal)) {
 			// Is it closer to start point than the previous intersection.
 			if (!intersected || LengthSqr(lcl_intersect - _ray_origin) < LengthSqr(intersect - _ray_origin)) {
 				intersect = lcl_intersect;
@@ -539,11 +522,7 @@ bool RayIntersectsMesh(const ozz::math::Float3& _ray_origin,
 	return intersected;
 }
 
-bool RayIntersectsMeshes(const ozz::math::Float3&           _ray_origin,
-                         const ozz::math::Float3&           _ray_direction,
-                         const ozz::span<const myns::Mesh>& _meshes,
-                         ozz::math::Float3*                 _intersect,
-                         ozz::math::Float3*                 _normal)
+bool RayIntersectsMeshes(const ozz::math::Float3& _ray_origin, const ozz::math::Float3& _ray_direction, const ozz::span<const myns::Mesh>& _meshes, ozz::math::Float3* _intersect, ozz::math::Float3* _normal)
 {
 	bool              intersected = false;
 	ozz::math::Float3 intersect, normal;

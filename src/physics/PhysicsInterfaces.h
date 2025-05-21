@@ -43,17 +43,15 @@ namespace Engine {
 		virtual bool ShouldCollide(ObjectLayer inLayer1, BroadPhaseLayer inLayer2) const override;
 	};
 
-	class MyContactListener : public ContactListener {
+	class ContactListenerImpl : public ContactListener {
 	  public:
-		// See: ContactListener
-		virtual ValidateResult
-		             OnContactValidate(const Body& inBody1, const Body& inBody2, RVec3Arg inBaseOffset, const CollideShapeResult& inCollisionResult) override;
-		virtual void OnContactAdded(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings) override;
-		virtual void OnContactPersisted(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings) override;
-		virtual void OnContactRemoved(const SubShapeIDPair& inSubShapePair) override;
+		virtual ValidateResult OnContactValidate(const Body& inBody1, const Body& inBody2, RVec3Arg inBaseOffset, const CollideShapeResult& inCollisionResult) override;
+		virtual void           OnContactAdded(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings) override;
+		virtual void           OnContactPersisted(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings) override;
+		virtual void           OnContactRemoved(const SubShapeIDPair& inSubShapePair) override;
 	};
 
-	class MyBodyActivationListener : public BodyActivationListener {
+	class BodyActivationListenerImpl : public BodyActivationListener {
 	  public:
 		virtual void OnBodyActivated(const BodyID& inBodyID, uint64 inBodyUserData) override;
 

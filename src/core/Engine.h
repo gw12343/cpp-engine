@@ -15,7 +15,6 @@ namespace Engine {
 
 	// Forward declarations
 	class Entity;
-	class UIManager;
 
 	class GEngine {
 	  public:
@@ -27,44 +26,34 @@ namespace Engine {
 		void Shutdown();
 
 		// Get the registry
-		entt::registry&       GetRegistry() { return m_registry; }
-		const entt::registry& GetRegistry() const { return m_registry; }
+		entt::registry&                                      GetRegistry() { return m_registry; }
+		[[maybe_unused]] [[nodiscard]] const entt::registry& GetRegistry() const { return m_registry; }
 
 		// Get managers
 		Audio::SoundManager& GetSoundManager() { return *m_soundManager; }
 		AnimationManager&    GetAnimationManager() { return *m_animationManager; }
 
 		// Get camera
-		const Camera& GetCamera() const { return m_camera; }
+		[[nodiscard]] const Camera& GetCamera() const { return m_camera; }
 
 		// Physics state
-		bool IsPhysicsEnabled() const { return m_physicsEnabled; }
+		[[nodiscard]] bool IsPhysicsEnabled() const { return m_physicsEnabled; }
 
 	  private:
-		// Initialization methods
-		bool InitializeWindow();
 		bool InitializeRenderer();
-		bool InitializeAudio();
-		bool InitializePhysics();
 		void CreateInitialEntities();
 
 		// Update methods
 		void ProcessInput();
 		void Update();
-		void UpdatePhysics();
-		void RenderUI();
 
 		Window                               m_window;
 		Camera                               m_camera;
-		std::unique_ptr<Renderer>            m_renderer;
 		std::shared_ptr<spdlog::logger>      m_logger;
 		std::shared_ptr<Audio::SoundManager> m_soundManager;
-		std::unique_ptr<UIManager>           m_uiManager;
+		std::unique_ptr<Renderer>            m_renderer;
+		std::unique_ptr<UI::UIManager>       m_uiManager;
 		std::unique_ptr<AnimationManager>    m_animationManager;
-
-		// Audio-related members
-		std::shared_ptr<Audio::SoundBuffer> m_backgroundMusic;
-		std::shared_ptr<Audio::SoundSource> m_backgroundMusicSource;
 
 		// EnTT registry for ECS
 		entt::registry m_registry;
@@ -75,7 +64,6 @@ namespace Engine {
 
 		// Friend declaration to allow Entity to access private members
 		friend class Entity;
-		friend class UIManager;
 	};
 
 } // namespace Engine

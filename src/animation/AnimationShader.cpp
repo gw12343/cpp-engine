@@ -27,7 +27,7 @@
 
 #define OZZ_INCLUDE_PRIVATE_HEADER // Allows to include private headers.
 
-#include "shader.h"
+#include "AnimationShader.h"
 
 #include "ozz/base/log.h"
 #include "ozz/base/maths/simd_math.h"
@@ -36,11 +36,6 @@
 #include <cstdio>
 #include <spdlog/spdlog.h>
 
-// namespace ozz {
-// namespace sample {
-// namespace internal {
-
-#define GL_ARB_instanced_arrays_supported false
 static const char* kPlatformSpecificVSHeader = "#version 330\n";
 static const char* kPlatformSpecificFSHeader = "#version 330\n";
 
@@ -172,8 +167,8 @@ bool AnimationShader::FindAttrib(const char* _semantic)
 
 void AnimationShader::UnbindAttribs()
 {
-	for (size_t i = 0; i < attribs_.size(); ++i) {
-		GL(DisableVertexAttribArray(attribs_[i]));
+	for (int attrib : attribs_) {
+		GL(DisableVertexAttribArray(attrib));
 	}
 }
 
@@ -222,12 +217,7 @@ ozz::unique_ptr<ImmediatePCShader> ImmediatePCShader::Build()
 	return shader;
 }
 
-void ImmediatePCShader::Bind(const ozz::math::Float4x4& _model,
-                             const ozz::math::Float4x4& _view_proj,
-                             GLsizei                    _pos_stride,
-                             GLsizei                    _pos_offset,
-                             GLsizei                    _color_stride,
-                             GLsizei                    _color_offset)
+void ImmediatePCShader::Bind(const ozz::math::Float4x4& _model, const ozz::math::Float4x4& _view_proj, GLsizei _pos_stride, GLsizei _pos_offset, GLsizei _color_stride, GLsizei _color_offset)
 {
 	GL(UseProgram(program()));
 
@@ -291,14 +281,7 @@ ozz::unique_ptr<ImmediatePTCShader> ImmediatePTCShader::Build()
 	return shader;
 }
 
-void ImmediatePTCShader::Bind(const ozz::math::Float4x4& _model,
-                              const ozz::math::Float4x4& _view_proj,
-                              GLsizei                    _pos_stride,
-                              GLsizei                    _pos_offset,
-                              GLsizei                    _tex_stride,
-                              GLsizei                    _tex_offset,
-                              GLsizei                    _color_stride,
-                              GLsizei                    _color_offset)
+void ImmediatePTCShader::Bind(const ozz::math::Float4x4& _model, const ozz::math::Float4x4& _view_proj, GLsizei _pos_stride, GLsizei _pos_offset, GLsizei _tex_stride, GLsizei _tex_offset, GLsizei _color_stride, GLsizei _color_offset)
 {
 	GL(UseProgram(program()));
 
@@ -367,15 +350,8 @@ ozz::unique_ptr<PointsShader> PointsShader::Build()
 	return shader;
 }
 
-PointsShader::GenericAttrib PointsShader::Bind(const ozz::math::Float4x4& _model,
-                                               const ozz::math::Float4x4& _view_proj,
-                                               GLsizei                    _pos_stride,
-                                               GLsizei                    _pos_offset,
-                                               GLsizei                    _color_stride,
-                                               GLsizei                    _color_offset,
-                                               GLsizei                    _size_stride,
-                                               GLsizei                    _size_offset,
-                                               bool                       _screen_space)
+PointsShader::GenericAttrib PointsShader::Bind(
+    const ozz::math::Float4x4& _model, const ozz::math::Float4x4& _view_proj, GLsizei _pos_stride, GLsizei _pos_offset, GLsizei _color_stride, GLsizei _color_offset, GLsizei _size_stride, GLsizei _size_offset, bool _screen_space)
 {
 	GL(UseProgram(program()));
 
@@ -459,14 +435,7 @@ namespace {
 	                                       "}\n";
 } // namespace
 
-void SkeletonShader::Bind(const ozz::math::Float4x4& _model,
-                          const ozz::math::Float4x4& _view_proj,
-                          GLsizei                    _pos_stride,
-                          GLsizei                    _pos_offset,
-                          GLsizei                    _normal_stride,
-                          GLsizei                    _normal_offset,
-                          GLsizei                    _color_stride,
-                          GLsizei                    _color_offset)
+void SkeletonShader::Bind(const ozz::math::Float4x4& _model, const ozz::math::Float4x4& _view_proj, GLsizei _pos_stride, GLsizei _pos_offset, GLsizei _normal_stride, GLsizei _normal_offset, GLsizei _color_stride, GLsizei _color_offset)
 {
 	GL(UseProgram(program()));
 
@@ -515,11 +484,7 @@ ozz::unique_ptr<JointShader> JointShader::Build()
 	                                       "  return u_model * world_matrix;\n"
 	                                       "}\n";
 
-	const char* vs[] = {kPlatformSpecificVSHeader,
-	                    kPassNoUv,
-	                    GL_ARB_instanced_arrays_supported ? "in mat4 joint;\n" : "uniform mat4 joint;\n",
-	                    vs_joint_to_world_matrix,
-	                    kShaderUberVS};
+	const char* vs[] = {kPlatformSpecificVSHeader, kPassNoUv, "uniform mat4 joint;\n", vs_joint_to_world_matrix, kShaderUberVS};
 	const char* fs[] = {kPlatformSpecificFSHeader, kShaderAmbientFct, kShaderAmbientFS};
 
 	ozz::unique_ptr<JointShader> shader = ozz::make_unique<JointShader>();
@@ -534,12 +499,7 @@ ozz::unique_ptr<JointShader> JointShader::Build()
 	success &= shader->BindUniform("u_model");
 	success &= shader->BindUniform("u_viewproj");
 
-	if (GL_ARB_instanced_arrays_supported) {
-		success &= shader->FindAttrib("joint");
-	}
-	else {
-		success &= shader->BindUniform("joint");
-	}
+	success &= shader->BindUniform("joint");
 
 	if (!success) {
 		shader.reset();
@@ -577,11 +537,7 @@ ozz::unique_ptr<BoneShader> BoneShader::Build()
 	                                       "  world_matrix[3] = vec4(joint[3].xyz, 1.);\n"
 	                                       "  return u_model * world_matrix;\n"
 	                                       "}\n";
-	const char* vs[] = {kPlatformSpecificVSHeader,
-	                    kPassNoUv,
-	                    GL_ARB_instanced_arrays_supported ? "in mat4 joint;\n" : "uniform mat4 joint;\n",
-	                    vs_joint_to_world_matrix,
-	                    kShaderUberVS};
+	const char* vs[] = {kPlatformSpecificVSHeader, kPassNoUv, "uniform mat4 joint;\n", vs_joint_to_world_matrix, kShaderUberVS};
 	const char* fs[] = {kPlatformSpecificFSHeader, kShaderAmbientFct, kShaderAmbientFS};
 
 	ozz::unique_ptr<BoneShader> shader = ozz::make_unique<BoneShader>();
@@ -596,12 +552,7 @@ ozz::unique_ptr<BoneShader> BoneShader::Build()
 	success &= shader->BindUniform("u_model");
 	success &= shader->BindUniform("u_viewproj");
 
-	if (GL_ARB_instanced_arrays_supported) {
-		success &= shader->FindAttrib("joint");
-	}
-	else {
-		success &= shader->BindUniform("joint");
-	}
+	success &= shader->BindUniform("joint");
 
 	if (!success) {
 		spdlog::error("Failed to build bone shader");
@@ -648,15 +599,8 @@ bool AmbientShader::InternalBuild(int _vertex_count, const char** _vertex, int _
 	return success;
 }
 
-void AmbientShader::Bind(const ozz::math::Float4x4& _model,
-                         const ozz::math::Float4x4& _view_proj,
-                         GLsizei                    _pos_stride,
-                         GLsizei                    _pos_offset,
-                         GLsizei                    _normal_stride,
-                         GLsizei                    _normal_offset,
-                         GLsizei                    _color_stride,
-                         GLsizei                    _color_offset,
-                         bool                       _color_float)
+void AmbientShader::Bind(
+    const ozz::math::Float4x4& _model, const ozz::math::Float4x4& _view_proj, GLsizei _pos_stride, GLsizei _pos_offset, GLsizei _normal_stride, GLsizei _normal_offset, GLsizei _color_stride, GLsizei _color_offset, bool _color_float)
 {
 	GL(UseProgram(program()));
 
@@ -705,15 +649,8 @@ ozz::unique_ptr<AmbientShaderInstanced> AmbientShaderInstanced::Build()
 	return shader;
 }
 
-void AmbientShaderInstanced::Bind(GLsizei                    _models_offset,
-                                  const ozz::math::Float4x4& _view_proj,
-                                  GLsizei                    _pos_stride,
-                                  GLsizei                    _pos_offset,
-                                  GLsizei                    _normal_stride,
-                                  GLsizei                    _normal_offset,
-                                  GLsizei                    _color_stride,
-                                  GLsizei                    _color_offset,
-                                  bool                       _color_float)
+void AmbientShaderInstanced::Bind(
+    GLsizei _models_offset, const ozz::math::Float4x4& _view_proj, GLsizei _pos_stride, GLsizei _pos_offset, GLsizei _normal_stride, GLsizei _normal_offset, GLsizei _color_stride, GLsizei _color_offset, bool _color_float)
 {
 	GL(UseProgram(program()));
 
@@ -803,6 +740,3 @@ void AmbientTexturedShader::Bind(const ozz::math::Float4x4& _model,
 	GL(EnableVertexAttribArray(uv_attrib));
 	GL(VertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, _uv_stride, GL_PTR_OFFSET(_uv_offset)));
 }
-// }  // namespace internal
-// }  // namespace sample
-// }  // namespace ozz

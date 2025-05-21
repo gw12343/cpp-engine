@@ -45,16 +45,15 @@ namespace Engine {
 		static bool AssertFailedImpl(const char* inExpression, const char* inMessage, const char* inFile, uint inLine);
 
 
-		static void Initialize(std::shared_ptr<PhysicsSystem> physics, std::shared_ptr<TempAllocatorImpl> allocater, std::shared_ptr<JobSystemThreadPool> jobs);
-		static void CleanUp(entt::registry& registry, std::shared_ptr<PhysicsSystem> physics);
-		static void
-		Update(std::shared_ptr<PhysicsSystem> physics, std::shared_ptr<TempAllocatorImpl> allocater, std::shared_ptr<JobSystemThreadPool> jobs, float dt);
-		static void UpdatePhysicsEntities(entt::registry& registry, std::shared_ptr<PhysicsSystem> physics);
-
+		static void                              Initialize();
+		static void                              CleanUp(entt::registry& registry);
+		static void                              Update(float dt);
+		static void                              SyncPhysicsEntities(entt::registry& registry);
+		static std::shared_ptr<PhysicsSystem>    GetPhysicsSystem();
 		static BPLayerInterfaceImpl              broad_phase_layer_interface;
 		static ObjectVsBroadPhaseLayerFilterImpl object_vs_broadphase_layer_filter;
 		static ObjectLayerPairFilterImpl         object_vs_object_layer_filter;
-		static MyContactListener                 contact_listener;
-		static MyBodyActivationListener          body_activation_listener;
+		static ContactListenerImpl               contact_listener;
+		static BodyActivationListenerImpl        body_activation_listener;
 	};
 } // namespace Engine

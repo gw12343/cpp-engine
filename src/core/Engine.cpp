@@ -95,7 +95,6 @@ namespace Engine {
 		return true;
 	}
 
-
 	void GEngine::CreateInitialEntities()
 	{
 		BodyInterface& body_interface = PhysicsManager::GetPhysicsSystem()->GetBodyInterface();
@@ -142,21 +141,22 @@ namespace Engine {
 		entity2.AddComponent<Components::RigidBodyComponent>(PhysicsManager::GetPhysicsSystem().get(), cube_id);
 		entity2.AddComponent<Components::AudioSource>("birds", true, 0.1f, 1.0f, true, 5.0f, 50.0f, 1.0f);
 
-		//		Entity animatedEntity = Entity::Create(this, "AnimatedEntity");
-		//		animatedEntity.AddComponent<Components::Transform>(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		//		animatedEntity.AddComponent<Components::SkeletonComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_skeleton.ozz");
-		//		animatedEntity.AddComponent<Components::AnimationComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_animation.ozz");
-		//		animatedEntity.AddComponent<Components::AnimationPoseComponent>();
-		//		animatedEntity.AddComponent<Components::AnimationWorkerComponent>();
-		//		animatedEntity.AddComponent<Components::SkinnedMeshComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_mesh.ozz");
 
-		// Entity animatedEntity2 = Entity::Create(this, "AnimatedEntity2");
-		// animatedEntity2.AddComponent<Components::Transform>(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(2.0f, 0.5f, 1.0f));
-		// animatedEntity2.AddComponent<Components::SkeletonComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_skeleton.ozz");
-		// animatedEntity2.AddComponent<Components::AnimationComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_animation.ozz");
-		// animatedEntity2.AddComponent<Components::AnimationPoseComponent>();
-		// animatedEntity2.AddComponent<Components::AnimationWorkerComponent>();
-		// animatedEntity2.AddComponent<Components::SkinnedMeshComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_mesh.ozz");
+		Entity animatedEntity = Entity::Create(this, "AnimatedEntity");
+		animatedEntity.AddComponent<Components::Transform>(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		animatedEntity.AddComponent<Components::SkeletonComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_skeleton.ozz");
+		animatedEntity.AddComponent<Components::AnimationComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_animation.ozz");
+		animatedEntity.AddComponent<Components::AnimationPoseComponent>();
+		animatedEntity.AddComponent<Components::AnimationWorkerComponent>();
+		animatedEntity.AddComponent<Components::SkinnedMeshComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_mesh.ozz");
+
+		Entity animatedEntity2 = Entity::Create(this, "AnimatedEntity2");
+		animatedEntity2.AddComponent<Components::Transform>(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(2.0f, 0.5f, 1.0f));
+		animatedEntity2.AddComponent<Components::SkeletonComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_skeleton.ozz");
+		animatedEntity2.AddComponent<Components::AnimationComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_animation.ozz");
+		animatedEntity2.AddComponent<Components::AnimationPoseComponent>();
+		animatedEntity2.AddComponent<Components::AnimationWorkerComponent>();
+		animatedEntity2.AddComponent<Components::SkinnedMeshComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_mesh.ozz");
 	}
 
 
@@ -242,13 +242,6 @@ namespace Engine {
 		}
 	}
 
-	void GEngine::UpdatePhysics()
-	{
-		if (m_physicsEnabled) PhysicsManager::Update(m_deltaTime);
-
-		PhysicsManager::UpdatePhysicsEntities(m_registry, NULL);
-	}
-
 	void GEngine::Update()
 	{
 		ProcessInput();
@@ -257,10 +250,12 @@ namespace Engine {
 		Input::Update();
 		m_renderer->PreRender();
 
-		// Update animation
 		m_animationManager->Update(m_deltaTime);
 
-		UpdatePhysics();
+		if (m_physicsEnabled) PhysicsManager::Update(m_deltaTime);
+
+		PhysicsManager::SyncPhysicsEntities(m_registry);
+
 		m_soundManager->UpdateAudioEntities(m_registry, m_camera);
 		// Use the renderer to render entities
 		m_renderer->RenderEntities(m_registry);
@@ -274,13 +269,19 @@ namespace Engine {
 
 	void GEngine::Shutdown()
 	{
-		PhysicsManager::CleanUp(m_registry, NULL);
+		PhysicsManager::CleanUp(m_registry);
 
 		// Shutdown sound manager
 		if (m_soundManager) {
 			m_soundManager->Shutdown();
 		}
 
+
+		Components::AnimationWorkerComponent::CleanAnimationContexts();
+		Components::SkinnedMeshComponent::CleanSkinnedModels();
+		Texture::CleanAllTextures();
+		Mesh::CleanAllMeshes();
+		m_window.Shutdown();
 		SPDLOG_INFO("Engine shutdown complete");
 	}
 } // namespace Engine

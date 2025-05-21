@@ -5,15 +5,10 @@
 #include <stb/stb_image.h>
 
 namespace Engine {
+	std::unordered_set<GLuint> Engine::Texture::s_loadedTextures;
+
 	Texture::Texture() : m_textureID(0), m_width(0), m_height(0), m_channels(0), m_isHDR(false)
 	{
-	}
-
-	Texture::~Texture()
-	{
-		if (m_textureID != 0) {
-			glDeleteTextures(1, &m_textureID);
-		}
 	}
 
 	bool Texture::LoadFromFile(const std::string& path)
@@ -29,6 +24,7 @@ namespace Engine {
 
 		// Generate texture ID
 		glGenTextures(1, &m_textureID);
+		s_loadedTextures.insert(m_textureID);
 
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR) {
@@ -76,7 +72,7 @@ namespace Engine {
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		m_isHDR = false;
-		// spdlog::info("Loaded texture: {} ({}x{}, {} channels) id: {}", path, m_width, m_height, m_channels, m_textureID);
+		// SPDLOG_INFO("Loaded texture: {} ({}x{}, {} channels) id: {}", path, m_width, m_height, m_channels, m_textureID);
 		return true;
 	}
 
@@ -84,6 +80,7 @@ namespace Engine {
 	{
 		// Generate texture ID
 		glGenTextures(1, &m_textureID);
+		s_loadedTextures.insert(m_textureID);
 		glBindTexture(GL_TEXTURE_2D, m_textureID);
 
 		// Set texture parameters
@@ -129,7 +126,7 @@ namespace Engine {
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		m_isHDR = true;
-		spdlog::info("Loaded HDR texture: {} ({}x{}, {} channels)", path, m_width, m_height, m_channels);
+		SPDLOG_INFO("Loaded HDR texture: {} ({}x{}, {} channels)", path, m_width, m_height, m_channels);
 		return true;
 	}
 
@@ -139,8 +136,26 @@ namespace Engine {
 		glBindTexture(GL_TEXTURE_2D, m_textureID);
 	}
 
-	void Texture::Unbind() const
+	void Texture::Unbind()
 	{
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
+	[[maybe_unused]] void Engine::Texture::CleanUp()
+	{
+		if (m_textureID != 0) {
+			glDeleteTextures(1, &m_textureID);
+			s_loadedTextures.erase(m_textureID);
+			m_textureID = 0;
+		}
+	}
+
+	void Texture::CleanAllTextures()
+	{
+		for (GLuint texID : s_loadedTextures) {
+			glDeleteTextures(1, &texID);
+		}
+		s_loadedTextures.clear();
+		SPDLOG_INFO("Cleaned up all tracked textures.");
+	}
+
 } // namespace Engine

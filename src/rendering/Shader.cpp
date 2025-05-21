@@ -51,7 +51,7 @@ namespace Engine {
 		// Clean up shaders
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
-		spdlog::info("Linked shader with id {}", programID);
+		SPDLOG_INFO("Linked shader with id {}", programID);
 		return true;
 	}
 
