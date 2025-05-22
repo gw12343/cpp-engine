@@ -19,8 +19,9 @@ namespace Engine {
 		void               Shutdown();
 		void               OnResize(int width, int height);
 
-		[[nodiscard]] int GetWidth() const;
-		[[nodiscard]] int GetHeight() const;
+		[[nodiscard]] int   GetWidth() const;
+		[[nodiscard]] int   GetHeight() const;
+		[[nodiscard]] float GetAspectRatio() const;
 
 		GLFWwindow* GetNativeWindow() const { return m_window; }
 

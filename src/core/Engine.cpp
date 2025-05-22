@@ -6,24 +6,12 @@
 #include "physics/PhysicsManager.h"
 #include "utils/ModelLoader.h"
 
-#include <Jolt/Core/Factory.h>
-#include <Jolt/Core/JobSystemThreadPool.h>
-#include <Jolt/Core/TempAllocator.h>
-#include <Jolt/Jolt.h>
-#include <Jolt/Physics/Body/BodyActivationListener.h>
-#include <Jolt/Physics/Body/BodyCreationSettings.h>
-#include <Jolt/Physics/Collision/Shape/BoxShape.h>
-#include <Jolt/Physics/Collision/Shape/SphereShape.h>
-#include <Jolt/Physics/PhysicsSettings.h>
-#include <Jolt/Physics/PhysicsSystem.h>
-#include <Jolt/RegisterTypes.h>
-#include <fstream>
+#include <Effekseer/Effekseer.h>
+#include <EffekseerRendererGL/EffekseerRendererGL.h>
 #include <imgui.h>
-#include <iostream>
 #include <memory>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <string>
-
 using namespace JPH;
 using namespace JPH::literals;
 
@@ -36,19 +24,12 @@ namespace Engine {
 	{
 		m_uiManager = std::make_unique<UI::UIManager>(this);
 	}
-	GEngine::~GEngine()
-	{
-		Shutdown();
-	}
-
-	// Audio system
-	std::shared_ptr<Audio::SoundBuffer> m_backgroundMusic;
-	std::shared_ptr<Audio::SoundSource> m_backgroundMusicSource;
-	Entity                              m_selectedEntity;
 
 	// Test models
-	std::shared_ptr<Model> sphere;
-	std::shared_ptr<Model> cube;
+	std::shared_ptr<Model>           sphere;
+	std::shared_ptr<Model>           cube;
+	EffekseerRendererGL::RendererRef particlerenderer = nullptr;
+	Effekseer::ManagerRef            particlemanager  = nullptr;
 
 	bool GEngine::Initialize()
 	{
@@ -82,7 +63,25 @@ namespace Engine {
 		m_uiManager->Initialize();
 
 		CreateInitialEntities();
-		return true;
+
+		// EffekseerRenderer::Renderer renderer = EffekseerRendererGL::Renderer();
+		particlerenderer = EffekseerRendererGL::Renderer::Create(8000);
+		if (!particlerenderer) {
+			SPDLOG_CRITICAL("FAILED TO CREATE PARTICLE RENDERER");
+		}
+		particlemanager = Effekseer::Manager::Create(8000);
+		particlemanager->SetSpriteRenderer(particlerenderer->CreateSpriteRenderer());
+		particlemanager->SetRibbonRenderer(particlerenderer->CreateRibbonRenderer());
+		particlemanager->SetRingRenderer(particlerenderer->CreateRingRenderer());
+		particlemanager->SetTrackRenderer(particlerenderer->CreateTrackRenderer());
+		particlemanager->SetModelRenderer(particlerenderer->CreateModelRenderer());
+
+		auto effect = Effekseer::Effect::Create(particlemanager, u"/home/gabe/CLionProjects/cpp-engine/build/_deps/effekseer-src/Examples/Resources/Laser01.efkefc");
+		if (!effect) {
+			SPDLOG_CRITICAL("Failed to load resource");
+		}
+		auto handle = particlemanager->Play(effect, 0.0f, 0.0f, 0.0f);
+		if (!handle) return true;
 	}
 
 	bool GEngine::InitializeRenderer()
@@ -142,21 +141,21 @@ namespace Engine {
 		entity2.AddComponent<Components::AudioSource>("birds", true, 0.1f, 1.0f, true, 5.0f, 50.0f, 1.0f);
 
 
-		Entity animatedEntity = Entity::Create(this, "AnimatedEntity");
-		animatedEntity.AddComponent<Components::Transform>(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		animatedEntity.AddComponent<Components::SkeletonComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_skeleton.ozz");
-		animatedEntity.AddComponent<Components::AnimationComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_animation.ozz");
-		animatedEntity.AddComponent<Components::AnimationPoseComponent>();
-		animatedEntity.AddComponent<Components::AnimationWorkerComponent>();
-		animatedEntity.AddComponent<Components::SkinnedMeshComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_mesh.ozz");
-
-		Entity animatedEntity2 = Entity::Create(this, "AnimatedEntity2");
-		animatedEntity2.AddComponent<Components::Transform>(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(2.0f, 0.5f, 1.0f));
-		animatedEntity2.AddComponent<Components::SkeletonComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_skeleton.ozz");
-		animatedEntity2.AddComponent<Components::AnimationComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_animation.ozz");
-		animatedEntity2.AddComponent<Components::AnimationPoseComponent>();
-		animatedEntity2.AddComponent<Components::AnimationWorkerComponent>();
-		animatedEntity2.AddComponent<Components::SkinnedMeshComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_mesh.ozz");
+		//		Entity animatedEntity = Entity::Create(this, "AnimatedEntity");
+		//		animatedEntity.AddComponent<Components::Transform>(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		//		animatedEntity.AddComponent<Components::SkeletonComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_skeleton.ozz");
+		//		animatedEntity.AddComponent<Components::AnimationComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_animation.ozz");
+		//		animatedEntity.AddComponent<Components::AnimationPoseComponent>();
+		//		animatedEntity.AddComponent<Components::AnimationWorkerComponent>();
+		//		animatedEntity.AddComponent<Components::SkinnedMeshComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_mesh.ozz");
+		//
+		//		Entity animatedEntity2 = Entity::Create(this, "AnimatedEntity2");
+		//		animatedEntity2.AddComponent<Components::Transform>(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(2.0f, 0.5f, 1.0f));
+		//		animatedEntity2.AddComponent<Components::SkeletonComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_skeleton.ozz");
+		//		animatedEntity2.AddComponent<Components::AnimationComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_animation.ozz");
+		//		animatedEntity2.AddComponent<Components::AnimationPoseComponent>();
+		//		animatedEntity2.AddComponent<Components::AnimationWorkerComponent>();
+		//		animatedEntity2.AddComponent<Components::SkinnedMeshComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_mesh.ozz");
 	}
 
 
@@ -242,6 +241,18 @@ namespace Engine {
 		}
 	}
 
+	::Effekseer::Matrix44 ConvertGLMToEffekseerMatrix(const glm::mat4& glmMatrix)
+	{
+		::Effekseer::Matrix44 effekseerMatrix;
+		for (int column = 0; column < 4; ++column) {
+			for (int row = 0; row < 4; ++row) {
+				effekseerMatrix.Values[column][row] = glmMatrix[column][row];
+			}
+		}
+		return effekseerMatrix;
+	}
+
+
 	void GEngine::Update()
 	{
 		ProcessInput();
@@ -262,6 +273,18 @@ namespace Engine {
 
 		// Render animated models
 		m_animationManager->Render();
+
+		particlemanager->Update(m_deltaTime);
+
+		::Effekseer::Matrix44 projMat = ConvertGLMToEffekseerMatrix(m_camera.GetProjectionMatrix(m_window.GetAspectRatio()));
+		::Effekseer::Matrix44 viewMat = ConvertGLMToEffekseerMatrix(m_camera.GetViewMatrix());
+		particlerenderer->SetProjectionMatrix(projMat);
+		particlerenderer->SetCameraMatrix(viewMat);
+		
+		particlerenderer->BeginRendering();
+		particlemanager->Draw();
+		particlerenderer->EndRendering();
+
 
 		m_uiManager->Render();
 		m_renderer->PostRender();

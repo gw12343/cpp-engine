@@ -19,7 +19,7 @@ namespace Engine {
 	class GEngine {
 	  public:
 		GEngine(int width, int height, const char* title);
-		~GEngine();
+		~GEngine() = default;
 
 		bool Initialize();
 		void Run();

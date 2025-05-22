@@ -31,11 +31,11 @@ namespace Engine {
 		void UpdateCameraVectors();
 
 		// Camera Attributes
-		glm::vec3 m_position;
+		glm::vec3 m_position{};
 		glm::vec3 m_front;
-		glm::vec3 m_up;
-		glm::vec3 m_right;
-		glm::vec3 m_worldUp;
+		glm::vec3 m_up{};
+		glm::vec3 m_right{};
+		glm::vec3 m_worldUp{};
 
 		// Euler Angles
 		float m_yaw;
@@ -50,6 +50,6 @@ namespace Engine {
 		float m_nearPlane;
 		float m_farPlane;
 
-		const Window* m_window;
+		const Window* m_window{};
 	};
 } // namespace Engine

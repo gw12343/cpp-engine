@@ -136,4 +136,8 @@ namespace Engine {
 		// Update viewport
 		glViewport(0, 0, width, height);
 	}
+	float Window::GetAspectRatio() const
+	{
+		return static_cast<float>(m_width) / static_cast<float>(m_height);
+	}
 } // namespace Engine

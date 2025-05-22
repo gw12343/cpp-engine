@@ -9,6 +9,7 @@ add_compile_options(-w)
 # Or for specific dependencies
 set(SPDLOG_BUILD_WARNINGS OFF CACHE BOOL "Build spdlog with warnings" FORCE)
 
+
 ################################### ASSIMP #####################################################################
 # Assimp is a library for importing and exporting 3D model formats. It supports a wide range of file formats,  #
 # including OBJ, FBX, COLLADA, and many others. Assimp provides a unified interface for loading 3D models,	   #
@@ -47,11 +48,15 @@ FetchContent_Declare(
         GIT_REPOSITORY https://github.com/guillaumeblanc/ozz-animation.git
         GIT_TAG master
 )
-set(OZZ_BUILD_TOOLS ON CACHE BOOL "" FORCE)      # ✅ Enables fbx2ozz and other tools
-set(OZZ_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)   # Optional: disable samples
-set(OZZ_BUILD_TESTS OFF CACHE BOOL "" FORCE)     # Optional: disable tests
+set(ozz_build_tools OFF CACHE BOOL "" FORCE)
+set(ozz_build_samples OFF CACHE BOOL "" FORCE)
+set(ozz_build_tests OFF CACHE BOOL "" FORCE)
+set(ozz_build_howtos OFF CACHE BOOL "" FORCE)
+set(ozz_build_gltf OFF CACHE BOOL "" FORCE)
+set(ozz_build_postfix OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(ozz)
 
+#################################### IMGUI ####################################################
 include(FetchContent)
 
 FetchContent_Declare(
@@ -78,11 +83,29 @@ target_include_directories(imgui PUBLIC
         ${imgui_SOURCE_DIR}
         ${imgui_SOURCE_DIR}/backends
 )
-#find_package(glfw3 REQUIRED)
-target_link_libraries(imgui PUBLIC glfw)
+
+target_link_libraries(imgui PRIVATE glfw)
 
 target_compile_definitions(imgui PUBLIC IMGUI_HAS_DOCK)
 
+############################### EFFEKSEER ###################################
+include(FetchContent)
+
+# Fetch Effekseer
+FetchContent_Declare(
+        effekseer
+        GIT_REPOSITORY https://github.com/Effekseer/Effekseer.git
+        GIT_TAG master
+)
+
+# Optional: make it faster by shallow cloning
+#set(FETCHCONTENT_QUIET ON)
+#set(FETCHCONTENT_SOURCE_DIR_EFFEKSEER "${CMAKE_BINARY_DIR}/_deps/effekseer-src")
+#(effekseer)
+FetchContent_MakeAvailable(effekseer)
+#target_link_libraries(effekseer PRIVATE GL)
+
+############################################################################
 
 # EnTT is a header-only library, so we don't need to link it
 # It's already included in lib/include/entt
@@ -98,8 +121,11 @@ file(GLOB_RECURSE SOURCES
 find_package(OpenAL REQUIRED)
 include_directories(${OPENAL_INCLUDE_DIR})
 
+
 # Add executable with all source files
 add_executable(${PROJECT_NAME} ${SOURCES})
+find_package(OpenGL REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE imgui)
 # Link spdlog
@@ -109,13 +135,15 @@ target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog)
 target_link_libraries(${PROJECT_NAME} PRIVATE Jolt)
 
 # Link GLFW
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
+#target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 
 # Link ASSIMP
 target_link_libraries(${PROJECT_NAME} PRIVATE assimp)
 
 # Link OpenAL
 target_link_libraries(${PROJECT_NAME} PRIVATE ${OPENAL_LIBRARY})
+
+#target_link_libraries(YourGame PRIVATE Effekseer::Effekseer Effekseer::EffekseerRendererGL)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(SNDFILE REQUIRED sndfile)
@@ -125,8 +153,17 @@ link_directories(${SNDFILE_LIBRARY_DIRS})
 target_link_libraries(${PROJECT_NAME} PRIVATE ${SNDFILE_LIBRARIES})
 
 # Link ozz-animation
-target_link_libraries(${PROJECT_NAME} PRIVATE ozz_animation ozz_animation_offline ozz_geometry)
+target_link_libraries(${PROJECT_NAME} PUBLIC ozz_animation ozz_animation_offline ozz_geometry)
 
+
+target_include_directories(${PROJECT_NAME} PRIVATE
+        ${effekseer_SOURCE_DIR}/Dev/Cpp
+        ${effekseer_SOURCE_DIR}/Dev/Cpp/Effekseer
+        ${effekseer_SOURCE_DIR}/Dev/Cpp/EffekseerRendererGL
+        ${effekseer_SOURCE_DIR}/Dev/Cpp/EffekseerRendererCommon
+)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE Effekseer EffekseerRendererGL)
 
 # Set C++ standard to C++17 (required for EnTT)
 set_target_properties(${PROJECT_NAME} PROPERTIES

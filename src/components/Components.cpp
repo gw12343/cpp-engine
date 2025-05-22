@@ -218,9 +218,7 @@ namespace Engine {
 
 		void AnimationWorkerComponent::CleanAnimationContexts()
 		{
-			SPDLOG_ERROR("deleting context");
 			for (ozz::animation::SamplingJob::Context* ctx : s_contexts) {
-				SPDLOG_ERROR("deleting context: {}", (void*) ctx);
 				delete ctx;
 			}
 		}
@@ -258,12 +256,10 @@ namespace Engine {
 		void SkinnedMeshComponent::CleanSkinnedModels()
 		{
 			for (std::vector<ozz::math::Float4x4>* mat : s_skin_mats) {
-				SPDLOG_INFO("deleting matrix: {}", (void*) mat);
 				delete mat;
 			}
 
 			for (ozz::vector<myns::Mesh>* mesh : s_all_meshes) {
-				SPDLOG_INFO("deleting mesh: {}", (void*) mesh);
 				delete mesh;
 			}
 		}
