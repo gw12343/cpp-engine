@@ -125,7 +125,12 @@ include_directories(${OPENAL_INCLUDE_DIR})
 # Add executable with all source files
 add_executable(${PROJECT_NAME} ${SOURCES}
         src/rendering/particles/ParticleManager.h
-        src/rendering/particles/ParticleManager.cpp)
+        src/rendering/particles/ParticleManager.cpp
+        src/terrain/TerrainLoader.h
+        src/terrain/TerrainLoader.cpp
+        src/terrain/TerrainManager.cpp
+        src/terrain/TerrainManager.h
+        lib/include/stb/stb_image_write.h)
 find_package(OpenGL REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 

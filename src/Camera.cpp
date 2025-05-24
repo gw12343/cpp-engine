@@ -37,7 +37,7 @@ namespace Engine {
 
 		// Apply speed boost when Control is held
 		if (Input::IsKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
-			velocity *= 2.0f; // Double the speed when Control is held
+			velocity *= 20.0f; // Double the speed when Control is held
 		}
 
 		if (Input::IsKeyPressed(GLFW_KEY_W)) m_position += m_front * velocity;

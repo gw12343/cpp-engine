@@ -55,6 +55,37 @@ namespace Engine {
 		return true;
 	}
 
+	bool Shader::LoadFromSource(const std::string& vertexSource, const std::string& fragmentSource)
+	{
+		if (vertexSource.empty() || fragmentSource.empty()) {
+			spdlog::error("Shader source code is empty");
+			return false;
+		}
+
+		GLuint vertexShader   = 0;
+		GLuint fragmentShader = 0;
+
+		if (!CompileShader(vertexShader, GL_VERTEX_SHADER, vertexSource) || !CompileShader(fragmentShader, GL_FRAGMENT_SHADER, fragmentSource)) {
+			return false;
+		}
+
+		programID = glCreateProgram();
+		glAttachShader(programID, vertexShader);
+		glAttachShader(programID, fragmentShader);
+
+		if (!LinkProgram()) {
+			glDeleteShader(vertexShader);
+			glDeleteShader(fragmentShader);
+			return false;
+		}
+
+		glDeleteShader(vertexShader);
+		glDeleteShader(fragmentShader);
+		SPDLOG_INFO("Linked shader from source with id {}", programID);
+		return true;
+	}
+
+
 	void Shader::Use() const
 	{
 		glUseProgram(programID);

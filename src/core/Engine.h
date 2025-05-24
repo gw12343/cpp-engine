@@ -4,9 +4,9 @@
 #include "Window.h"
 #include "animation/AnimationManager.h"
 #include "rendering/Renderer.h"
-// #include "rendering/particles/ParticleManager.h"
 #include "rendering/particles/ParticleManager.h"
 #include "sound/SoundManager.h"
+#include "terrain/TerrainManager.h"
 #include "ui/UIManager.h"
 
 #include <entt/entt.hpp>
@@ -42,6 +42,8 @@ namespace Engine {
 		// Physics state
 		[[nodiscard]] bool IsPhysicsEnabled() const { return m_physicsEnabled; }
 
+		static Terrain::TerrainManager terrainManager;
+
 	  private:
 		bool InitializeRenderer();
 		void CreateInitialEntities();
@@ -58,6 +60,7 @@ namespace Engine {
 		std::unique_ptr<UI::UIManager>       m_uiManager;
 		std::unique_ptr<AnimationManager>    m_animationManager;
 		std::unique_ptr<ParticleManager>     m_particleManager;
+
 
 		// EnTT registry for ECS
 		entt::registry m_registry;

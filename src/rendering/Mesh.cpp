@@ -1,10 +1,11 @@
 #include "Mesh.h"
 
 #include "Shader.h"
+#include "core/Engine.h"
+#include "terrain/TerrainManager.h"
 
 #include <glad/glad.h>
 #include <spdlog/spdlog.h>
-
 namespace Engine {
 	namespace Rendering {
 		// Static tracking sets
@@ -78,6 +79,7 @@ namespace Engine {
 			shader.SetVec3("material.ambientColor", m_material->GetAmbientColor());
 			shader.SetVec3("material.emissiveColor", m_material->GetEmissiveColor());
 			shader.SetFloat("material.shininess", m_material->GetShininess());
+			
 
 			glBindVertexArray(m_vao);
 			glDrawElements(GL_TRIANGLES, static_cast<int>(m_indices.size()), GL_UNSIGNED_INT, nullptr);

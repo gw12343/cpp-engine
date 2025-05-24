@@ -25,27 +25,27 @@ void main()
     // Sample textures
     vec4 diffuseSample = texture(diffuseTexture, TexCoord);
     vec3 diffuseColor = diffuseSample.rgb;
-    if(diffuseSample.a < 0.5) {
+    if (diffuseSample.a < 0.5) {
         discard;
     }
     vec3 specularColor = texture(specularTexture, TexCoord).rgb;
-    
+
     // Calculate normal in view space
     vec3 normal = normalize(Normal);
-    
+
     // Ambient
     vec3 ambient = ambientColor * diffuseColor;
-    
+
     // Diffuse
     float diff = max(dot(normal, -lightDir), 0.0);
     vec3 diffuse = lightColor * diff * diffuseColor * lightIntensity;
-    
+
     // Specular (Blinn-Phong)
     vec3 viewDir = normalize(-FragPos);
     vec3 halfwayDir = normalize(-lightDir + viewDir);
     float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess);
     vec3 specular = lightColor * spec * specularColor * lightIntensity;
-    
+
     // Combine all lighting components
     vec3 result = ambient + diffuse + specular;
     FragColor = vec4(result, 1.0);

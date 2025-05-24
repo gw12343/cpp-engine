@@ -13,7 +13,9 @@ namespace Engine {
 
 		// Load and compile shaders from source files
 		bool LoadFromFiles(const std::string& vertexPath, const std::string& fragmentPath);
-
+		// Load and compile shaders from in-memory source strings
+		bool LoadFromSource(const std::string& vertexSource, const std::string& fragmentSource);
+		
 		// Use the shader program
 		void Use() const;
 

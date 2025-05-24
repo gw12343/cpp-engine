@@ -86,6 +86,14 @@ namespace Engine {
 
 	void ParticleManager::Render(Window& window, Camera& camera)
 	{
+		// Set up OpenGL state for Effekseer
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LEQUAL);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glDepthMask(GL_FALSE);
 		if (m_renderer) {
 			::Effekseer::Matrix44 projMat = ConvertGLMToEffekseerMatrix(camera.GetProjectionMatrix(window.GetAspectRatio()));
 			::Effekseer::Matrix44 viewMat = ConvertGLMToEffekseerMatrix(camera.GetViewMatrix());
@@ -98,6 +106,7 @@ namespace Engine {
 			m_manager->Draw();
 			m_renderer->EndRendering();
 		}
+		glDepthMask(GL_TRUE);
 	}
 
 	void ParticleManager::Shutdown()
