@@ -3,22 +3,15 @@
 #include "core/Engine.h"
 #include "core/Entity.h"
 
+#include <codecvt>
 #include <glm/gtc/type_ptr.hpp>
 #include <imgui.h>
-#include <ozz/animation/runtime/animation.h>
-#include <ozz/animation/runtime/blending_job.h>
-#include <ozz/animation/runtime/local_to_model_job.h>
+#include <locale>
 #include <ozz/animation/runtime/sampling_job.h>
-#include <ozz/animation/runtime/skeleton.h>
 #include <ozz/animation/runtime/track.h>
-#include <ozz/animation/runtime/track_sampling_job.h>
-#include <ozz/animation/runtime/track_triggering_job.h>
 #include <ozz/base/containers/vector.h>
 #include <ozz/base/maths/simd_math.h>
-#include <ozz/base/maths/soa_transform.h>
-#include <ozz/base/maths/vec_float.h>
-#include <ozz/base/memory/unique_ptr.h>
-
+#include <string>
 namespace Engine {
 
 	namespace Components {
@@ -251,7 +244,7 @@ namespace Engine {
 
 
 		std::unordered_set<std::vector<ozz::math::Float4x4>*> SkinnedMeshComponent::s_skin_mats;
-		std::unordered_set<ozz::vector<myns::Mesh>*>          SkinnedMeshComponent::s_all_meshes;
+		std::unordered_set<ozz::vector<Engine::Mesh>*>        SkinnedMeshComponent::s_all_meshes;
 
 		void SkinnedMeshComponent::CleanSkinnedModels()
 		{
@@ -259,7 +252,7 @@ namespace Engine {
 				delete mat;
 			}
 
-			for (ozz::vector<myns::Mesh>* mesh : s_all_meshes) {
+			for (ozz::vector<Engine::Mesh>* mesh : s_all_meshes) {
 				delete mesh;
 			}
 		}
@@ -289,7 +282,7 @@ namespace Engine {
 			// Mesh::joint_remaps is used to know how to order skinning matrices. So
 			// the number of matrices required is the size of joint_remaps
 			size_t num_skinning_matrices = 0;
-			for (const myns::Mesh& mesh : *meshes) {
+			for (const Engine::Mesh& mesh : *meshes) {
 				num_skinning_matrices = ozz::math::Max(num_skinning_matrices, mesh.joint_remaps.size());
 			}
 
@@ -301,6 +294,41 @@ namespace Engine {
 		{
 			ImGui::Text("Meshes: %s", meshes ? std::to_string(meshes->size()).c_str() : "Null");
 			ImGui::Text("Skinning Matrices: %s", skinning_matrices ? std::to_string(skinning_matrices->size()).c_str() : "Null");
+		}
+
+
+		void ParticleSystem::OnAdded(Entity& entity)
+		{
+			if (!effect) {
+				// Convert path string
+				std::u16string  utf16 = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes(effectPath);
+				const char16_t* raw   = utf16.c_str();
+
+				const auto& manager = entity.m_engine->GetParticleManager().GetManager();
+				// Spawn effect
+				effect = Effekseer::Effect::Create(manager, raw);
+				// Get initial transform
+				auto transform = entity.GetComponent<Components::Transform>();
+				// Spawn particle
+				handle = manager->Play(effect, transform.position.x, transform.position.y, transform.position.z);
+			}
+		}
+
+		void ParticleSystem::RenderInspector(Entity& entity)
+		{
+			ImGui::Text("Handle: %d", handle);
+			const auto& manager = entity.m_engine->GetParticleManager().GetManager();
+			bool        paused  = manager->GetPaused(handle);
+
+			if (ImGui::Button(paused ? "Unpause" : "Pause")) {
+				manager->SetPaused(handle, !paused);
+			}
+
+			if (ImGui::Button("Restart")) {
+				manager->StopEffect(handle);
+				auto transform = entity.GetComponent<Components::Transform>();
+				handle         = manager->Play(effect, transform.position.x, transform.position.y, transform.position.z);
+			}
 		}
 	} // namespace Components
 } // namespace Engine

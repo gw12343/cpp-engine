@@ -3,10 +3,6 @@
 #include "components/Components.h"
 #include "utils/ModelLoader.h"
 
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/quaternion.hpp>
-#include <imgui.h>
 #include <spdlog/spdlog.h>
 
 namespace Engine {
@@ -21,14 +17,12 @@ namespace Engine {
 
 	bool Renderer::Initialize()
 	{
-		if (!m_shader.LoadFromFiles("/home/gabe/CLionProjects/cpp-engine/resources/shaders/vert.glsl",
-		                            "/home/gabe/CLionProjects/cpp-engine/resources/shaders/frag.glsl")) {
+		if (!m_shader.LoadFromFiles("/home/gabe/CLionProjects/cpp-engine/resources/shaders/vert.glsl", "/home/gabe/CLionProjects/cpp-engine/resources/shaders/frag.glsl")) {
 			return false;
 		}
 
 		// Load skybox shader
-		if (!m_skyboxShader.LoadFromFiles("/home/gabe/CLionProjects/cpp-engine/resources/shaders/skybox_vert.glsl",
-		                                  "/home/gabe/CLionProjects/cpp-engine/resources/shaders/skybox_frag.glsl")) {
+		if (!m_skyboxShader.LoadFromFiles("/home/gabe/CLionProjects/cpp-engine/resources/shaders/skybox_vert.glsl", "/home/gabe/CLionProjects/cpp-engine/resources/shaders/skybox_frag.glsl")) {
 			return false;
 		}
 
@@ -65,7 +59,26 @@ namespace Engine {
 
 	void Renderer::PostRender()
 	{
-		// TODO Draw skybox last
+		m_window.SwapBuffers();
+	}
+
+	void Renderer::Shutdown()
+	{
+		// Clean up any renderer-specific resources
+	}
+
+	void Renderer::RenderEntities(entt::registry& registry) const
+	{
+		// Create a view for entities with Transform and ModelRenderer components
+		auto view = registry.view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer>();
+		for (auto [entity, metadata, transform, renderer] : view.each()) {
+			// Draw model
+			renderer.Draw(GetShader(), transform);
+		}
+	}
+
+	void Renderer::RenderSkybox()
+	{
 		m_skyboxShader.Use();
 
 		// Set up view and projection matrices for skybox
@@ -77,22 +90,5 @@ namespace Engine {
 
 		// Draw skybox
 		m_skybox->Draw(m_skyboxShader);
-
-		m_window.SwapBuffers();
-	}
-
-	void Renderer::Shutdown()
-	{
-		// Clean up any renderer-specific resources
-	}
-
-	void Renderer::RenderEntities(entt::registry& registry)
-	{
-		// Create a view for entities with Transform and ModelRenderer components
-		auto view = registry.view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer>();
-		for (auto [entity, metadata, transform, renderer] : view.each()) {
-			// Draw model
-			renderer.Draw(GetShader(), transform);
-		}
 	}
 } // namespace Engine

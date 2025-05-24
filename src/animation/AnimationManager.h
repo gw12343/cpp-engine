@@ -55,7 +55,7 @@ namespace Engine {
 		static std::vector<ozz::math::Float4x4>* AllocateModelPose(const ozz::animation::Skeleton* skeleton);
 
 		// Load meshes from a file path
-		static ozz::vector<myns::Mesh>* LoadMeshesFromPath(const std::string& path);
+		static ozz::vector<Engine::Mesh>* LoadMeshesFromPath(const std::string& path);
 
 	  private:
 		// Reference to the engine

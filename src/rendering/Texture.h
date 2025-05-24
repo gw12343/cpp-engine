@@ -1,6 +1,10 @@
 #pragma once
 
+#ifndef GLAD_TEX_DEF
+#define GLAD_TEX_DEF
 #include <glad/glad.h>
+#endif
+
 #include <spdlog/spdlog.h>
 #include <string>
 #include <unordered_set>

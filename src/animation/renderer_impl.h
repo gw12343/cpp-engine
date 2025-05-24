@@ -20,14 +20,14 @@
 // Provides helper macro to test for glGetError on a gl call.
 #ifndef NDEBUG
 //     gl##_f;
-#define GL(_f)                                                                                                                                                 \
-	do {                                                                                                                                                       \
-		gl##_f;                                                                                                                                                \
-		GLenum gl_err = glGetError();                                                                                                                          \
-		if (gl_err != 0) {                                                                                                                                     \
-			ozz::log::Err() << "GL error 0x" << std::hex << gl_err << " returned from 'gl" << #_f << std::endl;                                                \
-		}                                                                                                                                                      \
-		assert(gl_err == GL_NO_ERROR);                                                                                                                         \
+#define GL(_f)                                                                                                                                                                                                                                 \
+	do {                                                                                                                                                                                                                                       \
+		gl##_f;                                                                                                                                                                                                                                \
+		GLenum gl_err = glGetError();                                                                                                                                                                                                          \
+		if (gl_err != 0) {                                                                                                                                                                                                                     \
+			ozz::log::Err() << "GL error 0x" << std::hex << gl_err << " returned from 'gl" << #_f << std::endl;                                                                                                                                \
+		}                                                                                                                                                                                                                                      \
+		assert(gl_err == GL_NO_ERROR);                                                                                                                                                                                                         \
 	} while (void(0), 0)
 
 #else // NDEBUG
@@ -69,46 +69,30 @@ class RendererImpl : public AnimatedRenderer {
 
 	virtual bool DrawSkeleton(const ozz::animation::Skeleton& _skeleton, const ozz::math::Float4x4& _transform, bool _draw_joints);
 
-	virtual bool DrawPosture(const ozz::animation::Skeleton&      _skeleton,
-	                         ozz::span<const ozz::math::Float4x4> _matrices,
-	                         const ozz::math::Float4x4&           _transform,
-	                         bool                                 _draw_joints);
+	virtual bool DrawPosture(const ozz::animation::Skeleton& _skeleton, ozz::span<const ozz::math::Float4x4> _matrices, const ozz::math::Float4x4& _transform, bool _draw_joints);
 
-	virtual bool DrawPoints(const ozz::span<const float>&       _positions,
-	                        const ozz::span<const float>&       _sizes,
-	                        const ozz::span<const myns::Color>& _colors,
-	                        const ozz::math::Float4x4&          _transform,
-	                        bool                                _screen_space);
+	virtual bool DrawPoints(const ozz::span<const float>& _positions, const ozz::span<const float>& _sizes, const ozz::span<const Engine::Color>& _colors, const ozz::math::Float4x4& _transform, bool _screen_space);
 
-	virtual bool DrawBoxIm(const ozz::math::Box& _box, const ozz::math::Float4x4& _transform, const myns::Color& _color);
+	virtual bool DrawBoxIm(const ozz::math::Box& _box, const ozz::math::Float4x4& _transform, const Engine::Color& _color);
 
-	virtual bool DrawBoxIm(const ozz::math::Box& _box, const ozz::math::Float4x4& _transform, const myns::Color _colors[2]);
+	virtual bool DrawBoxIm(const ozz::math::Box& _box, const ozz::math::Float4x4& _transform, const Engine::Color _colors[2]);
 
-	virtual bool DrawBoxShaded(const ozz::math::Box& _box, ozz::span<const ozz::math::Float4x4> _transforms, const myns::Color& _color);
+	virtual bool DrawBoxShaded(const ozz::math::Box& _box, ozz::span<const ozz::math::Float4x4> _transforms, const Engine::Color& _color);
 
-	virtual bool DrawSphereIm(float _radius, const ozz::math::Float4x4& _transform, const myns::Color& _color);
+	virtual bool DrawSphereIm(float _radius, const ozz::math::Float4x4& _transform, const Engine::Color& _color);
 
-	virtual bool DrawSphereShaded(float _radius, ozz::span<const ozz::math::Float4x4> _transforms, const myns::Color& _color);
+	virtual bool DrawSphereShaded(float _radius, ozz::span<const ozz::math::Float4x4> _transforms, const Engine::Color& _color);
 
-	virtual bool DrawSkinnedMesh(const myns::Mesh&                    _mesh,
-	                             const ozz::span<ozz::math::Float4x4> _skinning_matrices,
-	                             const ozz::math::Float4x4&           _transform,
-	                             const Options&                       _options = Options());
+	virtual bool DrawSkinnedMesh(const Engine::Mesh& _mesh, const ozz::span<ozz::math::Float4x4> _skinning_matrices, const ozz::math::Float4x4& _transform, const Options& _options = Options());
 
-	virtual bool DrawMesh(const myns::Mesh& _mesh, const ozz::math::Float4x4& _transform, const Options& _options = Options());
+	virtual bool DrawMesh(const Engine::Mesh& _mesh, const ozz::math::Float4x4& _transform, const Options& _options = Options());
 
-	virtual bool DrawLines(ozz::span<const ozz::math::Float3> _vertices, const myns::Color& _color, const ozz::math::Float4x4& _transform);
+	virtual bool DrawLines(ozz::span<const ozz::math::Float3> _vertices, const Engine::Color& _color, const ozz::math::Float4x4& _transform);
 
-	virtual bool DrawLineStrip(ozz::span<const ozz::math::Float3> _vertices, const myns::Color& _color, const ozz::math::Float4x4& _transform);
+	virtual bool DrawLineStrip(ozz::span<const ozz::math::Float3> _vertices, const Engine::Color& _color, const ozz::math::Float4x4& _transform);
 
-	virtual bool DrawVectors(ozz::span<const float>     _positions,
-	                         size_t                     _positions_stride,
-	                         ozz::span<const float>     _directions,
-	                         size_t                     _directions_stride,
-	                         int                        _num_vectors,
-	                         float                      _vector_length,
-	                         const myns::Color&         _color,
-	                         const ozz::math::Float4x4& _transform);
+	virtual bool DrawVectors(
+	    ozz::span<const float> _positions, size_t _positions_stride, ozz::span<const float> _directions, size_t _directions_stride, int _num_vectors, float _vector_length, const Engine::Color& _color, const ozz::math::Float4x4& _transform);
 
 	virtual bool DrawBinormals(ozz::span<const float>     _positions,
 	                           size_t                     _positions_stride,
@@ -120,7 +104,7 @@ class RendererImpl : public AnimatedRenderer {
 	                           size_t                     _handenesses_stride,
 	                           int                        _num_vectors,
 	                           float                      _vector_length,
-	                           const myns::Color&         _color,
+	                           const Engine::Color&       _color,
 	                           const ozz::math::Float4x4& _transform);
 
 	// Get GL immediate renderer implementation;

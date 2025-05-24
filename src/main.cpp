@@ -3,9 +3,10 @@ using namespace Engine;
 
 int main()
 {
-	GEngine engine(1600 * 2, 1200 * 2, "Hello World");
+	GEngine engine(1600, 1200, "Hello World");
 
 	if (!engine.Initialize()) {
+		spdlog::critical("Failed to init engine");
 		return -1;
 	}
 

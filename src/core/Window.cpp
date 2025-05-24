@@ -77,7 +77,7 @@ namespace Engine {
 		ImGui_ImplOpenGL3_Init("#version 150");
 
 		ImGui::StyleColorsDark();
-		io.FontGlobalScale = 2.0f;
+		io.FontGlobalScale = 1.0f;
 		return true;
 	}
 

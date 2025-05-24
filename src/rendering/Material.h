@@ -27,20 +27,20 @@ namespace Engine {
 		void SetShininess(float shininess);
 
 		// Getters
-		std::shared_ptr<Texture> GetDiffuseTexture() const { return m_diffuseTexture; }
-		std::shared_ptr<Texture> GetSpecularTexture() const { return m_specularTexture; }
-		std::shared_ptr<Texture> GetNormalTexture() const { return m_normalTexture; }
-		std::shared_ptr<Texture> GetHeightTexture() const { return m_heightTexture; }
+		[[nodiscard]] std::shared_ptr<Texture>                  GetDiffuseTexture() const { return m_diffuseTexture; }
+		[[nodiscard]] std::shared_ptr<Texture>                  GetSpecularTexture() const { return m_specularTexture; }
+		[[nodiscard]] std::shared_ptr<Texture>                  GetNormalTexture() const { return m_normalTexture; }
+		[[maybe_unused]] [[nodiscard]] std::shared_ptr<Texture> GetHeightTexture() const { return m_heightTexture; }
 
-		glm::vec3 GetDiffuseColor() const { return m_diffuseColor; }
-		glm::vec3 GetSpecularColor() const { return m_specularColor; }
-		glm::vec3 GetAmbientColor() const { return m_ambientColor; }
-		glm::vec3 GetEmissiveColor() const { return m_emissiveColor; }
-		float     GetShininess() const { return m_shininess; }
+		[[nodiscard]] glm::vec3 GetDiffuseColor() const { return m_diffuseColor; }
+		[[nodiscard]] glm::vec3 GetSpecularColor() const { return m_specularColor; }
+		[[nodiscard]] glm::vec3 GetAmbientColor() const { return m_ambientColor; }
+		[[nodiscard]] glm::vec3 GetEmissiveColor() const { return m_emissiveColor; }
+		[[nodiscard]] float     GetShininess() const { return m_shininess; }
 
 		// Material name
-		void               SetName(const std::string& name) { m_name = name; }
-		const std::string& GetName() const { return m_name; }
+		void                             SetName(const std::string& name) { m_name = name; }
+		[[nodiscard]] const std::string& GetName() const { return m_name; }
 
 	  private:
 		// Textures

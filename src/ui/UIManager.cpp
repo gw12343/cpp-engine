@@ -133,6 +133,11 @@ namespace Engine {
 						m_selectedEntity.GetComponent<Components::SkinnedMeshComponent>().RenderInspector(m_selectedEntity);
 					}
 				}
+				if (m_selectedEntity.HasComponent<Components::ParticleSystem>()) {
+					if (ImGui::CollapsingHeader("Particle System")) {
+						m_selectedEntity.GetComponent<Components::ParticleSystem>().RenderInspector(m_selectedEntity);
+					}
+				}
 			}
 			else {
 				ImGui::Text("No entity selected");

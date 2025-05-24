@@ -9,17 +9,17 @@
 #include "ozz/base/maths/vec_float.h"
 #include "ozz/base/platform.h"
 
-namespace myns {
+namespace Engine {
 
 	// Defines a mesh with skinning information (joint indices and weights).
 	// The mesh is subdivided into parts that group vertices according to their
 	// number of influencing joints. Triangle indices are shared across mesh parts.
 	struct Mesh {
 		// Number of triangle indices for the mesh.
-		int triangle_index_count() const { return static_cast<int>(triangle_indices.size()); }
+		[[nodiscard]] int triangle_index_count() const { return static_cast<int>(triangle_indices.size()); }
 
 		// Number of vertices for all mesh parts.
-		int vertex_count() const
+		[[nodiscard]] int vertex_count() const
 		{
 			int count = 0;
 			for (const Part& p : parts) {
@@ -29,7 +29,7 @@ namespace myns {
 		}
 
 		// Maximum number of joint influences among all parts.
-		int max_influences_count() const
+		[[maybe_unused]] [[nodiscard]] int max_influences_count() const
 		{
 			int max_count = 0;
 			for (const Part& p : parts) {
@@ -39,18 +39,18 @@ namespace myns {
 		}
 
 		// Test if the mesh has skinning information.
-		bool skinned() const { return !inverse_bind_poses.empty(); }
+		[[nodiscard]] bool skinned() const { return !inverse_bind_poses.empty(); }
 
 		// Number of joints in the skin.
-		int num_joints() const { return static_cast<int>(inverse_bind_poses.size()); }
+		[[nodiscard]] int num_joints() const { return static_cast<int>(inverse_bind_poses.size()); }
 
 		// Highest joint index used (relies on sorted joint_remaps).
-		int highest_joint_index() const { return joint_remaps.empty() ? 0 : static_cast<int>(joint_remaps.back()); }
+		[[maybe_unused]] [[nodiscard]] int highest_joint_index() const { return joint_remaps.empty() ? 0 : static_cast<int>(joint_remaps.back()); }
 
 		// A submesh grouping vertices with the same # of influences.
 		struct Part {
-			int vertex_count() const { return static_cast<int>(positions.size()) / kPositionsCpnts; }
-			int influences_count() const
+			[[nodiscard]] int vertex_count() const { return static_cast<int>(positions.size()) / kPositionsCpnts; }
+			[[nodiscard]] int influences_count() const
 			{
 				int vc = vertex_count();
 				return (vc == 0 ? 0 : static_cast<int>(joint_indices.size()) / vc);
@@ -96,34 +96,33 @@ namespace myns {
 		InverseBindPoses                         inverse_bind_poses;
 	};
 
-} // namespace myns
+} // namespace Engine
 
 
 // -----------------------------------------------------------------------------
 // Register with ozz‑animation’s archive system
 // -----------------------------------------------------------------------------
-namespace ozz {
-	namespace io {
 
-		// Part
-		OZZ_IO_TYPE_TAG("ozz-sample-Mesh-Part", myns::Mesh::Part)
-		OZZ_IO_TYPE_VERSION(1, myns::Mesh::Part)
+namespace ozz::io {
 
-		template <>
-		struct Extern<myns::Mesh::Part> {
-			static void Save(OArchive& _archive, const myns::Mesh::Part* _parts, size_t _count);
-			static void Load(IArchive& _archive, myns::Mesh::Part* _parts, size_t _count, uint32_t _version);
-		};
+	// Part
+	OZZ_IO_TYPE_TAG("ozz-sample-Mesh-Part", Engine::Mesh::Part)
+	OZZ_IO_TYPE_VERSION(1, Engine::Mesh::Part)
 
-		// Mesh
-		OZZ_IO_TYPE_TAG("ozz-sample-Mesh", myns::Mesh)
-		OZZ_IO_TYPE_VERSION(1, myns::Mesh)
+	template <>
+	struct Extern<Engine::Mesh::Part> {
+		static void Save(OArchive& _archive, const Engine::Mesh::Part* _parts, size_t _count);
+		static void Load(IArchive& _archive, Engine::Mesh::Part* _parts, size_t _count, uint32_t _version);
+	};
 
-		template <>
-		struct Extern<myns::Mesh> {
-			static void Save(OArchive& _archive, const myns::Mesh* _meshes, size_t _count);
-			static void Load(IArchive& _archive, myns::Mesh* _meshes, size_t _count, uint32_t _version);
-		};
+	// Mesh
+	OZZ_IO_TYPE_TAG("ozz-sample-Mesh", Engine::Mesh)
+	OZZ_IO_TYPE_VERSION(1, Engine::Mesh)
 
-	} // namespace io
-} // namespace ozz
+	template <>
+	struct Extern<Engine::Mesh> {
+		static void Save(OArchive& _archive, const Engine::Mesh* _meshes, size_t _count);
+		static void Load(IArchive& _archive, Engine::Mesh* _meshes, size_t _count, uint32_t _version);
+	};
+
+} // namespace ozz::io

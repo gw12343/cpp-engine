@@ -64,7 +64,7 @@ namespace Engine {
 		}
 
 		// Upload texture data
-		glTexImage2D(GL_TEXTURE_2D, 0, format, m_width, m_height, 0, format, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, static_cast<int>(format), m_width, m_height, 0, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		// Free image data
@@ -72,7 +72,6 @@ namespace Engine {
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		m_isHDR = false;
-		// SPDLOG_INFO("Loaded texture: {} ({}x{}, {} channels) id: {}", path, m_width, m_height, m_channels, m_textureID);
 		return true;
 	}
 
@@ -119,7 +118,7 @@ namespace Engine {
 		}
 
 		// Upload HDR texture data
-		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_width, m_height, 0, format, GL_FLOAT, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, static_cast<int>(internalFormat), m_width, m_height, 0, format, GL_FLOAT, data);
 
 		// Free image data
 		stbi_image_free(data);

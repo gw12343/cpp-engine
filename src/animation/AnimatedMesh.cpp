@@ -1,20 +1,17 @@
-// mesh.cpp
 #include "AnimatedMesh.h"
 
 #include "ozz/base/containers/vector_archive.h"
 #include "ozz/base/io/archive.h"
 
-#include <spdlog/spdlog.h>
-
 using namespace ozz::io;
 
 // -----------------------------------------------------------------------------
-// myns::Mesh::Part serialization
+// Engine::Mesh::Part serialization
 // -----------------------------------------------------------------------------
-void Extern<myns::Mesh::Part>::Save(OArchive& _archive, const myns::Mesh::Part* _parts, size_t _count)
+void Extern<Engine::Mesh::Part>::Save(OArchive& _archive, const Engine::Mesh::Part* _parts, size_t _count)
 {
 	for (size_t i = 0; i < _count; ++i) {
-		const myns::Mesh::Part& part = _parts[i];
+		const Engine::Mesh::Part& part = _parts[i];
 		_archive << part.positions;
 		_archive << part.normals;
 		_archive << part.tangents;
@@ -25,11 +22,11 @@ void Extern<myns::Mesh::Part>::Save(OArchive& _archive, const myns::Mesh::Part* 
 	}
 }
 
-void Extern<myns::Mesh::Part>::Load(IArchive& _archive, myns::Mesh::Part* _parts, size_t _count, uint32_t _version)
+void Extern<Engine::Mesh::Part>::Load(IArchive& _archive, Engine::Mesh::Part* _parts, size_t _count, uint32_t _version)
 {
 	(void) _version;
 	for (size_t i = 0; i < _count; ++i) {
-		myns::Mesh::Part& part = _parts[i];
+		Engine::Mesh::Part& part = _parts[i];
 		_archive >> part.positions;
 		_archive >> part.normals;
 		_archive >> part.tangents;
@@ -41,12 +38,12 @@ void Extern<myns::Mesh::Part>::Load(IArchive& _archive, myns::Mesh::Part* _parts
 }
 
 // -----------------------------------------------------------------------------
-// myns::Mesh serialization
+// Engine::Mesh serialization
 // -----------------------------------------------------------------------------
-void Extern<myns::Mesh>::Save(OArchive& _archive, const myns::Mesh* _meshes, size_t _count)
+void Extern<Engine::Mesh>::Save(OArchive& _archive, const Engine::Mesh* _meshes, size_t _count)
 {
 	for (size_t i = 0; i < _count; ++i) {
-		const myns::Mesh& mesh = _meshes[i];
+		const Engine::Mesh& mesh = _meshes[i];
 		_archive << mesh.parts;
 		_archive << mesh.triangle_indices;
 		_archive << mesh.joint_remaps;
@@ -54,11 +51,11 @@ void Extern<myns::Mesh>::Save(OArchive& _archive, const myns::Mesh* _meshes, siz
 	}
 }
 
-void Extern<myns::Mesh>::Load(IArchive& _archive, myns::Mesh* _meshes, size_t _count, uint32_t _version)
+void Extern<Engine::Mesh>::Load(IArchive& _archive, Engine::Mesh* _meshes, size_t _count, uint32_t _version)
 {
 	(void) _version;
 	for (size_t i = 0; i < _count; ++i) {
-		myns::Mesh& mesh = _meshes[i];
+		Engine::Mesh& mesh = _meshes[i];
 		_archive >> mesh.parts;
 		_archive >> mesh.triangle_indices;
 		_archive >> mesh.joint_remaps;

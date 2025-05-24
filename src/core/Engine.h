@@ -4,6 +4,8 @@
 #include "Window.h"
 #include "animation/AnimationManager.h"
 #include "rendering/Renderer.h"
+// #include "rendering/particles/ParticleManager.h"
+#include "rendering/particles/ParticleManager.h"
 #include "sound/SoundManager.h"
 #include "ui/UIManager.h"
 
@@ -32,6 +34,7 @@ namespace Engine {
 		// Get managers
 		Audio::SoundManager& GetSoundManager() { return *m_soundManager; }
 		AnimationManager&    GetAnimationManager() { return *m_animationManager; }
+		ParticleManager&     GetParticleManager() { return *m_particleManager; }
 
 		// Get camera
 		[[nodiscard]] const Camera& GetCamera() const { return m_camera; }
@@ -54,6 +57,7 @@ namespace Engine {
 		std::unique_ptr<Renderer>            m_renderer;
 		std::unique_ptr<UI::UIManager>       m_uiManager;
 		std::unique_ptr<AnimationManager>    m_animationManager;
+		std::unique_ptr<ParticleManager>     m_particleManager;
 
 		// EnTT registry for ECS
 		entt::registry m_registry;

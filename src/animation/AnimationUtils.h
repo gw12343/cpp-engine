@@ -56,7 +56,7 @@ namespace ozz {
 	}     // namespace animation
 } // namespace ozz
 
-namespace myns {
+namespace Engine {
 	struct Mesh;
 }
 
@@ -193,32 +193,24 @@ bool LoadTrack(const char* _filename, ozz::animation::QuaternionTrack* _track);
 // it is not a valid ozz mesh archive. A valid mesh archive can be
 // serialization API.
 // _filename and _mesh must be non-nullptr.
-bool LoadMesh(const char* _filename, myns::Mesh* _mesh);
+bool LoadMesh(const char* _filename, Engine::Mesh* _mesh);
 
 // Loads n sample::Mesh from an ozz archive file named _filename.
 // This function will fail and return false if the file cannot be opened or if
 // it is not a valid ozz mesh archive. A valid mesh archive can be
 // produced with ozz tools (fbx2skin) or using ozz animation serialization API.
 // _filename and _mesh must be non-nullptr.
-bool LoadMeshes(const char* _filename, ozz::vector<myns::Mesh>* _meshes);
+bool LoadMeshes(const char* _filename, ozz::vector<Engine::Mesh>* _meshes);
 
 // Intersect _mesh with the half-line extending from _ray_origin indefinitely in
 // _ray_direction only. Returns true if there was an intersection. Fills
 // intersection point and normal if provided, with the closest intersecting
 // triangle from _ray_origin. Only supports non-skinned, single part meshes.
-bool RayIntersectsMesh(const ozz::math::Float3& _ray_origin,
-                       const ozz::math::Float3& _ray_direction,
-                       const myns::Mesh&        _mesh,
-                       ozz::math::Float3*       _intersect,
-                       ozz::math::Float3*       _normal);
+bool RayIntersectsMesh(const ozz::math::Float3& _ray_origin, const ozz::math::Float3& _ray_direction, const Engine::Mesh& _mesh, ozz::math::Float3* _intersect, ozz::math::Float3* _normal);
 
 // Intersect _meshes with the half-line extending from _ray_origin indefinitely
 // in _ray_direction only. See RayIntersectsMesh.
-bool RayIntersectsMeshes(const ozz::math::Float3&           _ray_origin,
-                         const ozz::math::Float3&           _ray_direction,
-                         const ozz::span<const myns::Mesh>& _meshes,
-                         ozz::math::Float3*                 _intersect,
-                         ozz::math::Float3*                 _normal);
+bool RayIntersectsMeshes(const ozz::math::Float3& _ray_origin, const ozz::math::Float3& _ray_direction, const ozz::span<const Engine::Mesh>& _meshes, ozz::math::Float3* _intersect, ozz::math::Float3* _normal);
 
 // RAII performance profiler.
 class ProfileFctLog {

@@ -2,11 +2,15 @@
 
 #include "utils/ModelLoader.h"
 
-namespace Engine {
+
+namespace Engine::Rendering {
 	void Model::Draw(const Shader& shader) const
 	{
 		for (const auto& mesh : m_meshes) {
 			mesh->Draw(shader);
 		}
 	}
-} // namespace Engine
+	[[maybe_unused]] void Model::LoadModel(const std::string& path)
+	{
+	}
+} // namespace Engine::Rendering

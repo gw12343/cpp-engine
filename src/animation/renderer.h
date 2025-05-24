@@ -11,7 +11,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 
-namespace myns {
+namespace Engine {
 	// Sample framework mesh type.
 	struct Mesh;
 	struct Color {
@@ -19,17 +19,17 @@ namespace myns {
 	};
 
 	// Color constants.
-	static const myns::Color kRed     = {1, 0, 0, 1};
-	static const myns::Color kGreen   = {0, 1, 0, 1};
-	static const myns::Color kBlue    = {0, 0, 1, 1};
-	static const myns::Color kWhite   = {1, 1, 1, 1};
-	static const myns::Color kYellow  = {1, 1, 0, 1};
-	static const myns::Color kMagenta = {1, 0, 1, 1};
-	static const myns::Color kCyan    = {0, 1, 1, 1};
-	static const myns::Color kGrey    = {.5f, .5f, .5f, 1};
-	static const myns::Color kBlack   = {.5f, .5f, .5f, 1};
-} // namespace myns
-using namespace myns;
+	static const Engine::Color kRed     = {1, 0, 0, 1};
+	static const Engine::Color kGreen   = {0, 1, 0, 1};
+	static const Engine::Color kBlue    = {0, 0, 1, 1};
+	static const Engine::Color kWhite   = {1, 1, 1, 1};
+	static const Engine::Color kYellow  = {1, 1, 0, 1};
+	static const Engine::Color kMagenta = {1, 0, 1, 1};
+	static const Engine::Color kCyan    = {0, 1, 1, 1};
+	static const Engine::Color kGrey    = {.5f, .5f, .5f, 1};
+	static const Engine::Color kBlack   = {.5f, .5f, .5f, 1};
+} // namespace Engine
+using namespace Engine;
 
 // Defines render Color structure.
 
@@ -65,24 +65,24 @@ class AnimatedRenderer {
 	// _sizes and _colors must be either of ize 1 or equal to _positions' size.
 	// If _screen_space is true, then points size is fixed in screen-space,
 	// otherwise it changes with screen depth.
-	virtual bool DrawPoints(const ozz::span<const float>& _positions, const ozz::span<const float>& _sizes, const ozz::span<const myns::Color>& _colors, const ozz::math::Float4x4& _transform, bool _screen_space = false) = 0;
+	virtual bool DrawPoints(const ozz::span<const float>& _positions, const ozz::span<const float>& _sizes, const ozz::span<const Engine::Color>& _colors, const ozz::math::Float4x4& _transform, bool _screen_space = false) = 0;
 
 	// Renders a wired box at a specified location.
-	virtual bool DrawBoxIm(const ozz::math::Box& _box, const ozz::math::Float4x4& _transform, const myns::Color& _color) = 0;
+	virtual bool DrawBoxIm(const ozz::math::Box& _box, const ozz::math::Float4x4& _transform, const Engine::Color& _color) = 0;
 
 	// Renders a box at a specified location.
 	// The 2 slots of _colors array respectively defines color of the filled
 	// faces and color of the box outlines.
-	virtual bool DrawBoxIm(const ozz::math::Box& _box, const ozz::math::Float4x4& _transform, const myns::Color _colors[2]) = 0;
+	virtual bool DrawBoxIm(const ozz::math::Box& _box, const ozz::math::Float4x4& _transform, const Engine::Color _colors[2]) = 0;
 
 	// Renders shaded boxes at specified locations.
-	virtual bool DrawBoxShaded(const ozz::math::Box& _box, ozz::span<const ozz::math::Float4x4> _transforms, const myns::Color& _color) = 0;
+	virtual bool DrawBoxShaded(const ozz::math::Box& _box, ozz::span<const ozz::math::Float4x4> _transforms, const Engine::Color& _color) = 0;
 
 	// Renders a sphere at a specified location.
-	virtual bool DrawSphereIm(float _radius, const ozz::math::Float4x4& _transform, const myns::Color& _color) = 0;
+	virtual bool DrawSphereIm(float _radius, const ozz::math::Float4x4& _transform, const Engine::Color& _color) = 0;
 
 	// Renders shaded spheres at specified locations.
-	virtual bool DrawSphereShaded(float _radius, ozz::span<const ozz::math::Float4x4> _transforms, const myns::Color& _color) = 0;
+	virtual bool DrawSphereShaded(float _radius, ozz::span<const ozz::math::Float4x4> _transforms, const Engine::Color& _color) = 0;
 
 	struct Options {
 		bool triangles;     // Show triangles mesh.
@@ -104,20 +104,20 @@ class AnimatedRenderer {
 	};
 
 	// Renders a skinned mesh at a specified location.
-	virtual bool DrawSkinnedMesh(const myns::Mesh& _mesh, const ozz::span<ozz::math::Float4x4> _skinning_matrices, const ozz::math::Float4x4& _transform, const Options& _options = Options()) = 0;
+	virtual bool DrawSkinnedMesh(const Engine::Mesh& _mesh, const ozz::span<ozz::math::Float4x4> _skinning_matrices, const ozz::math::Float4x4& _transform, const Options& _options = Options()) = 0;
 
 	// Renders a mesh at a specified location.
-	virtual bool DrawMesh(const myns::Mesh& _mesh, const ozz::math::Float4x4& _transform, const Options& _options = Options()) = 0;
+	virtual bool DrawMesh(const Engine::Mesh& _mesh, const ozz::math::Float4x4& _transform, const Options& _options = Options()) = 0;
 
 	// Renders a lines. Vertices 0 and 1 are considered a line. Vertices 2 and 3
 	// are considered a line. And so on. If the user specifies a non-even number
 	// of vertices, then the extra vertex is ignored.
-	virtual bool DrawLines(ozz::span<const ozz::math::Float3> _vertices, const myns::Color& _color, const ozz::math::Float4x4& _transform) = 0;
+	virtual bool DrawLines(ozz::span<const ozz::math::Float3> _vertices, const Engine::Color& _color, const ozz::math::Float4x4& _transform) = 0;
 
 	// Renders a line strip. Adjacent vertices are considered lines. Thus, if you
 	// pass n vertices, you will get n-1 lines. If the user only specifies 1
 	// vertex, the drawing command is ignored (still valid).
-	virtual bool DrawLineStrip(ozz::span<const ozz::math::Float3> _vertices, const myns::Color& _color, const ozz::math::Float4x4& _transform) = 0;
+	virtual bool DrawLineStrip(ozz::span<const ozz::math::Float3> _vertices, const Engine::Color& _color, const ozz::math::Float4x4& _transform) = 0;
 
 	// Renders vectors, defined by their starting point and a direction.
 	virtual bool DrawVectors(ozz::span<const float>     _positions,
@@ -126,7 +126,7 @@ class AnimatedRenderer {
 	                         size_t                     _directions_stride,
 	                         int                        _num_vectors,
 	                         float                      _vector_length,
-	                         const myns::Color&         _color,
+	                         const Engine::Color&       _color,
 	                         const ozz::math::Float4x4& _transform) = 0;
 
 	// Compute binormals from normals and tangents, before displaying them.
@@ -140,6 +140,6 @@ class AnimatedRenderer {
 	                           size_t                     _handenesses_stride,
 	                           int                        _num_vectors,
 	                           float                      _vector_length,
-	                           const myns::Color&         _color,
+	                           const Engine::Color&       _color,
 	                           const ozz::math::Float4x4& _transform) = 0;
 };

@@ -396,7 +396,7 @@ bool LoadTrack(const char* _filename, ozz::animation::QuaternionTrack* _track)
 	return LoadTrackImpl(_filename, _track);
 }
 
-bool LoadMesh(const char* _filename, myns::Mesh* _mesh)
+bool LoadMesh(const char* _filename, Engine::Mesh* _mesh)
 {
 	assert(_filename && _mesh);
 	ozz::log::Out() << "Loading mesh archive: " << _filename << "." << std::endl;
@@ -406,7 +406,7 @@ bool LoadMesh(const char* _filename, myns::Mesh* _mesh)
 		return false;
 	}
 	ozz::io::IArchive archive(&file);
-	if (!archive.TestTag<myns::Mesh>()) {
+	if (!archive.TestTag<Engine::Mesh>()) {
 		ozz::log::Err() << "Failed to load mesh instance from file " << _filename << "." << std::endl;
 		return false;
 	}
@@ -420,7 +420,7 @@ bool LoadMesh(const char* _filename, myns::Mesh* _mesh)
 	return true;
 }
 
-bool LoadMeshes(const char* _filename, ozz::vector<myns::Mesh>* _meshes)
+bool LoadMeshes(const char* _filename, ozz::vector<Engine::Mesh>* _meshes)
 {
 	assert(_filename && _meshes);
 	ozz::io::File file(_filename, "rb");
@@ -432,7 +432,7 @@ bool LoadMeshes(const char* _filename, ozz::vector<myns::Mesh>* _meshes)
 
 	{
 		// ProfileFctLog profile{"Meshes loading time"};
-		while (archive.TestTag<myns::Mesh>()) {
+		while (archive.TestTag<Engine::Mesh>()) {
 			_meshes->resize(_meshes->size() + 1);
 			archive >> _meshes->back();
 		}
@@ -487,7 +487,7 @@ namespace {
 	}
 } // namespace
 
-bool RayIntersectsMesh(const ozz::math::Float3& _ray_origin, const ozz::math::Float3& _ray_direction, const myns::Mesh& _mesh, ozz::math::Float3* _intersect, ozz::math::Float3* _normal)
+bool RayIntersectsMesh(const ozz::math::Float3& _ray_origin, const ozz::math::Float3& _ray_direction, const Engine::Mesh& _mesh, ozz::math::Float3* _intersect, ozz::math::Float3* _normal)
 {
 	assert(_mesh.parts.size() == 1 && !_mesh.skinned());
 
@@ -522,7 +522,7 @@ bool RayIntersectsMesh(const ozz::math::Float3& _ray_origin, const ozz::math::Fl
 	return intersected;
 }
 
-bool RayIntersectsMeshes(const ozz::math::Float3& _ray_origin, const ozz::math::Float3& _ray_direction, const ozz::span<const myns::Mesh>& _meshes, ozz::math::Float3* _intersect, ozz::math::Float3* _normal)
+bool RayIntersectsMeshes(const ozz::math::Float3& _ray_origin, const ozz::math::Float3& _ray_direction, const ozz::span<const Engine::Mesh>& _meshes, ozz::math::Float3* _intersect, ozz::math::Float3* _normal)
 {
 	bool              intersected = false;
 	ozz::math::Float3 intersect, normal;

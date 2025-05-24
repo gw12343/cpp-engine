@@ -25,7 +25,7 @@ namespace Engine {
 		void SetMat4(const std::string& name, glm::mat4* value) const;
 
 		// Get the program ID
-		GLuint GetProgramID() const { return programID; }
+		[[maybe_unused]] [[nodiscard]] GLuint GetProgramID() const { return programID; }
 
 	  private:
 		GLuint programID;

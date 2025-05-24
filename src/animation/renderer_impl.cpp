@@ -1207,7 +1207,7 @@ bool RendererImpl::DrawMesh(const Mesh& _mesh, const ozz::math::Float4x4& _trans
 	if (_options.vertices) {
 		for (size_t i = 0; i < _mesh.parts.size(); ++i) {
 			const Mesh::Part& part  = _mesh.parts[i];
-			myns::Color       color = myns::kWhite;
+			Engine::Color     color = Engine::kWhite;
 			const float       size  = 2.f;
 			DrawPoints({part.positions.data(), part.positions.size()}, {&size, 1}, {&color, 1}, _transform, true);
 		}
@@ -1217,7 +1217,7 @@ bool RendererImpl::DrawMesh(const Mesh& _mesh, const ozz::math::Float4x4& _trans
 	if (_options.normals) {
 		for (size_t i = 0; i < _mesh.parts.size(); ++i) {
 			const Mesh::Part& part = _mesh.parts[i];
-			DrawVectors(make_span(part.positions), Mesh::Part::kPositionsCpnts * sizeof(float), make_span(part.normals), Mesh::Part::kNormalsCpnts * sizeof(float), part.vertex_count(), .03f, myns::kGreen, _transform);
+			DrawVectors(make_span(part.positions), Mesh::Part::kPositionsCpnts * sizeof(float), make_span(part.normals), Mesh::Part::kNormalsCpnts * sizeof(float), part.vertex_count(), .03f, Engine::kGreen, _transform);
 		}
 	}
 
@@ -1226,7 +1226,7 @@ bool RendererImpl::DrawMesh(const Mesh& _mesh, const ozz::math::Float4x4& _trans
 		for (size_t i = 0; i < _mesh.parts.size(); ++i) {
 			const Mesh::Part& part = _mesh.parts[i];
 			if (part.normals.size() != 0) {
-				DrawVectors(make_span(part.positions), Mesh::Part::kPositionsCpnts * sizeof(float), make_span(part.tangents), Mesh::Part::kTangentsCpnts * sizeof(float), part.vertex_count(), .03f, myns::kRed, _transform);
+				DrawVectors(make_span(part.positions), Mesh::Part::kPositionsCpnts * sizeof(float), make_span(part.tangents), Mesh::Part::kTangentsCpnts * sizeof(float), part.vertex_count(), .03f, Engine::kRed, _transform);
 			}
 		}
 	}
@@ -1246,7 +1246,7 @@ bool RendererImpl::DrawMesh(const Mesh& _mesh, const ozz::math::Float4x4& _trans
 				              Mesh::Part::kTangentsCpnts * sizeof(float),
 				              part.vertex_count(),
 				              .03f,
-				              myns::kBlue,
+				              Engine::kBlue,
 				              _transform);
 			}
 		}
@@ -1255,7 +1255,7 @@ bool RendererImpl::DrawMesh(const Mesh& _mesh, const ozz::math::Float4x4& _trans
 	return true;
 }
 
-bool RendererImpl::DrawSkinnedMesh(const myns::Mesh& _mesh, const ozz::span<ozz::math::Float4x4> _skinning_matrices, const ozz::math::Float4x4& _transform, const Options& _options)
+bool RendererImpl::DrawSkinnedMesh(const Engine::Mesh& _mesh, const ozz::span<ozz::math::Float4x4> _skinning_matrices, const ozz::math::Float4x4& _transform, const Options& _options)
 {
 	// Forward to DrawMesh function is skinning is disabled.
 	if (_options.skip_skinning || !_mesh.skinned()) {
@@ -1394,12 +1394,12 @@ bool RendererImpl::DrawSkinnedMesh(const myns::Mesh& _mesh, const ozz::span<ozz:
 
 		// Renders debug normals.
 		if (_options.normals && skinning_job.out_normals.size() > 0) {
-			DrawVectors(skinning_job.out_positions, skinning_job.out_positions_stride, skinning_job.out_normals, skinning_job.out_normals_stride, skinning_job.vertex_count, .03f, myns::kGreen, _transform);
+			DrawVectors(skinning_job.out_positions, skinning_job.out_positions_stride, skinning_job.out_normals, skinning_job.out_normals_stride, skinning_job.vertex_count, .03f, Engine::kGreen, _transform);
 		}
 
 		// Renders debug tangents.
 		if (_options.tangents && skinning_job.out_tangents.size() > 0) {
-			DrawVectors(skinning_job.out_positions, skinning_job.out_positions_stride, skinning_job.out_tangents, skinning_job.out_tangents_stride, skinning_job.vertex_count, .03f, myns::kRed, _transform);
+			DrawVectors(skinning_job.out_positions, skinning_job.out_positions_stride, skinning_job.out_tangents, skinning_job.out_tangents_stride, skinning_job.vertex_count, .03f, Engine::kRed, _transform);
 		}
 
 		// Renders debug binormals.
@@ -1414,7 +1414,7 @@ bool RendererImpl::DrawSkinnedMesh(const myns::Mesh& _mesh, const ozz::span<ozz:
 			              skinning_job.in_tangents_stride,
 			              skinning_job.vertex_count,
 			              .03f,
-			              myns::kBlue,
+			              Engine::kBlue,
 			              _transform);
 		}
 
@@ -1495,7 +1495,7 @@ bool RendererImpl::DrawSkinnedMesh(const myns::Mesh& _mesh, const ozz::span<ozz:
 
 	// Renders debug vertices.
 	if (_options.vertices) {
-		myns::Color                  color = myns::kWhite;
+		Engine::Color                color = Engine::kWhite;
 		const ozz::span<const float> vertices{reinterpret_cast<const float*>(ozz::PointerStride(vbo_map, positions_offset)), static_cast<size_t>(vertex_count * 3)};
 		const float                  size = 2.f;
 		DrawPoints(vertices, {&size, 1}, {&color, 1}, _transform, true);

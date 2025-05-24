@@ -7,14 +7,16 @@
 #include <string>
 #include <vector>
 
-namespace Engine {
+
+namespace Engine::Rendering {
 	class Model {
 	  public:
 		Model()  = default;
 		~Model() = default;
 
-		void                                      Draw(const Shader& shader) const;
-		const std::vector<std::shared_ptr<Mesh>>& GetMeshes() const { return m_meshes; }
+		void Draw(const Shader& shader) const;
+
+		[[maybe_unused]] [[nodiscard]] const std::vector<std::shared_ptr<Mesh>>& GetMeshes() const { return m_meshes; }
 
 	  private:
 		friend class ModelLoader;
@@ -22,6 +24,6 @@ namespace Engine {
 		std::vector<std::shared_ptr<Mesh>> m_meshes;
 		std::string                        m_directory;
 
-		void LoadModel(const std::string& path);
+		[[maybe_unused]] void LoadModel(const std::string& path);
 	};
-} // namespace Engine
+} // namespace Engine::Rendering

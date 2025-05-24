@@ -103,7 +103,7 @@ namespace Engine {
 			const ozz::math::Float4x4 transform              = FromMatrix(e.GetComponent<Components::Transform>().GetMatrix());
 
 			// Render each mesh
-			for (const myns::Mesh& mesh : *skinnedMeshComponent.meshes) {
+			for (const Engine::Mesh& mesh : *skinnedMeshComponent.meshes) {
 				// Render the mesh
 
 				// Builds skinning matrices, based on the output of the animation stage
@@ -198,10 +198,10 @@ namespace Engine {
 		return model_pose;
 	}
 
-	ozz::vector<myns::Mesh>* AnimationManager::LoadMeshesFromPath(const std::string& path)
+	ozz::vector<Engine::Mesh>* AnimationManager::LoadMeshesFromPath(const std::string& path)
 	{
 		// Create a new vector to hold the meshes
-		auto meshes = new ozz::vector<myns::Mesh>();
+		auto meshes = new ozz::vector<Engine::Mesh>();
 
 		// Load the meshes from file
 		if (!LoadMeshes(path.c_str(), meshes)) {

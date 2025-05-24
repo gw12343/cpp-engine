@@ -12,12 +12,14 @@
 #include "sound/SoundManager.h"
 #include "spdlog/spdlog.h"
 
+#include <Effekseer.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <ozz/animation/runtime/sampling_job.h>
 #include <ozz/base/containers/vector.h>
 #include <utility>
+
 using namespace JPH;
 using namespace JPH::literals;
 
@@ -34,13 +36,18 @@ namespace ozz::math {
 	struct Float4x4;
 } // namespace ozz::math
 
-namespace myns {
-	class Mesh;
-}
+
+// namespace Effekseer {
+//	template <typename T>
+//	class RefPtr;
+//
+//	class Effect;
+//	using Handle = int;
+// } // namespace Effekseer
+
 
 namespace Engine {
-
-	// Forward declaration
+	class Mesh;
 	class Entity;
 
 	// Component structs for the ECS system
@@ -57,7 +64,6 @@ namespace Engine {
 			// New method for rendering component in inspector
 			virtual void RenderInspector(Entity& entity) {}
 		};
-
 		// Basic metadata for an entity
 		class EntityMetadata : public Component {
 		  public:
@@ -109,12 +115,12 @@ namespace Engine {
 		// Renderer component for 3D models
 		class ModelRenderer : public Component {
 		  public:
-			std::shared_ptr<Model> model;
-			bool                   visible = true;
+			std::shared_ptr<Rendering::Model> model;
+			bool                              visible = true;
 
 			ModelRenderer() = default;
 
-			explicit ModelRenderer(const std::shared_ptr<Model>& model) : model(model) {}
+			explicit ModelRenderer(const std::shared_ptr<Rendering::Model>& model) : model(model) {}
 
 			// Draw the model with the given shader and transform
 			void Draw(const Shader& shader, const Transform& transform) const
@@ -254,12 +260,12 @@ namespace Engine {
 
 		class SkinnedMeshComponent : public Component {
 		  public:
-			ozz::vector<myns::Mesh>*          meshes            = nullptr;
+			ozz::vector<Engine::Mesh>*        meshes            = nullptr;
 			std::vector<ozz::math::Float4x4>* skinning_matrices = nullptr;
 			std::string                       meshPath;
 
 			SkinnedMeshComponent() = default;
-			explicit SkinnedMeshComponent(ozz::vector<myns::Mesh>* meshes) : meshes(meshes) {}
+			explicit SkinnedMeshComponent(ozz::vector<Engine::Mesh>* meshes) : meshes(meshes) {}
 			explicit SkinnedMeshComponent(std::string meshPath) : meshPath(std::move(meshPath)) {}
 
 			void OnAdded(Entity& entity) override;
@@ -268,9 +274,22 @@ namespace Engine {
 			static void CleanSkinnedModels();
 
 			static std::unordered_set<std::vector<ozz::math::Float4x4>*> s_skin_mats;
-			static std::unordered_set<ozz::vector<myns::Mesh>*>          s_all_meshes;
+			static std::unordered_set<ozz::vector<Engine::Mesh>*>        s_all_meshes;
 		};
 
+		class ParticleSystem : public Component {
+		  public:
+			std::string                          effectPath;
+			Effekseer::RefPtr<Effekseer::Effect> effect;
+			bool                                 autoPlay = true;
+			bool                                 looping  = false;
 
+			ParticleSystem(const std::string& path) : effectPath(path) {}
+			void OnAdded(Entity& entity) override;
+			void RenderInspector(Entity& entity) override;
+
+
+			Effekseer::Handle handle = -1;
+		};
 	} // namespace Components
 } // namespace Engine

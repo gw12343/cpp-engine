@@ -21,7 +21,8 @@ namespace Engine {
 		void PreRender();
 		void PostRender();
 		void Shutdown();
-		void RenderEntities(entt::registry& registry);
+		void RenderEntities(entt::registry& registry) const;
+		void RenderSkybox();
 
 		const Shader& GetShader() const { return m_shader; }
 

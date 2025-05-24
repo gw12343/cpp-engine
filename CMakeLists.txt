@@ -123,7 +123,9 @@ include_directories(${OPENAL_INCLUDE_DIR})
 
 
 # Add executable with all source files
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES}
+        src/rendering/particles/ParticleManager.h
+        src/rendering/particles/ParticleManager.cpp)
 find_package(OpenGL REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 
