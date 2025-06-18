@@ -392,7 +392,7 @@ namespace Engine::UI {
 
 	void UIManager::Render()
 	{
-		RenderSceneView();
+		RenderSceneView(Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->texture);
 		RenderHierarchyWindow();
 		RenderInspectorWindow();
 		RenderAnimationWindow();
@@ -572,6 +572,8 @@ namespace Engine::UI {
 			ImGui::Checkbox("Skip skinning", &render_options.skip_skinning);
 		}
 
+		ImGui::SliderFloat("fov", &m_engine->GetCamera().m_fov, 45, 120);
+
 		ImGui::End();
 	}
 
@@ -649,7 +651,7 @@ namespace Engine::UI {
 		ImGui::Text("Press P to resume");
 		ImGui::End();
 	}
-	void UIManager::RenderSceneView()
+	void UIManager::RenderSceneView(GLuint texId)
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 
@@ -679,7 +681,7 @@ namespace Engine::UI {
 
 		ImVec2 topLeft = ImGui::GetCursorScreenPos(); // Now it's correct
 
-		GLuint tex = Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->texture;
+		GLuint tex = texId; // Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->texture;
 		ImGui::Image((ImTextureID) tex, ImVec2(width, height), ImVec2(0, 1), ImVec2(1, 0));
 		// Now the topLeft is the actual top-left of the displayed image
 		Engine::Window::UpdateViewportSize(width, height, topLeft.x, topLeft.y);

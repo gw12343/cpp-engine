@@ -62,7 +62,7 @@ include(FetchContent)
 FetchContent_Declare(
         imgui
         GIT_REPOSITORY https://github.com/ocornut/imgui.git
-        GIT_TAG docking         # Use the docking branch
+        GIT_TAG docking         # Bind the docking branch
 )
 
 FetchContent_MakeAvailable(imgui)
@@ -132,7 +132,9 @@ add_executable(${PROJECT_NAME} ${SOURCES}
         src/terrain/TerrainManager.h
         lib/include/stb/stb_image_write.h
         src/rendering/Framebuffer.h
-        src/rendering/Framebuffer.cpp)
+        src/rendering/Framebuffer.cpp
+        src/rendering/shadows/ShadowMapRenderer.cpp
+        src/rendering/shadows/ShadowMapRenderer.h)
 find_package(OpenGL REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 

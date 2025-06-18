@@ -6,8 +6,8 @@
 #include <utils/Utils.h>
 
 namespace Engine {
-	Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) : m_front(glm::vec3(0.0f, 0.0f, -1.0f)), m_movementSpeed(2.5f), m_mouseSensitivity(0.1f), m_fov(90.0f), m_nearPlane(0.1f), m_farPlane(1000.0f)
-	{ // Increased from 100.0f to 1000.0f
+	Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) : m_front(glm::vec3(0.0f, 0.0f, -1.0f)), m_movementSpeed(2.5f), m_mouseSensitivity(0.1f), m_fov(90.0f), m_nearPlane(0.1f), m_farPlane(750.0f)
+	{
 		m_position = position;
 		m_worldUp  = up;
 		m_yaw      = yaw;

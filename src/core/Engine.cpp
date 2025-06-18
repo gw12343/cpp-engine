@@ -61,10 +61,6 @@ namespace Engine {
 			return false;
 		}
 
-		m_window.m_frameBuffers[Window::FramebufferID::GAME_OUT] = std::make_shared<Framebuffer>();
-		SPDLOG_ERROR("m_window.m_frameBuffers[Window::FramebufferID::GAME_OUT]: {}", m_window.m_frameBuffers[Window::FramebufferID::GAME_OUT]->texture);
-
-
 		if (!InitializeRenderer() || !m_soundManager->Initialize()) {
 			return false;
 		}
@@ -286,17 +282,14 @@ namespace Engine {
 		}
 	}
 
-	
+
 	void GEngine::Update()
 	{
 		ProcessInput();
 		Engine::Window::PollEvents();
 		Engine::Window::Update();
 		Input::Update();
-		Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->Bind();
 
-		m_renderer->PreRender();
-		m_uiManager->BeginDockspace();
 
 		m_animationManager->Update(m_deltaTime);
 
@@ -305,6 +298,14 @@ namespace Engine {
 		PhysicsManager::SyncPhysicsEntities(m_registry);
 
 		m_soundManager->UpdateAudioEntities(m_registry, m_camera);
+
+
+		m_renderer->RenderShadowMaps(m_registry);
+
+
+		Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->Bind();
+		m_renderer->PreRender();
+		m_uiManager->BeginDockspace();
 
 
 		m_renderer->RenderEntities(m_registry);

@@ -127,7 +127,7 @@ namespace Engine {
 			{
 				if (visible && model) {
 					// Set model matrix in shader
-					shader.Use();
+					shader.Bind();
 					glm::mat4 modelMatrix = transform.GetMatrix();
 					shader.SetMat4("model", &modelMatrix);
 

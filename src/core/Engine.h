@@ -86,7 +86,7 @@ namespace Engine {
 		 * @brief Retrieves the current camera.
 		 * @return Const reference to the Camera object.
 		 */
-		[[nodiscard]] const Camera& GetCamera() const { return m_camera; }
+		[[nodiscard]] Camera& GetCamera() { return m_camera; }
 
 		/**
 		 * @brief Checks if physics is enabled.

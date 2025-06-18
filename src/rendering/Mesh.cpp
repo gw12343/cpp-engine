@@ -3,6 +3,7 @@
 #include "Shader.h"
 #include "core/Engine.h"
 #include "terrain/TerrainManager.h"
+#include "utils/Utils.h"
 
 #include <glad/glad.h>
 #include <spdlog/spdlog.h>
@@ -54,45 +55,56 @@ namespace Engine {
 			glBindVertexArray(0);
 		}
 
+
 		void Mesh::Draw(const Shader& shader) const
 		{
+			//			if (m_material->GetDiffuseTexture()) {
+			//				glActiveTexture(GL_TEXTURE0);
+			//				shader.SetInt("material.diffuse", 0);
+			//				m_material->GetDiffuseTexture()->Bind(0);
+			//			}
+			ENGINE_GLCheckError();
 			if (m_material->GetDiffuseTexture()) {
 				glActiveTexture(GL_TEXTURE0);
-				shader.SetInt("material.diffuse", 0);
+				shader.SetInt("diffuseTexture", 0);
 				m_material->GetDiffuseTexture()->Bind(0);
 			}
+			ENGINE_GLCheckError();
 
-			if (m_material->GetSpecularTexture()) {
-				glActiveTexture(GL_TEXTURE1);
-				shader.SetInt("material.specular", 1);
-				m_material->GetSpecularTexture()->Bind(1);
-			}
+			//			if (m_material->GetSpecularTexture()) {
+			//				glActiveTexture(GL_TEXTURE1);
+			//				shader.SetInt("material.specular", 1);
+			//				m_material->GetSpecularTexture()->Bind(1);
+			//			}
+			//
+			//			if (m_material->GetNormalTexture()) {
+			//				glActiveTexture(GL_TEXTURE2);
+			//				shader.SetInt("material.normal", 2);
+			//				m_material->GetNormalTexture()->Bind(2);
+			//			}
 
-			if (m_material->GetNormalTexture()) {
-				glActiveTexture(GL_TEXTURE2);
-				shader.SetInt("material.normal", 2);
-				m_material->GetNormalTexture()->Bind(2);
-			}
+			// shader.SetVec3("diffuseTexture", m_material->GetDiffuseColor());
 
-			shader.SetVec3("material.diffuseColor", m_material->GetDiffuseColor());
-			shader.SetVec3("material.specularColor", m_material->GetSpecularColor());
-			shader.SetVec3("material.ambientColor", m_material->GetAmbientColor());
-			shader.SetVec3("material.emissiveColor", m_material->GetEmissiveColor());
-			shader.SetFloat("material.shininess", m_material->GetShininess());
-			
+
+			//			shader.SetVec3("material.diffuseColor", m_material->GetDiffuseColor());
+			//			shader.SetVec3("material.specularColor", m_material->GetSpecularColor());
+			//			shader.SetVec3("material.ambientColor", m_material->GetAmbientColor());
+			//			shader.SetVec3("material.emissiveColor", m_material->GetEmissiveColor());
+			//			shader.SetFloat("material.shininess", m_material->GetShininess());
+			//
 
 			glBindVertexArray(m_vao);
 			glDrawElements(GL_TRIANGLES, static_cast<int>(m_indices.size()), GL_UNSIGNED_INT, nullptr);
 			glBindVertexArray(0);
-
-			if (m_material->GetNormalTexture()) {
-				glActiveTexture(GL_TEXTURE2);
-				m_material->GetNormalTexture()->Unbind();
-			}
-			if (m_material->GetSpecularTexture()) {
-				glActiveTexture(GL_TEXTURE1);
-				m_material->GetSpecularTexture()->Unbind();
-			}
+			GLCheckError();
+			//			if (m_material->GetNormalTexture()) {
+			//				glActiveTexture(GL_TEXTURE2);
+			//				m_material->GetNormalTexture()->Unbind();
+			//			}
+			//			if (m_material->GetSpecularTexture()) {
+			//				glActiveTexture(GL_TEXTURE1);
+			//				m_material->GetSpecularTexture()->Unbind();
+			//			}
 			if (m_material->GetDiffuseTexture()) {
 				glActiveTexture(GL_TEXTURE0);
 				m_material->GetDiffuseTexture()->Unbind();

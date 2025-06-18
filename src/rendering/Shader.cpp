@@ -17,40 +17,64 @@ namespace Engine {
 		}
 	}
 
-	bool Shader::LoadFromFiles(const std::string& vertexPath, const std::string& fragmentPath)
+	bool Shader::LoadFromFiles(const std::string& vertexPath, const std::string& fragmentPath, const std::optional<std::string>& geometryPath)
 	{
 		// Read shader source code from files
 		std::string vertexSource   = ReadFile(vertexPath);
 		std::string fragmentSource = ReadFile(fragmentPath);
+		std::string geometrySource;
 
 		if (vertexSource.empty() || fragmentSource.empty()) {
-			spdlog::error("Failed to read shader files");
+			spdlog::error("Failed to read vertex or fragment shader files");
 			return false;
+		}
+
+		if (geometryPath.has_value()) {
+			geometrySource = ReadFile(*geometryPath);
+			if (geometrySource.empty()) {
+				spdlog::error("Failed to read geometry shader file");
+				return false;
+			}
 		}
 
 		// Create and compile shaders
 		GLuint vertexShader   = 0;
 		GLuint fragmentShader = 0;
+		GLuint geometryShader = 0;
 
 		if (!CompileShader(vertexShader, GL_VERTEX_SHADER, vertexSource) || !CompileShader(fragmentShader, GL_FRAGMENT_SHADER, fragmentSource)) {
 			return false;
+		}
+
+		if (geometryPath.has_value()) {
+			if (!CompileShader(geometryShader, GL_GEOMETRY_SHADER, geometrySource)) {
+				glDeleteShader(vertexShader);
+				glDeleteShader(fragmentShader);
+				return false;
+			}
 		}
 
 		// Create shader program
 		programID = glCreateProgram();
 		glAttachShader(programID, vertexShader);
 		glAttachShader(programID, fragmentShader);
+		if (geometryPath.has_value()) {
+			glAttachShader(programID, geometryShader);
+		}
 
 		// Link program
 		if (!LinkProgram()) {
 			glDeleteShader(vertexShader);
 			glDeleteShader(fragmentShader);
+			if (geometryPath.has_value()) glDeleteShader(geometryShader);
 			return false;
 		}
 
 		// Clean up shaders
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
+		if (geometryPath.has_value()) glDeleteShader(geometryShader);
+
 		SPDLOG_INFO("Linked shader with id {}", programID);
 		return true;
 	}
@@ -86,7 +110,7 @@ namespace Engine {
 	}
 
 
-	void Shader::Use() const
+	void Shader::Bind() const
 	{
 		glUseProgram(programID);
 	}
@@ -109,6 +133,11 @@ namespace Engine {
 	void Shader::SetVec3(const std::string& name, glm::vec3 value) const
 	{
 		glUniform3fv(glGetUniformLocation(programID, name.c_str()), 1, (GLfloat*) glm::value_ptr(value));
+	}
+
+	void Shader::SetVec2(const std::string& name, glm::vec2 value) const
+	{
+		glUniform2fv(glGetUniformLocation(programID, name.c_str()), 1, (GLfloat*) glm::value_ptr(value));
 	}
 
 	void Shader::SetMat4(const std::string& name, glm::mat4* value) const

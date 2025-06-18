@@ -17,6 +17,7 @@ namespace Engine {
 
 	Window::Window(int width, int height, std::string title) : m_window(nullptr), m_width(width), m_height(height), m_title(std::move(title))
 	{
+		m_frameBuffers[Window::FramebufferID::GAME_OUT] = std::make_shared<Framebuffer>();
 	}
 
 	Window::~Window() = default;

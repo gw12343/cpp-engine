@@ -2,12 +2,18 @@
 
 #include "components/Components.h"
 #include "utils/ModelLoader.h"
+#include "glm/gtc/type_ptr.hpp"
+#include "physics/PhysicsManager.h"
+#include "imgui.h"
+#include "utils/Utils.h"
 
 #include <spdlog/spdlog.h>
 
 namespace Engine {
+
 	Renderer::Renderer(Engine::Window& window, Engine::Camera& camera) : m_window(window), m_camera(camera)
 	{
+		m_shadowRenderer = std::make_unique<ShadowMapRenderer>(window, camera);
 	}
 
 	Renderer::~Renderer()
@@ -15,18 +21,19 @@ namespace Engine {
 		Shutdown();
 	}
 
+
 	bool Renderer::Initialize()
 	{
-		if (!m_shader.LoadFromFiles("/home/gabe/CLionProjects/cpp-engine/resources/shaders/vert.glsl", "/home/gabe/CLionProjects/cpp-engine/resources/shaders/frag.glsl")) {
+		if (!m_shader.LoadFromFiles("/home/gabe/CLionProjects/cpp-engine/resources/shaders/vert.glsl", "/home/gabe/CLionProjects/cpp-engine/resources/shaders/frag.glsl", std::nullopt)) {
 			return false;
 		}
 
 		// Load skybox shader
-		if (!m_skyboxShader.LoadFromFiles("/home/gabe/CLionProjects/cpp-engine/resources/shaders/skybox_vert.glsl", "/home/gabe/CLionProjects/cpp-engine/resources/shaders/skybox_frag.glsl")) {
+		if (!m_skyboxShader.LoadFromFiles("/home/gabe/CLionProjects/cpp-engine/resources/shaders/skybox_vert.glsl", "/home/gabe/CLionProjects/cpp-engine/resources/shaders/skybox_frag.glsl", std::nullopt)) {
 			return false;
 		}
 
-		// TODO Initialize skybox
+
 		m_skybox            = std::make_unique<Skybox>();
 		const std::string p = "/home/gabe/CLionProjects/cpp-engine/resources/textures/output.hdr";
 		if (!m_skybox->LoadFromFile(p)) {
@@ -37,6 +44,10 @@ namespace Engine {
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
+
+		// todo init
+		m_shadowRenderer->Initalize();
+
 		return true;
 	}
 
@@ -46,8 +57,8 @@ namespace Engine {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Use our shader
-		m_shader.Use();
+		// Bind our shader
+		m_shader.Bind();
 
 		// Set up view and projection matrices
 		glm::mat4 view       = m_camera.GetViewMatrix();
@@ -67,8 +78,14 @@ namespace Engine {
 		// Clean up any renderer-specific resources
 	}
 
-	void Renderer::RenderEntities(entt::registry& registry) const
+
+	void Renderer::RenderEntities(entt::registry& registry)
 	{
+		ENGINE_GLCheckError();
+		glm::mat4 V = m_camera.GetViewMatrix();
+		// UploadShadowMatrices(m_shader, V);
+		m_shadowRenderer->UploadShadowMatrices(m_shader, V);
+		ENGINE_GLCheckError();
 		// Create a view for entities with Transform and ModelRenderer components
 		auto view = registry.view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer>();
 		for (auto [entity, metadata, transform, renderer] : view.each()) {
@@ -79,7 +96,7 @@ namespace Engine {
 
 	void Renderer::RenderSkybox()
 	{
-		m_skyboxShader.Use();
+		m_skyboxShader.Bind();
 
 		// Set up view and projection matrices for skybox
 		glm::mat4 view       = m_camera.GetViewMatrix();
@@ -91,4 +108,10 @@ namespace Engine {
 		// Draw skybox
 		m_skybox->Draw(m_skyboxShader);
 	}
+	void Renderer::RenderShadowMaps(entt::registry& registry)
+	{
+		m_shadowRenderer->RenderShadowMaps(registry);
+	}
+
+
 } // namespace Engine

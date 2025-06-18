@@ -32,7 +32,7 @@ namespace Engine {
 			void RenderAnimationWindow();
 			void RenderAudioDebugUI();
 			void RenderPauseOverlay();
-			void RenderSceneView();
+			void RenderSceneView(GLuint texId);
 
 			// Reference to the engine
 			GEngine* m_engine;

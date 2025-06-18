@@ -343,7 +343,7 @@ namespace Engine::Terrain {
 	void TerrainManager::Render(Engine::Window& window, Engine::Camera& camera)
 	{
 		for (auto& tile : terrains) {
-			tile->terrainShader->Use();
+			tile->terrainShader->Bind();
 			glm::mat4 terrainTransform = glm::translate(glm::mat4(1.0f), glm::vec3(tile->posX, tile->posY, tile->posZ));
 			tile->terrainShader->SetMat4("uModel", &terrainTransform);
 

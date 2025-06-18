@@ -27,6 +27,9 @@ namespace Engine {
 		glm::vec3 GetPosition() const { return m_position; }
 		glm::vec3 GetFront() const { return m_front; }
 
+		// Projection parameters
+		float m_fov;
+
 	  private:
 		void UpdateCameraVectors();
 
@@ -45,8 +48,6 @@ namespace Engine {
 		float m_movementSpeed;
 		float m_mouseSensitivity;
 
-		// Projection parameters
-		float m_fov;
 		float m_nearPlane;
 		float m_farPlane;
 

@@ -10,7 +10,7 @@ namespace ozz::math {
 // Declares a shader program.
 class AnimationShader {
   public:
-	// Construct a fixed function pipeline shader. Use Shader::Build to specify
+	// Construct a fixed function pipeline shader. Bind Shader::Build to specify
 	// shader sources.
 	AnimationShader();
 
