@@ -51,7 +51,7 @@ namespace Engine {
 
 		// Set up view and projection matrices
 		glm::mat4 view       = m_camera.GetViewMatrix();
-		glm::mat4 projection = m_camera.GetProjectionMatrix((float) m_window.GetWidth() / (float) m_window.GetHeight());
+		glm::mat4 projection = m_camera.GetProjectionMatrix(m_window.GetTargetAspectRatio());
 
 		m_shader.SetMat4("view", &view);
 		m_shader.SetMat4("projection", &projection);
@@ -83,7 +83,7 @@ namespace Engine {
 
 		// Set up view and projection matrices for skybox
 		glm::mat4 view       = m_camera.GetViewMatrix();
-		glm::mat4 projection = m_camera.GetProjectionMatrix((float) m_window.GetWidth() / (float) m_window.GetHeight());
+		glm::mat4 projection = m_camera.GetProjectionMatrix(m_window.GetTargetAspectRatio());
 
 		m_skyboxShader.SetMat4("view", &view);
 		m_skyboxShader.SetMat4("projection", &projection);

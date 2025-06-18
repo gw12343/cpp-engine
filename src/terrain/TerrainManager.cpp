@@ -25,6 +25,8 @@ namespace Engine::Terrain {
 
 		uint32_t version;
 		file.read(reinterpret_cast<char*>(&version), sizeof(uint32_t));
+		if (version < 2 || version > 3) throw std::runtime_error("Unsupported terrain version");
+
 
 		uint32_t nameLen;
 		file.read(reinterpret_cast<char*>(&nameLen), sizeof(uint32_t));
@@ -36,11 +38,23 @@ namespace Engine::Terrain {
 		file.read(reinterpret_cast<char*>(&tile->sizeX), sizeof(float));
 		file.read(reinterpret_cast<char*>(&tile->sizeY), sizeof(float));
 		file.read(reinterpret_cast<char*>(&tile->sizeZ), sizeof(float));
+
+		if (version >= 3) {
+			file.read(reinterpret_cast<char*>(&tile->posX), sizeof(float));
+			file.read(reinterpret_cast<char*>(&tile->posY), sizeof(float));
+			file.read(reinterpret_cast<char*>(&tile->posZ), sizeof(float));
+			spdlog::debug("loaded terrain chunk at ({}, {}, {})", tile->posX, tile->posY, tile->posZ);
+		}
+		else {
+			spdlog::debug("unknown position, assuming (0, 0, 0).");
+		}
+
 		file.read(reinterpret_cast<char*>(&tile->splatLayerCount), sizeof(uint32_t));
 
 		size_t hcount = tile->heightRes * tile->heightRes;
 		tile->heightmap.resize(hcount);
 		file.read(reinterpret_cast<char*>(tile->heightmap.data()), hcount * sizeof(float));
+
 
 		size_t splatCount = tile->splatRes * tile->splatRes * tile->splatLayerCount;
 		tile->splatmap.resize(splatCount);
@@ -65,6 +79,26 @@ namespace Engine::Terrain {
 	{
 		for (auto& tile : terrains)
 			GenerateMeshForTile(*tile);
+	}
+
+	void TerrainManager::SetupShaders()
+	{
+		for (auto& tile : terrains) {
+			std::string vertexCode   = GenerateGLSLVertexShader();
+			std::string fragmentCode = GenerateGLSLShader();
+
+			spdlog::debug("VERTEX CODE: \n{}\n FRAGMENT CODE: \n{}", vertexCode, fragmentCode);
+
+			tile->terrainShader = std::make_shared<Engine::Shader>();
+			if (!tile->terrainShader->LoadFromSource(vertexCode, fragmentCode)) {
+				spdlog::error("Failed to compile terrain shader");
+			}
+			else {
+				spdlog::critical("yay");
+			}
+
+			spdlog::debug("num of textures: {}", tile->splatTextures.size());
+		}
 	}
 
 	void TerrainManager::GenerateSplatTextures()
@@ -306,8 +340,30 @@ namespace Engine::Terrain {
 	{
 		return terrains;
 	}
-	void TerrainManager::Render(Engine::Shader& terrainShader, Engine::Window& window, Engine::Camera& camera)
+	void TerrainManager::Render(Engine::Window& window, Engine::Camera& camera)
 	{
+		for (auto& tile : terrains) {
+			tile->terrainShader->Use();
+			glm::mat4 terrainTransform = glm::translate(glm::mat4(1.0f), glm::vec3(tile->posX, tile->posY, tile->posZ));
+			tile->terrainShader->SetMat4("uModel", &terrainTransform);
+
+			glm::mat4 viewM       = camera.GetViewMatrix();
+			glm::mat4 projectionM = camera.GetProjectionMatrix(window.GetTargetAspectRatio());
+
+			tile->terrainShader->SetMat4("uView", &viewM);
+			tile->terrainShader->SetMat4("uProjection", &projectionM);
+
+			for (size_t i = 0; i < tile->splatTextures.size(); ++i)
+				glBindTextureUnit(static_cast<GLuint>(i), tile->splatTextures[i]);
+
+			size_t base = tile->splatTextures.size();
+			for (size_t i = 0; i < tile->diffuseTextures.size(); ++i)
+				tile->diffuseTextures[i]->Bind(base + i);
+
+			glBindVertexArray(tile->vao);
+			glDrawElements(GL_TRIANGLES, tile->indexCount, GL_UNSIGNED_INT, nullptr);
+			glBindVertexArray(0);
+		}
 	}
 
 } // namespace Engine::Terrain

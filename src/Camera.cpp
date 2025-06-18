@@ -18,7 +18,7 @@ namespace Engine {
 
 	ozz::math::Float4x4 Camera::view_proj() const
 	{
-		return FromMatrix(GetProjectionMatrix((float) m_window->GetWidth() / (float) m_window->GetHeight())) * FromMatrix(GetViewMatrix());
+		return FromMatrix(GetProjectionMatrix(m_window->GetTargetAspectRatio())) * FromMatrix(GetViewMatrix());
 	}
 
 	glm::mat4 Camera::GetViewMatrix() const

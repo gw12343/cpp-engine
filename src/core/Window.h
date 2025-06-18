@@ -3,37 +3,53 @@
 #include <GLFW/glfw3.h>
 #include <memory>
 #include <string>
+#include <map>
+#include "rendering/Framebuffer.h"
 
 namespace Engine {
 
 	class Window {
 	  public:
-		Window(int width, int height, const std::string& title);
+		enum class FramebufferID { GAME_OUT };
+
+		Window(int width, int height, std::string title);
 		~Window();
 
 		bool               Initialize();
-		void               Update();
+		static void        Update();
 		[[nodiscard]] bool ShouldClose() const;
 		void               SwapBuffers() const;
-		void               PollEvents() const;
-		void               Shutdown();
+		static void        PollEvents();
+		static void        Shutdown();
 		void               OnResize(int width, int height);
+		void               SetFullViewport() const;
 
-		[[nodiscard]] int   GetWidth() const;
-		[[nodiscard]] int   GetHeight() const;
-		[[nodiscard]] float GetAspectRatio() const;
+		[[nodiscard]] int                    GetWidth() const;
+		[[nodiscard]] int                    GetHeight() const;
+		[[maybe_unused]] [[nodiscard]] float GetAspectRatio() const;
+		[[nodiscard]] static float           GetTargetAspectRatio();
 
-		GLFWwindow* GetNativeWindow() const { return m_window; }
+		GLFWwindow*                         GetNativeWindow() const { return m_window; }
+		static void                         UpdateViewportSize(int render_width, int render_height, int x, int y);
+		static void                         UpdateFramebufferSizes(int render_width, int render_height);
+		static std::shared_ptr<Framebuffer> GetFramebuffer(FramebufferID id);
+
+		static std::map<FramebufferID, std::shared_ptr<Framebuffer>> m_frameBuffers;
+
+
+		static int targetWidth;
+		static int targetHeight;
+		static int targetX;
+		static int targetY;
 
 	  private:
 		GLFWwindow* m_window;
 		int         m_width;
 		int         m_height;
 		std::string m_title;
-		bool        m_initialized;
 
-		bool InitGLFW();
-		bool InitGLAD();
-		bool InitImGui();
+		bool        InitGLFW();
+		static bool InitGLAD();
+		bool        InitImGui();
 	};
 } // namespace Engine

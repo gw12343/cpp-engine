@@ -1,29 +1,32 @@
 #include "Window.h"
 
-#include "core/Engine.h"
-
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <glad/glad.h>
 #include <imgui.h>
 #include <spdlog/spdlog.h>
+#include <utility>
 
 namespace Engine {
-	Window::Window(int width, int height, const std::string& title) : m_window(nullptr), m_width(width), m_height(height), m_title(title), m_initialized(false)
+	int Window::targetWidth  = 800;
+	int Window::targetHeight = 600;
+	int Window::targetX      = 0;
+	int Window::targetY      = 0;
+
+	std::map<Window::FramebufferID, std::shared_ptr<Framebuffer>> Window::m_frameBuffers;
+
+	Window::Window(int width, int height, std::string title) : m_window(nullptr), m_width(width), m_height(height), m_title(std::move(title))
 	{
 	}
 
-	Window::~Window()
-	{
-	}
+	Window::~Window() = default;
 
 	bool Window::Initialize()
 	{
 		if (!InitGLFW()) return false;
 		if (!InitGLAD()) return false;
-		if (!InitImGui()) return false;
+		InitImGui();
 
-		m_initialized = true;
 		return true;
 	}
 
@@ -47,7 +50,7 @@ namespace Engine {
 
 		// Set resize callback
 		glfwSetWindowSizeCallback(m_window, [](GLFWwindow* window, int width, int height) {
-			Window* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+			auto* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
 			if (win) win->OnResize(width, height);
 		});
 
@@ -55,6 +58,8 @@ namespace Engine {
 		glfwSetWindowUserPointer(m_window, this);
 
 		glfwMakeContextCurrent(m_window);
+
+
 		return true;
 	}
 
@@ -73,6 +78,9 @@ namespace Engine {
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     // Enable Docking
 		ImGui_ImplGlfw_InitForOpenGL(m_window, true);
 		ImGui_ImplOpenGL3_Init("#version 150");
 
@@ -101,9 +109,14 @@ namespace Engine {
 		glfwSwapBuffers(m_window);
 	}
 
-	void Window::PollEvents() const
+	void Window::PollEvents()
 	{
 		glfwPollEvents();
+	}
+
+	void Window::SetFullViewport() const
+	{
+		glViewport(0, 0, m_width, m_height);
 	}
 
 	void Window::Shutdown()
@@ -134,10 +147,37 @@ namespace Engine {
 		m_height = height;
 
 		// Update viewport
-		glViewport(0, 0, width, height);
+		SetFullViewport();
+		UpdateFramebufferSizes(width, height);
 	}
-	float Window::GetAspectRatio() const
+	[[maybe_unused]] float Window::GetAspectRatio() const
 	{
 		return static_cast<float>(m_width) / static_cast<float>(m_height);
+	}
+
+	float Window::GetTargetAspectRatio()
+	{
+		return static_cast<float>(targetWidth) / static_cast<float>(targetHeight);
+	}
+
+	void Window::UpdateFramebufferSizes(int render_width, int render_height)
+	{
+		for (const auto& [id, fb] : m_frameBuffers) {
+			SPDLOG_DEBUG("Resizing framebuffer {}, new size: ({}, {})", id, render_width, render_height);
+			fb->Resize(render_width, render_height);
+		}
+	}
+	void Window::UpdateViewportSize(int render_width, int render_height, int x, int y)
+	{
+		targetX = x;
+		targetY = y;
+		if (render_width != targetWidth || render_height != targetHeight) {
+			targetWidth  = render_width;
+			targetHeight = render_height;
+		}
+	}
+	std::shared_ptr<Framebuffer> Window::GetFramebuffer(Window::FramebufferID id)
+	{
+		return m_frameBuffers[id];
 	}
 } // namespace Engine

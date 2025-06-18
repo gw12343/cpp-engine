@@ -23,15 +23,20 @@ namespace Engine::Terrain {
 	};
 
 	struct TerrainTile {
-		std::string               name;
-		uint32_t                  heightRes;
-		uint32_t                  splatRes;
-		uint32_t                  splatLayerCount;
-		float                     sizeX, sizeY, sizeZ;
-		std::vector<float>        heightmap;
-		std::vector<uint8_t>      splatmap;
-		std::vector<TreeInstance> trees;
-		JPH::TriangleList         physicsMesh;
+		std::string                     name;
+		uint32_t                        heightRes;
+		uint32_t                        splatRes;
+		uint32_t                        splatLayerCount;
+		float                           sizeX, sizeY, sizeZ;
+		std::vector<float>              heightmap;
+		std::vector<uint8_t>            splatmap;
+		std::vector<TreeInstance>       trees;
+		JPH::TriangleList               physicsMesh;
+		std::shared_ptr<Engine::Shader> terrainShader;
+		float                           posX;
+		float                           posY;
+		float                           posZ;
+
 
 		// Runtime-generated OpenGL assets
 		GLuint                                        vao        = 0;
@@ -44,17 +49,20 @@ namespace Engine::Terrain {
 
 	class TerrainManager {
 	  public:
-		void        LoadTerrainFile(const std::string& path);
-		void        GenerateMeshes();
-		void        GenerateSplatTextures();
-		std::string GenerateGLSLShader() const;
-		std::string GenerateGLSLVertexShader() const;
+		void LoadTerrainFile(const std::string& path);
+		void GenerateMeshes();
+		void GenerateSplatTextures();
 
-		const std::vector<std::unique_ptr<TerrainTile>>& GetTerrains() const;
+		[[nodiscard]] const std::vector<std::unique_ptr<TerrainTile>>& GetTerrains() const;
 
-		void Render(Engine::Shader& terrainShader, Engine::Window& window, Engine::Camera& camera);
+		void Render(Engine::Window& window, Engine::Camera& camera);
+
+		void SetupShaders();
 
 	  private:
+		[[nodiscard]] std::string GenerateGLSLShader() const;
+		[[nodiscard]] std::string GenerateGLSLVertexShader() const;
+
 		std::vector<std::unique_ptr<TerrainTile>> terrains;
 
 		void GenerateMeshForTile(TerrainTile& tile);

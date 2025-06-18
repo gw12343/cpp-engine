@@ -2,6 +2,7 @@
 
 // #include "components/Components.h"
 #include "utils/Utils.h"
+#include "components/Components.h"
 
 // #include <components/Components.h>
 #include <spdlog/spdlog.h>
@@ -82,6 +83,12 @@ namespace Engine {
 		if (m_manager) {
 			m_manager->Update(deltaTime * 60.0);
 		}
+
+		// Update particles systems' locations
+		auto view = registry.view<Components::Transform, Components::ParticleSystem>();
+		for (auto [entity, transform, particleSystem] : view.each()) {
+			m_manager->SetLocation(particleSystem.handle, transform.position.x, transform.position.y, transform.position.z); // particleSystem.UpdateTransform(transform);
+		}
 	}
 
 	void ParticleManager::Render(Window& window, Camera& camera)
@@ -95,7 +102,7 @@ namespace Engine {
 		glCullFace(GL_BACK);
 		glDepthMask(GL_FALSE);
 		if (m_renderer) {
-			::Effekseer::Matrix44 projMat = ConvertGLMToEffekseerMatrix(camera.GetProjectionMatrix(window.GetAspectRatio()));
+			::Effekseer::Matrix44 projMat = ConvertGLMToEffekseerMatrix(camera.GetProjectionMatrix(window.GetTargetAspectRatio()));
 			::Effekseer::Matrix44 viewMat = ConvertGLMToEffekseerMatrix(camera.GetViewMatrix());
 
 

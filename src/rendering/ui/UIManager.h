@@ -5,8 +5,8 @@
 #include "core/Entity.h"
 #include "sound/SoundManager.h"
 
-#include <entt/entt.hpp>
-#include <imgui.h>
+#include "entt/entt.hpp"
+#include "imgui.h"
 #include <memory>
 
 namespace Engine {
@@ -15,11 +15,15 @@ namespace Engine {
 
 		class UIManager {
 		  public:
-			UIManager(GEngine* engine);
+			explicit UIManager(GEngine* engine);
 			~UIManager() = default;
 
 			void Initialize();
 			void Render();
+
+			void DrawTopBar();
+			void BeginDockspace();
+			void EndDockspace();
 
 		  private:
 			// UI rendering methods
@@ -28,6 +32,7 @@ namespace Engine {
 			void RenderAnimationWindow();
 			void RenderAudioDebugUI();
 			void RenderPauseOverlay();
+			void RenderSceneView();
 
 			// Reference to the engine
 			GEngine* m_engine;

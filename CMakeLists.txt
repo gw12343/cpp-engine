@@ -48,7 +48,7 @@ FetchContent_Declare(
         GIT_REPOSITORY https://github.com/guillaumeblanc/ozz-animation.git
         GIT_TAG master
 )
-set(ozz_build_tools OFF CACHE BOOL "" FORCE)
+#set(ozz_build_tools OFF CACHE BOOL "" FORCE)
 set(ozz_build_samples OFF CACHE BOOL "" FORCE)
 set(ozz_build_tests OFF CACHE BOOL "" FORCE)
 set(ozz_build_howtos OFF CACHE BOOL "" FORCE)
@@ -130,7 +130,9 @@ add_executable(${PROJECT_NAME} ${SOURCES}
         src/terrain/TerrainLoader.cpp
         src/terrain/TerrainManager.cpp
         src/terrain/TerrainManager.h
-        lib/include/stb/stb_image_write.h)
+        lib/include/stb/stb_image_write.h
+        src/rendering/Framebuffer.h
+        src/rendering/Framebuffer.cpp)
 find_package(OpenGL REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 

@@ -8,6 +8,8 @@
 #include "terrain/TerrainManager.h"
 #include "utils/ModelLoader.h"
 #include "Jolt/Physics/Collision/Shape/MeshShape.h"
+#include "rendering/Framebuffer.h"
+#include "rendering/ui/UIManager.h"
 #include <imgui.h>
 #include <memory>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -30,8 +32,9 @@ namespace Engine {
 	// Test models
 	std::shared_ptr<Rendering::Model> sphere;
 	std::shared_ptr<Rendering::Model> cube;
-	Engine::Terrain::TerrainManager   GEngine::terrainManager;
-	Shader                            terrainShader;
+
+	Engine::Terrain::TerrainManager GEngine::terrainManager;
+
 
 	bool GEngine::Initialize()
 	{
@@ -58,6 +61,10 @@ namespace Engine {
 			return false;
 		}
 
+		m_window.m_frameBuffers[Window::FramebufferID::GAME_OUT] = std::make_shared<Framebuffer>();
+		SPDLOG_ERROR("m_window.m_frameBuffers[Window::FramebufferID::GAME_OUT]: {}", m_window.m_frameBuffers[Window::FramebufferID::GAME_OUT]->texture);
+
+
 		if (!InitializeRenderer() || !m_soundManager->Initialize()) {
 			return false;
 		}
@@ -67,17 +74,13 @@ namespace Engine {
 
 		m_particleManager = std::make_unique<ParticleManager>();
 		if (!m_particleManager->Initialize(8000)) {
-			SPDLOG_INFO("bad");
+			SPDLOG_INFO("Failed to initalize particle manager");
 			return false;
 		}
 		else {
 			SPDLOG_INFO("good");
 		}
 
-
-		terrainManager.LoadTerrainFile("resources/terrain/terrain.bin");
-		terrainManager.GenerateMeshes();
-		terrainManager.GenerateSplatTextures();
 
 		std::shared_ptr<Engine::Texture> tex1 = std::make_shared<Engine::Texture>();
 		tex1->LoadFromFile("resources/textures/Terrain Grass.png");
@@ -94,27 +97,26 @@ namespace Engine {
 		std::shared_ptr<Engine::Texture> tex5 = std::make_shared<Engine::Texture>();
 		tex5->LoadFromFile("resources/textures/white.png");
 
-		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex1);
-		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex2);
-		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex3);
-		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex4);
-		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex5);
 
+		//		terrainManager.LoadTerrainFile("resources/terrain/terrain1.bin");
+		//		terrainManager.LoadTerrainFile("resources/terrain/terrain2.bin");
+		//		terrainManager.GenerateMeshes();
+		//		terrainManager.GenerateSplatTextures();
+		//		terrainManager.SetupShaders();
+		//
+		//
+		//		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex1);
+		//		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex2);
+		//		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex3);
+		//		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex4);
+		//		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex5);
+		//
+		//		terrainManager.GetTerrains()[1]->diffuseTextures.push_back(tex1);
+		//		terrainManager.GetTerrains()[1]->diffuseTextures.push_back(tex2);
+		//		terrainManager.GetTerrains()[1]->diffuseTextures.push_back(tex3);
+		//		terrainManager.GetTerrains()[1]->diffuseTextures.push_back(tex4);
+		//		terrainManager.GetTerrains()[1]->diffuseTextures.push_back(tex5);
 
-		// Engine::Shader terrainShader;
-		std::string vertexCode   = terrainManager.GenerateGLSLVertexShader();
-		std::string fragmentCode = terrainManager.GenerateGLSLShader();
-
-		spdlog::debug("VERTEX CODE: \n{}\n FRAGMENT CODE: \n{}", vertexCode, fragmentCode);
-
-		if (!terrainShader.LoadFromSource(vertexCode, fragmentCode)) {
-			spdlog::error("Failed to compile terrain shader");
-		}
-		else {
-			spdlog::critical("yay");
-		}
-
-		spdlog::debug("num of textures: {}", terrainManager.GetTerrains()[0]->splatTextures.size());
 
 		CreateInitialEntities();
 
@@ -128,6 +130,7 @@ namespace Engine {
 			m_logger->critical("Failed to initialize renderer");
 			return false;
 		}
+		m_window.UpdateFramebufferSizes(m_window.GetWidth(), m_window.GetHeight());
 		return true;
 	}
 
@@ -192,9 +195,9 @@ namespace Engine {
 		//		std::cout << "Heights: " << tile.heightmap.size() << "\n";
 		//		std::cout << "Trees: " << tile.trees.size() << "\n";
 
-		auto& tile         = terrainManager.GetTerrains()[0];
-		Body* terrain_body = body_interface.CreateBody(BodyCreationSettings(new MeshShapeSettings(tile->physicsMesh), RVec3(0.0_r, 0.0_r, 0.0_r), Quat::sIdentity(), EMotionType::Static, Layers::NON_MOVING));
-		body_interface.AddBody(terrain_body->GetID(), EActivation::DontActivate);
+		//		auto& tile         = terrainManager.GetTerrains()[0];
+		//		Body* terrain_body = body_interface.CreateBody(BodyCreationSettings(new MeshShapeSettings(tile->physicsMesh), RVec3(0.0_r, 0.0_r, 0.0_r), Quat::sIdentity(), EMotionType::Static, Layers::NON_MOVING));
+		//		body_interface.AddBody(terrain_body->GetID(), EActivation::DontActivate);
 	}
 
 	void GEngine::Run()
@@ -283,14 +286,17 @@ namespace Engine {
 		}
 	}
 
-
+	
 	void GEngine::Update()
 	{
 		ProcessInput();
-		m_window.PollEvents();
-		m_window.Update();
+		Engine::Window::PollEvents();
+		Engine::Window::Update();
 		Input::Update();
+		Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->Bind();
+
 		m_renderer->PreRender();
+		m_uiManager->BeginDockspace();
 
 		m_animationManager->Update(m_deltaTime);
 
@@ -299,51 +305,24 @@ namespace Engine {
 		PhysicsManager::SyncPhysicsEntities(m_registry);
 
 		m_soundManager->UpdateAudioEntities(m_registry, m_camera);
-		// Use the renderer to render entities
+
+
 		m_renderer->RenderEntities(m_registry);
 
-		// glActiveTexture(GL_TEXTURE0 + 0);
-		//			glBindTexture(GL_TEXTURE_2D, Engine::GEngine::terrainManager.GetTerrains()[0]->splatTextures[0]);
+		terrainManager.Render(m_window, m_camera);
 
-		auto& tile = terrainManager.GetTerrains()[0];
-
-		terrainShader.Use();
-		glm::mat4 transM(1.0);
-		terrainShader.SetMat4("uModel", &transM);
-
-		glm::mat4 viewM       = m_camera.GetViewMatrix();
-		glm::mat4 projectionM = m_camera.GetProjectionMatrix(m_window.GetAspectRatio());
-
-		terrainShader.SetMat4("uView", &viewM);
-		terrainShader.SetMat4("uProjection", &projectionM);
-
-		for (size_t i = 0; i < tile->splatTextures.size(); ++i)
-			glBindTextureUnit(static_cast<GLuint>(i), tile->splatTextures[i]);
-
-		size_t base = tile->splatTextures.size();
-		for (size_t i = 0; i < tile->diffuseTextures.size(); ++i)
-			tile->diffuseTextures[i]->Bind(base + i);
-
-		glBindVertexArray(tile->vao);
-		glDrawElements(GL_TRIANGLES, tile->indexCount, GL_UNSIGNED_INT, nullptr);
-		glBindVertexArray(0);
-
-
-		// Render animated models
 		m_animationManager->Render();
-		// Render skybox
+
 		m_renderer->RenderSkybox();
+
 		m_particleManager->Update(m_registry, m_deltaTime);
 
-		// Update particles systems' locations
-		auto view = m_registry.view<Components::Transform, Components::ParticleSystem>();
-		for (auto [entity, transform, particleSystem] : view.each()) {
-			m_particleManager->GetManager()->SetLocation(particleSystem.handle, transform.position.x, transform.position.y, transform.position.z); // particleSystem.UpdateTransform(transform);
-		}
-
-
 		m_particleManager->Render(m_window, m_camera);
+
+		Engine::Framebuffer::Unbind();
+
 		m_uiManager->Render();
+		m_uiManager->EndDockspace();
 		m_renderer->PostRender();
 	}
 
@@ -361,7 +340,7 @@ namespace Engine {
 		Components::SkinnedMeshComponent::CleanSkinnedModels();
 		Texture::CleanAllTextures();
 		Rendering::Mesh::CleanAllMeshes();
-		m_window.Shutdown();
+		Engine::Window::Shutdown();
 		SPDLOG_INFO("Engine shutdown complete");
 	}
 } // namespace Engine
