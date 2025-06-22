@@ -2,6 +2,7 @@
 
 #include "core/Engine.h"
 #include "core/Entity.h"
+#include "utils/Utils.h"
 
 #include <codecvt>
 #include <glm/gtc/type_ptr.hpp>
@@ -34,6 +35,7 @@ namespace Engine {
 
 		void AudioSource::OnAdded(Entity& entity)
 		{
+			ENGINE_ASSERT(entity.m_engine, "AudioSource::OnAdded: Entity's engine pointer is null");
 			// If autoPlay is enabled, try to play the sound
 			if (autoPlay && !soundName.empty()) {
 				// Get the sound manager from the engine
@@ -74,7 +76,8 @@ namespace Engine {
 
 			if (updatePhysicsPositionManually) {
 				if (entity.HasComponent<RigidBodyComponent>()) {
-					auto&          rb             = entity.GetComponent<RigidBodyComponent>();
+					auto& rb = entity.GetComponent<RigidBodyComponent>();
+					ENGINE_VERIFY(rb.physicsSystem, "Transform::RenderInspector: RigidBodyComponent has null physicsSystem");
 					BodyInterface& body_interface = rb.physicsSystem->GetBodyInterface();
 					// convert pos and rot to jolt types
 					RVec3 joltPos = RVec3(position.x, position.y, position.z);
@@ -135,6 +138,8 @@ namespace Engine {
 
 		void SkeletonComponent::OnAdded(Entity& entity)
 		{
+			ENGINE_ASSERT(entity.m_engine, "SkeletonComponent::OnAdded: Entity's engine pointer is null");
+
 			if (!skeletonPath.empty()) {
 				skeleton = entity.m_engine->GetAnimationManager().LoadSkeletonFromPath(skeletonPath);
 				if (!skeleton) {
@@ -156,6 +161,8 @@ namespace Engine {
 
 		void AnimationComponent::OnAdded(Entity& entity)
 		{
+			ENGINE_ASSERT(entity.m_engine, "AnimationComponent::OnAdded: Entity's engine pointer is null");
+
 			if (!animationPath.empty()) {
 				animation = entity.m_engine->GetAnimationManager().LoadAnimationFromPath(animationPath);
 				if (!animation) {
@@ -176,16 +183,10 @@ namespace Engine {
 
 		void AnimationPoseComponent::OnAdded(Entity& entity)
 		{
-			// Check if the entity has a skeleton component
-			if (!entity.HasComponent<SkeletonComponent>()) {
-				spdlog::error("AnimationPoseComponent requires a SkeletonComponent");
-				return;
-			}
+			ENGINE_VERIFY(entity.HasComponent<SkeletonComponent>(), "AnimationPoseComponent::OnAdded: Missing SkeletonComponent");
 			auto& skeletonComponent = entity.GetComponent<SkeletonComponent>();
-			if (!skeletonComponent.skeleton) {
-				spdlog::error("AnimationPoseComponent requires a valid SkeletonComponent with a valid skeleton!");
-				return;
-			}
+			ENGINE_VERIFY(skeletonComponent.skeleton, "AnimationPoseComponent::OnAdded: SkeletonComponent has null skeleton");
+			ENGINE_ASSERT(entity.m_engine, "AnimationPoseComponent::OnAdded: Entity's engine pointer is null");
 
 
 			// Allocate pose data
@@ -221,20 +222,14 @@ namespace Engine {
 			context = new ozz::animation::SamplingJob::Context();
 			s_contexts.insert(context);
 			// Get the animation component, then resize context for correct number of tracks
-			if (entity.HasComponent<AnimationComponent>()) {
-				auto& animationComponent = entity.GetComponent<AnimationComponent>();
-				if (animationComponent.animation) {
-					context->Resize(animationComponent.animation->num_tracks());
-					SPDLOG_INFO("Resized context for {} tracks", animationComponent.animation->num_tracks());
-				}
-				else {
-					// fix: if the animation is loaded at a later time, we need to resize the context when the animation is loaded
-					spdlog::error("AnimationWorkerComponent requires a valid AnimationComponent with a valid animation!");
-				}
-			}
-			else {
-				spdlog::error("AnimationWorkerComponent requires an AnimationComponent");
-			}
+			ENGINE_ASSERT(context, "AnimationWorkerComponent::OnAdded: Failed to allocate SamplingJob::Context");
+
+			ENGINE_VERIFY(entity.HasComponent<AnimationComponent>(), "AnimationWorkerComponent::OnAdded: Missing AnimationComponent");
+			auto& animationComponent = entity.GetComponent<AnimationComponent>();
+			ENGINE_VERIFY(animationComponent.animation, "AnimationWorkerComponent::OnAdded: AnimationComponent has null animation");
+
+			context->Resize(animationComponent.animation->num_tracks());
+			SPDLOG_INFO("Resized context for {} tracks", animationComponent.animation->num_tracks());
 		}
 
 		void AnimationWorkerComponent::RenderInspector(Entity& entity)
@@ -269,11 +264,13 @@ namespace Engine {
 					SPDLOG_INFO("Loaded SKINNED MESHES from path: {}", meshPath);
 				}
 			}
-
+			ENGINE_ASSERT(entity.m_engine, "SkinnedMeshComponent::OnAdded: Entity's engine pointer is null");
 			if (!meshes) {
-				spdlog::error("SkinnedMeshComponent requires a valid mesh!");
+				ENGINE_VERIFY(false, "SkinnedMeshComponent::OnAdded: Failed to load meshes");
 				return;
 			}
+
+
 			skinning_matrices = new std::vector<ozz::math::Float4x4>();
 			s_skin_mats.insert(skinning_matrices);
 			// Computes the number of skinning matrices required to skin all meshes
@@ -288,6 +285,7 @@ namespace Engine {
 
 			// Allocates skinning matrices
 			skinning_matrices->resize(num_skinning_matrices);
+			ENGINE_ASSERT(skinning_matrices, "SkinnedMeshComponent::OnAdded: Failed to allocate skinning matrices");
 		}
 
 		void SkinnedMeshComponent::RenderInspector(Entity& entity)
@@ -301,12 +299,16 @@ namespace Engine {
 		{
 			if (!effect) {
 				// Convert path string
+				ENGINE_ASSERT(!effectPath.empty(), "ParticleSystem::OnAdded: effectPath is empty");
 				std::u16string  utf16 = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes(effectPath);
 				const char16_t* raw   = utf16.c_str();
 
+				ENGINE_ASSERT(entity.m_engine, "ParticleSystem::OnAdded: Entity's engine pointer is null");
 				const auto& manager = entity.m_engine->GetParticleManager().GetManager();
+				ENGINE_VERIFY(manager != nullptr, "ParticleSystem::OnAdded: Failed to get Effekseer manager");
 				// Spawn effect
 				effect = Effekseer::Effect::Create(manager, raw);
+				ENGINE_VERIFY(effect != nullptr, "ParticleSystem::OnAdded: Failed to create Effekseer effect");
 				// Get initial transform
 				auto transform = entity.GetComponent<Components::Transform>();
 				// Spawn particle
@@ -316,9 +318,12 @@ namespace Engine {
 
 		void ParticleSystem::RenderInspector(Entity& entity)
 		{
+			ENGINE_ASSERT(entity.m_engine, "ParticleSystem::RenderInspector: Entity's engine pointer is null");
+
 			ImGui::Text("Handle: %d", handle);
 			const auto& manager = entity.m_engine->GetParticleManager().GetManager();
-			bool        paused  = manager->GetPaused(handle);
+			ENGINE_VERIFY(manager != nullptr, "ParticleSystem::RenderInspector: Failed to get Effekseer manager");
+			bool paused = manager->GetPaused(handle);
 
 			if (ImGui::Button(paused ? "Unpause" : "Pause")) {
 				manager->SetPaused(handle, !paused);

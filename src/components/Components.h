@@ -64,6 +64,13 @@ namespace Engine {
 			// New method for rendering component in inspector
 			virtual void RenderInspector(Entity& entity) {}
 		};
+
+		class ShadowCaster : public Component {
+		  public:
+			ShadowCaster() = default;
+		};
+
+
 		// Basic metadata for an entity
 		class EntityMetadata : public Component {
 		  public:

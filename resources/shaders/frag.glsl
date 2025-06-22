@@ -132,7 +132,12 @@ float ShadowCalculation(vec3 fragPosWorldSpace, int layer)
 
 void main()
 {
-    vec3 color = texture(diffuseTexture, fs_in.TexCoords * texScale).rgb;
+    vec4 smp = texture(diffuseTexture, fs_in.TexCoords * texScale);
+    vec3 color = smp.rgb;
+    float alpha = smp.a;
+    if (alpha < 1.0f){
+        discard;
+    }
     vec3 normal = normalize(fs_in.Normal);
 
     vec3 lightColor = vec3(0.3);
@@ -167,6 +172,9 @@ void main()
     } else {
         FragColor = vec4(lighting, 1.0);
     }
+
+    //FragColor = vec4(alpha, alpha, alpha, 1.0);
+
     // Alternatively, to show only debug color:
     // FragColor = vec4(cascadeColor, 1.0);
 }

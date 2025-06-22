@@ -2,9 +2,6 @@
 
 #include "components/Components.h"
 #include "utils/ModelLoader.h"
-#include "glm/gtc/type_ptr.hpp"
-#include "physics/PhysicsManager.h"
-#include "imgui.h"
 #include "utils/Utils.h"
 
 #include <spdlog/spdlog.h>
@@ -42,7 +39,7 @@ namespace Engine {
 
 		// Enable depth testing so closer fragments obscure farther ones
 		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
+		// glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 
 		// todo init
@@ -62,7 +59,7 @@ namespace Engine {
 
 		// Set up view and projection matrices
 		glm::mat4 view       = m_camera.GetViewMatrix();
-		glm::mat4 projection = m_camera.GetProjectionMatrix(m_window.GetTargetAspectRatio());
+		glm::mat4 projection = m_camera.GetProjectionMatrix(Engine::Window::GetTargetAspectRatio());
 
 		m_shader.SetMat4("view", &view);
 		m_shader.SetMat4("projection", &projection);
@@ -81,6 +78,7 @@ namespace Engine {
 
 	void Renderer::RenderEntities(entt::registry& registry)
 	{
+		glDisable(GL_CULL_FACE);
 		ENGINE_GLCheckError();
 		glm::mat4 V = m_camera.GetViewMatrix();
 		// UploadShadowMatrices(m_shader, V);
@@ -100,7 +98,7 @@ namespace Engine {
 
 		// Set up view and projection matrices for skybox
 		glm::mat4 view       = m_camera.GetViewMatrix();
-		glm::mat4 projection = m_camera.GetProjectionMatrix(m_window.GetTargetAspectRatio());
+		glm::mat4 projection = m_camera.GetProjectionMatrix(Engine::Window::GetTargetAspectRatio());
 
 		m_skyboxShader.SetMat4("view", &view);
 		m_skyboxShader.SetMat4("projection", &projection);

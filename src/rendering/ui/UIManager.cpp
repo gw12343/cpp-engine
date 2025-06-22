@@ -511,6 +511,12 @@ namespace Engine::UI {
 					m_selectedEntity.GetComponent<Components::ParticleSystem>().RenderInspector(m_selectedEntity);
 				}
 			}
+
+			if (m_selectedEntity.HasComponent<Components::ShadowCaster>()) {
+				if (ImGui::CollapsingHeader("Shadow Caster")) {
+					m_selectedEntity.GetComponent<Components::ShadowCaster>().RenderInspector(m_selectedEntity);
+				}
+			}
 		}
 		else {
 			ImGui::Text("No entity selected");

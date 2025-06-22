@@ -45,4 +45,37 @@ namespace Engine {
 	}
 
 #define ENGINE_GLCheckError() _GLCheckError(__FILE__, __LINE__)
+
+	// Platform-specific debug break
+#if defined(_MSC_VER)
+#define ENGINE_DEBUG_BREAK() __debugbreak()
+#elif defined(__GNUC__) || defined(__clang__)
+#define ENGINE_DEBUG_BREAK() __builtin_trap()
+#else
+#define ENGINE_DEBUG_BREAK() std::raise(SIGTRAP)
+#endif
+
+// Internal macro to format and log the failure
+#define ENGINE_ASSERT_IMPL(condition, message, ...)                                                                                                                                                                                            \
+	do {                                                                                                                                                                                                                                       \
+		if (!(condition)) {                                                                                                                                                                                                                    \
+			spdlog::error("Assertion failed: ({})", #condition);                                                                                                                                                                               \
+			spdlog::error("Message: " message, ##__VA_ARGS__);                                                                                                                                                                                 \
+			spdlog::error("At {}:{} in function {}", __FILE__, __LINE__, __func__);                                                                                                                                                            \
+			ENGINE_DEBUG_BREAK();                                                                                                                                                                                                              \
+			std::abort();                                                                                                                                                                                                                      \
+		}                                                                                                                                                                                                                                      \
+	} while (false)
+
+// ENGINE_ASSERT only in debug mode
+#ifndef NDEBUG
+#define ENGINE_ASSERT(condition, ...) ENGINE_ASSERT_IMPL(condition, "" __VA_ARGS__)
+#else
+#define ENGINE_ASSERT(condition, ...) ((void) 0)
+#endif
+
+// ENGINE_VERIFY always runs (can be used for runtime checks)
+#define ENGINE_VERIFY(condition, ...) ENGINE_ASSERT_IMPL(condition, "" __VA_ARGS__)
+
+
 } // namespace Engine

@@ -177,8 +177,8 @@ namespace Engine {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// TODO check for shadow casting component
-		auto view = registry.view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer>();
-		for (auto [entity, metadata, transform, renderer] : view.each()) {
+		auto view = registry.view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer, Engine::Components::ShadowCaster>();
+		for (auto [entity, metadata, transform, renderer, shadowCaster] : view.each()) {
 			glm::mat4 model = CalculateModelMatrix(transform);
 			m_depthShader.SetMat4("model", &model);
 			renderer.model->Draw(m_depthShader);

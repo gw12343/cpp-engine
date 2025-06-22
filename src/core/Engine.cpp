@@ -14,7 +14,6 @@
 #include <memory>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
-
 using namespace JPH;
 using namespace JPH::literals;
 
@@ -32,6 +31,7 @@ namespace Engine {
 	// Test models
 	std::shared_ptr<Rendering::Model> sphere;
 	std::shared_ptr<Rendering::Model> cube;
+	std::shared_ptr<Rendering::Model> track;
 
 	Engine::Terrain::TerrainManager GEngine::terrainManager;
 
@@ -64,6 +64,7 @@ namespace Engine {
 		if (!InitializeRenderer() || !m_soundManager->Initialize()) {
 			return false;
 		}
+
 		PhysicsManager::Initialize();
 		m_uiManager->Initialize();
 
@@ -94,27 +95,28 @@ namespace Engine {
 		tex5->LoadFromFile("resources/textures/white.png");
 
 
-		//		terrainManager.LoadTerrainFile("resources/terrain/terrain1.bin");
-		//		terrainManager.LoadTerrainFile("resources/terrain/terrain2.bin");
-		//		terrainManager.GenerateMeshes();
-		//		terrainManager.GenerateSplatTextures();
-		//		terrainManager.SetupShaders();
-		//
-		//
-		//		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex1);
-		//		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex2);
-		//		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex3);
-		//		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex4);
-		//		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex5);
-		//
-		//		terrainManager.GetTerrains()[1]->diffuseTextures.push_back(tex1);
-		//		terrainManager.GetTerrains()[1]->diffuseTextures.push_back(tex2);
-		//		terrainManager.GetTerrains()[1]->diffuseTextures.push_back(tex3);
-		//		terrainManager.GetTerrains()[1]->diffuseTextures.push_back(tex4);
-		//		terrainManager.GetTerrains()[1]->diffuseTextures.push_back(tex5);
+		terrainManager.LoadTerrainFile("resources/terrain/terrain1.bin");
+		terrainManager.LoadTerrainFile("resources/terrain/terrain2.bin");
+		terrainManager.GenerateMeshes();
+		terrainManager.GenerateSplatTextures();
+		terrainManager.SetupShaders();
+
+
+		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex1);
+		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex2);
+		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex3);
+		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex4);
+		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex5);
+
+		terrainManager.GetTerrains()[1]->diffuseTextures.push_back(tex1);
+		terrainManager.GetTerrains()[1]->diffuseTextures.push_back(tex2);
+		terrainManager.GetTerrains()[1]->diffuseTextures.push_back(tex3);
+		terrainManager.GetTerrains()[1]->diffuseTextures.push_back(tex4);
+		terrainManager.GetTerrains()[1]->diffuseTextures.push_back(tex5);
 
 
 		CreateInitialEntities();
+
 
 		return true;
 	}
@@ -155,21 +157,29 @@ namespace Engine {
 		BodyID floor_id = floor_body->GetID();
 
 		// Load models
-		sphere                                  = Rendering::ModelLoader::LoadModel("/home/gabe/CLionProjects/cpp-engine/resources/models/sphere.obj");
-		cube                                    = Rendering::ModelLoader::LoadModel("/home/gabe/CLionProjects/cpp-engine/resources/models/cube.obj");
+		sphere = Rendering::ModelLoader::LoadModel("/home/gabe/CLionProjects/cpp-engine/resources/models/sphere.obj");
+		cube   = Rendering::ModelLoader::LoadModel("/home/gabe/CLionProjects/cpp-engine/resources/models/cube.obj");
+
+
+		// track = Rendering::ModelLoader::LoadModel("/home/gabe/Downloads/GCNCMarioCircuit/course_fix.dae");
+		track = Rendering::ModelLoader::LoadModel("/home/gabe/Downloads/gltf/gltf/soccer_ball.gltf");
+
+
 		std::shared_ptr<Rendering::Model> model = Rendering::ModelLoader::LoadModel("/home/gabe/CLionProjects/cpp-engine/resources/models/"
 		                                                                            "TwistedTree_1.obj");
 
 		// Create entities
-		Entity floor = Entity::Create(this, "FloorEntity");
-		floor.AddComponent<Components::ModelRenderer>(cube);
-		floor.AddComponent<Components::Transform>(glm::vec3(0.0f, -10.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(60.0f, 2.0f, 60.0f));
+		Entity floor = Entity::Create(this, "Track");
+		floor.AddComponent<Components::ModelRenderer>(track);
+		floor.AddComponent<Components::Transform>(glm::vec3(0.0f, -10.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.01f, 0.01f, 0.01f));
 		floor.AddComponent<Components::RigidBodyComponent>(PhysicsManager::GetPhysicsSystem().get(), floor_id);
 
-		Entity entity = Entity::Create(this, "TestEntity");
-		entity.AddComponent<Components::ModelRenderer>(model);
-		entity.AddComponent<Components::Transform>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		entity.AddComponent<Components::ParticleSystem>("/home/gabe/CLionProjects/cpp-engine/resources/particles/testleaf.efk");
+		//		Entity entity = Entity::Create(this, "TestEntity");
+		//		entity.AddComponent<Components::ModelRenderer>(model);
+		//		entity.AddComponent<Components::Transform>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		//		entity.AddComponent<Components::ParticleSystem>("/home/gabe/CLionProjects/cpp-engine/resources/particles/testleaf.efk");
+
+
 		//		Entity entity2 = Entity::Create(this, "TestEntity2");
 		//		entity2.AddComponent<Components::ModelRenderer>(model);
 		//		entity2.AddComponent<Components::Transform>(glm::vec3(2.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
@@ -177,13 +187,13 @@ namespace Engine {
 		//		entity2.AddComponent<Components::AudioSource>("birds", true, 0.1f, 1.0f, true, 5.0f, 50.0f, 1.0f);
 
 
-		Entity animatedEntity = Entity::Create(this, "AnimatedEntity");
-		animatedEntity.AddComponent<Components::Transform>(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		animatedEntity.AddComponent<Components::SkeletonComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_skeleton.ozz");
-		animatedEntity.AddComponent<Components::AnimationComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_animation.ozz");
-		animatedEntity.AddComponent<Components::AnimationPoseComponent>();
-		animatedEntity.AddComponent<Components::AnimationWorkerComponent>();
-		animatedEntity.AddComponent<Components::SkinnedMeshComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_mesh.ozz");
+		//		Entity animatedEntity = Entity::Create(this, "AnimatedEntity");
+		//		animatedEntity.AddComponent<Components::Transform>(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		//		animatedEntity.AddComponent<Components::SkeletonComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_skeleton.ozz");
+		//		animatedEntity.AddComponent<Components::AnimationComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_animation.ozz");
+		//		animatedEntity.AddComponent<Components::AnimationPoseComponent>();
+		//		animatedEntity.AddComponent<Components::AnimationWorkerComponent>();
+		//		animatedEntity.AddComponent<Components::SkinnedMeshComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_mesh.ozz");
 
 		//
 		//		Terrain::TerrainTile tile = Terrain::LoadTerrainTile("resources/terrain/terrain.bin");
@@ -261,6 +271,7 @@ namespace Engine {
 			auto s = Entity::Create(this, "SphereEntity");
 			s.AddComponent<Components::Transform>(glm::vec3(cpos.x, cpos.y, cpos.z), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 			s.AddComponent<Components::ModelRenderer>(sphere);
+			// s.AddComponent<Components::ShadowCaster>();
 			s.AddComponent<Components::RigidBodyComponent>(PhysicsManager::GetPhysicsSystem().get(), sphere_id);
 		}
 
@@ -278,6 +289,7 @@ namespace Engine {
 			auto s = Entity::Create(this, "CubeEntity");
 			s.AddComponent<Components::Transform>(glm::vec3(cpos.x, cpos.y, cpos.z), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 			s.AddComponent<Components::ModelRenderer>(cube);
+			// s.AddComponent<Components::ShadowCaster>();
 			s.AddComponent<Components::RigidBodyComponent>(PhysicsManager::GetPhysicsSystem().get(), cube_id);
 		}
 	}

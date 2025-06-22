@@ -1,5 +1,6 @@
 #include "TerrainManager.h"
 #include "Jolt/Math/Float3.h"
+#include "utils/Utils.h"
 
 #include <filesystem>
 #include <fstream>
@@ -84,18 +85,16 @@ namespace Engine::Terrain {
 	void TerrainManager::SetupShaders()
 	{
 		for (auto& tile : terrains) {
+			ENGINE_ASSERT(tile, "Null tile pointer in SetupShaders");
+
 			std::string vertexCode   = GenerateGLSLVertexShader();
 			std::string fragmentCode = GenerateGLSLShader();
 
 			spdlog::debug("VERTEX CODE: \n{}\n FRAGMENT CODE: \n{}", vertexCode, fragmentCode);
 
 			tile->terrainShader = std::make_shared<Engine::Shader>();
-			if (!tile->terrainShader->LoadFromSource(vertexCode, fragmentCode)) {
-				spdlog::error("Failed to compile terrain shader");
-			}
-			else {
-				spdlog::critical("yay");
-			}
+			bool success        = tile->terrainShader->LoadFromSource(vertexCode, fragmentCode);
+			ENGINE_VERIFY(success, "Failed to compile terrain shader");
 
 			spdlog::debug("num of textures: {}", tile->splatTextures.size());
 		}
@@ -193,7 +192,8 @@ namespace Engine::Terrain {
 
 	void TerrainManager::GenerateMeshForTile(TerrainTile& tile)
 	{
-		uint32_t               res = tile.heightRes;
+		uint32_t res = tile.heightRes;
+
 		std::vector<glm::vec3> positions(res * res);
 		std::vector<glm::vec2> uvs(res * res);
 		std::vector<glm::vec3> normals(res * res, glm::vec3(0.0f));
