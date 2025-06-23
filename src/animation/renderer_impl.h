@@ -57,7 +57,7 @@ class GlImmediateRenderer;
 // Implements Renderer interface.
 class RendererImpl : public AnimatedRenderer {
   public:
-	RendererImpl(Engine::Camera* _camera);
+	RendererImpl();
 	virtual ~RendererImpl();
 
 	// See Renderer for all the details about the API.
@@ -109,10 +109,7 @@ class RendererImpl : public AnimatedRenderer {
 
 	// Get GL immediate renderer implementation;
 	GlImmediateRenderer* immediate_renderer() const { return immediate_.get(); }
-
-	// Get application camera that provides rendering matrices.
-	Engine::Camera* camera() const { return camera_; }
-
+	
   private:
 	// Defines the internal structure used to define a model.
 	struct Model {
@@ -147,8 +144,6 @@ class RendererImpl : public AnimatedRenderer {
 	// execution.
 	ozz::vector<ozz::math::Float4x4> prealloc_models_;
 
-	// Application camera that provides rendering matrices.
-	Engine::Camera* camera_;
 
 	// Bone and joint model objects.
 	Model models_[2];

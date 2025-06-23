@@ -2,6 +2,7 @@
 
 #include "components/Components.h"
 #include "physics/PhysicsInterfaces.h"
+#include "core/EngineData.h"
 
 #include <cstdarg>
 
@@ -10,12 +11,6 @@ using namespace JPH;
 using namespace JPH::literals;
 
 namespace Engine {
-
-	BPLayerInterfaceImpl              PhysicsManager::broad_phase_layer_interface;
-	ObjectVsBroadPhaseLayerFilterImpl PhysicsManager::object_vs_broadphase_layer_filter;
-	ObjectLayerPairFilterImpl         PhysicsManager::object_vs_object_layer_filter;
-	ContactListenerImpl               PhysicsManager::contact_listener;
-	BodyActivationListenerImpl        PhysicsManager::body_activation_listener;
 
 	std::shared_ptr<PhysicsSystem>       physics;
 	std::shared_ptr<TempAllocatorImpl>   allocater;
@@ -47,8 +42,7 @@ namespace Engine {
 		return true;
 	};
 
-
-	void PhysicsManager::Initialize()
+	void PhysicsManager::onInit()
 	{
 		RegisterDefaultAllocator();
 		Trace = PhysicsManager::TraceImpl;
@@ -71,20 +65,22 @@ namespace Engine {
 		physics->SetBodyActivationListener(&body_activation_listener);
 	}
 
-	void PhysicsManager::Update(float dt)
+	void PhysicsManager::onUpdate(float dt)
 	{
 		// Collision Steps to simulate. Should be around 1 per 16ms
 		int cCollisionSteps = static_cast<int>(glm::ceil(dt * 60.0f));
 		// Step the world
-		physics->Update(dt, cCollisionSteps, allocater.get(), jobs.get());
+		if (!IsPhysicsPaused()) physics->Update(dt, cCollisionSteps, allocater.get(), jobs.get());
+
+		SyncPhysicsEntities();
 	}
 
 
-	void PhysicsManager::CleanUp(entt::registry& registry)
+	void PhysicsManager::onShutdown()
 	{
 		SPDLOG_INFO("cleaning up physics");
 
-		auto           physicsView    = registry.view<Engine::Components::RigidBodyComponent>();
+		auto           physicsView    = GetRegistry().view<Engine::Components::RigidBodyComponent>();
 		BodyInterface& body_interface = physics->GetBodyInterface();
 
 		for (auto [entity, rb] : physicsView.each()) {
@@ -160,9 +156,9 @@ namespace Engine {
 		return modelMatrix;
 	}
 
-	void PhysicsManager::SyncPhysicsEntities(entt::registry& registry)
+	void PhysicsManager::SyncPhysicsEntities()
 	{
-		auto           physicsView    = registry.view<Engine::Components::Transform, Engine::Components::RigidBodyComponent>();
+		auto           physicsView    = GetRegistry().view<Engine::Components::Transform, Engine::Components::RigidBodyComponent>();
 		BodyInterface& body_interface = physics->GetBodyInterface();
 
 		for (auto [entity, transform, rb] : physicsView.each()) {
@@ -172,4 +168,6 @@ namespace Engine {
 			Vec3 velocity = body_interface.GetLinearVelocity(rb.bodyID);
 		}
 	}
+
+
 } // namespace Engine

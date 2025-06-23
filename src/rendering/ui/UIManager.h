@@ -7,19 +7,20 @@
 
 #include "entt/entt.hpp"
 #include "imgui.h"
+#include "core/module/Module.h"
 #include <memory>
 
 namespace Engine {
 	class GEngine;
 	namespace UI {
 
-		class UIManager {
+		class UIManager : public Module {
 		  public:
-			explicit UIManager(GEngine* engine);
-			~UIManager() = default;
+			void        onInit() override;
+			void        onUpdate(float dt) override;
+			void        onShutdown() override;
+			std::string name() const override { return "UIModule"; };
 
-			void Initialize();
-			void Render();
 
 			void DrawTopBar();
 			void BeginDockspace();
@@ -34,8 +35,6 @@ namespace Engine {
 			void RenderPauseOverlay();
 			void RenderSceneView(GLuint texId);
 
-			// Reference to the engine
-			GEngine* m_engine;
 
 			// Selected entity
 			Entity m_selectedEntity;

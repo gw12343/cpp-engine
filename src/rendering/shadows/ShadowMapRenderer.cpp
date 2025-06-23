@@ -10,19 +10,15 @@
 #include "components/Components.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "physics/PhysicsManager.h"
+#include "core/EngineData.h"
+#include <glad/glad.h>
+
 namespace Engine {
 
 	unsigned int ShadowMapRenderer::lightFBO;
 	unsigned int ShadowMapRenderer::matricesUBO;
 	unsigned int ShadowMapRenderer::lightDepthMaps;
 
-	ShadowMapRenderer::ShadowMapRenderer(Engine::Window& window, Engine::Camera& camera) : m_window(window), m_camera(camera)
-	{
-	}
-
-	ShadowMapRenderer::~ShadowMapRenderer()
-	{
-	}
 
 	// https://learnopengl.com/Guest-Articles/2021/CSM
 	std::vector<glm::vec4> ShadowMapRenderer::getFrustumCornersWorldSpace(const glm::mat4& projview)
@@ -49,8 +45,8 @@ namespace Engine {
 
 	glm::mat4 ShadowMapRenderer::getLightSpaceMatrix(const float nearPlane, const float farPlane)
 	{
-		const auto proj    = glm::perspective(glm::radians(m_camera.m_fov), Window::GetTargetAspectRatio(), nearPlane, farPlane); // m_camera.GetProjectionMatrix(Window::GetTargetAspectRatio());
-		const auto corners = getFrustumCornersWorldSpace(proj, m_camera.GetViewMatrix());
+		const auto proj    = glm::perspective(glm::radians(GetCamera().m_fov), Window::GetTargetAspectRatio(), nearPlane, farPlane); // m_camera.GetProjectionMatrix(Window::GetTargetAspectRatio());
+		const auto corners = getFrustumCornersWorldSpace(proj, GetCamera().GetViewMatrix());
 
 		glm::vec3 center = glm::vec3(0, 0, 0);
 		for (const auto& v : corners) {
@@ -161,7 +157,7 @@ namespace Engine {
 	}
 
 
-	void ShadowMapRenderer::RenderShadowMaps(entt::registry& registry)
+	void ShadowMapRenderer::RenderShadowMaps()
 	{
 		m_depthShader.Bind();
 
@@ -177,7 +173,7 @@ namespace Engine {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// TODO check for shadow casting component
-		auto view = registry.view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer, Engine::Components::ShadowCaster>();
+		auto view = GetRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer, Engine::Components::ShadowCaster>();
 		for (auto [entity, metadata, transform, renderer, shadowCaster] : view.each()) {
 			glm::mat4 model = CalculateModelMatrix(transform);
 			m_depthShader.SetMat4("model", &model);
@@ -187,7 +183,7 @@ namespace Engine {
 		// Unbind shadow buffer now
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		// Reset draw size to full screen, not shadow map resolution
-		m_window.SetFullViewport();
+		GetWindow().SetFullViewport();
 	}
 
 	void ShadowMapRenderer::UploadShadowMatrices(Engine::Shader& shader, glm::mat4& V)
@@ -207,10 +203,10 @@ namespace Engine {
 		ENGINE_GLCheckError();
 		shader.SetVec2("texScale", glm::vec2(1.0, 1.0));
 		ENGINE_GLCheckError();
-		shader.SetVec3("viewPos", m_camera.GetPosition());
+		shader.SetVec3("viewPos", GetCamera().GetPosition());
 		ENGINE_GLCheckError();
 		shader.SetMat4("view", &V);
-		glm::mat4 proj = m_camera.GetProjectionMatrix(m_window.GetTargetAspectRatio());
+		glm::mat4 proj = GetCamera().GetProjectionMatrix(Window::GetTargetAspectRatio());
 		shader.SetMat4("projection", &proj);
 		ENGINE_GLCheckError();
 		glActiveTexture(GL_TEXTURE1);

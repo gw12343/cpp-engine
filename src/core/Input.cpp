@@ -1,9 +1,11 @@
 #include "Input.h"
+#include "EngineData.h"
 
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
+#include "Window.h"
+
 namespace Engine {
-	GLFWwindow*                   Input::s_window            = nullptr;
 	glm::vec2                     Input::s_mousePosition     = glm::vec2(0.0f);
 	glm::vec2                     Input::s_lastMousePosition = glm::vec2(0.0f);
 	float                         Input::s_scrollDelta       = 0.0f;
@@ -12,12 +14,11 @@ namespace Engine {
 
 	void Input::Initialize(GLFWwindow* window)
 	{
-		s_window = window;
 		glfwSetScrollCallback(window, ScrollCallback);
 
 		// Prime the last-mouse position so GetMouseDelta is zero on first frame
 		double x, y;
-		glfwGetCursorPos(s_window, &x, &y);
+		glfwGetCursorPos(GetWindow().GetNativeWindow(), &x, &y);
 		s_lastMousePosition = glm::vec2((float) x, (float) y);
 	}
 
@@ -28,7 +29,7 @@ namespace Engine {
 		s_scrollDelta       = 0;
 		s_lastMousePosition = s_mousePosition;
 		double x, y;
-		glfwGetCursorPos(s_window, &x, &y);
+		glfwGetCursorPos(GetWindow().GetNativeWindow(), &x, &y);
 		s_mousePosition = glm::vec2(x, y);
 
 		// Update key states - copy current to previous, then update current
@@ -44,17 +45,17 @@ namespace Engine {
 
 	bool Input::IsMousePressed(int btn)
 	{
-		return glfwGetMouseButton(s_window, btn);
+		return glfwGetMouseButton(GetWindow().GetNativeWindow(), btn);
 	}
 
 	bool Input::IsKeyPressed(int key)
 	{
-		return glfwGetKey(s_window, key) == GLFW_PRESS;
+		return glfwGetKey(GetWindow().GetNativeWindow(), key) == GLFW_PRESS;
 	}
 
 	bool Input::IsKeyReleased(int key)
 	{
-		return glfwGetKey(s_window, key) == GLFW_RELEASE;
+		return glfwGetKey(GetWindow().GetNativeWindow(), key) == GLFW_RELEASE;
 	}
 
 	[[maybe_unused]] glm::vec2 Input::GetMousePosition()
@@ -76,17 +77,17 @@ namespace Engine {
 
 	[[maybe_unused]] void Input::SetMousePosition(const glm::vec2& pos)
 	{
-		glfwSetCursorPos(s_window, pos.x, pos.y);
+		glfwSetCursorPos(GetWindow().GetNativeWindow(), pos.x, pos.y);
 	}
 
 	void Input::SetCursorMode(int mode)
 	{
-		glfwSetInputMode(s_window, GLFW_CURSOR, mode);
+		glfwSetInputMode(GetWindow().GetNativeWindow(), GLFW_CURSOR, mode);
 	}
 
 	int Input::GetCursorMode()
 	{
-		return glfwGetInputMode(s_window, GLFW_CURSOR);
+		return glfwGetInputMode(GetWindow().GetNativeWindow(), GLFW_CURSOR);
 	}
 
 	[[maybe_unused]] void Input::MouseCallback(GLFWwindow* /*wnd*/, double /*x*/, double /*y*/)

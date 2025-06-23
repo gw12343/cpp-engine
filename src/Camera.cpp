@@ -1,9 +1,11 @@
 #include "Camera.h"
 
 #include "core/Input.h"
+#include "core/EngineData.h"
 
 #include <algorithm>
 #include <utils/Utils.h>
+#include "core/Window.h"
 
 namespace Engine {
 
@@ -19,8 +21,8 @@ namespace Engine {
 
 	ozz::math::Float4x4 Camera::view_proj() const
 	{
-		ENGINE_ASSERT(m_window, "Camera::view_proj: m_window is null");
-		float aspect = m_window->GetTargetAspectRatio();
+		ENGINE_ASSERT(Get().window, "Camera::view_proj: m_window is null");
+		float aspect = Window::GetTargetAspectRatio();
 		ENGINE_VERIFY(aspect > 0.0f, "Camera::view_proj: aspect ratio is non-positive");
 		return FromMatrix(GetProjectionMatrix(aspect)) * FromMatrix(GetViewMatrix());
 	}

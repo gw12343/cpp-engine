@@ -17,10 +17,8 @@
 namespace Engine {
 	class ShadowMapRenderer {
 	  public:
-		ShadowMapRenderer(Engine::Window& window, Engine::Camera& camera);
-		~ShadowMapRenderer();
 		void Initalize();
-		void RenderShadowMaps(entt::registry& registry);
+		void RenderShadowMaps();
 		void UploadShadowMatrices(Engine::Shader& shader, glm::mat4& V);
 
 	  private:
@@ -34,7 +32,7 @@ namespace Engine {
 
 		std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& projview);
 		std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& proj, const glm::mat4& view);
-		glm::mat4              getLightSpaceMatrix(const float nearPlane, const float farPlane);
+		glm::mat4              getLightSpaceMatrix(float nearPlane, float farPlane);
 		std::vector<glm::mat4> getLightSpaceMatrices();
 
 
@@ -42,9 +40,7 @@ namespace Engine {
 		static unsigned int matricesUBO;
 		static unsigned int lightDepthMaps;
 
-		Engine::Shader  m_depthShader;
-		Engine::Window& m_window;
-		Engine::Camera& m_camera;
+		Engine::Shader m_depthShader;
 	};
 
 } // namespace Engine

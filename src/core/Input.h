@@ -29,7 +29,6 @@ namespace Engine {
 		static void                  ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
 	  private:
-		static GLFWwindow*                   s_window;
 		static glm::vec2                     s_mousePosition;
 		static glm::vec2                     s_lastMousePosition;
 		static float                         s_scrollDelta;

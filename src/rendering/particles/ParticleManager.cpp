@@ -3,10 +3,12 @@
 // #include "components/Components.h"
 #include "utils/Utils.h"
 #include "components/Components.h"
+#include "core/EngineData.h"
 
 // #include <components/Components.h>
 #include <spdlog/spdlog.h>
 namespace Engine {
+	static const int MAX_INSTANCES = 8000;
 
 	class ParticleManager::DebugTextureLoader : public Effekseer::TextureLoader {
 	  public:
@@ -32,22 +34,16 @@ namespace Engine {
 		Effekseer::TextureLoaderRef      m_internalLoader;
 	};
 
-	ParticleManager::ParticleManager() = default;
 
-	ParticleManager::~ParticleManager()
+	void ParticleManager::onInit()
 	{
-		Shutdown();
-	}
-
-	bool ParticleManager::Initialize(int maxInstances)
-	{
-		m_renderer = EffekseerRendererGL::Renderer::Create(maxInstances, EffekseerRendererGL::OpenGLDeviceType::OpenGL3);
+		m_renderer = EffekseerRendererGL::Renderer::Create(MAX_INSTANCES, EffekseerRendererGL::OpenGLDeviceType::OpenGL3);
 		if (!m_renderer) {
 			spdlog::critical("Failed to create Effekseer renderer");
-			return false;
+			return;
 		}
 
-		m_manager = Effekseer::Manager::Create(maxInstances);
+		m_manager = Effekseer::Manager::Create(MAX_INSTANCES);
 		m_manager->SetSpriteRenderer(m_renderer->CreateSpriteRenderer());
 		m_manager->SetRibbonRenderer(m_renderer->CreateRibbonRenderer());
 		m_manager->SetRingRenderer(m_renderer->CreateRingRenderer());
@@ -57,41 +53,36 @@ namespace Engine {
 		auto textureLoader = Effekseer::MakeRefPtr<DebugTextureLoader>(m_renderer);
 		m_manager->SetTextureLoader(textureLoader);
 
-		//
-		////		auto effect = Effekseer::Effect::Create(m_manager, u"/home/gabe/CLionProjects/cpp-engine/resources/particles/fireworks.efk");
-		//		// auto effect = Effekseer::Effect::Create(m_particleManager, u"/home/gabe/CLionProjects/cpp-engine/build/_deps/effekseer-src/Examples/Resources/Laser01.efkefc");
-		//		if (!effect) {
-		//			SPDLOG_CRITICAL("Failed to load resource");
-		//		}
-		//
-		//		int handle = m_manager->Play(effect, 0.0f, 0.0f, 0.0f);
-		//
-
 		if (!m_manager) {
 			spdlog::error("Effekseer Manager not initialized!");
-			// handle error, maybe return early
+			return;
 		}
 		else {
 			spdlog::info("Effekseer Manager initialized!");
 		}
-
-		return true;
 	}
 
-	void ParticleManager::Update(entt::registry& registry, float deltaTime)
+
+	void ParticleManager::onUpdate(float dt)
 	{
 		if (m_manager) {
-			m_manager->Update(deltaTime * 60.0);
+			m_manager->Update(dt * 60.0);
 		}
 
 		// Update particles systems' locations
-		auto view = registry.view<Components::Transform, Components::ParticleSystem>();
+		auto view = GetRegistry().view<Components::Transform, Components::ParticleSystem>();
 		for (auto [entity, transform, particleSystem] : view.each()) {
 			m_manager->SetLocation(particleSystem.handle, transform.position.x, transform.position.y, transform.position.z); // particleSystem.UpdateTransform(transform);
 		}
 	}
+	void ParticleManager::onShutdown()
+	{
+		m_manager.Reset();
+		m_renderer.Reset();
+	}
 
-	void ParticleManager::Render(Window& window, Camera& camera)
+
+	void ParticleManager::Render()
 	{
 		// Set up OpenGL state for Effekseer
 		glEnable(GL_BLEND);
@@ -102,11 +93,11 @@ namespace Engine {
 		glCullFace(GL_BACK);
 		glDepthMask(GL_FALSE);
 		if (m_renderer) {
-			::Effekseer::Matrix44 projMat = ConvertGLMToEffekseerMatrix(camera.GetProjectionMatrix(window.GetTargetAspectRatio()));
-			::Effekseer::Matrix44 viewMat = ConvertGLMToEffekseerMatrix(camera.GetViewMatrix());
+			//::Effekseer::Matrix44 projMat = ConvertGLMToEffekseerMatrix(camera.GetProjectionMatrix(window.GetTargetAspectRatio()));
+			::Effekseer::Matrix44 viewMat = ConvertGLMToEffekseerMatrix(GetCamera().GetViewMatrix());
 
 
-			m_renderer->SetProjectionMatrix(projMat);
+			// m_renderer->SetProjectionMatrix(projMat);
 			m_renderer->SetCameraMatrix(viewMat);
 
 			m_renderer->BeginRendering();
@@ -116,11 +107,6 @@ namespace Engine {
 		glDepthMask(GL_TRUE);
 	}
 
-	void ParticleManager::Shutdown()
-	{
-		m_manager.Reset();
-		m_renderer.Reset();
-	}
 
 	Effekseer::Handle ParticleManager::PlayEffect(const std::u16string& path, float x, float y, float z)
 	{
@@ -132,5 +118,6 @@ namespace Engine {
 
 		return m_manager->Play(effect, x, y, z);
 	}
+
 
 } // namespace Engine

@@ -31,6 +31,7 @@
 #include "Camera.h"
 #include "ozz/base/memory/allocator.h"
 #include "renderer_impl.h"
+#include "core/EngineData.h"
 
 #include <cassert>
 #include <spdlog/spdlog.h>
@@ -80,7 +81,7 @@ void GlImmediateRenderer::End<VertexPC>(GLenum _mode, const ozz::math::Float4x4&
 	GL(BindBuffer(GL_ARRAY_BUFFER, vbo_));
 	GL(BufferData(GL_ARRAY_BUFFER, size_, buffer_.data(), GL_STREAM_DRAW));
 
-	immediate_pc_shader->Bind(_transform, renderer_->camera()->view_proj(), sizeof(VertexPC), 0, sizeof(VertexPC), 12);
+	immediate_pc_shader->Bind(_transform, GetCamera().view_proj(), sizeof(VertexPC), 0, sizeof(VertexPC), 12);
 
 	const int count = static_cast<int>(size_ / sizeof(VertexPC));
 	GL(DrawArrays(_mode, 0, count));
@@ -99,7 +100,7 @@ void GlImmediateRenderer::End<VertexPTC>(GLenum _mode, const ozz::math::Float4x4
 	GL(BindBuffer(GL_ARRAY_BUFFER, vbo_));
 	GL(BufferData(GL_ARRAY_BUFFER, size_, buffer_.data(), GL_STREAM_DRAW));
 
-	immediate_ptc_shader->Bind(_transform, renderer_->camera()->view_proj(), sizeof(VertexPTC), 0, sizeof(VertexPTC), 12, sizeof(VertexPTC), 20);
+	immediate_ptc_shader->Bind(_transform, GetCamera().view_proj(), sizeof(VertexPTC), 0, sizeof(VertexPTC), 12, sizeof(VertexPTC), 20);
 
 	const int count = static_cast<int>(size_ / sizeof(VertexPTC));
 	GL(DrawArrays(_mode, 0, count));

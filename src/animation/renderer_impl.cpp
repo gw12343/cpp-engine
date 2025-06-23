@@ -18,6 +18,7 @@
 #include "ozz/base/memory/allocator.h"
 #include "ozz/base/platform.h"
 #include "ozz/geometry/runtime/skinning_job.h"
+#include "core/EngineData.h"
 
 #include <spdlog/spdlog.h>
 
@@ -49,7 +50,7 @@ RendererImpl::Model::~Model()
 	}
 }
 
-RendererImpl::RendererImpl(Engine::Camera* _camera) : camera_(_camera)
+RendererImpl::RendererImpl()
 {
 }
 
@@ -484,7 +485,7 @@ void RendererImpl::DrawPosture_Impl(const ozz::math::Float4x4& _transform, const
 		GL(BindBuffer(GL_ARRAY_BUFFER, model.vbo));
 
 		// Bind shader
-		model.shader->Bind(_transform, camera_->view_proj(), sizeof(VertexPNC), 0, sizeof(VertexPNC), 12, sizeof(VertexPNC), 24);
+		model.shader->Bind(_transform, GetCamera().view_proj(), sizeof(VertexPNC), 0, sizeof(VertexPNC), 12, sizeof(VertexPNC), 24);
 
 		GL(BindBuffer(GL_ARRAY_BUFFER, 0));
 
@@ -516,7 +517,7 @@ void RendererImpl::DrawPosture_InstancedImpl(const ozz::math::Float4x4& _transfo
 		GL(BindBuffer(GL_ARRAY_BUFFER, model.vbo));
 
 		// Bind shader
-		model.shader->Bind(_transform, camera_->view_proj(), sizeof(VertexPNC), 0, sizeof(VertexPNC), 12, sizeof(VertexPNC), 24);
+		model.shader->Bind(_transform, GetCamera().view_proj(), sizeof(VertexPNC), 0, sizeof(VertexPNC), 12, sizeof(VertexPNC), 24);
 
 		GL(BindBuffer(GL_ARRAY_BUFFER, 0));
 
@@ -613,7 +614,7 @@ bool RendererImpl::DrawPoints(const ozz::span<const float>& _positions, const oz
 	// Size is managed in vertex shader side.
 	GL(Enable(GL_PROGRAM_POINT_SIZE));
 
-	const PointsShader::GenericAttrib attrib = points_shader->Bind(_transform, camera()->view_proj(), 12, positions_offset, colors_size ? 4 : 0, colors_offset, sizes_size ? 4 : 0, sizes_offset, _screen_space);
+	const PointsShader::GenericAttrib attrib = points_shader->Bind(_transform, GetCamera().view_proj(), 12, positions_offset, colors_size ? 4 : 0, colors_offset, sizes_size ? 4 : 0, sizes_offset, _screen_space);
 
 	GL(BindBuffer(GL_ARRAY_BUFFER, 0));
 
@@ -788,7 +789,7 @@ bool RendererImpl::DrawBoxShaded(const ozz::math::Box& _box, ozz::span<const ozz
 	//   GL(BufferSubData(GL_ARRAY_BUFFER, models_offset, _transforms.size_bytes(),
 	//                    _transforms.data()));
 
-	//   ambient_shader_instanced->Bind(models_offset, camera()->view_proj(), stride,
+	//   ambient_shader_instanced->Bind(models_offset, GetCamera().view_proj(), stride,
 	//                                  positions_offset, stride, normals_offset,
 	//                                  stride, colors_offset, true);
 	//   GL(BindBuffer(GL_ARRAY_BUFFER, 0));
@@ -806,7 +807,7 @@ bool RendererImpl::DrawBoxShaded(const ozz::math::Box& _box, ozz::span<const ozz
 	for (size_t i = 0; i < _transforms.size(); i++) {
 		const ozz::math::Float4x4& transform = _transforms[i];
 
-		ambient_shader->Bind(transform, camera()->view_proj(), stride, positions_offset, stride, normals_offset, stride, colors_offset, true);
+		ambient_shader->Bind(transform, GetCamera().view_proj(), stride, positions_offset, stride, normals_offset, stride, colors_offset, true);
 
 		// Draws the mesh.
 		GL(DrawArrays(GL_TRIANGLES, 0, OZZ_ARRAY_SIZE(vertices)));
@@ -881,7 +882,7 @@ bool RendererImpl::DrawSphereShaded(float _radius, ozz::span<const ozz::math::Fl
 	//   GL(BufferSubData(GL_ARRAY_BUFFER, models_offset, _transforms.size_bytes(),
 	//                    models));
 
-	//   ambient_shader_instanced->Bind(models_offset, camera()->view_proj(),
+	//   ambient_shader_instanced->Bind(models_offset, GetCamera().view_proj(),
 	//                                  positions_stride, positions_offset,
 	//                                  normals_stride, normals_offset,
 	//                                  colors_stride, colors_offset, true);
@@ -914,7 +915,7 @@ bool RendererImpl::DrawSphereShaded(float _radius, ozz::span<const ozz::math::Fl
 	for (size_t i = 0; i < _transforms.size(); i++) {
 		const ozz::math::Float4x4& transform = Scale(_transforms[i], radius);
 
-		ambient_shader->Bind(transform, camera()->view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, true);
+		ambient_shader->Bind(transform, GetCamera().view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, true);
 
 		static_assert(sizeof(icosphere::kIndices[0]) == 2, "Indices must be 2 bytes");
 		GL(DrawElements(GL_TRIANGLES, OZZ_ARRAY_SIZE(icosphere::kIndices), GL_UNSIGNED_SHORT, 0));
@@ -1172,14 +1173,14 @@ bool RendererImpl::DrawMesh(const Mesh& _mesh, const ozz::math::Float4x4& _trans
 		// Binds shader with this array buffer, depending on rendering options.
 		AnimationShader* shader = nullptr;
 		if (_options.texture) {
-			ambient_textured_shader->Bind(_transform, camera()->view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false, uvs_stride, uvs_offset);
+			ambient_textured_shader->Bind(_transform, GetCamera().view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false, uvs_stride, uvs_offset);
 			shader = ambient_textured_shader.get();
 
 			// Binds default texture
 			GL(BindTexture(GL_TEXTURE_2D, checkered_texture_));
 		}
 		else {
-			ambient_shader->Bind(_transform, camera()->view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false);
+			ambient_shader->Bind(_transform, GetCamera().view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false);
 			shader = ambient_shader.get();
 		}
 
@@ -1462,14 +1463,14 @@ bool RendererImpl::DrawSkinnedMesh(const Engine::Mesh& _mesh, const ozz::span<oz
 		// Binds shader with this array buffer, depending on rendering options.
 		AnimationShader* shader = nullptr;
 		if (_options.texture) {
-			ambient_textured_shader->Bind(_transform, camera()->view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false, uvs_stride, uvs_offset);
+			ambient_textured_shader->Bind(_transform, GetCamera().view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false, uvs_stride, uvs_offset);
 			shader = ambient_textured_shader.get();
 
 			// Binds default texture
 			GL(BindTexture(GL_TEXTURE_2D, checkered_texture_));
 		}
 		else {
-			ambient_shader->Bind(_transform, camera()->view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false);
+			ambient_shader->Bind(_transform, GetCamera().view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false);
 			shader = ambient_shader.get();
 		}
 

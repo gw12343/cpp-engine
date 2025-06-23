@@ -4,12 +4,10 @@
 #include "core/Engine.h"
 #include "spdlog/spdlog.h"
 #include "glm/glm.hpp"
+#include "core/EngineData.h"
+#include "animation/AnimationManager.h"
 
 namespace Engine::UI {
-	UIManager::UIManager(GEngine* engine) : m_engine(engine)
-	{
-	}
-
 
 	void SetThemeColors(int t)
 	{
@@ -329,7 +327,12 @@ namespace Engine::UI {
 		}
 	}
 
-	void UIManager::Initialize()
+
+	void UIManager::onShutdown()
+	{
+	}
+
+	void UIManager::onInit()
 	{
 		SetThemeColors(0);
 	}
@@ -389,9 +392,11 @@ namespace Engine::UI {
 		ImGui::End();
 	}
 
-
-	void UIManager::Render()
+	void UIManager::onUpdate(float dt)
 	{
+		GetRenderer().PreRender();
+		BeginDockspace();
+
 		RenderSceneView(Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->texture);
 		RenderHierarchyWindow();
 		RenderInspectorWindow();
@@ -399,9 +404,11 @@ namespace Engine::UI {
 		RenderAudioDebugUI();
 
 		// Display pause overlay when physics is disabled
-		if (!m_engine->IsPhysicsEnabled()) {
+		if (IsPhysicsPaused()) {
 			RenderPauseOverlay();
 		}
+
+		EndDockspace();
 	}
 
 	void UIManager::RenderHierarchyWindow()
@@ -409,10 +416,10 @@ namespace Engine::UI {
 		ImGui::Begin("Hierarchy");
 
 		// Get all entities with EntityMetadata component
-		auto view = m_engine->GetRegistry().view<Components::EntityMetadata>();
+		auto view = GetRegistry().view<Components::EntityMetadata>();
 
 		for (auto entity : view) {
-			Entity e(entity, m_engine);
+			Entity e(entity);
 			auto&  metadata = e.GetComponent<Components::EntityMetadata>();
 
 			// Create a selectable item for each entity
@@ -470,7 +477,7 @@ namespace Engine::UI {
 					// Handle the Play button functionality here since we have access to the sound manager
 					if (!audioSource.isPlaying && ImGui::Button("Play")) {
 						if (audioSource.source && !audioSource.soundName.empty()) {
-							audioSource.Play(m_engine->GetSoundManager());
+							audioSource.Play(GetSoundManager());
 							spdlog::error("Playing sound");
 						}
 					}
@@ -530,35 +537,37 @@ namespace Engine::UI {
 		ImGui::Begin("Animation");
 
 		if (ImGui::CollapsingHeader("Animation")) {
-			auto& animManager = m_engine->GetAnimationManager();
-			// auto& skeleton    = animManager.GetSkeleton();
-			// auto& meshes      = animManager.GetMeshes();
-
-			// ImGui::LabelText("Animated Joints", "%d animated joints", skeleton.num_joints());
-
-			// int influences = 0;
-			// for (const auto& mesh : meshes) {
-			// 	influences = ozz::math::Max(influences, mesh.max_influences_count());
-			// }
-			// ImGui::LabelText("Influences", "%d influences (max)", influences);
-
-			// int vertices = 0;
-			// for (const auto& mesh : meshes) {
-			// 	vertices += mesh.vertex_count();
-			// }
-
-			// ImGui::LabelText("Vertices", "%.1fK vertices", vertices / 1000.f);
-
-			// int indices = 0;
-			// for (const auto& mesh : meshes) {
-			// 	indices += mesh.triangle_index_count();
-			// }
-
-			// ImGui::LabelText("Triangles", "%.1fK triangles", indices / 3000.f);
+			//						auto& animManager = GetAnimationManager();
+			//
+			//
+			//						auto& skeleton = animManager.GetSkeleton();
+			//						auto& meshes   = animManager.GetMeshes();
+			//
+			//						ImGui::LabelText("Animated Joints", "%d animated joints", skeleton.num_joints());
+			//
+			//						int influences = 0;
+			//						for (const auto& mesh : meshes) {
+			//							influences = ozz::math::Max(influences, mesh.max_influences_count());
+			//						}
+			//						ImGui::LabelText("Influences", "%d influences (max)", influences);
+			//
+			//						int vertices = 0;
+			//						for (const auto& mesh : meshes) {
+			//							vertices += mesh.vertex_count();
+			//						}
+			//
+			//						ImGui::LabelText("Vertices", "%.1fK vertices", vertices / 1000.f);
+			//
+			//						int indices = 0;
+			//						for (const auto& mesh : meshes) {
+			//							indices += mesh.triangle_index_count();
+			//						}
+			//
+			//						ImGui::LabelText("Triangles", "%.1fK triangles", indices / 3000.f);
 		}
 
 		if (ImGui::CollapsingHeader("Rendering Options")) {
-			auto& animManager    = m_engine->GetAnimationManager();
+			auto& animManager    = GetAnimationManager();
 			auto& draw_skeleton  = animManager.GetDrawSkeleton();
 			auto& draw_mesh      = animManager.GetDrawMesh();
 			auto& render_options = animManager.GetRenderOptions();
@@ -578,7 +587,7 @@ namespace Engine::UI {
 			ImGui::Checkbox("Skip skinning", &render_options.skip_skinning);
 		}
 
-		ImGui::SliderFloat("fov", &m_engine->GetCamera().m_fov, 45, 120);
+		ImGui::SliderFloat("fov", &GetCamera().m_fov, 45, 120);
 
 		ImGui::End();
 	}
@@ -586,8 +595,8 @@ namespace Engine::UI {
 	void UIManager::RenderAudioDebugUI()
 	{
 		ImGui::Begin("Audio Debug");
-		auto      audioView = m_engine->GetRegistry().view<Components::EntityMetadata, Components::Transform, Components::AudioSource>();
-		glm::vec3 cameraPos = m_engine->GetCamera().GetPosition();
+		auto      audioView = GetRegistry().view<Components::EntityMetadata, Components::Transform, Components::AudioSource>();
+		glm::vec3 cameraPos = GetCamera().GetPosition();
 
 		for (auto [entity, metadata, transform, audio] : audioView.each()) {
 			if (audio.source) {
@@ -695,4 +704,6 @@ namespace Engine::UI {
 		ImGui::PopStyleVar();
 		ImGui::End();
 	}
+
+
 } // namespace Engine::UI

@@ -107,9 +107,63 @@ FetchContent_MakeAvailable(effekseer)
 
 ############################################################################
 
+include(FetchContent)
+
+# Fetch Lua from the official mirror
+FetchContent_Declare(
+        lua
+        URL https://www.lua.org/ftp/lua-5.4.6.tar.gz  # or latest version
+)
+
+FetchContent_MakeAvailable(lua)
+
+# Create a target for Lua manually
+add_library(lua STATIC
+        ${lua_SOURCE_DIR}/src/lapi.c
+        ${lua_SOURCE_DIR}/src/lauxlib.c
+        ${lua_SOURCE_DIR}/src/lbaselib.c
+        ${lua_SOURCE_DIR}/src/lcode.c
+        ${lua_SOURCE_DIR}/src/lcorolib.c
+        ${lua_SOURCE_DIR}/src/lctype.c
+        ${lua_SOURCE_DIR}/src/ldblib.c
+        ${lua_SOURCE_DIR}/src/ldebug.c
+        ${lua_SOURCE_DIR}/src/ldo.c
+        ${lua_SOURCE_DIR}/src/ldump.c
+        ${lua_SOURCE_DIR}/src/lfunc.c
+        ${lua_SOURCE_DIR}/src/lgc.c
+        ${lua_SOURCE_DIR}/src/linit.c
+        ${lua_SOURCE_DIR}/src/liolib.c
+        ${lua_SOURCE_DIR}/src/llex.c
+        ${lua_SOURCE_DIR}/src/lmathlib.c
+        ${lua_SOURCE_DIR}/src/lmem.c
+        ${lua_SOURCE_DIR}/src/loadlib.c
+        ${lua_SOURCE_DIR}/src/lobject.c
+        ${lua_SOURCE_DIR}/src/lopcodes.c
+        ${lua_SOURCE_DIR}/src/loslib.c
+        ${lua_SOURCE_DIR}/src/lparser.c
+        ${lua_SOURCE_DIR}/src/lstate.c
+        ${lua_SOURCE_DIR}/src/lstring.c
+        ${lua_SOURCE_DIR}/src/lstrlib.c
+        ${lua_SOURCE_DIR}/src/ltable.c
+        ${lua_SOURCE_DIR}/src/ltablib.c
+        ${lua_SOURCE_DIR}/src/ltm.c
+        ${lua_SOURCE_DIR}/src/lua.c
+        ${lua_SOURCE_DIR}/src/luac.c
+        ${lua_SOURCE_DIR}/src/lundump.c
+        ${lua_SOURCE_DIR}/src/lutf8lib.c
+        ${lua_SOURCE_DIR}/src/lvm.c
+        ${lua_SOURCE_DIR}/src/lzio.c
+)
+
+target_include_directories(lua PUBLIC ${lua_SOURCE_DIR})
+
+
+############################################################################
+
+
 # EnTT is a header-only library, so we don't need to link it
 # It's already included in lib/include/entt
-
+target_include_directories(lua PUBLIC ${lua_SOURCE_DIR}/src)
 include_directories(${PROJECT_NAME} lib/include /usr/include lib/src/JoltPhysics/ src)
 # Find all source files in src and lib/src directories
 file(GLOB_RECURSE SOURCES
@@ -134,8 +188,22 @@ add_executable(${PROJECT_NAME} ${SOURCES}
         src/rendering/Framebuffer.h
         src/rendering/Framebuffer.cpp
         src/rendering/shadows/ShadowMapRenderer.cpp
-        src/rendering/shadows/ShadowMapRenderer.h)
+        src/rendering/shadows/ShadowMapRenderer.h
+        src/utils/Logger.cpp
+        src/utils/Logger.h
+        src/core/module/Module.cpp
+        src/core/module/Module.h
+        src/core/module/ModuleManager.inl
+        src/core/module/ModuleManager.cpp
+        src/core/module/ModuleManager.h
+        src/core/module/TestModule.cpp
+        src/core/module/TestModule.h
+        src/core/EngineData.cpp
+        src/core/EngineData.h)
 find_package(OpenGL REQUIRED)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE lua)
+
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE imgui)

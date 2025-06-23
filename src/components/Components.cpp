@@ -35,11 +35,10 @@ namespace Engine {
 
 		void AudioSource::OnAdded(Entity& entity)
 		{
-			ENGINE_ASSERT(entity.m_engine, "AudioSource::OnAdded: Entity's engine pointer is null");
 			// If autoPlay is enabled, try to play the sound
 			if (autoPlay && !soundName.empty()) {
 				// Get the sound manager from the engine
-				auto& soundManager = entity.m_engine->GetSoundManager();
+				auto& soundManager = GetSoundManager();
 				Play(soundManager);
 			}
 		}
@@ -138,10 +137,8 @@ namespace Engine {
 
 		void SkeletonComponent::OnAdded(Entity& entity)
 		{
-			ENGINE_ASSERT(entity.m_engine, "SkeletonComponent::OnAdded: Entity's engine pointer is null");
-
 			if (!skeletonPath.empty()) {
-				skeleton = entity.m_engine->GetAnimationManager().LoadSkeletonFromPath(skeletonPath);
+				skeleton = GetAnimationManager().LoadSkeletonFromPath(skeletonPath);
 				if (!skeleton) {
 					spdlog::error("Failed to load skeleton from path: {}", skeletonPath);
 				}
@@ -161,10 +158,8 @@ namespace Engine {
 
 		void AnimationComponent::OnAdded(Entity& entity)
 		{
-			ENGINE_ASSERT(entity.m_engine, "AnimationComponent::OnAdded: Entity's engine pointer is null");
-
 			if (!animationPath.empty()) {
-				animation = entity.m_engine->GetAnimationManager().LoadAnimationFromPath(animationPath);
+				animation = GetAnimationManager().LoadAnimationFromPath(animationPath);
 				if (!animation) {
 					spdlog::error("Failed to load animation from path: {}", animationPath);
 				}
@@ -186,7 +181,6 @@ namespace Engine {
 			ENGINE_VERIFY(entity.HasComponent<SkeletonComponent>(), "AnimationPoseComponent::OnAdded: Missing SkeletonComponent");
 			auto& skeletonComponent = entity.GetComponent<SkeletonComponent>();
 			ENGINE_VERIFY(skeletonComponent.skeleton, "AnimationPoseComponent::OnAdded: SkeletonComponent has null skeleton");
-			ENGINE_ASSERT(entity.m_engine, "AnimationPoseComponent::OnAdded: Entity's engine pointer is null");
 
 
 			// Allocate pose data
@@ -264,12 +258,8 @@ namespace Engine {
 					SPDLOG_INFO("Loaded SKINNED MESHES from path: {}", meshPath);
 				}
 			}
-			ENGINE_ASSERT(entity.m_engine, "SkinnedMeshComponent::OnAdded: Entity's engine pointer is null");
-			if (!meshes) {
-				ENGINE_VERIFY(false, "SkinnedMeshComponent::OnAdded: Failed to load meshes");
-				return;
-			}
 
+			ENGINE_VERIFY(meshes, "SkinnedMeshComponent::OnAdded: Failed to load meshes");
 
 			skinning_matrices = new std::vector<ozz::math::Float4x4>();
 			s_skin_mats.insert(skinning_matrices);
@@ -303,8 +293,7 @@ namespace Engine {
 				std::u16string  utf16 = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes(effectPath);
 				const char16_t* raw   = utf16.c_str();
 
-				ENGINE_ASSERT(entity.m_engine, "ParticleSystem::OnAdded: Entity's engine pointer is null");
-				const auto& manager = entity.m_engine->GetParticleManager().GetManager();
+				const auto& manager = GetParticleManager().GetManager();
 				ENGINE_VERIFY(manager != nullptr, "ParticleSystem::OnAdded: Failed to get Effekseer manager");
 				// Spawn effect
 				effect = Effekseer::Effect::Create(manager, raw);
@@ -318,10 +307,8 @@ namespace Engine {
 
 		void ParticleSystem::RenderInspector(Entity& entity)
 		{
-			ENGINE_ASSERT(entity.m_engine, "ParticleSystem::RenderInspector: Entity's engine pointer is null");
-
 			ImGui::Text("Handle: %d", handle);
-			const auto& manager = entity.m_engine->GetParticleManager().GetManager();
+			const auto& manager = GetParticleManager().GetManager();
 			ENGINE_VERIFY(manager != nullptr, "ParticleSystem::RenderInspector: Failed to get Effekseer manager");
 			bool paused = manager->GetPaused(handle);
 

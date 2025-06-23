@@ -1,6 +1,7 @@
 #include "SoundManager.h"
 
 #include "components/Components.h"
+#include "core/EngineData.h"
 
 #include <cstring>
 #include <sndfile.h>
@@ -223,14 +224,6 @@ namespace Engine::Audio {
 		alSourcei(m_sourceID, AL_LOOPING, looping ? AL_TRUE : AL_FALSE);
 	}
 
-	SoundManager::SoundManager() : m_device(nullptr), m_context(nullptr), m_initialized(false)
-	{
-	}
-
-	SoundManager::~SoundManager()
-	{
-		Shutdown();
-	}
 
 	void SoundManager::Play(const std::string& soundName, bool looping, float volume)
 	{
@@ -246,13 +239,63 @@ namespace Engine::Audio {
 		m_sources.push_back(source);
 	}
 
-	bool SoundManager::Initialize()
+
+	void SoundManager::onUpdate(float dt)
+	{
+		// Clear any previous errors
+		alGetError();
+
+		// Update listener position and orientation based on camera
+		glm::vec3 cameraPos   = GetCamera().GetPosition();
+		glm::vec3 cameraFront = GetCamera().GetFront();
+		glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f); // Assuming Y-up world
+
+		// Set listener position to camera position
+		SetListenerPosition(cameraPos.x, cameraPos.y, cameraPos.z);
+		CheckOpenALError("setting listener position");
+
+		// Set listener orientation (at vector and up vector)
+		SetListenerOrientation(cameraFront.x,
+		                       cameraFront.y,
+		                       cameraFront.z, // "At" vector (where camera is looking)
+		                       cameraUp.x,
+		                       cameraUp.y,
+		                       cameraUp.z // "Up" vector
+		);
+		CheckOpenALError("setting listener orientation");
+
+		// Update all audio sources based on their entity transforms
+		auto audioView = GetRegistry().view<Components::EntityMetadata, Components::Transform, Components::AudioSource>();
+
+		for (auto [entity, metadata, transform, audio] : audioView.each()) {
+			// Update audio source position based on entity transform
+			if (audio.source) {
+				// Get the world position from the transform
+				glm::vec3 worldPos = transform.position;
+
+				// Set the 3D position of the sound source
+				audio.source->SetPosition(worldPos.x, worldPos.y, worldPos.z);
+				CheckOpenALError("setting source position");
+
+				// Ensure attenuation parameters are up-to-date
+				audio.source->ConfigureAttenuation(audio.referenceDistance, audio.maxDistance, audio.rolloffFactor);
+				CheckOpenALError("configuring attenuation");
+
+				// Set the base volume (OpenAL will handle the attenuation)
+				audio.source->SetGain(audio.volume);
+				CheckOpenALError("setting gain");
+			}
+		}
+	}
+
+
+	void SoundManager::onInit()
 	{
 		// Open the default audio device
 		m_device = alcOpenDevice(nullptr);
 		if (!m_device) {
 			spdlog::error("Failed to open OpenAL device");
-			return false;
+			return;
 		}
 
 		// Create context
@@ -261,7 +304,7 @@ namespace Engine::Audio {
 			spdlog::error("Failed to create OpenAL context");
 			alcCloseDevice(m_device);
 			m_device = nullptr;
-			return false;
+			return;
 		}
 
 		// Make context current
@@ -271,23 +314,22 @@ namespace Engine::Audio {
 			alcCloseDevice(m_device);
 			m_context = nullptr;
 			m_device  = nullptr;
-			return false;
+			return;
 		}
 
 		m_initialized = true;
-		SPDLOG_INFO("OpenAL initialized successfully");
+		spdlog::info("OpenAL initialized successfully");
 
 
 		if (!m_initialized) {
 			spdlog::critical("Failed to initialize sound manager");
-			return false;
+			return;
 		}
 
 		LoadDefaultSounds();
-		return true;
 	}
 
-	void SoundManager::Shutdown()
+	void SoundManager::onShutdown()
 	{
 		if (!m_initialized) return;
 
@@ -375,51 +417,5 @@ namespace Engine::Audio {
 		}
 	}
 
-	void SoundManager::UpdateAudioEntities(entt::registry& registry, const Camera& camera)
-	{
-		// Clear any previous errors
-		alGetError();
 
-		// Update listener position and orientation based on camera
-		glm::vec3 cameraPos   = camera.GetPosition();
-		glm::vec3 cameraFront = camera.GetFront();
-		glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f); // Assuming Y-up world
-
-		// Set listener position to camera position
-		SetListenerPosition(cameraPos.x, cameraPos.y, cameraPos.z);
-		CheckOpenALError("setting listener position");
-
-		// Set listener orientation (at vector and up vector)
-		SetListenerOrientation(cameraFront.x,
-		                       cameraFront.y,
-		                       cameraFront.z, // "At" vector (where camera is looking)
-		                       cameraUp.x,
-		                       cameraUp.y,
-		                       cameraUp.z // "Up" vector
-		);
-		CheckOpenALError("setting listener orientation");
-
-		// Update all audio sources based on their entity transforms
-		auto audioView = registry.view<Components::EntityMetadata, Components::Transform, Components::AudioSource>();
-
-		for (auto [entity, metadata, transform, audio] : audioView.each()) {
-			// Update audio source position based on entity transform
-			if (audio.source) {
-				// Get the world position from the transform
-				glm::vec3 worldPos = transform.position;
-
-				// Set the 3D position of the sound source
-				audio.source->SetPosition(worldPos.x, worldPos.y, worldPos.z);
-				CheckOpenALError("setting source position");
-
-				// Ensure attenuation parameters are up-to-date
-				audio.source->ConfigureAttenuation(audio.referenceDistance, audio.maxDistance, audio.rolloffFactor);
-				CheckOpenALError("configuring attenuation");
-
-				// Set the base volume (OpenAL will handle the attenuation)
-				audio.source->SetGain(audio.volume);
-				CheckOpenALError("setting gain");
-			}
-		}
-	}
 } // namespace Engine::Audio

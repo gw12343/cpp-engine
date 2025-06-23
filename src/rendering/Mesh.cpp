@@ -7,6 +7,8 @@
 
 #include <glad/glad.h>
 #include <spdlog/spdlog.h>
+
+
 namespace Engine {
 	namespace Rendering {
 		// Static tracking sets

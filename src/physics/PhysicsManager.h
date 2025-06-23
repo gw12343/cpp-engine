@@ -11,6 +11,7 @@
 
 #include "physics/PhysicsInterfaces.h"
 #include "spdlog/spdlog.h"
+#include "core/module/Module.h"
 
 #include <Jolt/Core/Factory.h>
 #include <Jolt/Core/JobSystemThreadPool.h>
@@ -39,21 +40,24 @@ namespace Engine {
 	const uint cMaxContactConstraints = 1024;
 
 
-	class PhysicsManager {
+	class PhysicsManager : public Module {
 	  public:
 		static void TraceImpl(const char* inFMT, ...);
 		static bool AssertFailedImpl(const char* inExpression, const char* inMessage, const char* inFile, uint inLine);
 
 
-		static void                              Initialize();
-		static void                              CleanUp(entt::registry& registry);
-		static void                              Update(float dt);
-		static void                              SyncPhysicsEntities(entt::registry& registry);
-		static std::shared_ptr<PhysicsSystem>    GetPhysicsSystem();
-		static BPLayerInterfaceImpl              broad_phase_layer_interface;
-		static ObjectVsBroadPhaseLayerFilterImpl object_vs_broadphase_layer_filter;
-		static ObjectLayerPairFilterImpl         object_vs_object_layer_filter;
-		static ContactListenerImpl               contact_listener;
-		static BodyActivationListenerImpl        body_activation_listener;
+		void        onInit() override;
+		void        onUpdate(float dt) override;
+		void        onShutdown() override;
+		std::string name() const override { return "PhysicsManger"; };
+
+
+		void                              SyncPhysicsEntities();
+		std::shared_ptr<PhysicsSystem>    GetPhysicsSystem();
+		BPLayerInterfaceImpl              broad_phase_layer_interface;
+		ObjectVsBroadPhaseLayerFilterImpl object_vs_broadphase_layer_filter;
+		ObjectLayerPairFilterImpl         object_vs_object_layer_filter;
+		ContactListenerImpl               contact_listener;
+		BodyActivationListenerImpl        body_activation_listener;
 	};
 } // namespace Engine

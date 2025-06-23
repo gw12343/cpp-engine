@@ -9,8 +9,10 @@
 #include <utils/Utils.h>
 namespace Engine {
 
-	AnimationManager::AnimationManager(GEngine* engine) : m_engine(engine), draw_skeleton_(false), draw_mesh_(true)
+	void AnimationManager::onInit()
 	{
+		draw_skeleton_ = false;
+		draw_mesh_     = true;
 		// Initialize render options with defaults
 		render_options_.triangles     = true;
 		render_options_.texture       = true;
@@ -21,27 +23,22 @@ namespace Engine {
 		render_options_.colors        = true;
 		render_options_.wireframe     = false;
 		render_options_.skip_skinning = false;
-	}
 
-	bool AnimationManager::Initialize(Camera* camera)
-	{
-		camera_   = camera;
-		renderer_ = ozz::make_unique<RendererImpl>(camera_);
+
+		renderer_ = ozz::make_unique<RendererImpl>();
 
 		bool success = renderer_->Initialize();
 		if (!success) {
-			spdlog::error("Failed to initialize animation renderer");
-			return false;
+			log->error("Failed to initialize animation renderer");
+			return;
 		}
 		else {
 			SPDLOG_INFO("Initialized animated renderer");
 		}
-
-		return true;
 	}
 
 
-	void AnimationManager::Shutdown()
+	void AnimationManager::onShutdown()
 	{
 		// Clean up loaded skeletons and animations
 		for (auto& pair : loaded_skeletons_) {
@@ -55,12 +52,12 @@ namespace Engine {
 	}
 
 
-	void AnimationManager::Update(float deltaTime)
+	void AnimationManager::onUpdate(float deltaTime)
 	{
 		// Get all entities with a AnimationWorkerComponent and AnimationComponent and AnimationPoseComponent and SkeletonComponent
-		auto view = m_engine->GetRegistry().view<Components::AnimationWorkerComponent, Components::AnimationComponent>();
+		auto view = GetRegistry().view<Components::AnimationWorkerComponent, Components::AnimationComponent>();
 		for (auto entity : view) {
-			Entity e(entity, m_engine);
+			Entity e(entity);
 			auto&  animationWorkerComponent = e.GetComponent<Components::AnimationWorkerComponent>();
 			auto&  animationComponent       = e.GetComponent<Components::AnimationComponent>();
 			auto&  animationPoseComponent   = e.GetComponent<Components::AnimationPoseComponent>();
@@ -95,9 +92,9 @@ namespace Engine {
 	void AnimationManager::Render()
 	{
 		// Get all entities with a SkinnedMeshComponent and transform and AnimationPoseComponent
-		auto view = m_engine->GetRegistry().view<Components::SkinnedMeshComponent, Components::Transform>();
+		auto view = GetRegistry().view<Components::SkinnedMeshComponent, Components::Transform>();
 		for (auto entity : view) {
-			Entity                    e(entity, m_engine);
+			Entity                    e(entity);
 			auto&                     skinnedMeshComponent   = e.GetComponent<Components::SkinnedMeshComponent>();
 			auto&                     animationPoseComponent = e.GetComponent<Components::AnimationPoseComponent>();
 			const ozz::math::Float4x4 transform              = FromMatrix(e.GetComponent<Components::Transform>().GetMatrix());
@@ -213,5 +210,6 @@ namespace Engine {
 		SPDLOG_INFO("Loaded {} meshes from path: {}", meshes->size(), path);
 		return meshes;
 	}
+
 
 } // namespace Engine

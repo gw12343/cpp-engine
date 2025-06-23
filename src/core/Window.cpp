@@ -20,16 +20,16 @@ namespace Engine {
 		m_frameBuffers[Window::FramebufferID::GAME_OUT] = std::make_shared<Framebuffer>();
 	}
 
-	Window::~Window() = default;
 
-	bool Window::Initialize()
+	void Window::onInit()
 	{
-		if (!InitGLFW()) return false;
-		if (!InitGLAD()) return false;
+		InitGLFW();
+		InitGLAD();
 		InitImGui();
 
-		return true;
+		UpdateFramebufferSizes(targetWidth, targetHeight);
 	}
+
 
 	bool Window::InitGLFW()
 	{
@@ -90,7 +90,7 @@ namespace Engine {
 		return true;
 	}
 
-	void Window::Update()
+	void Window::onUpdate(float dt)
 	{
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -120,7 +120,7 @@ namespace Engine {
 		glViewport(0, 0, m_width, m_height);
 	}
 
-	void Window::Shutdown()
+	void Window::onShutdown()
 	{
 		SPDLOG_INFO("Shutting down ImGui context");
 		ImGui_ImplOpenGL3_Shutdown();
@@ -177,8 +177,11 @@ namespace Engine {
 			targetHeight = render_height;
 		}
 	}
+
 	std::shared_ptr<Framebuffer> Window::GetFramebuffer(Window::FramebufferID id)
 	{
 		return m_frameBuffers[id];
 	}
+
+
 } // namespace Engine

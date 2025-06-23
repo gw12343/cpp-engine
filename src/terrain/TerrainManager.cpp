@@ -1,6 +1,6 @@
 #include "TerrainManager.h"
-#include "Jolt/Math/Float3.h"
 #include "utils/Utils.h"
+#include "core/EngineData.h"
 
 #include <filesystem>
 #include <fstream>
@@ -13,6 +13,79 @@
 #include <stdexcept>
 
 namespace Engine::Terrain {
+
+	void TerrainManager::onInit()
+	{
+		std::shared_ptr<Engine::Texture> tex1 = std::make_shared<Engine::Texture>();
+		tex1->LoadFromFile("resources/textures/Terrain Grass.png");
+
+		std::shared_ptr<Engine::Texture> tex2 = std::make_shared<Engine::Texture>();
+		tex2->LoadFromFile("resources/textures/Terrain Dirt.png");
+
+		std::shared_ptr<Engine::Texture> tex3 = std::make_shared<Engine::Texture>();
+		tex3->LoadFromFile("resources/textures/Terrain Sand.png");
+
+		std::shared_ptr<Engine::Texture> tex4 = std::make_shared<Engine::Texture>();
+		tex4->LoadFromFile("resources/textures/Terrain Rock.png");
+
+		std::shared_ptr<Engine::Texture> tex5 = std::make_shared<Engine::Texture>();
+		tex5->LoadFromFile("resources/textures/white.png");
+
+
+		LoadTerrainFile("resources/terrain/terrain1.bin");
+		LoadTerrainFile("resources/terrain/terrain2.bin");
+		GenerateMeshes();
+		GenerateSplatTextures();
+		SetupShaders();
+
+
+		GetTerrains()[0]->diffuseTextures.push_back(tex1);
+		GetTerrains()[0]->diffuseTextures.push_back(tex2);
+		GetTerrains()[0]->diffuseTextures.push_back(tex3);
+		GetTerrains()[0]->diffuseTextures.push_back(tex4);
+		GetTerrains()[0]->diffuseTextures.push_back(tex5);
+
+		GetTerrains()[1]->diffuseTextures.push_back(tex1);
+		GetTerrains()[1]->diffuseTextures.push_back(tex2);
+		GetTerrains()[1]->diffuseTextures.push_back(tex3);
+		GetTerrains()[1]->diffuseTextures.push_back(tex4);
+		GetTerrains()[1]->diffuseTextures.push_back(tex5);
+	}
+
+	void TerrainManager::onUpdate(float dt)
+	{
+	}
+
+	void TerrainManager::Render()
+	{
+		for (auto& tile : terrains) {
+			tile->terrainShader->Bind();
+			glm::mat4 terrainTransform = glm::translate(glm::mat4(1.0f), glm::vec3(tile->posX, tile->posY, tile->posZ));
+			tile->terrainShader->SetMat4("uModel", &terrainTransform);
+
+			glm::mat4 viewM       = GetCamera().GetViewMatrix();
+			glm::mat4 projectionM = GetCamera().GetProjectionMatrix(Window::GetTargetAspectRatio());
+
+			tile->terrainShader->SetMat4("uView", &viewM);
+			tile->terrainShader->SetMat4("uProjection", &projectionM);
+
+			for (size_t i = 0; i < tile->splatTextures.size(); ++i)
+				glBindTextureUnit(static_cast<GLuint>(i), tile->splatTextures[i]);
+
+			size_t base = tile->splatTextures.size();
+			for (size_t i = 0; i < tile->diffuseTextures.size(); ++i)
+				tile->diffuseTextures[i]->Bind(base + i);
+
+			glBindVertexArray(tile->vao);
+			glDrawElements(GL_TRIANGLES, tile->indexCount, GL_UNSIGNED_INT, nullptr);
+			glBindVertexArray(0);
+		}
+	}
+	void TerrainManager::onShutdown()
+	{
+		// TODO dispose shaders ...
+	}
+
 	void TerrainManager::LoadTerrainFile(const std::string& path)
 	{
 		auto tile = std::make_unique<TerrainTile>();
@@ -340,30 +413,6 @@ namespace Engine::Terrain {
 	{
 		return terrains;
 	}
-	void TerrainManager::Render(Engine::Window& window, Engine::Camera& camera)
-	{
-		for (auto& tile : terrains) {
-			tile->terrainShader->Bind();
-			glm::mat4 terrainTransform = glm::translate(glm::mat4(1.0f), glm::vec3(tile->posX, tile->posY, tile->posZ));
-			tile->terrainShader->SetMat4("uModel", &terrainTransform);
 
-			glm::mat4 viewM       = camera.GetViewMatrix();
-			glm::mat4 projectionM = camera.GetProjectionMatrix(window.GetTargetAspectRatio());
-
-			tile->terrainShader->SetMat4("uView", &viewM);
-			tile->terrainShader->SetMat4("uProjection", &projectionM);
-
-			for (size_t i = 0; i < tile->splatTextures.size(); ++i)
-				glBindTextureUnit(static_cast<GLuint>(i), tile->splatTextures[i]);
-
-			size_t base = tile->splatTextures.size();
-			for (size_t i = 0; i < tile->diffuseTextures.size(); ++i)
-				tile->diffuseTextures[i]->Bind(base + i);
-
-			glBindVertexArray(tile->vao);
-			glDrawElements(GL_TRIANGLES, tile->indexCount, GL_UNSIGNED_INT, nullptr);
-			glBindVertexArray(0);
-		}
-	}
 
 } // namespace Engine::Terrain

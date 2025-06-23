@@ -1,31 +1,50 @@
 #include "Engine.h"
-
-#include "Entity.h"
-#include "Input.h"
+using namespace JPH;
+using namespace JPH::literals;
 #include "components/Components.h"
 #include "physics/PhysicsManager.h"
 #include "terrain/TerrainLoader.h"
-#include "terrain/TerrainManager.h"
 #include "utils/ModelLoader.h"
 #include "Jolt/Physics/Collision/Shape/MeshShape.h"
-#include "rendering/Framebuffer.h"
-#include "rendering/ui/UIManager.h"
-#include <imgui.h>
+#include "core/module/ModuleManager.h"
+#include "core/module/TestModule.h"
 #include <memory>
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include "EngineData.h"
+#include "Window.h"
+#include "Input.h"
 
-using namespace JPH;
-using namespace JPH::literals;
 
+extern "C" {
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+}
 
 namespace Engine {
+	ModuleManager manager;
 
 
-	GEngine::GEngine(int width, int height, const char* title)
-	    : m_window(width, height, title), m_camera(glm::vec3(0.0f, 3.0f, 6.0f), glm::vec3(0, 1, 0), -90.0f, -30.0f), m_soundManager(std::make_shared<Audio::SoundManager>()), m_animationManager(std::make_unique<AnimationManager>(this)),
-	      m_deltaTime(0.0f), m_lastFrame(0.0f)
+	GEngine::GEngine(int width, int height, const char* title) : m_deltaTime(0.0f), m_lastFrame(0.0f)
 	{
-		m_uiManager = std::make_unique<UI::UIManager>(this);
+		Get().window    = std::make_shared<Window>(width, height, title);
+		Get().renderer  = std::make_shared<Renderer>();
+		Get().physics   = std::make_shared<PhysicsManager>();
+		Get().sound     = std::make_shared<Audio::SoundManager>();
+		Get().animation = std::make_shared<AnimationManager>();
+		Get().particle  = std::make_shared<ParticleManager>();
+		Get().ui        = std::make_shared<UI::UIManager>();
+		Get().camera    = std::make_shared<Camera>(glm::vec3(0.0f, 3.0f, 6.0f), glm::vec3(0, 1, 0), -90.0f, -30.0f);
+		Get().registry  = std::make_shared<entt::registry>();
+		Get().terrain   = std::make_shared<Terrain::TerrainManager>();
+		manager.RegisterExternal(Get().window);
+		manager.RegisterExternal(Get().physics);
+		manager.RegisterExternal(Get().sound);
+		manager.RegisterExternal(Get().ui);
+		manager.RegisterExternal(Get().animation);
+		manager.RegisterExternal(Get().particle);
+		manager.RegisterExternal(Get().terrain);
+		manager.RegisterExternal(Get().renderer);
 	}
 
 	// Test models
@@ -33,108 +52,30 @@ namespace Engine {
 	std::shared_ptr<Rendering::Model> cube;
 	std::shared_ptr<Rendering::Model> track;
 
-	Engine::Terrain::TerrainManager GEngine::terrainManager;
-
 
 	bool GEngine::Initialize()
 	{
-		m_logger = spdlog::stdout_color_mt("engine");
-		spdlog::set_level(spdlog::level::debug);
-		spdlog::set_pattern("[%H:%M:%S.%e] [%^%l%$] [%s:%#] %v");
-
 		SPDLOG_INFO("Starting Engine");
+		manager.InitAll();
 
-		// After window initialization, set the window reference in the camera
-		if (!m_window.Initialize()) {
-			return false;
-		}
-
-		Input::Initialize(m_window.GetNativeWindow());
+		Input::Initialize(GetWindow().GetNativeWindow());
 		Input::SetCursorMode(GLFW_CURSOR_NORMAL);
-
-		// Set the window reference in the camera
-		m_camera.SetWindow(&m_window);
-
-		// Initialize animation manager
-		if (!m_animationManager->Initialize(&m_camera)) {
-			spdlog::error("Failed to initialize animation manager");
-			return false;
-		}
-
-		if (!InitializeRenderer() || !m_soundManager->Initialize()) {
-			return false;
-		}
-
-		PhysicsManager::Initialize();
-		m_uiManager->Initialize();
-
-
-		m_particleManager = std::make_unique<ParticleManager>();
-		if (!m_particleManager->Initialize(8000)) {
-			SPDLOG_INFO("Failed to initalize particle manager");
-			return false;
-		}
-		else {
-			SPDLOG_INFO("good");
-		}
-
-
-		std::shared_ptr<Engine::Texture> tex1 = std::make_shared<Engine::Texture>();
-		tex1->LoadFromFile("resources/textures/Terrain Grass.png");
-
-		std::shared_ptr<Engine::Texture> tex2 = std::make_shared<Engine::Texture>();
-		tex2->LoadFromFile("resources/textures/Terrain Dirt.png");
-
-		std::shared_ptr<Engine::Texture> tex3 = std::make_shared<Engine::Texture>();
-		tex3->LoadFromFile("resources/textures/Terrain Sand.png");
-
-		std::shared_ptr<Engine::Texture> tex4 = std::make_shared<Engine::Texture>();
-		tex4->LoadFromFile("resources/textures/Terrain Rock.png");
-
-		std::shared_ptr<Engine::Texture> tex5 = std::make_shared<Engine::Texture>();
-		tex5->LoadFromFile("resources/textures/white.png");
-
-
-		terrainManager.LoadTerrainFile("resources/terrain/terrain1.bin");
-		terrainManager.LoadTerrainFile("resources/terrain/terrain2.bin");
-		terrainManager.GenerateMeshes();
-		terrainManager.GenerateSplatTextures();
-		terrainManager.SetupShaders();
-
-
-		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex1);
-		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex2);
-		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex3);
-		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex4);
-		terrainManager.GetTerrains()[0]->diffuseTextures.push_back(tex5);
-
-		terrainManager.GetTerrains()[1]->diffuseTextures.push_back(tex1);
-		terrainManager.GetTerrains()[1]->diffuseTextures.push_back(tex2);
-		terrainManager.GetTerrains()[1]->diffuseTextures.push_back(tex3);
-		terrainManager.GetTerrains()[1]->diffuseTextures.push_back(tex4);
-		terrainManager.GetTerrains()[1]->diffuseTextures.push_back(tex5);
 
 
 		CreateInitialEntities();
 
 
-		return true;
-	}
+		lua_State* L = luaL_newstate();
+		luaL_openlibs(L);
+		luaL_dostring(L, "print('Lua is working!')");
+		lua_close(L);
 
-	bool GEngine::InitializeRenderer()
-	{
-		m_renderer = std::make_unique<Renderer>(m_window, m_camera);
-		if (!m_renderer->Initialize()) {
-			m_logger->critical("Failed to initialize renderer");
-			return false;
-		}
-		m_window.UpdateFramebufferSizes(m_window.GetWidth(), m_window.GetHeight());
 		return true;
 	}
 
 	void GEngine::CreateInitialEntities()
 	{
-		BodyInterface& body_interface = PhysicsManager::GetPhysicsSystem()->GetBodyInterface();
+		BodyInterface& body_interface = GetPhysics().GetPhysicsSystem()->GetBodyInterface();
 		const RVec3    box_half_extents(0.5f, 0.5f, 0.5f);
 
 		// Create physics body
@@ -169,31 +110,31 @@ namespace Engine {
 		                                                                            "TwistedTree_1.obj");
 
 		// Create entities
-		Entity floor = Entity::Create(this, "Track");
-		floor.AddComponent<Components::ModelRenderer>(track);
+		Entity floor = Entity::Create("Track");
+		floor.AddComponent<Components::ModelRenderer>(cube);
 		floor.AddComponent<Components::Transform>(glm::vec3(0.0f, -10.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.01f, 0.01f, 0.01f));
-		floor.AddComponent<Components::RigidBodyComponent>(PhysicsManager::GetPhysicsSystem().get(), floor_id);
+		floor.AddComponent<Components::RigidBodyComponent>(GetPhysics().GetPhysicsSystem().get(), floor_id);
 
-		//		Entity entity = Entity::Create(this, "TestEntity");
-		//		entity.AddComponent<Components::ModelRenderer>(model);
-		//		entity.AddComponent<Components::Transform>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		//		entity.AddComponent<Components::ParticleSystem>("/home/gabe/CLionProjects/cpp-engine/resources/particles/testleaf.efk");
-
-
-		//		Entity entity2 = Entity::Create(this, "TestEntity2");
-		//		entity2.AddComponent<Components::ModelRenderer>(model);
-		//		entity2.AddComponent<Components::Transform>(glm::vec3(2.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		//		entity2.AddComponent<Components::RigidBodyComponent>(PhysicsManager::GetPhysicsSystem().get(), cube_id);
-		//		entity2.AddComponent<Components::AudioSource>("birds", true, 0.1f, 1.0f, true, 5.0f, 50.0f, 1.0f);
+		Entity entity = Entity::Create("TestEntity");
+		entity.AddComponent<Components::ModelRenderer>(model);
+		entity.AddComponent<Components::Transform>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		entity.AddComponent<Components::ParticleSystem>("/home/gabe/CLionProjects/cpp-engine/resources/particles/testleaf.efk");
 
 
-		//		Entity animatedEntity = Entity::Create(this, "AnimatedEntity");
-		//		animatedEntity.AddComponent<Components::Transform>(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		//		animatedEntity.AddComponent<Components::SkeletonComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_skeleton.ozz");
-		//		animatedEntity.AddComponent<Components::AnimationComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_animation.ozz");
-		//		animatedEntity.AddComponent<Components::AnimationPoseComponent>();
-		//		animatedEntity.AddComponent<Components::AnimationWorkerComponent>();
-		//		animatedEntity.AddComponent<Components::SkinnedMeshComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_mesh.ozz");
+		Entity entity2 = Entity::Create("TestEntity2");
+		entity2.AddComponent<Components::ModelRenderer>(model);
+		entity2.AddComponent<Components::Transform>(glm::vec3(2.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		entity2.AddComponent<Components::RigidBodyComponent>(GetPhysics().GetPhysicsSystem().get(), cube_id);
+		entity2.AddComponent<Components::AudioSource>("birds", true, 0.1f, 1.0f, true, 5.0f, 50.0f, 1.0f);
+
+
+		Entity animatedEntity = Entity::Create("AnimatedEntity");
+		animatedEntity.AddComponent<Components::Transform>(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		animatedEntity.AddComponent<Components::SkeletonComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_skeleton.ozz");
+		animatedEntity.AddComponent<Components::AnimationComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_animation.ozz");
+		animatedEntity.AddComponent<Components::AnimationPoseComponent>();
+		animatedEntity.AddComponent<Components::AnimationWorkerComponent>();
+		animatedEntity.AddComponent<Components::SkinnedMeshComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_mesh.ozz");
 
 		//
 		//		Terrain::TerrainTile tile = Terrain::LoadTerrainTile("resources/terrain/terrain.bin");
@@ -208,7 +149,7 @@ namespace Engine {
 
 	void GEngine::Run()
 	{
-		while (!m_window.ShouldClose()) {
+		while (!GetWindow().ShouldClose()) {
 			auto currentFrame = static_cast<float>(glfwGetTime());
 			m_deltaTime       = currentFrame - m_lastFrame;
 			m_lastFrame       = currentFrame;
@@ -217,7 +158,7 @@ namespace Engine {
 		}
 	}
 
-	void GEngine::ProcessInput()
+	void GEngine::ProcessInput() const
 	{
 		// Handle camera movement based on right mouse button state
 		if (Input::IsMousePressed(GLFW_MOUSE_BUTTON_RIGHT)) {
@@ -227,11 +168,11 @@ namespace Engine {
 			}
 
 			// Process camera movement with keyboard
-			m_camera.ProcessKeyboard(m_deltaTime);
+			GetCamera().ProcessKeyboard(m_deltaTime);
 
 			// Process mouse movement for camera rotation
 			glm::vec2 mouseDelta = Input::GetMouseDelta();
-			m_camera.ProcessMouseMovement(mouseDelta.x, mouseDelta.y);
+			GetCamera().ProcessMouseMovement(mouseDelta.x, mouseDelta.y);
 		}
 		else {
 			// Release cursor when right mouse button is released
@@ -242,118 +183,105 @@ namespace Engine {
 
 		// Toggle physics when P is pressed
 		if (Input::IsKeyPressedThisFrame(GLFW_KEY_P)) {
-			m_physicsEnabled = !m_physicsEnabled;
-			SPDLOG_INFO("Physics simulation {}", m_physicsEnabled ? "enabled" : "disabled");
+			Get().isPhysicsPaused = !Get().isPhysicsPaused;
+			SPDLOG_INFO("Physics simulation {}", Get().isPhysicsPaused ? "enabled" : "disabled");
 		}
 
 		// Process mouse scroll regardless of capture state
 		float scrollDelta = Input::GetMouseScrollDelta();
 		if (scrollDelta != 0.0f) {
-			m_camera.ProcessMouseScroll(scrollDelta);
+			GetCamera().ProcessMouseScroll(scrollDelta);
 		}
 
-		if (Input::IsKeyPressedThisFrame(GLFW_KEY_R)) {
-			SPDLOG_INFO("r");
-			// m_particleManager->SetPaused(handle, !m_particleManager->GetPaused(handle));
-		}
-
-
+		//		if (Input::IsKeyPressedThisFrame(GLFW_KEY_R)) {
+		//			SPDLOG_INFO("r");
+		//			// m_particleManager->SetPaused(handle, !m_particleManager->GetPaused(handle));
+		//		}
+		//
+		//
 		if (ImGui::IsKeyPressed(ImGuiKey_B)) {
-			glm::vec3 cpos    = m_camera.GetPosition();
-			glm::vec3 forward = m_camera.GetFront();
+			glm::vec3 cpos    = GetCamera().GetPosition();
+			glm::vec3 forward = GetCamera().GetFront();
 
-			BodyInterface&       body_interface = PhysicsManager::GetPhysicsSystem()->GetBodyInterface();
+			BodyInterface&       body_interface = GetPhysics().GetPhysicsSystem()->GetBodyInterface();
 			BodyCreationSettings sphere_settings(new SphereShape(0.5f), RVec3(cpos.x, cpos.y, cpos.z), Quat::sIdentity(), EMotionType::Dynamic, Layers::MOVING);
 			BodyID               sphere_id = body_interface.CreateAndAddBody(sphere_settings, EActivation::Activate);
 
 			body_interface.AddLinearVelocity(sphere_id, RVec3(forward.x * 5, forward.y * 5, forward.z * 5));
 
-			auto s = Entity::Create(this, "SphereEntity");
+			auto s = Entity::Create("SphereEntity");
 			s.AddComponent<Components::Transform>(glm::vec3(cpos.x, cpos.y, cpos.z), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 			s.AddComponent<Components::ModelRenderer>(sphere);
 			// s.AddComponent<Components::ShadowCaster>();
-			s.AddComponent<Components::RigidBodyComponent>(PhysicsManager::GetPhysicsSystem().get(), sphere_id);
+			s.AddComponent<Components::RigidBodyComponent>(GetPhysics().GetPhysicsSystem().get(), sphere_id);
 		}
 
 		if (ImGui::IsKeyPressed(ImGuiKey_C)) {
 			const RVec3 box_half_extents(0.5f, 0.5f, 0.5f);
-			glm::vec3   cpos    = m_camera.GetPosition();
-			glm::vec3   forward = m_camera.GetFront();
+			glm::vec3   cpos    = GetCamera().GetPosition();
+			glm::vec3   forward = GetCamera().GetFront();
 
-			BodyInterface&       body_interface = PhysicsManager::GetPhysicsSystem()->GetBodyInterface();
+			BodyInterface&       body_interface = GetPhysics().GetPhysicsSystem()->GetBodyInterface();
 			BodyCreationSettings cube_settings(new BoxShape(box_half_extents), RVec3(cpos.x, cpos.y, cpos.z), Quat::sIdentity(), EMotionType::Dynamic, Layers::MOVING);
 			BodyID               cube_id = body_interface.CreateAndAddBody(cube_settings, EActivation::Activate);
 
 			body_interface.AddLinearVelocity(cube_id, RVec3(forward.x * 5, forward.y * 5, forward.z * 5));
 
-			auto s = Entity::Create(this, "CubeEntity");
+			auto s = Entity::Create("CubeEntity");
 			s.AddComponent<Components::Transform>(glm::vec3(cpos.x, cpos.y, cpos.z), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 			s.AddComponent<Components::ModelRenderer>(cube);
 			// s.AddComponent<Components::ShadowCaster>();
-			s.AddComponent<Components::RigidBodyComponent>(PhysicsManager::GetPhysicsSystem().get(), cube_id);
+			s.AddComponent<Components::RigidBodyComponent>(GetPhysics().GetPhysicsSystem().get(), cube_id);
 		}
 	}
 
 
 	void GEngine::Update()
 	{
+		Window::PollEvents();
 		ProcessInput();
-		Engine::Window::PollEvents();
-		Engine::Window::Update();
 		Input::Update();
+		manager.UpdateAll(m_deltaTime);
 
 
-		m_animationManager->Update(m_deltaTime);
+		//		m_animationManager->Update(m_deltaTime);
+		//		if (m_physicsEnabled) PhysicsManager::Update(m_deltaTime);
+		//		PhysicsManager::SyncPhysicsEntities(m_registry);
+		//		m_soundManager->UpdateAudioEntities(m_registry, m_camera);
 
-		if (m_physicsEnabled) PhysicsManager::Update(m_deltaTime);
+		//
+		//		m_renderer->PreRender();
+		//		m_uiManager->BeginDockspace();
+		//		m_uiManager->Render();
+		//		m_uiManager->EndDockspace();
+		//
+		//		terrainManager.Render(m_window, m_camera);
+		//		m_animationManager->Render();
+		//		m_particleManager->Update(m_registry, m_deltaTime);
+		//		m_particleManager->Render(m_window, m_camera);
+		//
+		//		m_renderer->RenderEntities(m_registry);
+		//
+		//
+		//
+		//
+		//
 
-		PhysicsManager::SyncPhysicsEntities(m_registry);
-
-		m_soundManager->UpdateAudioEntities(m_registry, m_camera);
-
-
-		m_renderer->RenderShadowMaps(m_registry);
-
-
-		Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->Bind();
-		m_renderer->PreRender();
-		m_uiManager->BeginDockspace();
-
-
-		m_renderer->RenderEntities(m_registry);
-
-		terrainManager.Render(m_window, m_camera);
-
-		m_animationManager->Render();
-
-		m_renderer->RenderSkybox();
-
-		m_particleManager->Update(m_registry, m_deltaTime);
-
-		m_particleManager->Render(m_window, m_camera);
-
-		Engine::Framebuffer::Unbind();
-
-		m_uiManager->Render();
-		m_uiManager->EndDockspace();
-		m_renderer->PostRender();
+		//		m_renderer->RenderShadowMaps(m_registry);
+		//		Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->Bind();
+		//		m_renderer->RenderSkybox();
+		//		Engine::Framebuffer::Unbind();
+		//		m_renderer->PostRender();
 	}
 
 	void GEngine::Shutdown()
 	{
-		PhysicsManager::CleanUp(m_registry);
-
-		// Shutdown sound manager
-		if (m_soundManager) {
-			m_soundManager->Shutdown();
-		}
-
+		manager.ShutdownAll();
 
 		Components::AnimationWorkerComponent::CleanAnimationContexts();
 		Components::SkinnedMeshComponent::CleanSkinnedModels();
 		Texture::CleanAllTextures();
 		Rendering::Mesh::CleanAllMeshes();
-		Engine::Window::Shutdown();
 		SPDLOG_INFO("Engine shutdown complete");
 	}
 } // namespace Engine

@@ -1,10 +1,14 @@
 #pragma once
 
-#include <glad/glad.h>
+
 #include <glm/glm.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
 #include <optional>
+
+typedef unsigned int GLuint;
+typedef unsigned int GLenum;
+
 
 namespace Engine {
 	class Shader {

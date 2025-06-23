@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "glad/glad.h"
+typedef unsigned int GLuint;
 namespace Engine {
 	class Framebuffer {
 	  public:

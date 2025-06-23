@@ -4,7 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 // include ozz mat4
-#include "core/Window.h"
+// #include "core/Window.h"
 #include "ozz/base/maths/simd_math.h"
 #include "ozz/base/platform.h"
 
@@ -14,7 +14,7 @@ namespace Engine {
 	  public:
 		Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = -90.0f, float pitch = 0.0f);
 
-		void SetWindow(const Window* window) { m_window = window; }
+		// void SetWindow(const Window* window) { m_window = window; }
 
 		glm::mat4           GetViewMatrix() const;
 		ozz::math::Float4x4 view_proj() const;
@@ -51,6 +51,6 @@ namespace Engine {
 		float m_nearPlane;
 		float m_farPlane;
 
-		const Window* m_window{};
+		// const Window* m_window{};
 	};
 } // namespace Engine

@@ -5,22 +5,25 @@
 #include <string>
 #include <map>
 #include "rendering/Framebuffer.h"
+#include "core/module/Module.h"
 
 namespace Engine {
 
-	class Window {
+	class Window : public Module {
 	  public:
 		enum class FramebufferID { GAME_OUT };
 
 		Window(int width, int height, std::string title);
-		~Window();
 
-		bool               Initialize();
-		static void        Update();
+
+		[[nodiscard]] std::string name() const override { return "WindowModule"; }
+		void                      onInit() override;
+		void                      onUpdate(float dt) override;
+		void                      onShutdown() override;
+
 		[[nodiscard]] bool ShouldClose() const;
 		void               SwapBuffers() const;
 		static void        PollEvents();
-		static void        Shutdown();
 		void               OnResize(int width, int height);
 		void               SetFullViewport() const;
 

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <spdlog/spdlog.h>
 #include <stb/stb_image.h>
+#include <glad/glad.h>
 
 namespace Engine {
 	std::unordered_set<GLuint> Engine::Texture::s_loadedTextures;

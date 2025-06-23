@@ -4,6 +4,7 @@
 #include "animation/AnimatedMesh.h"
 #include "animation/renderer.h"
 #include "animation/renderer_impl.h"
+#include "core/module/Module.h"
 
 #include <memory>
 #include <ozz/animation/runtime/animation.h>
@@ -27,14 +28,14 @@ namespace Engine {
 
 	class GEngine; // Forward declaration
 
-	class AnimationManager {
+	class AnimationManager : public Module {
 	  public:
-		AnimationManager(GEngine* engine);
-		~AnimationManager() = default;
+		void        onInit() override;
+		void        onUpdate(float dt) override;
+		void        onShutdown() override;
+		std::string name() const override { return "AnimationModule"; };
 
-		bool Initialize(Camera* camera);
-		void Shutdown();
-		void Update(float deltaTime);
+
 		void Render();
 
 
@@ -58,9 +59,6 @@ namespace Engine {
 		static ozz::vector<Engine::Mesh>* LoadMeshesFromPath(const std::string& path);
 
 	  private:
-		// Reference to the engine
-		GEngine* m_engine;
-
 		// Map to store loaded skeletons
 		std::unordered_map<std::string, std::unique_ptr<ozz::animation::Skeleton>> loaded_skeletons_;
 
@@ -88,7 +86,6 @@ namespace Engine {
 
 		// Renderer
 		ozz::unique_ptr<RendererImpl> renderer_;
-		Camera*                       camera_ = nullptr;
 	};
 
 } // namespace Engine

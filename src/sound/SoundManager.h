@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Camera.h"
+#include "core/module/Module.h"
 
 #include <AL/al.h>
 #include <AL/alc.h>
@@ -47,13 +48,12 @@ namespace Engine::Audio {
 		[[maybe_unused]] ALuint m_sourceID{};
 	};
 
-	class SoundManager {
+	class SoundManager : public Module {
 	  public:
-		SoundManager();
-		~SoundManager();
-
-		bool Initialize();
-		void Shutdown();
+		void        onInit() override;
+		void        onUpdate(float dt) override;
+		void        onShutdown() override;
+		std::string name() const override { return "SoundManager"; };
 
 		std::shared_ptr<SoundBuffer> LoadSound(const std::string& name, const std::string& filename);
 		std::shared_ptr<SoundBuffer> GetSound(const std::string& name);
@@ -63,7 +63,6 @@ namespace Engine::Audio {
 		static void                  SetListenerOrientation(float atX, float atY, float atZ, float upX, float upY, float upZ);
 		void                         Play(const std::string& soundName, bool looping = false, float volume = 1.0f);
 
-		static void UpdateAudioEntities(entt::registry& registry, const Camera& camera);
 		static void CheckOpenALError(const char* operation);
 
 	  private:

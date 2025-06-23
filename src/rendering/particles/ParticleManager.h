@@ -10,15 +10,14 @@
 #include <string>
 namespace Engine {
 
-	class ParticleManager {
+	class ParticleManager : public Module {
 	  public:
-		ParticleManager();
-		~ParticleManager();
-
-		bool Initialize(int maxInstances = 8000);
-		void Update(entt::registry& registry, float deltaTime);
-		void Render(Window& window, Camera& camera);
-		void Shutdown();
+		void        onInit() override;
+		void        onUpdate(float dt) override;
+		void        onShutdown() override;
+		std::string name() const override { return "ParticleModule"; };
+		
+		void Render();
 
 		Effekseer::Handle            PlayEffect(const std::u16string& path, float x, float y, float z);
 		const Effekseer::ManagerRef& GetManager() const { return m_manager; }

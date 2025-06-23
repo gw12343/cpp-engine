@@ -47,7 +47,7 @@ namespace Engine::Terrain {
 		std::vector<std::shared_ptr<Engine::Texture>> diffuseTextures; // One RGBA texture per 4 layers
 	};
 
-	class TerrainManager {
+	class TerrainManager : public Module {
 	  public:
 		void LoadTerrainFile(const std::string& path);
 		void GenerateMeshes();
@@ -55,9 +55,15 @@ namespace Engine::Terrain {
 
 		[[nodiscard]] const std::vector<std::unique_ptr<TerrainTile>>& GetTerrains() const;
 
-		void Render(Engine::Window& window, Engine::Camera& camera);
+		void Render();
 
 		void SetupShaders();
+
+
+		void        onInit() override;
+		void        onUpdate(float dt) override;
+		void        onShutdown() override;
+		std::string name() const override { return "TerrainModule"; };
 
 	  private:
 		[[nodiscard]] std::string GenerateGLSLShader() const;
