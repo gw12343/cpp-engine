@@ -7,6 +7,8 @@
 #include <utils/Utils.h>
 #include "core/Window.h"
 
+#include "scripting/ScriptManager.h"
+
 namespace Engine {
 
 	Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) : m_front(glm::vec3(0.0f, 0.0f, -1.0f)), m_movementSpeed(2.5f), m_mouseSensitivity(0.1f), m_fov(90.0f), m_nearPlane(0.1f), m_farPlane(750.0f)
@@ -24,9 +26,41 @@ namespace Engine {
 	}
 	void Camera::onUpdate(float dt)
 	{
+		// Handle camera movement based on right mouse button state
+		if (GetInput().IsMousePressed(GLFW_MOUSE_BUTTON_RIGHT)) {
+			// Only capture cursor if it's not already captured
+			if (GetInput().GetCursorMode() != GLFW_CURSOR_DISABLED) {
+				GetInput().SetCursorMode(GLFW_CURSOR_DISABLED);
+			}
+
+			// Process camera movement with keyboard
+			GetCamera().ProcessKeyboard(dt);
+
+			// Process mouse movement for camera rotation
+			glm::vec2 mouseDelta = GetInput().GetMouseDelta();
+
+			float xoffset = mouseDelta.x;
+			float yoffset = mouseDelta.y;
+
+			xoffset *= m_mouseSensitivity;
+			yoffset *= m_mouseSensitivity;
+
+			m_yaw += xoffset;
+			m_pitch += yoffset;
+
+			m_pitch = std::clamp(m_pitch, -89.0f, 89.0f);
+		}
+		else {
+			// Release cursor when right mouse button is released
+			if (GetInput().GetCursorMode() == GLFW_CURSOR_DISABLED) {
+				GetInput().SetCursorMode(GLFW_CURSOR_NORMAL);
+			}
+		}
+
+
 		UpdateCameraVectors();
 
-		float aspect = Window::GetTargetAspectRatio();
+		float aspect = GetWindow().GetTargetAspectRatio();
 		ENGINE_VERIFY(aspect > 0.0f, "Camera::view_proj: aspect ratio is non-positive");
 
 		m_proj = glm::perspective(glm::radians(m_fov), aspect, m_nearPlane, m_farPlane);
@@ -60,34 +94,18 @@ namespace Engine {
 		ENGINE_ASSERT(deltaTime >= 0.0f, "Camera::ProcessKeyboard: Negative delta time");
 		float velocity = m_movementSpeed * deltaTime;
 
-		if (Input::IsKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
+		if (GetInput().IsKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
 			velocity *= 20.0f;
 		}
 
-		if (Input::IsKeyPressed(GLFW_KEY_W)) m_position += m_front * velocity;
-		if (Input::IsKeyPressed(GLFW_KEY_S)) m_position -= m_front * velocity;
-		if (Input::IsKeyPressed(GLFW_KEY_A)) m_position -= m_right * velocity;
-		if (Input::IsKeyPressed(GLFW_KEY_D)) m_position += m_right * velocity;
-		if (Input::IsKeyPressed(GLFW_KEY_SPACE)) m_position += m_worldUp * velocity;
-		if (Input::IsKeyPressed(GLFW_KEY_LEFT_SHIFT)) m_position -= m_worldUp * velocity;
+		if (GetInput().IsKeyPressed(GLFW_KEY_W)) m_position += m_front * velocity;
+		if (GetInput().IsKeyPressed(GLFW_KEY_S)) m_position -= m_front * velocity;
+		if (GetInput().IsKeyPressed(GLFW_KEY_A)) m_position -= m_right * velocity;
+		if (GetInput().IsKeyPressed(GLFW_KEY_D)) m_position += m_right * velocity;
+		if (GetInput().IsKeyPressed(GLFW_KEY_SPACE)) m_position += m_worldUp * velocity;
+		if (GetInput().IsKeyPressed(GLFW_KEY_LEFT_SHIFT)) m_position -= m_worldUp * velocity;
 	}
 
-	void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch)
-	{
-		ENGINE_ASSERT(std::isfinite(xoffset) && std::isfinite(yoffset), "Camera::ProcessMouseMovement: Offset values are not finite");
-
-		xoffset *= m_mouseSensitivity;
-		yoffset *= m_mouseSensitivity;
-
-		m_yaw += xoffset;
-		m_pitch += yoffset;
-
-		if (constrainPitch) {
-			m_pitch = std::clamp(m_pitch, -89.0f, 89.0f);
-		}
-
-		UpdateCameraVectors();
-	}
 
 	void Camera::ProcessMouseScroll(float yoffset)
 	{
@@ -111,6 +129,35 @@ namespace Engine {
 
 		m_right = glm::normalize(glm::cross(m_front, m_worldUp));
 		m_up    = glm::normalize(glm::cross(m_right, m_front));
+	}
+	void Camera::setLuaBindings()
+	{
+		// Camera binding
+		GetScriptManager().lua.new_usertype<Camera>("Camera",
+		                                            // Read-only getters
+		                                            "getPosition",
+		                                            &Camera::GetPosition,
+		                                            "getFront",
+		                                            &Camera::GetFront,
+
+		                                            // Public fields
+		                                            "fov",
+		                                            &Camera::m_fov,
+		                                            "movementSpeed",
+		                                            &Camera::m_movementSpeed,
+		                                            "mouseSensitivity",
+		                                            &Camera::m_mouseSensitivity,
+		                                            "nearPlane",
+		                                            &Camera::m_nearPlane,
+		                                            "farPlane",
+		                                            &Camera::m_farPlane,
+		                                            "yaw",
+		                                            &Camera::m_yaw,
+		                                            "pitch",
+		                                            &Camera::m_pitch);
+
+		// Global getter
+		GetScriptManager().lua.set_function("getCamera", []() -> Camera& { return Engine::GetCamera(); });
 	}
 
 

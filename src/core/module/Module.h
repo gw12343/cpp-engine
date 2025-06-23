@@ -10,7 +10,8 @@ namespace Engine {
 		virtual void                      onInit()           = 0;
 		virtual void                      onUpdate(float dt) = 0;
 		virtual void                      onShutdown()       = 0;
-		[[nodiscard]] virtual std::string name() const       = 0;
+		virtual void                      setLuaBindings() {}
+		[[nodiscard]] virtual std::string name() const = 0;
 		std::shared_ptr<spdlog::logger>   log;
 	};
 } // namespace Engine

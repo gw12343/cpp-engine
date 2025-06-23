@@ -68,6 +68,10 @@ namespace Engine {
 		class ShadowCaster : public Component {
 		  public:
 			ShadowCaster() = default;
+
+
+			void OnAdded(Entity& entity) override;
+			void RenderInspector(Entity& entity) override;
 		};
 
 

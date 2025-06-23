@@ -14,7 +14,7 @@ namespace Engine {
 		void                      onShutdown() override;
 		[[nodiscard]] std::string name() const override { return "ScriptModule"; }
 
-	  private:
+
 		sol::state    lua;
 		sol::function luaUpdate;
 	};

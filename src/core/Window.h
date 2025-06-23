@@ -20,6 +20,7 @@ namespace Engine {
 		void                      onInit() override;
 		void                      onUpdate(float dt) override;
 		void                      onShutdown() override;
+		void                      setLuaBindings() override;
 
 		[[nodiscard]] bool ShouldClose() const;
 		void               SwapBuffers() const;
@@ -30,20 +31,21 @@ namespace Engine {
 		[[nodiscard]] int                    GetWidth() const;
 		[[nodiscard]] int                    GetHeight() const;
 		[[maybe_unused]] [[nodiscard]] float GetAspectRatio() const;
-		[[nodiscard]] static float           GetTargetAspectRatio();
+		[[nodiscard]] float                  GetTargetAspectRatio();
 
-		GLFWwindow*                         GetNativeWindow() const { return m_window; }
-		static void                         UpdateViewportSize(int render_width, int render_height, int x, int y);
+		GLFWwindow* GetNativeWindow() const { return m_window; }
+		void        UpdateViewportSize(int render_width, int render_height, int x, int y);
+
 		static void                         UpdateFramebufferSizes(int render_width, int render_height);
 		static std::shared_ptr<Framebuffer> GetFramebuffer(FramebufferID id);
 
 		static std::map<FramebufferID, std::shared_ptr<Framebuffer>> m_frameBuffers;
 
 
-		static int targetWidth;
-		static int targetHeight;
-		static int targetX;
-		static int targetY;
+		int targetWidth;
+		int targetHeight;
+		int targetX;
+		int targetY;
 
 	  private:
 		GLFWwindow* m_window;

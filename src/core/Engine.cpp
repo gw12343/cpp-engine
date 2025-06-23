@@ -32,10 +32,12 @@ namespace Engine {
 
 	GEngine::GEngine(int width, int height, const char* title) : m_deltaTime(0.0f), m_lastFrame(0.0f)
 	{
+		// Initialize Scene
 		Get().registry = std::make_shared<entt::registry>();
 
 		// Initialize Modules
 		Get().window    = std::make_shared<Window>(width, height, title);
+		Get().input     = std::make_shared<Input>();
 		Get().camera    = std::make_shared<Camera>(glm::vec3(0.0f, 3.0f, 6.0f), glm::vec3(0, 1, 0), -90.0f, -30.0f);
 		Get().renderer  = std::make_shared<Renderer>();
 		Get().physics   = std::make_shared<PhysicsManager>();
@@ -48,6 +50,7 @@ namespace Engine {
 
 		// Register Modules to handle lifecycle
 		manager.RegisterExternal(Get().window);
+		manager.RegisterExternal(Get().input);
 		manager.RegisterExternal(Get().camera);
 		manager.RegisterExternal(Get().physics);
 		manager.RegisterExternal(Get().sound);
@@ -59,6 +62,7 @@ namespace Engine {
 		manager.RegisterExternal(Get().script);
 	}
 
+
 	// Test models
 	std::shared_ptr<Rendering::Model> sphere;
 	std::shared_ptr<Rendering::Model> cube;
@@ -68,12 +72,9 @@ namespace Engine {
 	{
 		SPDLOG_INFO("Starting Engine");
 		manager.InitAll();
-
-		Input::Initialize(GetWindow().GetNativeWindow());
-		Input::SetCursorMode(GLFW_CURSOR_NORMAL);
-
-
 		CreateInitialEntities();
+		manager.InitAllLuaBindings();
+
 		return true;
 	}
 
@@ -130,6 +131,7 @@ namespace Engine {
 		entity2.AddComponent<Components::Transform>(glm::vec3(2.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 		entity2.AddComponent<Components::RigidBodyComponent>(GetPhysics().GetPhysicsSystem().get(), cube_id);
 		entity2.AddComponent<Components::AudioSource>("birds", true, 0.1f, 1.0f, true, 5.0f, 50.0f, 1.0f);
+		entity2.AddComponent<Components::ShadowCaster>();
 
 
 		Entity animatedEntity = Entity::Create("AnimatedEntity");
@@ -140,12 +142,12 @@ namespace Engine {
 		animatedEntity.AddComponent<Components::AnimationWorkerComponent>();
 		animatedEntity.AddComponent<Components::SkinnedMeshComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_mesh.ozz");
 
-		//
+
 		//		Terrain::TerrainTile tile = Terrain::LoadTerrainTile("resources/terrain/terrain.bin");
 		//		std::cout << "Loaded tile: " << tile.name << "\n";
 		//		std::cout << "Heights: " << tile.heightmap.size() << "\n";
 		//		std::cout << "Trees: " << tile.trees.size() << "\n";
-
+		//
 		//		auto& tile         = terrainManager.GetTerrains()[0];
 		//		Body* terrain_body = body_interface.CreateBody(BodyCreationSettings(new MeshShapeSettings(tile->physicsMesh), RVec3(0.0_r, 0.0_r, 0.0_r), Quat::sIdentity(), EMotionType::Static, Layers::NON_MOVING));
 		//		body_interface.AddBody(terrain_body->GetID(), EActivation::DontActivate);
@@ -164,38 +166,17 @@ namespace Engine {
 
 	void GEngine::ProcessInput() const
 	{
-		// Handle camera movement based on right mouse button state
-		if (Input::IsMousePressed(GLFW_MOUSE_BUTTON_RIGHT)) {
-			// Only capture cursor if it's not already captured
-			if (Input::GetCursorMode() != GLFW_CURSOR_DISABLED) {
-				Input::SetCursorMode(GLFW_CURSOR_DISABLED);
-			}
-
-			// Process camera movement with keyboard
-			GetCamera().ProcessKeyboard(m_deltaTime);
-
-			// Process mouse movement for camera rotation
-			glm::vec2 mouseDelta = Input::GetMouseDelta();
-			GetCamera().ProcessMouseMovement(mouseDelta.x, mouseDelta.y);
-		}
-		else {
-			// Release cursor when right mouse button is released
-			if (Input::GetCursorMode() == GLFW_CURSOR_DISABLED) {
-				Input::SetCursorMode(GLFW_CURSOR_NORMAL);
-			}
-		}
-
 		// Toggle physics when P is pressed
-		if (Input::IsKeyPressedThisFrame(GLFW_KEY_P)) {
+		if (GetInput().IsKeyPressedThisFrame(GLFW_KEY_P)) {
 			Get().isPhysicsPaused = !Get().isPhysicsPaused;
 			SPDLOG_INFO("Physics simulation {}", Get().isPhysicsPaused ? "enabled" : "disabled");
 		}
 
 		// Process mouse scroll regardless of capture state
-		float scrollDelta = Input::GetMouseScrollDelta();
-		if (scrollDelta != 0.0f) {
-			GetCamera().ProcessMouseScroll(scrollDelta);
-		}
+		//		float scrollDelta = Input::GetMouseScrollDelta();
+		//		if (scrollDelta != 0.0f) {
+		//			GetCamera().ProcessMouseScroll(scrollDelta);
+		//		}
 
 		//		if (Input::IsKeyPressedThisFrame(GLFW_KEY_R)) {
 		//			SPDLOG_INFO("r");
@@ -216,7 +197,7 @@ namespace Engine {
 			auto s = Entity::Create("SphereEntity");
 			s.AddComponent<Components::Transform>(glm::vec3(cpos.x, cpos.y, cpos.z), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 			s.AddComponent<Components::ModelRenderer>(sphere);
-			// s.AddComponent<Components::ShadowCaster>();
+			s.AddComponent<Components::ShadowCaster>();
 			s.AddComponent<Components::RigidBodyComponent>(GetPhysics().GetPhysicsSystem().get(), sphere_id);
 		}
 
@@ -234,7 +215,7 @@ namespace Engine {
 			auto s = Entity::Create("CubeEntity");
 			s.AddComponent<Components::Transform>(glm::vec3(cpos.x, cpos.y, cpos.z), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 			s.AddComponent<Components::ModelRenderer>(cube);
-			// s.AddComponent<Components::ShadowCaster>();
+			s.AddComponent<Components::ShadowCaster>();
 			s.AddComponent<Components::RigidBodyComponent>(GetPhysics().GetPhysicsSystem().get(), cube_id);
 		}
 	}
@@ -244,38 +225,7 @@ namespace Engine {
 	{
 		Window::PollEvents();
 		ProcessInput();
-		Input::Update();
 		manager.UpdateAll(m_deltaTime);
-
-
-		//		m_animationManager->Update(m_deltaTime);
-		//		if (m_physicsEnabled) PhysicsManager::Update(m_deltaTime);
-		//		PhysicsManager::SyncPhysicsEntities(m_registry);
-		//		m_soundManager->UpdateAudioEntities(m_registry, m_camera);
-
-		//
-		//		m_renderer->PreRender();
-		//		m_uiManager->BeginDockspace();
-		//		m_uiManager->Render();
-		//		m_uiManager->EndDockspace();
-		//
-		//		terrainManager.Render(m_window, m_camera);
-		//		m_animationManager->Render();
-		//		m_particleManager->Update(m_registry, m_deltaTime);
-		//		m_particleManager->Render(m_window, m_camera);
-		//
-		//		m_renderer->RenderEntities(m_registry);
-		//
-		//
-		//
-		//
-		//
-
-		//		m_renderer->RenderShadowMaps(m_registry);
-		//		Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->Bind();
-		//		m_renderer->RenderSkybox();
-		//		Engine::Framebuffer::Unbind();
-		//		m_renderer->PostRender();
 	}
 
 	void GEngine::Shutdown()

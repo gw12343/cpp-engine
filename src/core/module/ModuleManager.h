@@ -14,11 +14,12 @@ namespace Engine {
 	  public:
 		template <typename T>
 		void RegisterModule();
-		
+
 		template <typename T>
 		void RegisterExternal(std::shared_ptr<T> mod);
 
 		void InitAll();
+		void InitAllLuaBindings();
 		void UpdateAll(float dt);
 		void ShutdownAll();
 

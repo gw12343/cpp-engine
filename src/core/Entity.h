@@ -38,6 +38,7 @@ namespace Engine {
 			return component;
 		}
 
+
 		template <typename T>
 		T& GetComponent()
 		{

@@ -3,36 +3,45 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <unordered_map>
+#include "core/module/Module.h"
 
 namespace Engine {
-	class Input {
+	class Input : public Module {
 	  public:
-		static void Initialize(GLFWwindow* window);
-		static void Update();
+		Input() = default;
+
+
+		void        onInit() override;
+		void        onUpdate(float dt) override;
+		void        onShutdown() override;
+		std::string name() const override { return "InputModule"; };
+		void        setLuaBindings() override;
 
 		// Keyboard input
-		static bool IsKeyPressed(int key);
-		static bool IsKeyReleased(int key);
-		static bool IsKeyPressedThisFrame(int key);
+		bool IsKeyPressed(int key);
+		bool IsKeyReleased(int key);
+		bool IsKeyPressedThisFrame(int key);
 
 		// Mouse input
-		static bool                       IsMousePressed(int btn);
-		[[maybe_unused]] static glm::vec2 GetMousePosition();
-		static glm::vec2                  GetMouseDelta();
-		static float                      GetMouseScrollDelta();
-		[[maybe_unused]] static void      SetMousePosition(const glm::vec2& position);
-		static void                       SetCursorMode(int mode);
-		static int                        GetCursorMode();
+		bool                       IsMousePressed(int btn);
+		[[maybe_unused]] glm::vec2 GetMousePosition();
+		glm::vec2                  GetMouseDelta() const;
+		// float                      GetMouseScrollDelta();
+		[[maybe_unused]] void SetMousePosition(const glm::vec2& position);
+		void                  SetCursorMode(int mode);
+		int                   GetCursorMode();
 
-		// Callbacks
-		[[maybe_unused]] static void MouseCallback(GLFWwindow* window, double xpos, double ypos);
-		static void                  ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+
+		//		// Callbacks
+		//		[[maybe_unused]] void MouseCallback(GLFWwindow* window, double xpos, double ypos);
+		//		void                  ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+
 
 	  private:
-		static glm::vec2                     s_mousePosition;
-		static glm::vec2                     s_lastMousePosition;
-		static float                         s_scrollDelta;
-		static std::unordered_map<int, bool> s_keyStates;     // Current frame
-		static std::unordered_map<int, bool> s_prevKeyStates; // Previous frame
+		glm::vec2 m_mousePosition;
+		glm::vec2 m_lastMousePosition;
+		// float                         m_scrollDelta;
+		std::unordered_map<int, bool> m_keyStates;     // Current frame
+		std::unordered_map<int, bool> m_prevKeyStates; // Previous frame
 	};
 } // namespace Engine

@@ -45,7 +45,7 @@ namespace Engine {
 
 	glm::mat4 ShadowMapRenderer::getLightSpaceMatrix(const float nearPlane, const float farPlane)
 	{
-		const auto proj    = glm::perspective(glm::radians(GetCamera().m_fov), Window::GetTargetAspectRatio(), nearPlane, farPlane); // m_camera.GetProjectionMatrix(Window::GetTargetAspectRatio());
+		const auto proj    = glm::perspective(glm::radians(GetCamera().m_fov), GetWindow().GetTargetAspectRatio(), nearPlane, farPlane); // m_camera.GetProjectionMatrix(Window::GetTargetAspectRatio());
 		const auto corners = getFrustumCornersWorldSpace(proj, GetCamera().GetViewMatrix());
 
 		glm::vec3 center = glm::vec3(0, 0, 0);

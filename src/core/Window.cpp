@@ -1,4 +1,5 @@
 #include "Window.h"
+#include "EngineData.h"
 
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
@@ -6,12 +7,9 @@
 #include <imgui.h>
 #include <spdlog/spdlog.h>
 #include <utility>
+#include "scripting/ScriptManager.h"
 
 namespace Engine {
-	int Window::targetWidth  = 800;
-	int Window::targetHeight = 600;
-	int Window::targetX      = 0;
-	int Window::targetY      = 0;
 
 	std::map<Window::FramebufferID, std::shared_ptr<Framebuffer>> Window::m_frameBuffers;
 
@@ -23,6 +21,9 @@ namespace Engine {
 
 	void Window::onInit()
 	{
+		targetWidth  = 800;
+		targetHeight = 600;
+
 		InitGLFW();
 		InitGLAD();
 		InitImGui();
@@ -181,6 +182,41 @@ namespace Engine {
 	std::shared_ptr<Framebuffer> Window::GetFramebuffer(Window::FramebufferID id)
 	{
 		return m_frameBuffers[id];
+	}
+	void Window::setLuaBindings()
+	{
+		// Expose FramebufferID and Framebuffer as needed
+		GetScriptManager().lua.new_usertype<FramebufferID>("FramebufferID"); // customize as needed
+		GetScriptManager().lua.new_usertype<Framebuffer>("Framebuffer", sol::no_constructor);
+
+		// Bind the Window instance API
+		GetScriptManager().lua.new_usertype<Window>("Window",
+		                                            // Methods
+		                                            "getWidth",
+		                                            &Window::GetWidth,
+		                                            "getHeight",
+		                                            &Window::GetHeight,
+		                                            "getAspectRatio",
+		                                            &Window::GetAspectRatio,
+		                                            "getTargetAspectRatio",
+		                                            &Window::GetTargetAspectRatio,
+		                                            "updateViewportSize",
+		                                            &Window::UpdateViewportSize,
+
+		                                            // Members (mutable instance variables)
+		                                            "targetWidth",
+		                                            &Window::targetWidth,
+		                                            "targetHeight",
+		                                            &Window::targetHeight,
+		                                            "targetX",
+		                                            &Window::targetX,
+		                                            "targetY",
+		                                            &Window::targetY);
+
+		// Provide access to the main window
+		GetScriptManager().lua.set_function("getWindow", []() -> Window& {
+			return Engine::GetWindow(); // You provide this somewhere
+		});
 	}
 
 

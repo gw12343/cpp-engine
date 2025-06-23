@@ -660,7 +660,7 @@ namespace Engine::UI {
 		ImGuiIO& io = ImGui::GetIO();
 		// ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 10, 10), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
 
-		ImGui::SetNextWindowPos(ImVec2(Window::targetX + Window::targetWidth - 10, Window::targetY + 10), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
+		ImGui::SetNextWindowPos(ImVec2(GetWindow().targetX + GetWindow().targetWidth - 10, GetWindow().targetY + 10), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
 		ImGui::SetNextWindowBgAlpha(0.35f);
 		ImGui::Begin("PauseOverlay", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove);
 		ImGui::Text("PHYSICS PAUSED");
@@ -700,7 +700,7 @@ namespace Engine::UI {
 		GLuint tex = texId; // Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->texture;
 		ImGui::Image((ImTextureID) tex, ImVec2(width, height), ImVec2(0, 1), ImVec2(1, 0));
 		// Now the topLeft is the actual top-left of the displayed image
-		Engine::Window::UpdateViewportSize(width, height, topLeft.x, topLeft.y);
+		GetWindow().UpdateViewportSize(width, height, topLeft.x, topLeft.y);
 
 		ImGui::PopStyleVar();
 		ImGui::End();

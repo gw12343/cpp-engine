@@ -15,6 +15,11 @@ namespace Engine {
 		log->info("Initializing Lua scripting...");
 		lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::table, sol::lib::os);
 
+		env[sol::metatable_key] = lua.create_table_with("__index", [](sol::this_state ts, const std::string& key) {
+			std::cerr << "[Lua] WARNING: Tried to access undefined key: " << key << "\n";
+			return sol::lua_nil;
+		});
+
 		try {
 			lua.script_file("scripts/init.lua");
 
@@ -26,11 +31,10 @@ namespace Engine {
 			lua["Input"]["isKeyPressedThisFrame"] = &Input::IsKeyPressedThisFrame;
 
 			// Mouse
-			lua["Input"]["isMousePressed"]      = &Engine::Input::IsMousePressed;
-			lua["Input"]["getMouseDelta"]       = &Engine::Input::GetMouseDelta;
-			lua["Input"]["getMouseScrollDelta"] = &Engine::Input::GetMouseScrollDelta;
-			lua["Input"]["getCursorMode"]       = &Engine::Input::GetCursorMode;
-			lua["Input"]["setCursorMode"]       = &Engine::Input::SetCursorMode;
+			lua["Input"]["isMousePressed"] = &Engine::Input::IsMousePressed;
+			lua["Input"]["getMouseDelta"]  = &Engine::Input::GetMouseDelta;
+			lua["Input"]["getCursorMode"]  = &Engine::Input::GetCursorMode;
+			lua["Input"]["setCursorMode"]  = &Engine::Input::SetCursorMode;
 
 			// glm::vec2 binding if not already done
 			lua.new_usertype<glm::vec2>("vec2", sol::constructors<glm::vec2(), glm::vec2(float, float)>(), "x", &glm::vec2::x, "y", &glm::vec2::y);

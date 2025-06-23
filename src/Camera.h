@@ -11,27 +11,39 @@ namespace Engine {
 
 	class Camera : public Module {
 	  public:
-		Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = -90.0f, float pitch = 0.0f);
+		explicit Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = -90.0f, float pitch = 0.0f);
 
-		void        onInit() override;
-		void        onUpdate(float dt) override;
-		void        onShutdown() override;
-		std::string name() const override { return "CameraModule"; };
+		void                      onInit() override;
+		void                      onUpdate(float dt) override;
+		void                      onShutdown() override;
+		[[nodiscard]] std::string name() const override { return "CameraModule"; };
+		void                      setLuaBindings() override;
 
 
-		glm::mat4           GetViewMatrix() const;
+		void ProcessMouseScroll(float yoffset);
+		void ProcessKeyboard(float deltaTime);
+
 		ozz::math::Float4x4 view_proj() const;
+		glm::mat4           GetViewMatrix() const;
 		glm::mat4           GetProjectionMatrix() const;
-		void                ProcessKeyboard(float deltaTime);
-		void                ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);
-		void                ProcessMouseScroll(float yoffset);
 
 		// Getters
 		glm::vec3 GetPosition() const { return m_position; }
 		glm::vec3 GetFront() const { return m_front; }
 
-		// Projection parameters
+
 		float m_fov;
+
+		// Camera options
+		float m_movementSpeed;
+		float m_mouseSensitivity;
+
+		float m_nearPlane;
+		float m_farPlane;
+
+		// Euler Angles
+		float m_yaw;
+		float m_pitch;
 
 	  private:
 		void UpdateCameraVectors();
@@ -46,16 +58,5 @@ namespace Engine {
 		glm::vec3 m_up{};
 		glm::vec3 m_right{};
 		glm::vec3 m_worldUp{};
-
-		// Euler Angles
-		float m_yaw;
-		float m_pitch;
-
-		// Camera options
-		float m_movementSpeed;
-		float m_mouseSensitivity;
-
-		float m_nearPlane;
-		float m_farPlane;
 	};
 } // namespace Engine

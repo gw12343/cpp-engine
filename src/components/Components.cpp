@@ -35,6 +35,16 @@ namespace Engine::Components {
 	{
 	}
 
+	void ShadowCaster::OnAdded(Entity& entity)
+	{
+	}
+
+	void ShadowCaster::RenderInspector(Entity& entity)
+	{
+		ImGui::Text("hi");
+	}
+
+
 	void AudioSource::OnAdded(Entity& entity)
 	{
 		// If autoPlay is enabled, try to play the sound

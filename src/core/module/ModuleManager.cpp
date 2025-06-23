@@ -13,6 +13,14 @@ namespace Engine {
 		}
 	}
 
+	void ModuleManager::InitAllLuaBindings()
+	{
+		for (auto& module : m_modules) {
+			module->log->info("Initializing Lua Bindings...");
+			module->setLuaBindings();
+		}
+	}
+
 	void ModuleManager::UpdateAll(float dt)
 	{
 		for (auto& module : m_modules) {

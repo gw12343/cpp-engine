@@ -5,6 +5,7 @@
 #pragma once
 #include <memory>
 #include "entt/entt.hpp"
+#include "Input.h"
 
 namespace Engine {
 	class Window;
@@ -36,6 +37,7 @@ namespace Engine {
 		std::shared_ptr<UI::UIManager>           ui;
 		std::shared_ptr<PhysicsManager>          physics;
 		std::shared_ptr<Camera>                  camera;
+		std::shared_ptr<Input>                   input;
 		std::shared_ptr<entt::registry>          registry;
 		bool                                     isPhysicsPaused = true;
 	};
@@ -83,6 +85,10 @@ namespace Engine {
 	inline auto& GetCamera()
 	{
 		return *Get().camera;
+	}
+	inline auto& GetInput()
+	{
+		return *Get().input;
 	}
 	inline auto& GetRegistry()
 	{
