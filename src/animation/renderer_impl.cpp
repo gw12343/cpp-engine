@@ -1,9 +1,5 @@
-//
-// #include <glm/gtc/type_ptr.hpp>
-// #include <imgui.h>
 #include "renderer_impl.h"
 
-#include "Camera.h"
 #include "animation/AnimatedMesh.h"
 #include "animation/AnimationShader.h"
 #include "animation/icosphere.h"
@@ -19,6 +15,10 @@
 #include "ozz/base/platform.h"
 #include "ozz/geometry/runtime/skinning_job.h"
 #include "core/EngineData.h"
+
+#include <GLFW/glfw3.h>
+#include <glad/glad.h>
+
 
 #include <spdlog/spdlog.h>
 

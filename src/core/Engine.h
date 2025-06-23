@@ -1,14 +1,5 @@
 #pragma once
 
-#include "Camera.h"
-// #include "Window.h"
-#include "animation/AnimationManager.h"
-#include "rendering/Renderer.h"
-#include "rendering/particles/ParticleManager.h"
-#include "sound/SoundManager.h"
-#include "terrain/TerrainManager.h"
-#include "rendering/ui/UIManager.h"
-
 #include <entt/entt.hpp>
 #include <memory>
 #include <spdlog/spdlog.h>
@@ -40,7 +31,7 @@ namespace Engine {
 		 * @brief Initializes subsystems and resources.
 		 * @return True if initialization was successful, false otherwise.
 		 */
-		bool Initialize();
+		static bool Initialize();
 
 		/**
 		 * @brief Starts and runs the main engine loop.
@@ -75,11 +66,6 @@ namespace Engine {
 
 		float m_deltaTime; ///< Time elapsed since last frame.
 		float m_lastFrame; ///< Timestamp of last frame.
-
-		/**
-		 * @brief Grants Entity class access to private members.
-		 */
-		friend class Entity;
 	};
 
 } // namespace Engine

@@ -14,8 +14,6 @@
 #include "ozz/base/log.h"
 #include "ozz/base/memory/unique_ptr.h"
 
-#include <GLFW/glfw3.h>
-#include <glad/glad.h>
 
 // Provides helper macro to test for glGetError on a gl call.
 #ifndef NDEBUG
@@ -53,6 +51,12 @@ class AmbientShader;
 class AmbientTexturedShader;
 class AmbientShaderInstanced;
 class GlImmediateRenderer;
+
+
+typedef unsigned int GLuint;
+typedef unsigned int GLenum;
+typedef int          GLsizei;
+
 
 // Implements Renderer interface.
 class RendererImpl : public AnimatedRenderer {
@@ -109,7 +113,7 @@ class RendererImpl : public AnimatedRenderer {
 
 	// Get GL immediate renderer implementation;
 	GlImmediateRenderer* immediate_renderer() const { return immediate_.get(); }
-	
+
   private:
 	// Defines the internal structure used to define a model.
 	struct Model {

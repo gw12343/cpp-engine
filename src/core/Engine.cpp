@@ -1,8 +1,6 @@
 #include "Engine.h"
-using namespace JPH;
-using namespace JPH::literals;
+
 #include "components/Components.h"
-#include "physics/PhysicsManager.h"
 #include "terrain/TerrainLoader.h"
 #include "utils/ModelLoader.h"
 #include "Jolt/Physics/Collision/Shape/MeshShape.h"
@@ -11,15 +9,22 @@ using namespace JPH::literals;
 #include <memory>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include "EngineData.h"
-#include "Window.h"
 #include "Input.h"
+#include "scripting/ScriptManager.h"
 
 
-extern "C" {
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
-}
+#include "Window.h"
+#include "rendering/Renderer.h"
+#include "physics/PhysicsManager.h"
+
+#include "animation/AnimationManager.h"
+#include "rendering/particles/ParticleManager.h"
+#include "rendering/ui/UIManager.h"
+#include "terrain/TerrainManager.h"
+
+
+using namespace JPH;
+using namespace JPH::literals;
 
 namespace Engine {
 	ModuleManager manager;
@@ -27,17 +32,23 @@ namespace Engine {
 
 	GEngine::GEngine(int width, int height, const char* title) : m_deltaTime(0.0f), m_lastFrame(0.0f)
 	{
+		Get().registry = std::make_shared<entt::registry>();
+
+		// Initialize Modules
 		Get().window    = std::make_shared<Window>(width, height, title);
+		Get().camera    = std::make_shared<Camera>(glm::vec3(0.0f, 3.0f, 6.0f), glm::vec3(0, 1, 0), -90.0f, -30.0f);
 		Get().renderer  = std::make_shared<Renderer>();
 		Get().physics   = std::make_shared<PhysicsManager>();
 		Get().sound     = std::make_shared<Audio::SoundManager>();
 		Get().animation = std::make_shared<AnimationManager>();
 		Get().particle  = std::make_shared<ParticleManager>();
 		Get().ui        = std::make_shared<UI::UIManager>();
-		Get().camera    = std::make_shared<Camera>(glm::vec3(0.0f, 3.0f, 6.0f), glm::vec3(0, 1, 0), -90.0f, -30.0f);
-		Get().registry  = std::make_shared<entt::registry>();
 		Get().terrain   = std::make_shared<Terrain::TerrainManager>();
+		Get().script    = std::make_shared<ScriptManager>();
+
+		// Register Modules to handle lifecycle
 		manager.RegisterExternal(Get().window);
+		manager.RegisterExternal(Get().camera);
 		manager.RegisterExternal(Get().physics);
 		manager.RegisterExternal(Get().sound);
 		manager.RegisterExternal(Get().ui);
@@ -45,12 +56,12 @@ namespace Engine {
 		manager.RegisterExternal(Get().particle);
 		manager.RegisterExternal(Get().terrain);
 		manager.RegisterExternal(Get().renderer);
+		manager.RegisterExternal(Get().script);
 	}
 
 	// Test models
 	std::shared_ptr<Rendering::Model> sphere;
 	std::shared_ptr<Rendering::Model> cube;
-	std::shared_ptr<Rendering::Model> track;
 
 
 	bool GEngine::Initialize()
@@ -63,13 +74,6 @@ namespace Engine {
 
 
 		CreateInitialEntities();
-
-
-		lua_State* L = luaL_newstate();
-		luaL_openlibs(L);
-		luaL_dostring(L, "print('Lua is working!')");
-		lua_close(L);
-
 		return true;
 	}
 
@@ -99,18 +103,18 @@ namespace Engine {
 
 		// Load models
 		sphere = Rendering::ModelLoader::LoadModel("/home/gabe/CLionProjects/cpp-engine/resources/models/sphere.obj");
-		cube   = Rendering::ModelLoader::LoadModel("/home/gabe/CLionProjects/cpp-engine/resources/models/cube.obj");
 
 
 		// track = Rendering::ModelLoader::LoadModel("/home/gabe/Downloads/GCNCMarioCircuit/course_fix.dae");
-		track = Rendering::ModelLoader::LoadModel("/home/gabe/Downloads/gltf/gltf/soccer_ball.gltf");
+		// track = Rendering::ModelLoader::LoadModel("/home/gabe/Downloads/gltf/gltf/soccer_ball.gltf");
 
 
 		std::shared_ptr<Rendering::Model> model = Rendering::ModelLoader::LoadModel("/home/gabe/CLionProjects/cpp-engine/resources/models/"
 		                                                                            "TwistedTree_1.obj");
 
+		cube = Rendering::ModelLoader::LoadModel("/home/gabe/CLionProjects/cpp-engine/resources/models/cube.obj");
 		// Create entities
-		Entity floor = Entity::Create("Track");
+		Entity floor = Entity::Create("TestCube");
 		floor.AddComponent<Components::ModelRenderer>(cube);
 		floor.AddComponent<Components::Transform>(glm::vec3(0.0f, -10.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.01f, 0.01f, 0.01f));
 		floor.AddComponent<Components::RigidBodyComponent>(GetPhysics().GetPhysicsSystem().get(), floor_id);

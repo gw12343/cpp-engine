@@ -93,11 +93,11 @@ namespace Engine {
 		glCullFace(GL_BACK);
 		glDepthMask(GL_FALSE);
 		if (m_renderer) {
-			//::Effekseer::Matrix44 projMat = ConvertGLMToEffekseerMatrix(camera.GetProjectionMatrix(window.GetTargetAspectRatio()));
+			::Effekseer::Matrix44 projMat = ConvertGLMToEffekseerMatrix(GetCamera().GetProjectionMatrix());
 			::Effekseer::Matrix44 viewMat = ConvertGLMToEffekseerMatrix(GetCamera().GetViewMatrix());
 
 
-			// m_renderer->SetProjectionMatrix(projMat);
+			m_renderer->SetProjectionMatrix(projMat);
 			m_renderer->SetCameraMatrix(viewMat);
 
 			m_renderer->BeginRendering();

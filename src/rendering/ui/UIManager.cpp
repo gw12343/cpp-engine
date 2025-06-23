@@ -1,11 +1,12 @@
 #include "UIManager.h"
 
 #include "components/Components.h"
-#include "core/Engine.h"
 #include "spdlog/spdlog.h"
 #include "glm/glm.hpp"
 #include "core/EngineData.h"
 #include "animation/AnimationManager.h"
+
+#include "rendering/Renderer.h"
 
 namespace Engine::UI {
 

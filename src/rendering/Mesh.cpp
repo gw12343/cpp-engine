@@ -98,7 +98,7 @@ namespace Engine {
 			glBindVertexArray(m_vao);
 			glDrawElements(GL_TRIANGLES, static_cast<int>(m_indices.size()), GL_UNSIGNED_INT, nullptr);
 			glBindVertexArray(0);
-			GLCheckError();
+			// GLCheckError();
 			//			if (m_material->GetNormalTexture()) {
 			//				glActiveTexture(GL_TEXTURE2);
 			//				m_material->GetNormalTexture()->Unbind();

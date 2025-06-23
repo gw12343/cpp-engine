@@ -1,6 +1,7 @@
 #include "Skybox.h"
 
 #include <spdlog/spdlog.h>
+#include <glad/glad.h>
 
 namespace Engine {
 	Skybox::Skybox() : m_vao(0), m_vbo(0), m_texture(nullptr), m_initialized(false)

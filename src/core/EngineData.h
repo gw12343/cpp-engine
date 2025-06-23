@@ -20,6 +20,7 @@ namespace Engine {
 	namespace UI {
 		class UIManager;
 	}
+	class ScriptManager;
 	class PhysicsManager;
 	class Camera;
 
@@ -31,6 +32,7 @@ namespace Engine {
 		std::shared_ptr<AnimationManager>        animation;
 		std::shared_ptr<ParticleManager>         particle;
 		std::shared_ptr<Terrain::TerrainManager> terrain;
+		std::shared_ptr<ScriptManager>           script;
 		std::shared_ptr<UI::UIManager>           ui;
 		std::shared_ptr<PhysicsManager>          physics;
 		std::shared_ptr<Camera>                  camera;
@@ -69,6 +71,10 @@ namespace Engine {
 	inline auto& GetTerrainManager()
 	{
 		return *Get().terrain;
+	}
+	inline auto& GetScriptManager()
+	{
+		return *Get().script;
 	}
 	inline auto& GetPhysics()
 	{

@@ -7,13 +7,13 @@
 
 #include <Jolt/Jolt.h>
 #include <Jolt/Geometry/Triangle.h>
-#include <glad/glad.h>
+
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-
+typedef unsigned int GLuint;
 namespace Engine::Terrain {
 
 	struct TreeInstance {

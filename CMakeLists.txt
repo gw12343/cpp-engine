@@ -199,10 +199,22 @@ add_executable(${PROJECT_NAME} ${SOURCES}
         src/core/module/TestModule.cpp
         src/core/module/TestModule.h
         src/core/EngineData.cpp
-        src/core/EngineData.h)
+        src/core/EngineData.h
+        src/scripting/ScriptManager.cpp
+        src/scripting/ScriptManager.h)
 find_package(OpenGL REQUIRED)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE lua)
+
+FetchContent_Declare(
+        sol2
+        GIT_REPOSITORY https://github.com/ThePhD/sol2.git
+        GIT_TAG c1f95a773c6f8f4fde8ca3efe872e7286afe4444
+)
+
+FetchContent_MakeAvailable(sol2)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE lua sol2::sol2)
+#target_link_libraries(${PROJECT_NAME} PRIVATE lua)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 

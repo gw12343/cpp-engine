@@ -3,9 +3,11 @@
 #include "Shader.h"
 #include "Texture.h"
 
-#include <glad/glad.h>
+
 #include <memory>
 #include <string>
+
+typedef unsigned int GLuint;
 
 namespace Engine {
 	class Skybox {

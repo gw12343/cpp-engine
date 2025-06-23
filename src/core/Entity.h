@@ -8,8 +8,6 @@
 
 namespace Engine {
 
-	// Forward declaration of Engine class
-	class GEngine;
 
 	// Entity wrapper class for easier entity manipulation
 	class Entity {

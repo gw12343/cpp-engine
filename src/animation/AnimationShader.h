@@ -6,6 +6,10 @@ namespace ozz::math {
 	struct Float4x4;
 }
 
+typedef unsigned int GLuint;
+typedef unsigned int GLenum;
+typedef int          GLsizei;
+typedef int          GLint;
 
 // Declares a shader program.
 class AnimationShader {

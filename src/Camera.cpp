@@ -15,27 +15,44 @@ namespace Engine {
 		m_worldUp  = up;
 		m_yaw      = yaw;
 		m_pitch    = pitch;
+	}
 
+
+	void Camera::onInit()
+	{
 		UpdateCameraVectors();
 	}
+	void Camera::onUpdate(float dt)
+	{
+		UpdateCameraVectors();
+
+		float aspect = Window::GetTargetAspectRatio();
+		ENGINE_VERIFY(aspect > 0.0f, "Camera::view_proj: aspect ratio is non-positive");
+
+		m_proj = glm::perspective(glm::radians(m_fov), aspect, m_nearPlane, m_farPlane);
+
+		m_view = glm::lookAt(m_position, m_position + m_front, m_up);
+
+		m_viewProj = FromMatrix(GetProjectionMatrix()) * FromMatrix(GetViewMatrix());
+	}
+	void Camera::onShutdown()
+	{
+	}
+
 
 	ozz::math::Float4x4 Camera::view_proj() const
 	{
-		ENGINE_ASSERT(Get().window, "Camera::view_proj: m_window is null");
-		float aspect = Window::GetTargetAspectRatio();
-		ENGINE_VERIFY(aspect > 0.0f, "Camera::view_proj: aspect ratio is non-positive");
-		return FromMatrix(GetProjectionMatrix(aspect)) * FromMatrix(GetViewMatrix());
+		return m_viewProj;
 	}
 
 	glm::mat4 Camera::GetViewMatrix() const
 	{
-		return glm::lookAt(m_position, m_position + m_front, m_up);
+		return m_view;
 	}
 
-	glm::mat4 Camera::GetProjectionMatrix(float aspectRatio) const
+	glm::mat4 Camera::GetProjectionMatrix() const
 	{
-		ENGINE_ASSERT(aspectRatio > 0.0f, "Camera::GetProjectionMatrix: Invalid aspect ratio");
-		return glm::perspective(glm::radians(m_fov), aspectRatio, m_nearPlane, m_farPlane);
+		return m_proj;
 	}
 
 	void Camera::ProcessKeyboard(float deltaTime)
@@ -95,5 +112,6 @@ namespace Engine {
 		m_right = glm::normalize(glm::cross(m_front, m_worldUp));
 		m_up    = glm::normalize(glm::cross(m_right, m_front));
 	}
+
 
 } // namespace Engine

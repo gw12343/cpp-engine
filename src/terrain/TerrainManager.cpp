@@ -1,6 +1,7 @@
 #include "TerrainManager.h"
 #include "utils/Utils.h"
 #include "core/EngineData.h"
+#include <glad/glad.h>
 
 #include <filesystem>
 #include <fstream>
@@ -64,7 +65,7 @@ namespace Engine::Terrain {
 			tile->terrainShader->SetMat4("uModel", &terrainTransform);
 
 			glm::mat4 viewM       = GetCamera().GetViewMatrix();
-			glm::mat4 projectionM = GetCamera().GetProjectionMatrix(Window::GetTargetAspectRatio());
+			glm::mat4 projectionM = GetCamera().GetProjectionMatrix();
 
 			tile->terrainShader->SetMat4("uView", &viewM);
 			tile->terrainShader->SetMat4("uProjection", &projectionM);

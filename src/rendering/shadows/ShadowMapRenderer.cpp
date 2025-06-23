@@ -206,7 +206,7 @@ namespace Engine {
 		shader.SetVec3("viewPos", GetCamera().GetPosition());
 		ENGINE_GLCheckError();
 		shader.SetMat4("view", &V);
-		glm::mat4 proj = GetCamera().GetProjectionMatrix(Window::GetTargetAspectRatio());
+		glm::mat4 proj = GetCamera().GetProjectionMatrix();
 		shader.SetMat4("projection", &proj);
 		ENGINE_GLCheckError();
 		glActiveTexture(GL_TEXTURE1);

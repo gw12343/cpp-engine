@@ -29,16 +29,14 @@
 
 #include "AnimationShader.h"
 #include "Camera.h"
-#include "ozz/base/memory/allocator.h"
 #include "renderer_impl.h"
 #include "core/EngineData.h"
+
+#include "glad/glad.h"
 
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-// namespace ozz {
-// namespace sample {
-// namespace internal {
 
 GlImmediateRenderer::GlImmediateRenderer(RendererImpl* _renderer) : vbo_(0), size_(0), renderer_(_renderer)
 {

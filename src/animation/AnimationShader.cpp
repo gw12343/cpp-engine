@@ -36,6 +36,9 @@
 #include <cstdio>
 #include <spdlog/spdlog.h>
 
+#include "glad/glad.h"
+
+
 static const char* kPlatformSpecificVSHeader = "#version 330\n";
 static const char* kPlatformSpecificFSHeader = "#version 330\n";
 

@@ -3,22 +3,25 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-// include ozz mat4
-// #include "core/Window.h"
 #include "ozz/base/maths/simd_math.h"
 #include "ozz/base/platform.h"
+#include "core/module/Module.h"
 
 namespace Engine {
 
-	class Camera {
+	class Camera : public Module {
 	  public:
 		Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = -90.0f, float pitch = 0.0f);
 
-		// void SetWindow(const Window* window) { m_window = window; }
+		void        onInit() override;
+		void        onUpdate(float dt) override;
+		void        onShutdown() override;
+		std::string name() const override { return "CameraModule"; };
+
 
 		glm::mat4           GetViewMatrix() const;
 		ozz::math::Float4x4 view_proj() const;
-		glm::mat4           GetProjectionMatrix(float aspectRatio) const;
+		glm::mat4           GetProjectionMatrix() const;
 		void                ProcessKeyboard(float deltaTime);
 		void                ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);
 		void                ProcessMouseScroll(float yoffset);
@@ -32,6 +35,10 @@ namespace Engine {
 
 	  private:
 		void UpdateCameraVectors();
+
+		glm::mat4           m_proj;
+		glm::mat4           m_view;
+		ozz::math::Float4x4 m_viewProj;
 
 		// Camera Attributes
 		glm::vec3 m_position{};
@@ -50,7 +57,5 @@ namespace Engine {
 
 		float m_nearPlane;
 		float m_farPlane;
-
-		// const Window* m_window{};
 	};
 } // namespace Engine
