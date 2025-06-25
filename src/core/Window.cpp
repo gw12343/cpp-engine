@@ -8,8 +8,11 @@
 #include <spdlog/spdlog.h>
 #include <utility>
 #include "scripting/ScriptManager.h"
+#include "rendering/ui/IconsFontAwesome6.h"
 
 namespace Engine {
+
+	static const ImWchar icons_ranges[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
 
 	std::map<Window::FramebufferID, std::shared_ptr<Framebuffer>> Window::m_frameBuffers;
 
@@ -75,6 +78,7 @@ namespace Engine {
 		return true;
 	}
 
+
 	bool Window::InitImGui()
 	{
 		IMGUI_CHECKVERSION();
@@ -87,6 +91,21 @@ namespace Engine {
 		ImGui_ImplOpenGL3_Init("#version 150");
 
 		ImGui::StyleColorsDark();
+
+		// Load Roboto 12pt (approx. 24px)
+		ImFontConfig roboto_config;
+		roboto_config.MergeMode  = false;
+		roboto_config.PixelSnapH = true;
+		ImFont* roboto_font      = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Regular.ttf", 18.0f, &roboto_config, io.Fonts->GetGlyphRangesDefault());
+
+		// Load Font Awesome and merge into Roboto
+		ImFontConfig fa_config;
+		fa_config.MergeMode        = true; // Important
+		fa_config.PixelSnapH       = true;
+		fa_config.GlyphMinAdvanceX = 12.0f; // Adjust icon spacing if needed
+		io.Fonts->AddFontFromFileTTF("resources/fonts/fa-solid-900.ttf", 18.0f, &fa_config, icons_ranges);
+
+
 		io.FontGlobalScale = 1.0f;
 		return true;
 	}

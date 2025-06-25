@@ -196,12 +196,25 @@ add_executable(${PROJECT_NAME} ${SOURCES}
         src/core/module/ModuleManager.inl
         src/core/module/ModuleManager.cpp
         src/core/module/ModuleManager.h
-        src/core/module/TestModule.cpp
-        src/core/module/TestModule.h
+        src/core/module/scriptingonly/TestModule.cpp
+        src/core/module/scriptingonly/TestModule.h
         src/core/EngineData.cpp
         src/core/EngineData.h
         src/scripting/ScriptManager.cpp
-        src/scripting/ScriptManager.h)
+        src/scripting/ScriptManager.h
+        src/components/impl/EntityMetadataComponent.cpp
+        src/components/impl/TransformComponent.cpp
+        src/components/impl/ShadowCasterComponent.cpp
+        src/components/impl/ParticleSystemComponent.cpp
+        src/components/impl/LuaScriptComponent.cpp
+        src/components/impl/AudioSourceComponent.cpp
+        src/components/impl/SkeletonComponent.cpp
+        src/components/impl/SkinnedMeshComponent.cpp
+        src/components/impl/RigidBodyComponent.cpp
+        src/components/impl/AnimationComponent.cpp
+        src/components/impl/AnimationPoseComponent.cpp
+        src/components/Components.cpp
+)
 find_package(OpenGL REQUIRED)
 
 

@@ -7,6 +7,7 @@
 #include "animation/AnimationManager.h"
 
 #include "rendering/Renderer.h"
+#include "rendering/ui/IconsFontAwesome6.h"
 
 namespace Engine::UI {
 
@@ -338,7 +339,7 @@ namespace Engine::UI {
 		SetThemeColors(0);
 	}
 
-	int selectedTheme = 1;
+	int selectedTheme = 0;
 
 	void UIManager::DrawTopBar()
 	{
@@ -447,31 +448,31 @@ namespace Engine::UI {
 
 			// Render each component in the inspector
 			if (m_selectedEntity.HasComponent<Components::EntityMetadata>()) {
-				if (ImGui::CollapsingHeader("Entity Metadata", ImGuiTreeNodeFlags_DefaultOpen)) {
+				if (ImGui::CollapsingHeader(ICON_FA_ID_CARD " Entity Metadata", ImGuiTreeNodeFlags_DefaultOpen)) {
 					m_selectedEntity.GetComponent<Components::EntityMetadata>().RenderInspector(m_selectedEntity);
 				}
 			}
 
 			if (m_selectedEntity.HasComponent<Components::Transform>()) {
-				if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
+				if (ImGui::CollapsingHeader(ICON_FA_MAXIMIZE " Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
 					m_selectedEntity.GetComponent<Components::Transform>().RenderInspector(m_selectedEntity);
 				}
 			}
 
 			if (m_selectedEntity.HasComponent<Components::ModelRenderer>()) {
-				if (ImGui::CollapsingHeader("Model Renderer")) {
+				if (ImGui::CollapsingHeader(ICON_FA_CUBE " Model Renderer")) {
 					m_selectedEntity.GetComponent<Components::ModelRenderer>().RenderInspector(m_selectedEntity);
 				}
 			}
 
 			if (m_selectedEntity.HasComponent<Components::RigidBodyComponent>()) {
-				if (ImGui::CollapsingHeader("Rigid Body")) {
+				if (ImGui::CollapsingHeader(ICON_FA_CUBES_STACKED " Rigid Body")) {
 					m_selectedEntity.GetComponent<Components::RigidBodyComponent>().RenderInspector(m_selectedEntity);
 				}
 			}
 
 			if (m_selectedEntity.HasComponent<Components::AudioSource>()) {
-				if (ImGui::CollapsingHeader("Audio Source")) {
+				if (ImGui::CollapsingHeader(ICON_FA_VOLUME_HIGH " Audio Source")) {
 					auto& audioSource = m_selectedEntity.GetComponent<Components::AudioSource>();
 					audioSource.RenderInspector(m_selectedEntity);
 
@@ -515,14 +516,18 @@ namespace Engine::UI {
 				}
 			}
 			if (m_selectedEntity.HasComponent<Components::ParticleSystem>()) {
-				if (ImGui::CollapsingHeader("Particle System")) {
+				if (ImGui::CollapsingHeader(ICON_FA_STAR_HALF_STROKE "Particle System")) {
 					m_selectedEntity.GetComponent<Components::ParticleSystem>().RenderInspector(m_selectedEntity);
 				}
 			}
-
 			if (m_selectedEntity.HasComponent<Components::ShadowCaster>()) {
-				if (ImGui::CollapsingHeader("Shadow Caster")) {
+				if (ImGui::CollapsingHeader(ICON_FA_MOON " Shadow Caster")) {
 					m_selectedEntity.GetComponent<Components::ShadowCaster>().RenderInspector(m_selectedEntity);
+				}
+			}
+			if (m_selectedEntity.HasComponent<Components::LuaScript>()) {
+				if (ImGui::CollapsingHeader(ICON_FA_SCROLL " Script")) {
+					m_selectedEntity.GetComponent<Components::LuaScript>().RenderInspector(m_selectedEntity);
 				}
 			}
 		}

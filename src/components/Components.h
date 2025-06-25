@@ -19,6 +19,8 @@
 #include <ozz/animation/runtime/sampling_job.h>
 #include <ozz/base/containers/vector.h>
 #include <utility>
+#include <sol/environment.hpp>
+#include <sol/function.hpp>
 
 using namespace JPH;
 using namespace JPH::literals;
@@ -37,21 +39,14 @@ namespace ozz::math {
 } // namespace ozz::math
 
 
-// namespace Effekseer {
-//	template <typename T>
-//	class RefPtr;
-//
-//	class Effect;
-//	using Handle = int;
-// } // namespace Effekseer
-
-
 namespace Engine {
 	class Mesh;
 	class Entity;
 
 	// Component structs for the ECS system
 	namespace Components {
+
+		void RegisterAllComponentBindings();
 
 		// Base Component class
 		class Component {
@@ -63,6 +58,38 @@ namespace Engine {
 
 			// New method for rendering component in inspector
 			virtual void RenderInspector(Entity& entity) {}
+
+
+			static void AddBindings() { SPDLOG_INFO("unimpl!"); }
+		};
+
+		class AnimationComponent : public Component {
+		  public:
+			ozz::animation::Animation* animation = nullptr;
+			std::string                animationPath;
+
+			AnimationComponent() = default;
+			explicit AnimationComponent(ozz::animation::Animation* animation) : animation(animation) {}
+			explicit AnimationComponent(std::string animationPath) : animationPath(std::move(animationPath)) {}
+			void OnAdded(Entity& entity) override;
+			void RenderInspector(Entity& entity) override;
+		};
+
+		class LuaScript : public Component {
+		  public:
+			LuaScript() = default;
+			explicit LuaScript(std::string path) : scriptPath(path) {}
+
+			virtual void OnAdded(Entity& entity) override;
+			virtual void RenderInspector(Entity& entity) override;
+
+
+			std::string      scriptPath;
+			sol::environment env;
+
+			sol::function start;
+			sol::function shutdown;
+			sol::function update;
 		};
 
 		class ShadowCaster : public Component {
@@ -121,6 +148,8 @@ namespace Engine {
 
 			void OnAdded(Entity& entity) override;
 			void RenderInspector(Entity& entity) override;
+
+			static void AddBindings();
 		};
 
 		// Renderer component for 3D models
@@ -232,17 +261,6 @@ namespace Engine {
 			void RenderInspector(Entity& entity) override;
 		};
 
-		class AnimationComponent : public Component {
-		  public:
-			ozz::animation::Animation* animation = nullptr;
-			std::string                animationPath;
-
-			AnimationComponent() = default;
-			explicit AnimationComponent(ozz::animation::Animation* animation) : animation(animation) {}
-			explicit AnimationComponent(std::string animationPath) : animationPath(std::move(animationPath)) {}
-			void OnAdded(Entity& entity) override;
-			void RenderInspector(Entity& entity) override;
-		};
 
 		class AnimationPoseComponent : public Component {
 		  public:
@@ -295,7 +313,8 @@ namespace Engine {
 			bool                                 autoPlay = true;
 			bool                                 looping  = false;
 
-			ParticleSystem(const std::string& path) : effectPath(path) {}
+			ParticleSystem() = default;
+			explicit ParticleSystem(const std::string& path) : effectPath(path) {}
 			void OnAdded(Entity& entity) override;
 			void RenderInspector(Entity& entity) override;
 

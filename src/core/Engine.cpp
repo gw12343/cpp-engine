@@ -5,7 +5,7 @@
 #include "utils/ModelLoader.h"
 #include "Jolt/Physics/Collision/Shape/MeshShape.h"
 #include "core/module/ModuleManager.h"
-#include "core/module/TestModule.h"
+#include "core/module/scriptingonly/TestModule.h"
 #include <memory>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include "EngineData.h"
@@ -72,8 +72,10 @@ namespace Engine {
 	{
 		SPDLOG_INFO("Starting Engine");
 		manager.InitAll();
-		CreateInitialEntities();
+		Components::RegisterAllComponentBindings();
 		manager.InitAllLuaBindings();
+
+		CreateInitialEntities();
 
 		return true;
 	}
@@ -83,9 +85,9 @@ namespace Engine {
 		BodyInterface& body_interface = GetPhysics().GetPhysicsSystem()->GetBodyInterface();
 		const RVec3    box_half_extents(0.5f, 0.5f, 0.5f);
 
-		// Create physics body
-		BodyCreationSettings cube_settings(new BoxShape(box_half_extents), RVec3(0.0, 5.0, 0.0), Quat::sIdentity(), EMotionType::Dynamic, Layers::MOVING);
-		BodyID               cube_id = body_interface.CreateAndAddBody(cube_settings, EActivation::Activate);
+		//		// Create physics body
+		//		BodyCreationSettings cube_settings(new BoxShape(box_half_extents), RVec3(0.0, 5.0, 0.0), Quat::sIdentity(), EMotionType::Dynamic, Layers::MOVING);
+		//		BodyID               cube_id = body_interface.CreateAndAddBody(cube_settings, EActivation::Activate);
 
 		// Create floor
 		BoxShapeSettings floor_shape_settings(Vec3(30.0f, 1.0f, 30.0f));
@@ -129,9 +131,10 @@ namespace Engine {
 		Entity entity2 = Entity::Create("TestEntity2");
 		entity2.AddComponent<Components::ModelRenderer>(model);
 		entity2.AddComponent<Components::Transform>(glm::vec3(2.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		entity2.AddComponent<Components::RigidBodyComponent>(GetPhysics().GetPhysicsSystem().get(), cube_id);
+		// entity2.AddComponent<Components::RigidBodyComponent>(GetPhysics().GetPhysicsSystem().get(), cube_id);
 		entity2.AddComponent<Components::AudioSource>("birds", true, 0.1f, 1.0f, true, 5.0f, 50.0f, 1.0f);
 		entity2.AddComponent<Components::ShadowCaster>();
+		entity2.AddComponent<Components::LuaScript>("scripts/test.lua");
 
 
 		Entity animatedEntity = Entity::Create("AnimatedEntity");
@@ -171,6 +174,7 @@ namespace Engine {
 			Get().isPhysicsPaused = !Get().isPhysicsPaused;
 			SPDLOG_INFO("Physics simulation {}", Get().isPhysicsPaused ? "enabled" : "disabled");
 		}
+
 
 		// Process mouse scroll regardless of capture state
 		//		float scrollDelta = Input::GetMouseScrollDelta();

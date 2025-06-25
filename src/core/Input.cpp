@@ -129,7 +129,7 @@ namespace Engine {
 	void Input::setLuaBindings()
 	{
 		// glm::vec2 usertype (only if not already bound)
-		GetScriptManager().lua.new_usertype<glm::vec2>("vec2", sol::constructors<glm::vec2(), glm::vec2(float, float)>(), "x", &glm::vec2::x, "y", &glm::vec2::y);
+		// GetScriptManager().lua.new_usertype<glm::vec2>("vec2", sol::constructors<glm::vec2(), glm::vec2(float, float)>(), "x", &glm::vec2::x, "y", &glm::vec2::y);
 
 		// Input binding
 		GetScriptManager().lua.new_usertype<Input>("Input",
@@ -162,9 +162,7 @@ namespace Engine {
 		GetScriptManager().lua["CURSOR_HIDDEN"]   = GLFW_CURSOR_HIDDEN;
 
 		// Global accessor
-		GetScriptManager().lua.set_function("getInput", []() -> Input& {
-			return Engine::GetInput(); // You implement this
-		});
+		GetScriptManager().lua.set_function("getInput", []() -> Input& { return Engine::GetInput(); });
 	}
 
 
