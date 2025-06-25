@@ -39,15 +39,9 @@ namespace Engine {
 		std::shared_ptr<Camera>                  camera;
 		std::shared_ptr<Input>                   input;
 		std::shared_ptr<entt::registry>          registry;
-		bool                                     isPhysicsPaused = true;
 	};
 
 	EngineData& Get();
-
-	inline bool IsPhysicsPaused()
-	{
-		return Get().isPhysicsPaused;
-	}
 
 	// Convenience inline accessors
 	inline auto& GetWindow()

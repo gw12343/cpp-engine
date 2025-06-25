@@ -70,7 +70,7 @@ namespace Engine {
 		// Collision Steps to simulate. Should be around 1 per 16ms
 		int cCollisionSteps = static_cast<int>(glm::ceil(dt * 60.0f));
 		// Step the world
-		if (!IsPhysicsPaused()) physics->Update(dt, cCollisionSteps, allocater.get(), jobs.get());
+		if (!isPhysicsPaused) physics->Update(dt, cCollisionSteps, allocater.get(), jobs.get());
 
 		SyncPhysicsEntities();
 	}

@@ -9,6 +9,8 @@
 #include "rendering/Renderer.h"
 #include "rendering/ui/IconsFontAwesome6.h"
 
+#include "physics/PhysicsManager.h"
+
 namespace Engine::UI {
 
 	void SetThemeColors(int t)
@@ -406,7 +408,7 @@ namespace Engine::UI {
 		RenderAudioDebugUI();
 
 		// Display pause overlay when physics is disabled
-		if (IsPhysicsPaused()) {
+		if (GetPhysics().isPhysicsPaused) {
 			RenderPauseOverlay();
 		}
 

@@ -170,10 +170,10 @@ namespace Engine {
 	void GEngine::ProcessInput() const
 	{
 		// Toggle physics when P is pressed
-		if (GetInput().IsKeyPressedThisFrame(GLFW_KEY_P)) {
-			Get().isPhysicsPaused = !Get().isPhysicsPaused;
-			SPDLOG_INFO("Physics simulation {}", Get().isPhysicsPaused ? "enabled" : "disabled");
-		}
+		//		if (GetInput().IsKeyPressedThisFrame(GLFW_KEY_P)) {
+		//			Get().isPhysicsPaused = !Get().isPhysicsPaused;
+		//			SPDLOG_INFO("Physics simulation {}", Get().isPhysicsPaused ? "enabled" : "disabled");
+		//		}
 
 
 		// Process mouse scroll regardless of capture state
@@ -188,6 +188,8 @@ namespace Engine {
 		//		}
 		//
 		//
+
+
 		if (ImGui::IsKeyPressed(ImGuiKey_B)) {
 			glm::vec3 cpos    = GetCamera().GetPosition();
 			glm::vec3 forward = GetCamera().GetFront();
