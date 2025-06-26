@@ -104,18 +104,14 @@ namespace Engine {
 		body_interface.AddBody(floor_body->GetID(), EActivation::DontActivate);
 		BodyID floor_id = floor_body->GetID();
 
-		// Load models
-		sphere = Rendering::ModelLoader::LoadModel("/home/gabe/CLionProjects/cpp-engine/resources/models/sphere.obj");
-
-
-		// track = Rendering::ModelLoader::LoadModel("/home/gabe/Downloads/GCNCMarioCircuit/course_fix.dae");
-		// track = Rendering::ModelLoader::LoadModel("/home/gabe/Downloads/gltf/gltf/soccer_ball.gltf");
-
-
-		std::shared_ptr<Rendering::Model> model = Rendering::ModelLoader::LoadModel("/home/gabe/CLionProjects/cpp-engine/resources/models/"
+		sphere = Rendering::ModelLoader::LoadModel("resources/models/sphere.obj");
+		std::shared_ptr<Rendering::Model> treeModel = Rendering::ModelLoader::LoadModel("resources/models/"
 		                                                                            "TwistedTree_1.obj");
 
-		cube = Rendering::ModelLoader::LoadModel("/home/gabe/CLionProjects/cpp-engine/resources/models/cube.obj");
+
+
+
+		cube = Rendering::ModelLoader::LoadModel("resources/models/cube.obj");
 		// Create entities
 		Entity floor = Entity::Create("TestCube");
 		floor.AddComponent<Components::ModelRenderer>(cube);
@@ -123,13 +119,13 @@ namespace Engine {
 		floor.AddComponent<Components::RigidBodyComponent>(GetPhysics().GetPhysicsSystem().get(), floor_id);
 
 		Entity entity = Entity::Create("TestEntity");
-		entity.AddComponent<Components::ModelRenderer>(model);
+		entity.AddComponent<Components::ModelRenderer>(treeModel);
 		entity.AddComponent<Components::Transform>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		entity.AddComponent<Components::ParticleSystem>("/home/gabe/CLionProjects/cpp-engine/resources/particles/testleaf.efk");
+		entity.AddComponent<Components::ParticleSystem>("resources/particles/testleaf.efk");
 
 
 		Entity entity2 = Entity::Create("TestEntity2");
-		entity2.AddComponent<Components::ModelRenderer>(model);
+		entity2.AddComponent<Components::ModelRenderer>(treeModel);
 		entity2.AddComponent<Components::Transform>(glm::vec3(2.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 		// entity2.AddComponent<Components::RigidBodyComponent>(GetPhysics().GetPhysicsSystem().get(), cube_id);
 		entity2.AddComponent<Components::AudioSource>("birds", true, 0.1f, 1.0f, true, 5.0f, 50.0f, 1.0f);
@@ -139,11 +135,11 @@ namespace Engine {
 
 		Entity animatedEntity = Entity::Create("AnimatedEntity");
 		animatedEntity.AddComponent<Components::Transform>(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		animatedEntity.AddComponent<Components::SkeletonComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_skeleton.ozz");
-		animatedEntity.AddComponent<Components::AnimationComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_animation.ozz");
+		animatedEntity.AddComponent<Components::SkeletonComponent>("resources/models/ruby_skeleton.ozz");
+		animatedEntity.AddComponent<Components::AnimationComponent>("resources/models/ruby_animation.ozz");
 		animatedEntity.AddComponent<Components::AnimationPoseComponent>();
 		animatedEntity.AddComponent<Components::AnimationWorkerComponent>();
-		animatedEntity.AddComponent<Components::SkinnedMeshComponent>("/home/gabe/CLionProjects/cpp-engine/resources/models/ruby_mesh.ozz");
+		animatedEntity.AddComponent<Components::SkinnedMeshComponent>("resources/models/ruby_mesh.ozz");
 
 
 		//		Terrain::TerrainTile tile = Terrain::LoadTerrainTile("resources/terrain/terrain.bin");

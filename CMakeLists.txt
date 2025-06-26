@@ -8,8 +8,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 option(ENABLE_ALL_WARNINGS "Enable all warnings and warnings as errors" OFF)
 add_compile_options(-w)
 
+if (WIN32)
+    add_compile_definitions(NOMINMAX)
+endif()
+
 # Global dependency flags
 set(SPDLOG_BUILD_WARNINGS OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(JPH_USE_STATIC_RUNTIME OFF CACHE BOOL "" FORCE)
 set(JPH_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
 set(JPH_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(ozz_build_samples OFF CACHE BOOL "" FORCE)
@@ -17,6 +23,19 @@ set(ozz_build_tests OFF CACHE BOOL "" FORCE)
 set(ozz_build_howtos OFF CACHE BOOL "" FORCE)
 set(ozz_build_gltf OFF CACHE BOOL "" FORCE)
 set(ozz_build_postfix OFF CACHE BOOL "" FORCE)
+set(OPENAL_ROOT "C:/Users/Gabe/Documents/openal-soft-1.24.3-bin")  # Change this if needed
+
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    # Use MDd in Debug, MD in Release
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+        add_compile_options(/MDd)
+    else()
+        add_compile_options(/MD)
+    endif()
+endif()
+
+
 
 # Fetch external libraries
 include(FetchContent)
@@ -65,6 +84,22 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(spdlog jolt ozz imgui effekseer lua sol2)
 
+
+if (WIN32)
+    FetchContent_Declare(
+            sndfile
+            GIT_REPOSITORY https://github.com/libsndfile/libsndfile.git
+            GIT_TAG 1.2.2
+    )
+
+    set(ENABLE_EXTERNAL_LIBS OFF CACHE BOOL "" FORCE)  # Avoid building FLAC/MP3/VORBIS, optional
+    set(BUILD_PROGRAMS OFF CACHE BOOL "" FORCE)        # No command-line tools
+    set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(sndfile)
+endif()
+
+
 # ----------------- IMGUI -------------------
 add_library(imgui STATIC
         ${imgui_SOURCE_DIR}/imgui.cpp
@@ -78,11 +113,11 @@ add_library(imgui STATIC
 
 target_include_directories(imgui PUBLIC
         ${imgui_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/include
         ${imgui_SOURCE_DIR}/backends
 )
 
 target_compile_definitions(imgui PUBLIC IMGUI_HAS_DOCK)
-target_link_libraries(imgui PRIVATE glfw)
 
 # ----------------- LUA -------------------
 file(GLOB LUA_SOURCES ${lua_SOURCE_DIR}/src/*.c)
@@ -90,14 +125,16 @@ add_library(lua STATIC ${LUA_SOURCES})
 target_include_directories(lua PUBLIC ${lua_SOURCE_DIR}/src)
 
 # ----------------- Source & Includes -------------------
-file(GLOB_RECURSE LIB_SOURCES "lib/src/*.cpp" "lib/src/*.c" "src/*.cpp" "src/*.inl")
+file(GLOB_RECURSE SOURCES "lib/src/*.cpp" "lib/src/*.c" "src/*.cpp" "src/*.inl")
 
-add_executable(${PROJECT_NAME} ${LIB_SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES})
+
 
 target_include_directories(${PROJECT_NAME} PRIVATE
-        lib/include
-        lib/src/JoltPhysics
-        src
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/src/JoltPhysics
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/include/JoltPhysics
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${lua_SOURCE_DIR}/src
 )
 
@@ -116,28 +153,69 @@ find_package(OpenGL REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 
 # OpenAL
-if (WIN32)
-    find_path(OPENAL_INCLUDE_DIR AL/al.h)
-    find_library(OPENAL_LIBRARY OpenAL32)
-else ()
+if(WIN32)
+    set(OPENAL_LIBRARY "${OPENAL_ROOT}/libs/Win64/OpenAL32.lib")
+    set(OPENAL_INCLUDE_DIR "${OPENAL_ROOT}/include")
+
+    if(EXISTS "${OPENAL_LIBRARY}" AND EXISTS "${OPENAL_INCLUDE_DIR}/AL/al.h")
+        message(STATUS "Using manually specified OpenAL from ${OPENAL_ROOT}")
+    else()
+        message(FATAL_ERROR "OpenAL not found! Please set OPENAL_ROOT to the path where OpenAL Soft is installed.")
+    endif()
+
+    include_directories(${OPENAL_INCLUDE_DIR})
+    target_link_libraries(${PROJECT_NAME} PRIVATE "${OPENAL_LIBRARY}")
+else()
     find_package(OpenAL REQUIRED)
-endif ()
+endif()
 
-if (OPENAL_INCLUDE_DIR AND OPENAL_LIBRARY)
-    target_include_directories(${PROJECT_NAME} PRIVATE ${OPENAL_INCLUDE_DIR})
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${OPENAL_LIBRARY})
-else ()
-    message(WARNING "OpenAL not found. Audio may not work!")
-endif ()
 
-# SndFile (Linux/macOS only; needs vcpkg or manual install on Windows)
-if (NOT WIN32)
+
+if (WIN32)
+    set(ASSIMP_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/assimp.lib")
+    if (EXISTS "${ASSIMP_LIB}")
+        message(STATUS "Using manually specified Assimp at ${ASSIMP_LIB}")
+        target_link_libraries(${PROJECT_NAME} PRIVATE "${ASSIMP_LIB}")
+    else()
+        message(FATAL_ERROR "Assimp library not found at ${ASSIMP_LIB}")
+    endif()
+else()
+    find_package(assimp REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE assimp)
+endif()
+
+if (WIN32)
+    set(GLFW_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/glfw3.lib")
+    set(GLFW_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/include")  # Optional if needed
+    if (EXISTS "${GLFW_LIB}")
+        message(STATUS "Using manually specified GLFW at ${GLFW_LIB}")
+        target_link_libraries(${PROJECT_NAME} PRIVATE "${GLFW_LIB}")
+        target_link_libraries(imgui PRIVATE "${GLFW_LIB}")
+        target_include_directories(${PROJECT_NAME} PRIVATE "${GLFW_INCLUDE_DIR}")
+    else()
+        message(FATAL_ERROR "GLFW library not found at ${GLFW_LIB}")
+    endif()
+else()
+    find_package(glfw3 REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
+    target_link_libraries(imgui PRIVATE glfw)
+endif()
+
+
+
+include_directories(${OPENAL_INCLUDE_DIR})
+
+# SndFile
+if (WIN32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE sndfile)
+else()
+    # Linux/macOS
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(SNDFILE REQUIRED sndfile)
     include_directories(${SNDFILE_INCLUDE_DIRS})
     link_directories(${SNDFILE_LIBRARY_DIRS})
     target_link_libraries(${PROJECT_NAME} PRIVATE ${SNDFILE_LIBRARIES})
-endif ()
+endif()
 
 # ----------------- Link Everything Else -------------------
 target_link_libraries(${PROJECT_NAME} PRIVATE
@@ -146,7 +224,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         imgui
         spdlog::spdlog
         Jolt
-        assimp
         ozz_animation ozz_animation_offline ozz_geometry
         Effekseer
         EffekseerRendererGL

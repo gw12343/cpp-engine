@@ -42,13 +42,13 @@ namespace Engine {
 		template <typename T>
 		T& GetComponent()
 		{
-			GetRegistry().template get<T>(m_handle);
+			return GetRegistry().template get<T>(m_handle);
 		}
 
 		template <typename T>
 		bool HasComponent() const
 		{
-			GetRegistry().template all_of<T>(m_handle);
+            return GetRegistry().template all_of<T>(m_handle);
 		}
 
 		template <typename T>

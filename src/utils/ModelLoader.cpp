@@ -136,7 +136,7 @@ namespace Engine {
 			auto heightTextures = LoadMaterialTextures(mat, aiTextureType_HEIGHT, "texture_height", directory);
 			if (!heightTextures.empty()) material->SetHeightTexture(heightTextures[0]);
 
-			material->SetName(mat->GetName().C_Str());
+			material->SetName("MaterialYay");
 
 			return material;
 		}

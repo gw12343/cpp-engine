@@ -9,6 +9,7 @@
 #include "ozz/base/maths/vec_float.h"
 #include "ozz/base/platform.h"
 
+#undef max
 namespace Engine {
 
 	// Defines a mesh with skinning information (joint indices and weights).

@@ -27,7 +27,7 @@ end
 function Update()
     local input = getInput()
     if input:isMousePressed(1) then
-        --MoveObject(gameObject)
+        MoveObject(gameObject)
     end
 
     if input:isKeyPressedThisFrame(KEY_W) then

@@ -15,20 +15,20 @@ namespace Engine {
 	{
 		m_shadowRenderer = std::make_unique<ShadowMapRenderer>();
 
-		if (!m_shader.LoadFromFiles("/home/gabe/CLionProjects/cpp-engine/resources/shaders/vert.glsl", "/home/gabe/CLionProjects/cpp-engine/resources/shaders/frag.glsl", std::nullopt)) {
+		if (!m_shader.LoadFromFiles("resources/shaders/vert.glsl", "resources/shaders/frag.glsl", std::nullopt)) {
 			log->error("Failed to load default shader");
 			return;
 		}
 
 		// Load skybox shader
-		if (!m_skyboxShader.LoadFromFiles("/home/gabe/CLionProjects/cpp-engine/resources/shaders/skybox_vert.glsl", "/home/gabe/CLionProjects/cpp-engine/resources/shaders/skybox_frag.glsl", std::nullopt)) {
+		if (!m_skyboxShader.LoadFromFiles("resources/shaders/skybox_vert.glsl", "resources/shaders/skybox_frag.glsl", std::nullopt)) {
 			log->error("Failed to load skybox shader");
 			return;
 		}
 
 
 		m_skybox            = std::make_unique<Skybox>();
-		const std::string p = "/home/gabe/CLionProjects/cpp-engine/resources/textures/output.hdr";
+		const std::string p = "resources/textures/output.hdr";
 		if (!m_skybox->LoadFromFile(p)) {
 			log->error("Failed to load skybox");
 			return;
@@ -78,8 +78,8 @@ namespace Engine {
 		GetAnimationManager().Render();
 		RenderEntities();
 		GetTerrainManager().Render();
-		GetParticleManager().Render();
 		RenderSkybox();
+		GetParticleManager().Render();
 		Engine::Framebuffer::Unbind();
 		PostRender();
 	}

@@ -112,7 +112,7 @@ namespace Engine {
 	void ShadowMapRenderer::Initalize()
 	{
 		if (!m_depthShader.LoadFromFiles(
-		        "/home/gabe/CLionProjects/cpp-engine/resources/shaders/depth.vert", "/home/gabe/CLionProjects/cpp-engine/resources/shaders/depth.frag", "/home/gabe/CLionProjects/cpp-engine/resources/shaders/depth.geom")) {
+		        "resources/shaders/depth.vert", "resources/shaders/depth.frag", "resources/shaders/depth.geom")) {
 			SPDLOG_ERROR("Failed to load depth shader");
 		}
 

@@ -402,9 +402,9 @@ namespace Engine::Audio {
 		alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
 
 		// Load sounds
-		auto backgroundMusic = LoadSound("background_music", "/home/gabe/CLionProjects/cpp-engine/resources/sounds/quietmoments.wav");
+		auto backgroundMusic = LoadSound("background_music", "resources/sounds/quietmoments.wav");
 
-		LoadSound("birds", "/home/gabe/CLionProjects/cpp-engine/resources/sounds/bird_chirp.wav");
+		LoadSound("birds", "resources/sounds/bird_chirp.wav");
 
 		Play("background_music", true, 1.0f);
 	}
