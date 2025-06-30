@@ -1,7 +1,8 @@
 //
 // Created by gabe on 6/24/25.
 //
-#include "components/Components.h"
+#include "ParticleSystemComponent.h"
+#include "TransformComponent.h"
 
 #include "core/Engine.h"
 #include "core/Entity.h"

@@ -1,9 +1,9 @@
 #include "physics/PhysicsManager.h"
 
 #include "components/Components.h"
-#include "physics/PhysicsInterfaces.h"
 #include "core/EngineData.h"
-
+#include "scripting/ScriptManager.h"
+#include "components/impl/RigidBodyComponent.h"
 #include <cstdarg>
 
 
@@ -40,7 +40,7 @@ namespace Engine {
 
 		// Breakpoint
 		return true;
-	};
+	}
 
 	void PhysicsManager::onInit()
 	{
@@ -95,7 +95,44 @@ namespace Engine {
 		Factory::sInstance = nullptr;
 	}
 
-	void DecomposeMatrix(const JPH::RMat44& mat, glm::vec3& position, glm::quat& rotation, glm::vec3& scale)
+
+	void PhysicsManager::setLuaBindings()
+	{
+		// Bind the PhysicsManager class
+		GetScriptManager().lua.new_usertype<PhysicsManager>("PhysicsManager",
+		                                                    // Public members
+		                                                    "isPhysicsPaused",
+		                                                    &PhysicsManager::isPhysicsPaused);
+
+		// Provide access to the main PhysicsManager
+		GetScriptManager().lua.set_function("getPhysics", []() -> PhysicsManager& { return Engine::GetPhysics(); });
+
+
+		// SphereShape
+		GetScriptManager().lua.new_usertype<SphereShapeSettings>("SphereShape",
+		                                                         sol::no_constructor, // Disable direct constructor to avoid conflict
+		                                                         "getType",
+		                                                         []() { return "SphereShape"; });
+		GetScriptManager().lua.set_function("SphereShape", [](float radius) { return SphereShapeSettings(radius); });
+
+		// BoxShape
+		GetScriptManager().lua.new_usertype<BoxShapeSettings>("BoxShape", sol::no_constructor, "getType", []() { return "BoxShape"; });
+		GetScriptManager().lua.set_function("BoxShape", [](const glm::vec3& half_extent) { return BoxShapeSettings(Vec3(half_extent.x, half_extent.y, half_extent.z)); });
+
+		// CapsuleShape
+		GetScriptManager().lua.new_usertype<CapsuleShapeSettings>("CapsuleShape", sol::no_constructor, "getType", []() { return "CapsuleShape"; });
+		GetScriptManager().lua.set_function("CapsuleShape", [](float radius, float height) { return CapsuleShapeSettings(height, radius); });
+
+		// CylinderShape
+		GetScriptManager().lua.new_usertype<CylinderShapeSettings>("CylinderShape", sol::no_constructor, "getType", []() { return "CylinderShape"; });
+		GetScriptManager().lua.set_function("CylinderShape", [](float radius, float height) { return CylinderShapeSettings(height, radius); });
+
+		// TriangleShape
+		GetScriptManager().lua.new_usertype<TriangleShapeSettings>("TriangleShape", sol::no_constructor, "getType", []() { return "TriangleShape"; });
+		GetScriptManager().lua.set_function("TriangleShape", [](const glm::vec3& a, const glm::vec3& b, const glm::vec3& c) { return TriangleShapeSettings(Vec3(a.x, a.y, a.z), Vec3(b.x, b.y, b.z), Vec3(c.x, c.y, c.z)); });
+	}
+
+	void DecomposeMatrix(const RMat44& mat, glm::vec3& position, glm::quat& rotation, glm::vec3& scale)
 	{
 		// Convert Jolt matrix to glm matrix
 		glm::mat4 glmMat;

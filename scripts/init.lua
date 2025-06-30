@@ -1,34 +1,78 @@
-function onInit()
-    print("[Lua] onInit called!")
-    --floor = create_entity("TestCube2")
 
-    --add_transform(floor,
-    --    { x = 0.0, y = -10.0, z = 0.0 },
-    --    { x = 0.0, y = 0.0, z = 0.0 },
-    --    { x = 40, y = 1, z = 40 }
-    --)
-    --add_model_renderer(floor, "/home/gabe/CLionProjects/cpp-engine/resources/models/cube.obj")
+function EditorInit()
+    print("[Lua] editor init called!")
 
+    local floor = createEntity("Floor")
+    local tr = floor:AddTransform()
+    local mr = floor:AddModelRenderer();
+    local rb = floor:AddRigidBodyComponent();
+    tr.scale = vec3(60, 2, 60)
+
+    mr:setModel("resources/models/cube.obj")
+    rb:setKinematic(true)
+    rb:setBoxShape(BoxShape(vec3(30.0, 1.0, 30.0)))
 end
 
-function onUpdate(dt)
 
-
-    local win = getWindow()
-
-    --print("Window size:", win:getWidth(), "x", win:getHeight())
-    --print("Aspect ratio:", win:getAspectRatio())
-
+function ShootObject(model, shape, speed, scale)
     local cam = getCamera()
+    local cpos = cam:getPosition()
+    local foward = cam:getFront()
+    -- Summon entity
+    local newBall = createEntity("Ball")
+    -- Add Components
+    local tr = newBall:AddTransform()
+    local mr = newBall:AddModelRenderer();
+    local rb = newBall:AddRigidBodyComponent();
+    local sc = newBall:AddLuaScript();
+    newBall:AddShadowCaster();
 
-    --print("Camera position:", cam:getPosition().x, cam:getPosition().y, cam:getPosition().z)
+    tr.scale = vec3(scale, scale, scale)
+    mr:setModel(model)
+    rb:setPosition(cam:getPosition())
+    rb:addLinearVelocity(vec3(foward.x * speed, foward.y * speed, foward.z * speed))
+    local t = shape:getType()
+    if t == "BoxShape" then
+        rb:setBoxShape(shape)
+    elseif t == "SphereShape" then
+        rb:setSphereShape(shape)
+    elseif t == "CapsuleShape" then
+        rb:setCapsuleShape(shape)
+    elseif t == "CylinderShape" then
+        rb:setCylinderShape(shape)
+    elseif t == "TriangleShape" then
+        rb:setTriangleShape(shape)
+    else
+        print("Unknown shape type: " .. tostring(t))
+    end
+    --sc:setScript(newBall, "scripts/bullet.lua")
+end
+
+function EditorUpdate(dt)
+
+    local input = getInput()
+
+    if input:isKeyPressedThisFrame(KEY_P) then
+        local physics = getPhysics()
+        physics.isPhysicsPaused = not physics.isPhysicsPaused
+
+        if physics.isPhysicsPaused then
+            print("Physics paused")
+        else
+            print("Physics unpaused")
+        end
+    end
 
 
+    if input:isKeyPressed(KEY_E) then
+        local shape = SphereShape(0.5 / 4)
+        ShootObject("resources/models/sphere.obj", shape, 12, 0.25)
+    end
 end
 
 
 
 
-function onShutdown()
+function EditorShutdown()
     print("[Lua] onShutdown called!")
 end

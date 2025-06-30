@@ -1,4 +1,9 @@
-#pragma once
+//
+// Created by gabe on 6/29/25.
+//
+
+#ifndef CPP_ENGINE_ANIMATIONCOMPONENT_H
+#define CPP_ENGINE_ANIMATIONCOMPONENT_H
 
 #include <memory>
 #include <string>
@@ -17,7 +22,6 @@
 #include "Jolt/Physics/Collision/Shape/CylinderShape.h"
 #include "Jolt/Physics/Collision/Shape/TriangleShape.h"
 
-
 #include <Effekseer.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -28,46 +32,21 @@
 #include <sol/environment.hpp>
 #include <sol/function.hpp>
 
-using namespace JPH;
-using namespace JPH::literals;
-
-namespace ozz::animation {
-	class Skeleton;
-	class Animation;
-
-	class LocalToModelJob;
-	class AnimationController;
-} // namespace ozz::animation
-
-namespace ozz::math {
-	struct SoaTransform;
-	struct Float4x4;
-} // namespace ozz::math
+#include "components/Components.h"
 
 
-namespace Engine {
-	class Mesh;
-	class Entity;
+namespace Engine::Components {
+	class AnimationComponent : public Component {
+	  public:
+		ozz::animation::Animation* animation = nullptr;
+		std::string                animationPath;
 
-	// Component structs for the ECS system
-	namespace Components {
+		AnimationComponent() = default;
+		explicit AnimationComponent(ozz::animation::Animation* animation) : animation(animation) {}
+		explicit AnimationComponent(std::string animationPath) : animationPath(std::move(animationPath)) {}
+		void OnAdded(Entity& entity) override;
+		void RenderInspector(Entity& entity) override;
+	};
+} // namespace Engine::Components
 
-		void RegisterAllComponentBindings();
-
-		// Base Component class
-		class Component {
-		  public:
-			Component()          = default;
-			virtual ~Component() = default;
-
-			virtual void OnAdded(Entity& entity) = 0;
-
-			// New method for rendering component in inspector
-			virtual void RenderInspector(Entity& entity) {}
-
-
-			static void AddBindings() { SPDLOG_INFO("unimpl!"); }
-		};
-
-	} // namespace Components
-} // namespace Engine
+#endif // CPP_ENGINE_ANIMATIONCOMPONENT_H

@@ -22,8 +22,13 @@
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
 #include <Jolt/Physics/PhysicsSettings.h>
 #include <Jolt/Physics/PhysicsSystem.h>
+#include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
+#include <Jolt/Physics/Collision/Shape/CylinderShape.h>
+#include <Jolt/Physics/Collision/Shape/TriangleShape.h>
+#include <Jolt/Physics/Collision/Shape/ConvexHullShape.h>
 #include <Jolt/RegisterTypes.h>
-
+#include "core/Entity.h"
+#include "components/impl/TransformComponent.h"
 
 using namespace JPH;
 using namespace JPH::literals;
@@ -51,7 +56,7 @@ namespace Engine {
 		void        onUpdate(float dt) override;
 		void        onShutdown() override;
 		std::string name() const override { return "PhysicsManger"; };
-
+		void        setLuaBindings() override;
 
 		void                              SyncPhysicsEntities();
 		std::shared_ptr<PhysicsSystem>    GetPhysicsSystem();
@@ -60,5 +65,7 @@ namespace Engine {
 		ObjectLayerPairFilterImpl         object_vs_object_layer_filter;
 		ContactListenerImpl               contact_listener;
 		BodyActivationListenerImpl        body_activation_listener;
+
+		std::unordered_map<JPH::BodyID, Entity> bodyToEntityMap;
 	};
 } // namespace Engine

@@ -51,11 +51,6 @@ namespace Engine {
 		static void CreateInitialEntities();
 
 		/**
-		 * @brief Handles input events (keyboard, mouse, etc.).
-		 */
-		void ProcessInput() const;
-
-		/**
 		 * @brief Updates all engine systems and entities.
 		 */
 		void Update();

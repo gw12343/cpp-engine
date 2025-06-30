@@ -2,6 +2,9 @@
 
 #include "components/Components.h"
 #include "core/EngineData.h"
+#include "components/impl/EntityMetadataComponent.h"
+#include "components/impl/AudioSourceComponent.h"
+#include "components/impl/TransformComponent.h"
 
 #include <cstring>
 #include <sndfile.h>
@@ -22,7 +25,7 @@ namespace Engine::Audio {
 
 		SNDFILE* file = sf_open(filename.c_str(), SFM_READ, &fileInfo);
 		if (!file) {
-			spdlog::error("Failed to open sound file: {}", filename);
+			GetSoundManager().log->error("Failed to open sound file: {}", filename);
 			return;
 		}
 
@@ -38,7 +41,7 @@ namespace Engine::Audio {
 		else if (fileInfo.channels == 2)
 			format = AL_FORMAT_STEREO16;
 		else {
-			spdlog::error("Unsupported channel count: {}", fileInfo.channels);
+			GetSoundManager().log->error("Unsupported channel count: {}", fileInfo.channels);
 			return;
 		}
 
@@ -49,7 +52,7 @@ namespace Engine::Audio {
 		// Check for errors
 		ALenum error = alGetError();
 		if (error != AL_NO_ERROR) {
-			spdlog::error("Failed to load sound data: {}", error);
+			GetSoundManager().log->error("Failed to load sound data: {}", error);
 			return;
 		}
 
@@ -88,7 +91,7 @@ namespace Engine::Audio {
 		alSource3f(m_sourceID, AL_POSITION, x, y, z);
 		ALenum error = alGetError();
 		if (error != AL_NO_ERROR) {
-			spdlog::error("OpenAL error setting source position: {}", error);
+			GetSoundManager().log->error("OpenAL error setting source position: {}", error);
 		}
 	}
 
@@ -99,21 +102,21 @@ namespace Engine::Audio {
 		alSourcef(m_sourceID, AL_REFERENCE_DISTANCE, refDistance);
 		ALenum error = alGetError();
 		if (error != AL_NO_ERROR) {
-			spdlog::error("OpenAL error setting reference distance: {}", error);
+			GetSoundManager().log->error("OpenAL error setting reference distance: {}", error);
 			return;
 		}
 
 		alSourcef(m_sourceID, AL_MAX_DISTANCE, maxDistance);
 		error = alGetError();
 		if (error != AL_NO_ERROR) {
-			spdlog::error("OpenAL error setting max distance: {}", error);
+			GetSoundManager().log->error("OpenAL error setting max distance: {}", error);
 			return;
 		}
 
 		alSourcef(m_sourceID, AL_ROLLOFF_FACTOR, rolloffFactor);
 		error = alGetError();
 		if (error != AL_NO_ERROR) {
-			spdlog::error("OpenAL error setting rolloff factor: {}", error);
+			GetSoundManager().log->error("OpenAL error setting rolloff factor: {}", error);
 			return;
 		}
 	}
@@ -125,7 +128,7 @@ namespace Engine::Audio {
 		alGetError();
 
 		if (!buffer.IsLoaded()) {
-			spdlog::error("Attempted to play unloaded buffer");
+			GetSoundManager().log->error("Attempted to play unloaded buffer");
 			return;
 		}
 
@@ -138,22 +141,22 @@ namespace Engine::Audio {
 
 		ALenum error = alGetError();
 		if (error != AL_NO_ERROR) {
-			spdlog::error("Buffer validation failed: {}", error);
+			GetSoundManager().log->error("Buffer validation failed: {}", error);
 			return;
 		}
 
 		if (size <= 0) {
-			spdlog::error("Buffer has no data (size = {})", size);
+			GetSoundManager().log->error("Buffer has no data (size = {})", size);
 			return;
 		}
 
-		SPDLOG_INFO("Playing sound buffer: ID {}, size {} bytes", bufferID, size);
+		GetSoundManager().log->info("Playing sound buffer: ID {}, size {} bytes", bufferID, size);
 
 		// Stop any currently playing sound
 		alSourceStop(m_sourceID);
 		error = alGetError();
 		if (error != AL_NO_ERROR) {
-			spdlog::warn("Error stopping previous sound: {}", error);
+			GetSoundManager().log->warn("Error stopping previous sound: {}", error);
 			// Continue anyway
 		}
 
@@ -161,7 +164,7 @@ namespace Engine::Audio {
 		alSourcei(m_sourceID, AL_BUFFER, 0);
 		error = alGetError();
 		if (error != AL_NO_ERROR) {
-			spdlog::warn("Error detaching previous buffer: {}", error);
+			GetSoundManager().log->warn("Error detaching previous buffer: {}", error);
 			// Continue anyway
 		}
 
@@ -170,7 +173,7 @@ namespace Engine::Audio {
 
 		error = alGetError();
 		if (error != AL_NO_ERROR) {
-			spdlog::error("Failed to attach buffer to source: {}", error);
+			GetSoundManager().log->error("Failed to attach buffer to source: {}", error);
 			return;
 		}
 
@@ -179,14 +182,14 @@ namespace Engine::Audio {
 
 		error = alGetError();
 		if (error != AL_NO_ERROR) {
-			spdlog::error("Failed to play source: {}", error);
+			GetSoundManager().log->error("Failed to play source: {}", error);
 			return;
 		}
 
 		// Check if it's actually playing
 		ALint state;
 		alGetSourcei(m_sourceID, AL_SOURCE_STATE, &state);
-		SPDLOG_INFO("Source state after play: {}", state == AL_PLAYING ? "PLAYING" : state == AL_PAUSED ? "PAUSED" : state == AL_STOPPED ? "STOPPED" : "UNKNOWN");
+		GetSoundManager().log->info("Source state after play: {}", state == AL_PLAYING ? "PLAYING" : state == AL_PAUSED ? "PAUSED" : state == AL_STOPPED ? "STOPPED" : "UNKNOWN");
 	}
 
 	void SoundSource::Stop() const
@@ -229,7 +232,7 @@ namespace Engine::Audio {
 	{
 		auto buffer = GetSound(soundName);
 		if (!buffer) {
-			spdlog::error("Failed to play sound: sound not found");
+			log->error("Failed to play sound: sound not found");
 			return;
 		}
 
@@ -294,14 +297,14 @@ namespace Engine::Audio {
 		// Open the default audio device
 		m_device = alcOpenDevice(nullptr);
 		if (!m_device) {
-			spdlog::error("Failed to open OpenAL device");
+			log->error("Failed to open OpenAL device");
 			return;
 		}
 
 		// Create context
 		m_context = alcCreateContext(m_device, nullptr);
 		if (!m_context) {
-			spdlog::error("Failed to create OpenAL context");
+			log->error("Failed to create OpenAL context");
 			alcCloseDevice(m_device);
 			m_device = nullptr;
 			return;
@@ -309,7 +312,7 @@ namespace Engine::Audio {
 
 		// Make context current
 		if (!alcMakeContextCurrent(m_context)) {
-			spdlog::error("Failed to make OpenAL context current");
+			log->error("Failed to make OpenAL context current");
 			alcDestroyContext(m_context);
 			alcCloseDevice(m_device);
 			m_context = nullptr;
@@ -318,11 +321,11 @@ namespace Engine::Audio {
 		}
 
 		m_initialized = true;
-		spdlog::info("OpenAL initialized successfully");
+		log->info("OpenAL initialized successfully");
 
 
 		if (!m_initialized) {
-			spdlog::critical("Failed to initialize sound manager");
+			log->critical("Failed to initialize sound manager");
 			return;
 		}
 
@@ -413,7 +416,7 @@ namespace Engine::Audio {
 	{
 		ALenum error = alGetError();
 		if (error != AL_NO_ERROR) {
-			spdlog::error("OpenAL error after {}: {}", operation, error);
+			GetSoundManager().log->error("OpenAL error after {}: {}", operation, error);
 		}
 	}
 

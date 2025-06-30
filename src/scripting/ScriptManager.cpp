@@ -3,10 +3,22 @@
 //
 
 #include "ScriptManager.h"
-#include "glm/vec3.hpp"
+
 #include "core/Entity.h"
+#include "components/impl/AnimationComponent.h"
 #include "utils/ModelLoader.h"
 #include "physics/PhysicsManager.h"
+#include "components/impl/LuaScriptComponent.h"
+#include "components/impl/ShadowCasterComponent.h"
+#include "components/impl/EntityMetadataComponent.h"
+#include "components/impl/ModelRendererComponent.h"
+#include "components/impl/RigidBodyComponent.h"
+#include "components/impl/AudioSourceComponent.h"
+#include "components/impl/SkeletonComponent.h"
+#include "components/impl/AnimationPoseComponent.h"
+#include "components/impl/AnimationWorkerComponent.h"
+#include "components/impl/SkinnedMeshComponent.h"
+#include "components/impl/ParticleSystemComponent.h"
 
 
 #define COMPONENT_METHODS(COMPONENT_TYPE, COMPONENT_NAME)                                                                                                                                                                                      \
@@ -21,17 +33,9 @@ namespace Engine {
 		log->info("Initializing Lua scripting...");
 		lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::table, sol::lib::os);
 
-		//		env[sol::metatable_key] = lua.create_table_with("__index", [](sol::this_state ts, const std::string& key) {
-		//			std::cerr << "[Lua] WARNING: Tried to access undefined key: " << key << "\n";
-		//			return sol::lua_nil;
-		//		});
 
 		try {
 			lua.script_file("scripts/init.lua");
-
-
-			// Bind glm::vec3
-			// lua.new_usertype<glm::vec3>("vec3", sol::constructors<glm::vec3(), glm::vec3(float, float, float)>(), "x", &glm::vec3::x, "y", &glm::vec3::y, "z", &glm::vec3::z);
 
 			// Bind Entity
 			lua.new_usertype<Engine::Entity>("Entity",
@@ -55,30 +59,15 @@ namespace Engine {
 
 
 			// create_entity(name)
-			//			lua.set_function("create_entity", [](const std::string& name) {
-			//				SPDLOG_ERROR("CALLING CREATE ENTITY========================");
-			//				return Engine::Entity::Create(name);
-			//			});
-
-			//			lua.set_function("add_transform", [](Engine::Entity e, sol::table pos, sol::table rot, sol::table scale) {
-			//				if (!e) return;
-			//
-			//				auto toVec3 = [](sol::table t) { return glm::vec3(t.get_or("x", 0.0f), t.get_or("y", 0.0f), t.get_or("z", 0.0f)); };
-			//
-			//				glm::vec3 p = toVec3(pos);
-			//				glm::vec3 r = toVec3(rot);
-			//				glm::vec3 s = toVec3(scale);
-			//
-			//				e.AddComponent<Components::Transform>(p, r, s);
-			//			});
+			lua.set_function("createEntity", [](const std::string& name) { return Engine::Entity::Create(name); });
 
 
-			if (lua["onInit"].valid()) {
-				lua["onInit"]();
+			if (lua["EditorInit"].valid()) {
+				lua["EditorInit"]();
 			}
 
-			if (lua["onUpdate"].valid()) {
-				luaUpdate = lua["onUpdate"];
+			if (lua["EditorUpdate"].valid()) {
+				luaUpdate = lua["EditorUpdate"];
 			}
 			else {
 				log->warn("No onUpdate function found in Lua.");
@@ -114,9 +103,9 @@ namespace Engine {
 	void ScriptManager::onShutdown()
 	{
 		log->info("Shutting down Lua scripting...");
-		if (lua["onShutdown"].valid()) {
+		if (lua["EditorShutdown"].valid()) {
 			try {
-				lua["onShutdown"]();
+				lua["EditorShutdown"]();
 			}
 			catch (const sol::error& e) {
 				log->error("Lua error in onShutdown: {}", e.what());

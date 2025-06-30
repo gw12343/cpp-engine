@@ -31,7 +31,7 @@ namespace Engine {
 		InitGLAD();
 		InitImGui();
 
-		UpdateFramebufferSizes(targetWidth, targetHeight);
+		UpdateFramebufferSizes(m_width, m_height);
 	}
 
 
@@ -142,13 +142,13 @@ namespace Engine {
 
 	void Window::onShutdown()
 	{
-		SPDLOG_INFO("Shutting down ImGui context");
+		log->info("Shutting down ImGui context");
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 
 		// Terminate GLFW
-		SPDLOG_INFO("Shutting down glfw window");
+		log->info("Shutting down glfw window");
 		glfwTerminate();
 	}
 
@@ -184,7 +184,7 @@ namespace Engine {
 	void Window::UpdateFramebufferSizes(int render_width, int render_height)
 	{
 		for (const auto& [id, fb] : m_frameBuffers) {
-			SPDLOG_DEBUG("Resizing framebuffer {}, new size: ({}, {})", id, render_width, render_height);
+			//			GetWindow().log->debug("Resizing framebuffer {}, new size: ({}, {})", (int) id, render_width, render_height);
 			fb->Resize(render_width, render_height);
 		}
 	}

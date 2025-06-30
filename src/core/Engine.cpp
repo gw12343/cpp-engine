@@ -21,10 +21,16 @@
 #include "rendering/particles/ParticleManager.h"
 #include "rendering/ui/UIManager.h"
 #include "terrain/TerrainManager.h"
+#include "components/impl/AnimationComponent.h"
+#include "components/impl/LuaScriptComponent.h"
+#include "components/impl/ModelRendererComponent.h"
+#include "components/impl/AudioSourceComponent.h"
+#include "components/impl/ShadowCasterComponent.h"
+#include "components/impl/SkeletonComponent.h"
+#include "components/impl/AnimationPoseComponent.h"
+#include "components/impl/AnimationWorkerComponent.h"
+#include "components/impl/SkinnedMeshComponent.h"
 
-
-using namespace JPH;
-using namespace JPH::literals;
 
 namespace Engine {
 	ModuleManager manager;
@@ -63,17 +69,15 @@ namespace Engine {
 	}
 
 
-	// Test models
-	std::shared_ptr<Rendering::Model> sphere;
 	std::shared_ptr<Rendering::Model> cube;
 
 
 	bool GEngine::Initialize()
 	{
 		SPDLOG_INFO("Starting Engine");
-		manager.InitAll();
 		Components::RegisterAllComponentBindings();
 		manager.InitAllLuaBindings();
+		manager.InitAll();
 
 		CreateInitialEntities();
 
@@ -82,52 +86,25 @@ namespace Engine {
 
 	void GEngine::CreateInitialEntities()
 	{
-		BodyInterface& body_interface = GetPhysics().GetPhysicsSystem()->GetBodyInterface();
-		const RVec3    box_half_extents(0.5f, 0.5f, 0.5f);
-
-		//		// Create physics body
-		//		BodyCreationSettings cube_settings(new BoxShape(box_half_extents), RVec3(0.0, 5.0, 0.0), Quat::sIdentity(), EMotionType::Dynamic, Layers::MOVING);
-		//		BodyID               cube_id = body_interface.CreateAndAddBody(cube_settings, EActivation::Activate);
-
-		// Create floor
-		BoxShapeSettings floor_shape_settings(Vec3(30.0f, 1.0f, 30.0f));
-		floor_shape_settings.SetEmbedded(); // A ref counted object on the stack (base class
-		                                    // RefTarget) should be marked as such to prevent it
-		                                    // from being freed when its reference count goes to 0.
-		ShapeSettings::ShapeResult floor_shape_result = floor_shape_settings.Create();
-		ShapeRefC                  floor_shape        = floor_shape_result.Get(); // We don't expect an error here, but you can check
-		                                                                          // floor_shape_result for HasError() / GetError()
-
-		BodyCreationSettings floor_settings(floor_shape, RVec3(0.0_r, -1.0_r, 0.0_r), Quat::sIdentity(), EMotionType::Static, Layers::NON_MOVING);
-		Body*                floor_body = body_interface.CreateBody(floor_settings); // Note that if we run out of bodies this can
-		                                                                             // return nullptr
-		body_interface.AddBody(floor_body->GetID(), EActivation::DontActivate);
-		BodyID floor_id = floor_body->GetID();
-
-		sphere = Rendering::ModelLoader::LoadModel("resources/models/sphere.obj");
-		std::shared_ptr<Rendering::Model> treeModel = Rendering::ModelLoader::LoadModel("resources/models/"
-		                                                                            "TwistedTree_1.obj");
+		std::shared_ptr<Rendering::Model> treeModel = Rendering::ModelLoader::LoadModel("resources/models/TwistedTree_1.obj");
 
 
-
-
-		cube = Rendering::ModelLoader::LoadModel("resources/models/cube.obj");
 		// Create entities
-		Entity floor = Entity::Create("TestCube");
-		floor.AddComponent<Components::ModelRenderer>(cube);
-		floor.AddComponent<Components::Transform>(glm::vec3(0.0f, -10.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.01f, 0.01f, 0.01f));
-		floor.AddComponent<Components::RigidBodyComponent>(GetPhysics().GetPhysicsSystem().get(), floor_id);
+		//		Entity floor = Entity::Create("TestCube");
+		//		floor.AddComponent<Components::ModelRenderer>(cube);
+		//		floor.AddComponent<Components::Transform>(glm::vec3(0.0f, -10.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.01f, 0.01f, 0.01f));
+		//		floor.AddComponent<Components::RigidBodyComponent>(floor_id);
 
-		Entity entity = Entity::Create("TestEntity");
-		entity.AddComponent<Components::ModelRenderer>(treeModel);
-		entity.AddComponent<Components::Transform>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		entity.AddComponent<Components::ParticleSystem>("resources/particles/testleaf.efk");
+		// cube          = Rendering::ModelLoader::LoadModel("resources/models/cube.obj");
+		//		Entity entity = Entity::Create("TestEntity");
+		//		entity.AddComponent<Components::ModelRenderer>(treeModel);
+		//		entity.AddComponent<Components::Transform>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		//		entity.AddComponent<Components::ParticleSystem>("resources/particles/testleaf.efk");
 
 
 		Entity entity2 = Entity::Create("TestEntity2");
 		entity2.AddComponent<Components::ModelRenderer>(treeModel);
 		entity2.AddComponent<Components::Transform>(glm::vec3(2.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		// entity2.AddComponent<Components::RigidBodyComponent>(GetPhysics().GetPhysicsSystem().get(), cube_id);
 		entity2.AddComponent<Components::AudioSource>("birds", true, 0.1f, 1.0f, true, 5.0f, 50.0f, 1.0f);
 		entity2.AddComponent<Components::ShadowCaster>();
 		entity2.AddComponent<Components::LuaScript>("scripts/test.lua");
@@ -163,70 +140,10 @@ namespace Engine {
 		}
 	}
 
-	void GEngine::ProcessInput() const
-	{
-		// Toggle physics when P is pressed
-		//		if (GetInput().IsKeyPressedThisFrame(GLFW_KEY_P)) {
-		//			Get().isPhysicsPaused = !Get().isPhysicsPaused;
-		//			SPDLOG_INFO("Physics simulation {}", Get().isPhysicsPaused ? "enabled" : "disabled");
-		//		}
-
-
-		// Process mouse scroll regardless of capture state
-		//		float scrollDelta = Input::GetMouseScrollDelta();
-		//		if (scrollDelta != 0.0f) {
-		//			GetCamera().ProcessMouseScroll(scrollDelta);
-		//		}
-
-		//		if (Input::IsKeyPressedThisFrame(GLFW_KEY_R)) {
-		//			SPDLOG_INFO("r");
-		//			// m_particleManager->SetPaused(handle, !m_particleManager->GetPaused(handle));
-		//		}
-		//
-		//
-
-
-		if (ImGui::IsKeyPressed(ImGuiKey_B)) {
-			glm::vec3 cpos    = GetCamera().GetPosition();
-			glm::vec3 forward = GetCamera().GetFront();
-
-			BodyInterface&       body_interface = GetPhysics().GetPhysicsSystem()->GetBodyInterface();
-			BodyCreationSettings sphere_settings(new SphereShape(0.5f), RVec3(cpos.x, cpos.y, cpos.z), Quat::sIdentity(), EMotionType::Dynamic, Layers::MOVING);
-			BodyID               sphere_id = body_interface.CreateAndAddBody(sphere_settings, EActivation::Activate);
-
-			body_interface.AddLinearVelocity(sphere_id, RVec3(forward.x * 5, forward.y * 5, forward.z * 5));
-
-			auto s = Entity::Create("SphereEntity");
-			s.AddComponent<Components::Transform>(glm::vec3(cpos.x, cpos.y, cpos.z), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-			s.AddComponent<Components::ModelRenderer>(sphere);
-			s.AddComponent<Components::ShadowCaster>();
-			s.AddComponent<Components::RigidBodyComponent>(GetPhysics().GetPhysicsSystem().get(), sphere_id);
-		}
-
-		if (ImGui::IsKeyPressed(ImGuiKey_C)) {
-			const RVec3 box_half_extents(0.5f, 0.5f, 0.5f);
-			glm::vec3   cpos    = GetCamera().GetPosition();
-			glm::vec3   forward = GetCamera().GetFront();
-
-			BodyInterface&       body_interface = GetPhysics().GetPhysicsSystem()->GetBodyInterface();
-			BodyCreationSettings cube_settings(new BoxShape(box_half_extents), RVec3(cpos.x, cpos.y, cpos.z), Quat::sIdentity(), EMotionType::Dynamic, Layers::MOVING);
-			BodyID               cube_id = body_interface.CreateAndAddBody(cube_settings, EActivation::Activate);
-
-			body_interface.AddLinearVelocity(cube_id, RVec3(forward.x * 5, forward.y * 5, forward.z * 5));
-
-			auto s = Entity::Create("CubeEntity");
-			s.AddComponent<Components::Transform>(glm::vec3(cpos.x, cpos.y, cpos.z), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-			s.AddComponent<Components::ModelRenderer>(cube);
-			s.AddComponent<Components::ShadowCaster>();
-			s.AddComponent<Components::RigidBodyComponent>(GetPhysics().GetPhysicsSystem().get(), cube_id);
-		}
-	}
-
 
 	void GEngine::Update()
 	{
 		Window::PollEvents();
-		ProcessInput();
 		manager.UpdateAll(m_deltaTime);
 	}
 

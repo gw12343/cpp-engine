@@ -2,7 +2,7 @@
 // Created by gabe on 6/24/25.
 //
 
-#include "components/Components.h"
+#include "AnimationPoseComponent.h"
 
 #include "core/Engine.h"
 #include "core/Entity.h"
@@ -14,6 +14,7 @@
 #include "rendering/particles/ParticleManager.h"
 #include "animation/AnimationManager.h"
 #include "scripting/ScriptManager.h"
+#include "SkeletonComponent.h"
 
 namespace Engine::Components {
 

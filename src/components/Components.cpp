@@ -3,6 +3,20 @@
 //
 
 #include "Components.h"
+#include "impl/AnimationComponent.h"
+#include "impl/TransformComponent.h"
+#include "impl/LuaScriptComponent.h"
+#include "impl/EntityMetadataComponent.h"
+#include "impl/ShadowCasterComponent.h"
+#include "impl/ModelRendererComponent.h"
+#include "impl/RigidBodyComponent.h"
+#include "impl/AnimationPoseComponent.h"
+#include "impl/AnimationWorkerComponent.h"
+#include "impl/AudioSourceComponent.h"
+#include "impl/ParticleSystemComponent.h"
+#include "impl/SkeletonComponent.h"
+#include "impl/SkinnedMeshComponent.h"
+
 
 namespace Engine::Components {
 

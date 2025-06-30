@@ -2,16 +2,18 @@
 // Created by gabe on 6/24/25.
 //
 #include "components/Components.h"
-#include "core/Engine.h"
 #include "core/Entity.h"
 #include "utils/Utils.h"
-
 #include "imgui.h"
 #include "ozz/animation/runtime/track.h"
 #include "rendering/particles/ParticleManager.h"
 #include "animation/AnimationManager.h"
 #include "scripting/ScriptManager.h"
 #include "glm/gtc/type_ptr.hpp"
+#include "physics/PhysicsManager.h"
+#include "TransformComponent.h"
+#include "RigidBodyComponent.h"
+
 
 namespace Engine::Components {
 	void Transform::OnAdded(Entity& entity)
@@ -33,9 +35,8 @@ namespace Engine::Components {
 
 		if (updatePhysicsPositionManually) {
 			if (entity.HasComponent<RigidBodyComponent>()) {
-				auto& rb = entity.GetComponent<RigidBodyComponent>();
-				ENGINE_VERIFY(rb.physicsSystem, "Transform::RenderInspector: RigidBodyComponent has null physicsSystem");
-				BodyInterface& body_interface = rb.physicsSystem->GetBodyInterface();
+				auto&          rb             = entity.GetComponent<RigidBodyComponent>();
+				BodyInterface& body_interface = Engine::GetPhysics().GetPhysicsSystem()->GetBodyInterface();
 				// convert pos and rot to jolt types
 				RVec3 joltPos = RVec3(position.x, position.y, position.z);
 				Quat  joltRot = Quat::sEulerAngles(RVec3(glm::radians(eulerAngles.x), glm::radians(eulerAngles.y), glm::radians(eulerAngles.z)));
@@ -49,7 +50,7 @@ namespace Engine::Components {
 	void Transform::AddBindings()
 	{
 		auto& lua = GetScriptManager().lua;
-		
+
 
 		lua.new_usertype<glm::vec3>("vec3", sol::constructors<glm::vec3(), glm::vec3(float, float, float)>(), "x", &glm::vec3::x, "y", &glm::vec3::y, "z", &glm::vec3::z);
 		lua.set_function("vec3", [](float x, float y, float z) { return glm::vec3(x, y, z); });
@@ -67,7 +68,7 @@ namespace Engine::Components {
 		                            "scale",
 		                            &Transform::scale,
 
-		                            "SetRotation",
+		                            "setRotation",
 		                            &Transform::SetRotation,
 		                            "GetEulerAngles",
 		                            &Transform::GetEulerAngles);

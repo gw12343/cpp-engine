@@ -1,6 +1,7 @@
 #include "UIManager.h"
 
 #include "components/Components.h"
+#include "components/impl/AnimationComponent.h"
 #include "spdlog/spdlog.h"
 #include "glm/glm.hpp"
 #include "core/EngineData.h"
@@ -10,6 +11,17 @@
 #include "rendering/ui/IconsFontAwesome6.h"
 
 #include "physics/PhysicsManager.h"
+#include "components/impl/LuaScriptComponent.h"
+#include "components/impl/EntityMetadataComponent.h"
+#include "components/impl/SkeletonComponent.h"
+#include "components/impl/RigidBodyComponent.h"
+#include "components/impl/AudioSourceComponent.h"
+#include "components/impl/ModelRendererComponent.h"
+#include "components/impl/AnimationPoseComponent.h"
+#include "components/impl/AnimationWorkerComponent.h"
+#include "components/impl/SkinnedMeshComponent.h"
+#include "components/impl/ParticleSystemComponent.h"
+#include "components/impl/ShadowCasterComponent.h"
 
 namespace Engine::UI {
 
@@ -405,7 +417,7 @@ namespace Engine::UI {
 		RenderHierarchyWindow();
 		RenderInspectorWindow();
 		RenderAnimationWindow();
-		RenderAudioDebugUI();
+		// RenderAudioDebugUI();
 
 		// Display pause overlay when physics is disabled
 		if (GetPhysics().isPhysicsPaused) {

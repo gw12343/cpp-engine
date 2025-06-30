@@ -1,12 +1,18 @@
 #include "AnimationManager.h"
 
 #include "AnimationUtils.h"
-#include "components/Components.h"
-#include "core/Engine.h"
 #include "core/Entity.h"
+
+#include "components/impl/AnimationComponent.h"
+#include "components/impl/TransformComponent.h"
+#include "components/impl/AnimationPoseComponent.h"
+#include "components/impl/AnimationWorkerComponent.h"
+#include "components/impl/SkeletonComponent.h"
+#include "components/impl/SkinnedMeshComponent.h"
 
 #include <spdlog/spdlog.h>
 #include <utils/Utils.h>
+
 namespace Engine {
 
 	void AnimationManager::onInit()
@@ -33,7 +39,7 @@ namespace Engine {
 			return;
 		}
 		else {
-			SPDLOG_INFO("Initialized animated renderer");
+			log->info("Initialized animated renderer");
 		}
 	}
 
@@ -73,7 +79,7 @@ namespace Engine {
 			sampling_job.ratio     = controller_.time_ratio();
 			sampling_job.output    = ozz::make_span(*animationPoseComponent.local_pose);
 			if (!sampling_job.Run()) {
-				spdlog::error("Failed to sample animation");
+				log->error("Failed to sample animation");
 				return;
 			}
 
@@ -82,7 +88,7 @@ namespace Engine {
 			ltm_job.input    = ozz::make_span(*animationPoseComponent.local_pose);
 			ltm_job.output   = ozz::make_span(*animationPoseComponent.model_pose);
 			if (!ltm_job.Run()) {
-				spdlog::error("Failed to convert to model space");
+				log->error("Failed to convert to model space");
 				return;
 			}
 		}
@@ -132,7 +138,7 @@ namespace Engine {
 
 		// Load the skeleton from file
 		if (!LoadSkeleton(path.c_str(), skeleton.get())) {
-			spdlog::error("Failed to load skeleton from path: {}", path);
+			log->error("Failed to load skeleton from path: {}", path);
 			return nullptr;
 		}
 
@@ -155,7 +161,7 @@ namespace Engine {
 
 		// Load the animation from file
 		if (!LoadAnimation(path.c_str(), animation.get())) {
-			spdlog::error("Failed to load animation from path: {}", path);
+			log->error("Failed to load animation from path: {}", path);
 			return nullptr;
 		}
 
@@ -168,7 +174,7 @@ namespace Engine {
 	std::vector<ozz::math::SoaTransform>* AnimationManager::AllocateLocalPose(const ozz::animation::Skeleton* skeleton)
 	{
 		if (!skeleton) {
-			spdlog::error("Cannot allocate local pose for null skeleton");
+			GetAnimationManager().log->error("Cannot allocate local pose for null skeleton");
 			return nullptr;
 		}
 
@@ -176,14 +182,14 @@ namespace Engine {
 		auto local_pose = new std::vector<ozz::math::SoaTransform>();
 		local_pose->resize(skeleton->num_soa_joints());
 
-		SPDLOG_INFO("Allocated local pose with {} SoA joints", skeleton->num_soa_joints());
+		GetAnimationManager().log->info("Allocated local pose with {} SoA joints", skeleton->num_soa_joints());
 		return local_pose;
 	}
 
 	std::vector<ozz::math::Float4x4>* AnimationManager::AllocateModelPose(const ozz::animation::Skeleton* skeleton)
 	{
 		if (!skeleton) {
-			spdlog::error("Cannot allocate model pose for null skeleton");
+			GetAnimationManager().log->error("Cannot allocate model pose for null skeleton");
 			return nullptr;
 		}
 
@@ -191,7 +197,7 @@ namespace Engine {
 		auto model_pose = new std::vector<ozz::math::Float4x4>();
 		model_pose->resize(skeleton->num_joints());
 
-		SPDLOG_INFO("Allocated model pose with {} joints", skeleton->num_joints());
+		GetAnimationManager().log->info("Allocated model pose with {} joints", skeleton->num_joints());
 		return model_pose;
 	}
 
@@ -202,12 +208,12 @@ namespace Engine {
 
 		// Load the meshes from file
 		if (!LoadMeshes(path.c_str(), meshes)) {
-			spdlog::error("Failed to load meshes from path: {}", path);
+			GetAnimationManager().log->error("Failed to load meshes from path: {}", path);
 			delete meshes;
 			return nullptr;
 		}
 
-		SPDLOG_INFO("Loaded {} meshes from path: {}", meshes->size(), path);
+		GetAnimationManager().log->info("Loaded {} meshes from path: {}", meshes->size(), path);
 		return meshes;
 	}
 

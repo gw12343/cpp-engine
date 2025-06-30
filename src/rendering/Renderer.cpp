@@ -1,12 +1,14 @@
 #include "Renderer.h"
 
-#include "components/Components.h"
 #include "utils/ModelLoader.h"
 #include "utils/Utils.h"
 #include "core/EngineData.h"
 #include "terrain/TerrainManager.h"
 #include "animation/AnimationManager.h"
 #include "rendering/particles/ParticleManager.h"
+#include "components/impl/EntityMetadataComponent.h"
+#include "components/impl/TransformComponent.h"
+#include "components/impl/ModelRendererComponent.h"
 #include <spdlog/spdlog.h>
 
 namespace Engine {

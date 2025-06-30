@@ -3,6 +3,7 @@
 #include "Engine.h"
 #include "components/Components.h"
 #include "EngineData.h"
+#include "components/impl/EntityMetadataComponent.h"
 
 namespace Engine {
 

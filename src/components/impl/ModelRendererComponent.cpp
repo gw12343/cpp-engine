@@ -1,7 +1,6 @@
 //
 // Created by gabe on 6/24/25.
 //
-#include "components/Components.h"
 #include "core/Entity.h"
 #include "utils/Utils.h"
 
@@ -10,9 +9,24 @@
 #include "rendering/particles/ParticleManager.h"
 #include "animation/AnimationManager.h"
 #include "scripting/ScriptManager.h"
-
+#include "utils/ModelLoader.h"
+#include "ModelRendererComponent.h"
 
 namespace Engine::Components {
+
+	void ModelRenderer::AddBindings()
+	{
+		auto& lua = GetScriptManager().lua;
+
+		lua.new_usertype<ModelRenderer>("ModelRenderer", "setModel", &ModelRenderer::SetModel);
+	}
+
+	void ModelRenderer::SetModel(std::string path)
+	{
+		model = Rendering::ModelLoader::LoadModel(path);
+	}
+
+
 	void ModelRenderer::OnAdded(Entity& entity)
 	{
 	}

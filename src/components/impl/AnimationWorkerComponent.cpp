@@ -1,4 +1,5 @@
-#include "components/Components.h"
+#include "AnimationComponent.h"
+#include "AnimationWorkerComponent.h"
 
 #include "core/Engine.h"
 #include "core/Entity.h"
@@ -44,5 +45,5 @@ namespace Engine::Components {
 		ImGui::Text("Sampling Job Context: %s", context ? "Initialized" : "Null");
 	}
 
-	
+
 } // namespace Engine::Components

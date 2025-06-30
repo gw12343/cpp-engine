@@ -4,6 +4,8 @@
 #include "utils/Utils.h"
 #include "components/Components.h"
 #include "core/EngineData.h"
+#include "components/impl/TransformComponent.h"
+#include "components/impl/ParticleSystemComponent.h"
 
 // #include <components/Components.h>
 #include <spdlog/spdlog.h>

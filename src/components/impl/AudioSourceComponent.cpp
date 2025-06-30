@@ -3,6 +3,8 @@
 //
 
 #include "components/Components.h"
+#include "AudioSourceComponent.h"
+
 
 #include "core/Entity.h"
 #include "utils/Utils.h"

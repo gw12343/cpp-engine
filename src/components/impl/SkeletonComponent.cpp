@@ -3,7 +3,7 @@
 //
 
 #include "components/Components.h"
-
+#include "SkeletonComponent.h"
 #include "core/Engine.h"
 #include "core/Entity.h"
 #include "utils/Utils.h"

@@ -3,6 +3,7 @@
 //
 #include "components/Components.h"
 #include "imgui.h"
+#include "EntityMetadataComponent.h"
 
 
 namespace Engine::Components {

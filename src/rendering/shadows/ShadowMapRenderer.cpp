@@ -11,6 +11,9 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "physics/PhysicsManager.h"
 #include "core/EngineData.h"
+#include "components/impl/EntityMetadataComponent.h"
+#include "components/impl/ModelRendererComponent.h"
+#include "components/impl/ShadowCasterComponent.h"
 #include <glad/glad.h>
 
 namespace Engine {
@@ -111,8 +114,7 @@ namespace Engine {
 
 	void ShadowMapRenderer::Initalize()
 	{
-		if (!m_depthShader.LoadFromFiles(
-		        "resources/shaders/depth.vert", "resources/shaders/depth.frag", "resources/shaders/depth.geom")) {
+		if (!m_depthShader.LoadFromFiles("resources/shaders/depth.vert", "resources/shaders/depth.frag", "resources/shaders/depth.geom")) {
 			SPDLOG_ERROR("Failed to load depth shader");
 		}
 
@@ -175,6 +177,7 @@ namespace Engine {
 		// TODO check for shadow casting component
 		auto view = GetRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer, Engine::Components::ShadowCaster>();
 		for (auto [entity, metadata, transform, renderer, shadowCaster] : view.each()) {
+			if (!renderer.model) continue;
 			glm::mat4 model = CalculateModelMatrix(transform);
 			m_depthShader.SetMat4("model", &model);
 			renderer.model->Draw(m_depthShader);

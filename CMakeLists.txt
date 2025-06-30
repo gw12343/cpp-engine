@@ -10,7 +10,7 @@ add_compile_options(-w)
 
 if (WIN32)
     add_compile_definitions(NOMINMAX)
-endif()
+endif ()
 
 # Global dependency flags
 set(SPDLOG_BUILD_WARNINGS OFF CACHE BOOL "" FORCE)
@@ -24,21 +24,39 @@ set(ozz_build_howtos OFF CACHE BOOL "" FORCE)
 set(ozz_build_gltf OFF CACHE BOOL "" FORCE)
 set(ozz_build_postfix OFF CACHE BOOL "" FORCE)
 set(OPENAL_ROOT "C:/Users/Gabe/Documents/openal-soft-1.24.3-bin")  # Change this if needed
+option(USE_ASSIMP_FROM_SOURCE "Build and use Assimp 6.0.2 from source" ON)
 
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     # Use MDd in Debug, MD in Release
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         add_compile_options(/MDd)
-    else()
+    else ()
         add_compile_options(/MD)
-    endif()
-endif()
-
+    endif ()
+endif ()
 
 
 # Fetch external libraries
 include(FetchContent)
+
+
+if (USE_ASSIMP_FROM_SOURCE)
+    include(FetchContent)
+    FetchContent_Declare(
+            assimp_src
+            GIT_REPOSITORY https://github.com/assimp/assimp.git
+            GIT_TAG v6.0.2
+    )
+    FetchContent_GetProperties(assimp_src)
+    if (NOT assimp_src_POPULATED)
+        FetchContent_Populate(assimp_src)
+        set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+        set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT ON CACHE BOOL "" FORCE)
+        set(PKG_CONFIG_USE_CMAKE OFF CACHE BOOL "" FORCE)
+        add_subdirectory(${assimp_src_SOURCE_DIR} ${assimp_src_BINARY_DIR})
+    endif ()
+endif ()
 
 FetchContent_Declare(
         spdlog
@@ -97,7 +115,7 @@ if (WIN32)
     set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
     set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(sndfile)
-endif()
+endif ()
 
 
 # ----------------- IMGUI -------------------
@@ -127,7 +145,20 @@ target_include_directories(lua PUBLIC ${lua_SOURCE_DIR}/src)
 # ----------------- Source & Includes -------------------
 file(GLOB_RECURSE SOURCES "lib/src/*.cpp" "lib/src/*.c" "src/*.cpp" "src/*.inl")
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES}
+        src/components/impl/AnimationComponent.h
+        src/components/impl/LuaScriptComponent.h
+        src/components/impl/ShadowCasterComponent.h
+        src/components/impl/EntityMetadataComponent.h
+        src/components/impl/TransformComponent.h
+        src/components/impl/ModelRendererComponent.h
+        src/components/impl/RigidBodyComponent.h
+        src/components/impl/AudioSourceComponent.h
+        src/components/impl/SkeletonComponent.h
+        src/components/impl/AnimationPoseComponent.h
+        src/components/impl/ParticleSystemComponent.h
+        src/components/impl/AnimationWorkerComponent.h
+        src/components/impl/SkinnedMeshComponent.h)
 
 
 target_include_directories(${PROJECT_NAME} PRIVATE
@@ -153,36 +184,43 @@ find_package(OpenGL REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 
 # OpenAL
-if(WIN32)
+if (WIN32)
     set(OPENAL_LIBRARY "${OPENAL_ROOT}/libs/Win64/OpenAL32.lib")
     set(OPENAL_INCLUDE_DIR "${OPENAL_ROOT}/include")
 
-    if(EXISTS "${OPENAL_LIBRARY}" AND EXISTS "${OPENAL_INCLUDE_DIR}/AL/al.h")
+    if (EXISTS "${OPENAL_LIBRARY}" AND EXISTS "${OPENAL_INCLUDE_DIR}/AL/al.h")
         message(STATUS "Using manually specified OpenAL from ${OPENAL_ROOT}")
-    else()
+    else ()
         message(FATAL_ERROR "OpenAL not found! Please set OPENAL_ROOT to the path where OpenAL Soft is installed.")
-    endif()
+    endif ()
 
     include_directories(${OPENAL_INCLUDE_DIR})
     target_link_libraries(${PROJECT_NAME} PRIVATE "${OPENAL_LIBRARY}")
-else()
+else ()
     find_package(OpenAL REQUIRED)
-endif()
-
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${OPENAL_LIBRARY})
+endif ()
 
 
 if (WIN32)
+    # Use built-in or bundled .lib
     set(ASSIMP_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/assimp.lib")
     if (EXISTS "${ASSIMP_LIB}")
-        message(STATUS "Using manually specified Assimp at ${ASSIMP_LIB}")
+        message(STATUS "Using bundled Assimp on Windows: ${ASSIMP_LIB}")
         target_link_libraries(${PROJECT_NAME} PRIVATE "${ASSIMP_LIB}")
-    else()
-        message(FATAL_ERROR "Assimp library not found at ${ASSIMP_LIB}")
-    endif()
-else()
-    find_package(assimp REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PRIVATE assimp)
-endif()
+    else ()
+        find_package(ASSIMP REQUIRED)
+        target_link_libraries(${PROJECT_NAME} PRIVATE assimp::assimp)
+    endif ()
+else ()
+    if (USE_ASSIMP_FROM_SOURCE)
+        # Use the built-in CMake target from our fetch/build
+        target_link_libraries(${PROJECT_NAME} PRIVATE assimp)
+    else ()
+        find_package(ASSIMP 6.0.2 REQUIRED)
+        target_link_libraries(${PROJECT_NAME} PRIVATE assimp::assimp)
+    endif ()
+endif ()
 
 if (WIN32)
     set(GLFW_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/glfw3.lib")
@@ -192,15 +230,14 @@ if (WIN32)
         target_link_libraries(${PROJECT_NAME} PRIVATE "${GLFW_LIB}")
         target_link_libraries(imgui PRIVATE "${GLFW_LIB}")
         target_include_directories(${PROJECT_NAME} PRIVATE "${GLFW_INCLUDE_DIR}")
-    else()
+    else ()
         message(FATAL_ERROR "GLFW library not found at ${GLFW_LIB}")
-    endif()
-else()
+    endif ()
+else ()
     find_package(glfw3 REQUIRED)
     target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
     target_link_libraries(imgui PRIVATE glfw)
-endif()
-
+endif ()
 
 
 include_directories(${OPENAL_INCLUDE_DIR})
@@ -208,14 +245,14 @@ include_directories(${OPENAL_INCLUDE_DIR})
 # SndFile
 if (WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE sndfile)
-else()
+else ()
     # Linux/macOS
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(SNDFILE REQUIRED sndfile)
     include_directories(${SNDFILE_INCLUDE_DIRS})
     link_directories(${SNDFILE_LIBRARY_DIRS})
     target_link_libraries(${PROJECT_NAME} PRIVATE ${SNDFILE_LIBRARIES})
-endif()
+endif ()
 
 # ----------------- Link Everything Else -------------------
 target_link_libraries(${PROJECT_NAME} PRIVATE

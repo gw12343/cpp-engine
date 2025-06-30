@@ -1,5 +1,7 @@
 #include "physics/PhysicsInterfaces.h"
-
+#include "core/EngineData.h"
+#include "physics/PhysicsManager.h"
+#include "components/impl/LuaScriptComponent.h"
 
 using namespace JPH;
 using namespace JPH::literals;
@@ -79,7 +81,18 @@ namespace Engine {
 
 	void ContactListenerImpl::OnContactAdded(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings)
 	{
-		// SPDLOG_INFO("A contact was added");
+		Entity& entity1 = GetPhysics().bodyToEntityMap[inBody1.GetID()];
+		Entity& entity2 = GetPhysics().bodyToEntityMap[inBody2.GetID()];
+
+		if (entity1.HasComponent<Components::LuaScript>()) {
+			auto& sc1 = entity1.GetComponent<Components::LuaScript>();
+			sc1.OnCollisionEnter(entity2);
+		}
+
+		if (entity2.HasComponent<Components::LuaScript>()) {
+			auto& sc2 = entity2.GetComponent<Components::LuaScript>();
+			sc2.OnCollisionEnter(entity1);
+		}
 	}
 
 	void ContactListenerImpl::OnContactPersisted(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings)
