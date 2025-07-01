@@ -37,11 +37,10 @@ namespace Engine {
 	}
 
 
-	void ModelPreview::Render(Rendering::Model* model, Shader& shader, float size)
+	void ModelPreview::Render(Rendering::Model* model, Shader& shader)
 	{
-		int newSize = static_cast<int>(size);
-		if (!initialized || width != newSize || height != newSize) {
-			width = height = newSize;
+		if (!initialized) {
+			width = height = MODEL_PREVIEW_SIZE;
 			Initialize(); // resize framebuffer + texture
 		}
 

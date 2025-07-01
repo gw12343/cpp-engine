@@ -8,17 +8,19 @@
 
 #include "rendering/Model.h"
 
+#define MODEL_PREVIEW_SIZE 128
+
 namespace Engine {
 	struct ModelPreview {
 		GLuint fbo         = 0;
 		GLuint texture     = 0;
 		GLuint depth       = 0;
-		int    width       = 128;
-		int    height      = 128;
+		int    width       = MODEL_PREVIEW_SIZE;
+		int    height      = MODEL_PREVIEW_SIZE;
 		bool   initialized = false;
 
 		void Initialize();
-		void Render(Rendering::Model* model, Shader& shader, float size);
+		void Render(Rendering::Model* model, Shader& shader);
 	};
 } // namespace Engine
 

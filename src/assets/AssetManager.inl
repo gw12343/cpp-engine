@@ -9,7 +9,6 @@ namespace Engine {
 		auto& storage = GetStorage<T>();
 		auto  it      = storage.pathToHandle.find(path);
 		if (it != storage.pathToHandle.end()) {
-			spdlog::info("had cached: {}", it->second.GetID());
 			return it->second;
 		}
 		else {

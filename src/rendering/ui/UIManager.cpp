@@ -730,11 +730,11 @@ namespace Engine::UI {
 		ImGui::End();
 	}
 
-	float m_iconSize = 64.0f;
+	float m_iconSize = 128.0f;
 
 	void UIManager::RenderAssetWindow()
 	{
-		if (!ImGui::Begin("Assets")) return;
+		ImGui::Begin("Assets");
 
 		ImGui::SliderFloat("Icon Size", &m_iconSize, 16.0f, 256.0f, "%.0f", ImGuiSliderFlags_AlwaysClamp);
 
@@ -812,9 +812,9 @@ namespace Engine::UI {
 			ImGui::PushID(static_cast<int>(id));
 
 			auto& preview  = m_modelPreviews[id];
-			preview.width  = static_cast<int>(m_iconSize);
-			preview.height = static_cast<int>(m_iconSize);
-			preview.Render(model.get(), GetRenderer().GetShader(), m_iconSize);
+			preview.width  = static_cast<int>(MODEL_PREVIEW_SIZE);
+			preview.height = static_cast<int>(MODEL_PREVIEW_SIZE);
+			preview.Render(model.get(), GetRenderer().GetShader());
 
 			ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(preview.texture)),
 			             ImVec2(m_iconSize, m_iconSize),
