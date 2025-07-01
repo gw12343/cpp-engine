@@ -48,9 +48,9 @@ namespace Engine {
 	  private:
 		void UpdateCameraVectors();
 
-		glm::mat4           m_proj;
-		glm::mat4           m_view;
-		ozz::math::Float4x4 m_viewProj;
+		glm::mat4           m_proj{};
+		glm::mat4           m_view{};
+		ozz::math::Float4x4 m_viewProj{};
 
 		// Camera Attributes
 		glm::vec3 m_position{};

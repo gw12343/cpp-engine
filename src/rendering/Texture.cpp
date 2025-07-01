@@ -18,7 +18,8 @@ namespace Engine {
 		if (stbi_is_hdr(path.c_str())) {
 			return LoadHDRFromFile(path);
 		}
-
+		m_name = path.substr(path.find_last_of("/\\") + 1);
+		SPDLOG_DEBUG("TRYING TO LOAD: {}", path);
 		if (glGetString(GL_VERSION) == nullptr) {
 			std::cerr << "No valid OpenGL context!" << std::endl;
 		}
@@ -78,6 +79,7 @@ namespace Engine {
 
 	bool Texture::LoadHDRFromFile(const std::string& path)
 	{
+		m_name = path.substr(path.find_last_of("/\\") + 1);
 		// Generate texture ID
 		glGenTextures(1, &m_textureID);
 		s_loadedTextures.insert(m_textureID);

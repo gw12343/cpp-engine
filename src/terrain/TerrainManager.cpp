@@ -78,13 +78,12 @@ namespace Engine::Terrain {
 				tile->diffuseTextures[i]->Bind(base + i);
 
 			glBindVertexArray(tile->vao);
-			glDrawElements(GL_TRIANGLES, tile->indexCount, GL_UNSIGNED_INT, nullptr);
+			glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(tile->indexCount), GL_UNSIGNED_INT, nullptr);
 			glBindVertexArray(0);
 		}
 	}
 	void TerrainManager::onShutdown()
 	{
-		// TODO dispose shaders ...
 	}
 
 	void TerrainManager::LoadTerrainFile(const std::string& path)
@@ -126,14 +125,14 @@ namespace Engine::Terrain {
 
 		file.read(reinterpret_cast<char*>(&tile->splatLayerCount), sizeof(uint32_t));
 
-		size_t hcount = tile->heightRes * tile->heightRes;
-		tile->heightmap.resize(hcount);
-		file.read(reinterpret_cast<char*>(tile->heightmap.data()), hcount * sizeof(float));
+		size_t heightCount = tile->heightRes * tile->heightRes;
+		tile->heightmap.resize(heightCount);
+		file.read(reinterpret_cast<char*>(tile->heightmap.data()), static_cast<std::streamsize>(heightCount * sizeof(float)));
 
 
 		size_t splatCount = tile->splatRes * tile->splatRes * tile->splatLayerCount;
 		tile->splatmap.resize(splatCount);
-		file.read(reinterpret_cast<char*>(tile->splatmap.data()), splatCount);
+		file.read(reinterpret_cast<char*>(tile->splatmap.data()), static_cast<std::streamsize>(splatCount));
 
 		uint32_t treeCount;
 		file.read(reinterpret_cast<char*>(&treeCount), sizeof(uint32_t));
@@ -194,7 +193,7 @@ namespace Engine::Terrain {
 		ss << "uniform vec3 uLightColor = vec3(1.0);\n";
 		ss << "uniform vec3 uAmbient = vec3(0.3);\n";
 
-		int totalLayers  = terrains[0]->splatLayerCount;
+		int totalLayers  = (int) terrains[0]->splatLayerCount;
 		int textureCount = (totalLayers + 3) / 4;
 
 		for (int i = 0; i < textureCount; ++i)
@@ -260,7 +259,7 @@ namespace Engine::Terrain {
 
 	JPH::Float3 toF3(glm::vec3 v)
 	{
-		return JPH::Float3(v.x, v.y, v.z);
+		return {v.x, v.y, v.z};
 	}
 
 
@@ -286,9 +285,9 @@ namespace Engine::Terrain {
 		// Step 1: Generate vertex positions and UVs
 		for (uint32_t z = 0; z < res; ++z) {
 			for (uint32_t x = 0; x < res; ++x) {
-				float u = x / float(res - 1);
-				float v = z / float(res - 1);
-				float h = getHeight(x, z);
+				auto u = (float) ((float) x / float(res - 1));
+				auto v = (float) ((float) z / float(res - 1));
+				auto h = (float) (getHeight((int) x, (int) z));
 
 				glm::vec3 pos(tile.sizeX * u, h * tile.sizeY, tile.sizeZ * v);
 				positions[z * res + x] = pos;
@@ -358,13 +357,13 @@ namespace Engine::Terrain {
 
 		glBindVertexArray(tile.vao);
 		glBindBuffer(GL_ARRAY_BUFFER, tile.vbo);
-		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, (GLsizei) vertices.size() * (GLsizei) sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, tile.ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint32_t), indices.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizei) indices.size() * (GLsizei) sizeof(uint32_t), indices.data(), GL_STATIC_DRAW);
 
 		glEnableVertexAttribArray(0); // position
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) 0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) nullptr);
 		glEnableVertexAttribArray(1); // uv
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) (3 * sizeof(float)));
 		glEnableVertexAttribArray(2); // normal
@@ -387,7 +386,7 @@ namespace Engine::Terrain {
 
 			for (uint32_t y = 0; y < res; ++y) {
 				for (uint32_t x = 0; x < res; ++x) {
-					int idx = (y * res + x) * layerCount;
+					int idx = (int) (y * res + x) * (int) layerCount;
 					for (int c = 0; c < 4; ++c) {
 						uint32_t layer = i * 4 + c;
 						if (layer < layerCount) rgba[(y * res + x) * 4 + c] = tile.splatmap[idx + layer];
@@ -399,14 +398,14 @@ namespace Engine::Terrain {
 			GLuint tex;
 			glGenTextures(1, &tex);
 			glBindTexture(GL_TEXTURE_2D, tex);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, res, res, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgba.data());
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, (GLsizei) res, (GLsizei) res, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgba.data());
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			tile.splatTextures.push_back(tex);
 
 			// Save to PNG for debugging
 			std::string filename = "debug/splat/tile_" + tile.name + "_layerGroup_" + std::to_string(i) + ".png";
-			stbi_write_png(filename.c_str(), res, res, 4, rgba.data(), res * 4);
+			stbi_write_png(filename.c_str(), (GLsizei) res, (GLsizei) res, 4, rgba.data(), (GLsizei) res * 4);
 		}
 	}
 

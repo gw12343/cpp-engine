@@ -8,7 +8,12 @@
 #include "entt/entt.hpp"
 #include "imgui.h"
 #include "core/module/Module.h"
+#include "ModelPreview.h"
 #include <memory>
+#include <typeindex>
+#include <string>
+#include <unordered_map>
+
 
 namespace Engine {
 	class GEngine;
@@ -34,10 +39,16 @@ namespace Engine {
 			void RenderAudioDebugUI();
 			void RenderPauseOverlay();
 			void RenderSceneView(GLuint texId);
+			void RenderAssetWindow();
 
+			void DrawTextureAssets();
+			void DrawModelAssets();
 
 			// Selected entity
 			Entity m_selectedEntity;
+
+			std::unordered_map<std::type_index, std::function<void()>> drawFuncs;
+			std::unordered_map<uint32_t, ModelPreview>                 m_modelPreviews;
 		};
 	} // namespace UI
 } // namespace Engine

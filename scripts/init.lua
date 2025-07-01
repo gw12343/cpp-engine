@@ -45,7 +45,7 @@ function ShootObject(model, shape, speed, scale)
     else
         print("Unknown shape type: " .. tostring(t))
     end
-    --sc:setScript(newBall, "scripts/bullet.lua")
+    sc:setScript(newBall, "scripts/bullet.lua")
 end
 
 function EditorUpdate(dt)

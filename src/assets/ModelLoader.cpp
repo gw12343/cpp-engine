@@ -1,7 +1,9 @@
 #include "ModelLoader.h"
 
 #include "rendering/Texture.h"
-#include "Utils.h"
+#include "utils/Utils.h"
+#include "assets/AssetManager.h"
+#include "core/EngineData.h"
 
 #include <filesystem>
 #include <iostream>
@@ -9,7 +11,7 @@
 namespace Engine {
 	namespace Rendering {
 
-		std::shared_ptr<Model> ModelLoader::LoadModel(const std::string& path)
+		std::unique_ptr<Model> ModelLoader::LoadFromFile(const std::string& path)
 		{
 			Assimp::Importer importer;
 			const aiScene*   scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace | aiProcess_FlipUVs);
@@ -23,7 +25,7 @@ namespace Engine {
 			std::string                        directory = std::filesystem::path(path).parent_path().string();
 			ProcessNode(scene->mRootNode, scene, meshes, directory);
 
-			auto model = std::make_shared<Model>();
+			auto model = std::make_unique<Model>();
 			ENGINE_ASSERT(model, "Failed to allocate Model");
 			model->m_meshes = std::move(meshes);
 			return model;
@@ -83,6 +85,35 @@ namespace Engine {
 			return std::make_shared<Mesh>(vertices, indices, material);
 		}
 
+		std::vector<AssetHandle<Texture>> ModelLoader::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName, const std::string& directory)
+		{
+			ENGINE_ASSERT(mat, "Null aiMaterial passed to LoadMaterialTextures");
+
+			std::vector<AssetHandle<Texture>> textures;
+
+			for (unsigned int i = 0; i < mat->GetTextureCount(type); ++i) {
+				aiString str;
+				if (mat->GetTexture(type, i, &str) != AI_SUCCESS) {
+					spdlog::warn("Failed to get texture #{} from material", i);
+					continue;
+				}
+
+				std::filesystem::path fullPath    = std::filesystem::path(directory) / str.C_Str();
+				std::string           fullPathStr = fullPath.string();
+
+				spdlog::info("Loading texture: {} (type: {})", fullPathStr, typeName);
+
+				auto handle = GetAssetManager().Load<Texture>(fullPathStr);
+				if (handle.IsValid()) {
+					textures.push_back(handle);
+				}
+				else {
+					spdlog::warn("Failed to load {} texture from path: {}", typeName, fullPathStr);
+				}
+			}
+
+			return textures;
+		}
 		std::shared_ptr<Material> ModelLoader::LoadMaterial(aiMaterial* mat, const std::string& directory)
 		{
 			ENGINE_ASSERT(mat, "Null aiMaterial passed to LoadMaterial");
@@ -109,40 +140,11 @@ namespace Engine {
 			loadFirst(aiTextureType_NORMALS, "texture_normal", [](auto& m, auto& t) { m->SetNormalTexture(t); });
 			loadFirst(aiTextureType_HEIGHT, "texture_height", [](auto& m, auto& t) { m->SetHeightTexture(t); });
 
-			material->SetName("Material"); // Optional name
+			material->SetName("Material");
 			return material;
-		}
-
-		std::vector<std::shared_ptr<Texture>> ModelLoader::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName, const std::string& directory)
-		{
-			ENGINE_ASSERT(mat, "Null aiMaterial passed to LoadMaterialTextures");
-
-			std::vector<std::shared_ptr<Texture>> textures;
-
-			for (unsigned int i = 0; i < mat->GetTextureCount(type); ++i) {
-				aiString str;
-				if (mat->GetTexture(type, i, &str) != AI_SUCCESS) {
-					spdlog::warn("Failed to get texture #{} from material", i);
-					continue;
-				}
-
-				std::string           raw         = str.C_Str();
-				std::filesystem::path fullPath    = std::filesystem::path(directory) / raw;
-				std::string           fullPathStr = fullPath.string();
-
-				spdlog::info("Loading texture: {} (type: {})", fullPathStr, typeName);
-
-				auto texture = std::make_shared<Texture>();
-				if (texture->LoadFromFile(fullPathStr)) {
-					textures.push_back(texture);
-				}
-				else {
-					spdlog::warn("Failed to load {} texture from path: {}", typeName, fullPathStr);
-				}
-			}
-
-			return textures;
 		}
 
 	} // namespace Rendering
 } // namespace Engine
+
+#include "assets/AssetManager.inl"

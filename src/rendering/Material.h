@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Texture.h"
+#include "assets/AssetHandle.h"
 
 #include <glm/glm.hpp>
 #include <memory>
@@ -14,10 +15,10 @@ namespace Engine {
 		~Material() = default;
 
 		// Texture setters
-		void SetDiffuseTexture(const std::shared_ptr<Texture>& texture);
-		void SetSpecularTexture(const std::shared_ptr<Texture>& texture);
-		void SetNormalTexture(const std::shared_ptr<Texture>& texture);
-		void SetHeightTexture(const std::shared_ptr<Texture>& texture);
+		void SetDiffuseTexture(AssetHandle<Texture> texture);
+		void SetSpecularTexture(AssetHandle<Texture> texture);
+		void SetNormalTexture(AssetHandle<Texture> texture);
+		void SetHeightTexture(AssetHandle<Texture> texture);
 
 		// Color setters
 		void SetDiffuseColor(const glm::vec3& color);
@@ -27,10 +28,10 @@ namespace Engine {
 		void SetShininess(float shininess);
 
 		// Getters
-		[[nodiscard]] std::shared_ptr<Texture>                  GetDiffuseTexture() const { return m_diffuseTexture; }
-		[[nodiscard]] std::shared_ptr<Texture>                  GetSpecularTexture() const { return m_specularTexture; }
-		[[nodiscard]] std::shared_ptr<Texture>                  GetNormalTexture() const { return m_normalTexture; }
-		[[maybe_unused]] [[nodiscard]] std::shared_ptr<Texture> GetHeightTexture() const { return m_heightTexture; }
+		[[nodiscard]] AssetHandle<Texture>                  GetDiffuseTexture() const { return m_diffuseTexture; }
+		[[nodiscard]] AssetHandle<Texture>                  GetSpecularTexture() const { return m_specularTexture; }
+		[[nodiscard]] AssetHandle<Texture>                  GetNormalTexture() const { return m_normalTexture; }
+		[[maybe_unused]] [[nodiscard]] AssetHandle<Texture> GetHeightTexture() const { return m_heightTexture; }
 
 		[[nodiscard]] glm::vec3 GetDiffuseColor() const { return m_diffuseColor; }
 		[[nodiscard]] glm::vec3 GetSpecularColor() const { return m_specularColor; }
@@ -44,10 +45,10 @@ namespace Engine {
 
 	  private:
 		// Textures
-		std::shared_ptr<Texture> m_diffuseTexture;
-		std::shared_ptr<Texture> m_specularTexture;
-		std::shared_ptr<Texture> m_normalTexture;
-		std::shared_ptr<Texture> m_heightTexture;
+		AssetHandle<Texture> m_diffuseTexture;
+		AssetHandle<Texture> m_specularTexture;
+		AssetHandle<Texture> m_normalTexture;
+		AssetHandle<Texture> m_heightTexture;
 
 		// Colors
 		glm::vec3 m_diffuseColor;

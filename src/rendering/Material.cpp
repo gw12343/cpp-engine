@@ -16,25 +16,26 @@ namespace Engine {
 	{
 	}
 
-	void Material::SetDiffuseTexture(const std::shared_ptr<Texture>& texture)
+	void Material::SetDiffuseTexture(AssetHandle<Texture> texture)
 	{
 		m_diffuseTexture = texture;
 	}
 
-	void Material::SetSpecularTexture(const std::shared_ptr<Texture>& texture)
+	void Material::SetSpecularTexture(AssetHandle<Texture> texture)
 	{
 		m_specularTexture = texture;
 	}
 
-	void Material::SetNormalTexture(const std::shared_ptr<Texture>& texture)
+	void Material::SetNormalTexture(AssetHandle<Texture> texture)
 	{
 		m_normalTexture = texture;
 	}
 
-	void Material::SetHeightTexture(const std::shared_ptr<Texture>& texture)
+	void Material::SetHeightTexture(AssetHandle<Texture> texture)
 	{
 		m_heightTexture = texture;
 	}
+
 
 	void Material::SetDiffuseColor(const glm::vec3& color)
 	{

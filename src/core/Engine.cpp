@@ -2,7 +2,7 @@
 
 #include "components/Components.h"
 #include "terrain/TerrainLoader.h"
-#include "utils/ModelLoader.h"
+#include "assets/ModelLoader.h"
 #include "Jolt/Physics/Collision/Shape/MeshShape.h"
 #include "core/module/ModuleManager.h"
 #include "core/module/scriptingonly/TestModule.h"
@@ -30,7 +30,8 @@
 #include "components/impl/AnimationPoseComponent.h"
 #include "components/impl/AnimationWorkerComponent.h"
 #include "components/impl/SkinnedMeshComponent.h"
-
+#include "assets/AssetManager.h"
+#include "assets/TextureLoader.h"
 
 namespace Engine {
 	ModuleManager manager;
@@ -38,6 +39,11 @@ namespace Engine {
 
 	GEngine::GEngine(int width, int height, const char* title) : m_deltaTime(0.0f), m_lastFrame(0.0f)
 	{
+		// Initialize asset loaders
+		Get().assetManager = std::make_shared<AssetManager>();
+		GetAssetManager().RegisterLoader<Texture>(std::make_unique<TextureLoader>());
+		GetAssetManager().RegisterLoader<Rendering::Model>(std::make_unique<Rendering::ModelLoader>());
+
 		// Initialize Scene
 		Get().registry = std::make_shared<entt::registry>();
 
@@ -69,15 +75,18 @@ namespace Engine {
 	}
 
 
-	std::shared_ptr<Rendering::Model> cube;
-
-
 	bool GEngine::Initialize()
 	{
 		SPDLOG_INFO("Starting Engine");
 		Components::RegisterAllComponentBindings();
 		manager.InitAllLuaBindings();
 		manager.InitAll();
+
+
+		// auto texHandle = GetAssetManager().Load<Texture>("resources/textures/Bark_TwistedTree.png");
+
+		// SPDLOG_INFO("LOADED TEXTURE: width: {}", GetAssetManager().Get(texHandle)->GetWidth());
+
 
 		CreateInitialEntities();
 
@@ -86,7 +95,7 @@ namespace Engine {
 
 	void GEngine::CreateInitialEntities()
 	{
-		std::shared_ptr<Rendering::Model> treeModel = Rendering::ModelLoader::LoadModel("resources/models/TwistedTree_1.obj");
+		AssetHandle<Rendering::Model> treeModel = GetAssetManager().Load<Rendering::Model>("resources/models/TwistedTree_1.obj");
 
 
 		// Create entities

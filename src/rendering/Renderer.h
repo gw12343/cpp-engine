@@ -29,7 +29,7 @@ namespace Engine {
 		void RenderShadowMaps();
 		void RenderSkybox();
 
-		const Shader& GetShader() const { return m_shader; }
+		Shader& GetShader() { return m_shader; }
 
 	  private:
 		std::unique_ptr<ShadowMapRenderer> m_shadowRenderer;

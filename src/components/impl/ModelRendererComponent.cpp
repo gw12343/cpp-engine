@@ -9,7 +9,7 @@
 #include "rendering/particles/ParticleManager.h"
 #include "animation/AnimationManager.h"
 #include "scripting/ScriptManager.h"
-#include "utils/ModelLoader.h"
+#include "assets/ModelLoader.h"
 #include "ModelRendererComponent.h"
 
 namespace Engine::Components {
@@ -21,9 +21,9 @@ namespace Engine::Components {
 		lua.new_usertype<ModelRenderer>("ModelRenderer", "setModel", &ModelRenderer::SetModel);
 	}
 
-	void ModelRenderer::SetModel(std::string path)
+	void ModelRenderer::SetModel(const std::string& path)
 	{
-		model = Rendering::ModelLoader::LoadModel(path);
+		model = GetAssetManager().Load<Rendering::Model>(path);
 	}
 
 
@@ -35,7 +35,7 @@ namespace Engine::Components {
 	{
 		ImGui::Checkbox("Visible", &visible);
 
-		if (model) {
+		if (model.IsValid()) {
 			ImGui::Text("Model: Loaded");
 			// Could add more model info here
 		}

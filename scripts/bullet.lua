@@ -15,12 +15,14 @@ function CollisionEnter(other)
         return
     end
     print("Entered collision with other!!!!")
-    print(other:getName())
+
+    if other:getName() ~= "Floor" then
+        return
+    end
 
     local tr = gameObject:GetTransform()
     tr.scale = vec3(1, 1, 1)
-    --local rb = gameObject:GetRigidBodyComponent()
-    --print(rb:getLinearVelocity().x)
-    --rb:setBoxShape(BoxShape(vec3(0.5, 0.5, 0.5)))
+    local rb = gameObject:GetRigidBodyComponent()
+    rb:setSphereShape(SphereShape(0.5))
     isSmall = false
 end

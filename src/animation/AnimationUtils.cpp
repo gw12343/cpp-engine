@@ -199,7 +199,7 @@ bool RawSkeletonEditor::OnGui(ozz::animation::offline::RawSkeleton* _skeleton)
 {
 	open_close_states.resize(_skeleton->num_joints(), false); // TODO fix
 
-	ozz::vector<bool>::iterator begin = open_close_states.begin();
+	auto begin = open_close_states.begin();
 	return OnRawSkeletonJointGui(&_skeleton->roots, &begin);
 }
 
@@ -258,8 +258,6 @@ void ComputePostureBounds(ozz::span<const ozz::math::Float4x4> _models, const oz
 	// Stores in math::Box structure.
 	ozz::math::Store3PtrU(min, &_bound->min.x);
 	ozz::math::Store3PtrU(max, &_bound->max.x);
-
-	return;
 }
 
 void MultiplySoATransformQuaternion(int _index, const ozz::math::SimdQuaternion& _quat, const ozz::span<ozz::math::SoaTransform>& _transforms)
@@ -349,8 +347,8 @@ bool LoadRawAnimation(const char* _filename, ozz::animation::offline::RawAnimati
 }
 
 namespace {
-	template <typename _Track>
-	bool LoadTrackImpl(const char* _filename, _Track* _track)
+	template <typename TTrack>
+	bool LoadTrackImpl(const char* _filename, TTrack* _track)
 	{
 		assert(_filename && _track);
 		ozz::log::Out() << "Loading track archive: " << _filename << "." << std::endl;
@@ -360,7 +358,7 @@ namespace {
 			return false;
 		}
 		ozz::io::IArchive archive(&file);
-		if (!archive.TestTag<_Track>()) {
+		if (!archive.TestTag<TTrack>()) {
 			ozz::log::Err() << "Failed to load float track instance from file " << _filename << "." << std::endl;
 			return false;
 		}
@@ -526,9 +524,9 @@ bool RayIntersectsMeshes(const ozz::math::Float3& _ray_origin, const ozz::math::
 {
 	bool              intersected = false;
 	ozz::math::Float3 intersect, normal;
-	for (size_t i = 0; i < _meshes.size(); ++i) {
+	for (const auto& _meshe : _meshes) {
 		ozz::math::Float3 lcl_intersect, lcl_normal;
-		if (RayIntersectsMesh(_ray_origin, _ray_direction, _meshes[i], &lcl_intersect, &lcl_normal)) {
+		if (RayIntersectsMesh(_ray_origin, _ray_direction, _meshe, &lcl_intersect, &lcl_normal)) {
 			// Is it closer to start point than the previous intersection.
 			if (!intersected || LengthSqr(lcl_intersect - _ray_origin) < LengthSqr(intersect - _ray_origin)) {
 				intersect = lcl_intersect;

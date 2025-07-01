@@ -1,6 +1,6 @@
 #include "Model.h"
 
-#include "utils/ModelLoader.h"
+#include "assets/ModelLoader.h"
 
 
 namespace Engine::Rendering {

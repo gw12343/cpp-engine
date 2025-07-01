@@ -1,6 +1,6 @@
 #include "Renderer.h"
 
-#include "utils/ModelLoader.h"
+#include "assets/ModelLoader.h"
 #include "utils/Utils.h"
 #include "core/EngineData.h"
 #include "terrain/TerrainManager.h"
@@ -38,10 +38,9 @@ namespace Engine {
 
 		// Enable depth testing so closer fragments obscure farther ones
 		glEnable(GL_DEPTH_TEST);
-		// glEnable(GL_CULL_FACE);
+		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 
-		// todo init
 		m_shadowRenderer->Initalize();
 	}
 

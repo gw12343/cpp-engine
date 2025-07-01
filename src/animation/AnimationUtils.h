@@ -217,7 +217,7 @@ class ProfileFctLog {
 	using clock = std::chrono::high_resolution_clock;
 
   public:
-	ProfileFctLog(const char* _name);
+	explicit ProfileFctLog(const char* _name);
 	~ProfileFctLog();
 
   private:

@@ -146,19 +146,9 @@ target_include_directories(lua PUBLIC ${lua_SOURCE_DIR}/src)
 file(GLOB_RECURSE SOURCES "lib/src/*.cpp" "lib/src/*.c" "src/*.cpp" "src/*.inl")
 
 add_executable(${PROJECT_NAME} ${SOURCES}
-        src/components/impl/AnimationComponent.h
-        src/components/impl/LuaScriptComponent.h
-        src/components/impl/ShadowCasterComponent.h
-        src/components/impl/EntityMetadataComponent.h
-        src/components/impl/TransformComponent.h
-        src/components/impl/ModelRendererComponent.h
-        src/components/impl/RigidBodyComponent.h
-        src/components/impl/AudioSourceComponent.h
-        src/components/impl/SkeletonComponent.h
-        src/components/impl/AnimationPoseComponent.h
-        src/components/impl/ParticleSystemComponent.h
-        src/components/impl/AnimationWorkerComponent.h
-        src/components/impl/SkinnedMeshComponent.h)
+        src/rendering/ui/ModelPreview.h
+        src/rendering/ui/ModelPreview.cpp
+)
 
 
 target_include_directories(${PROJECT_NAME} PRIVATE

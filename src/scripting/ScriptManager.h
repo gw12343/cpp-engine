@@ -5,8 +5,11 @@
 #pragma once
 #include <sol/sol.hpp>
 #include "core/module/Module.h"
+#include "core/Entity.h"
 
 namespace Engine {
+
+
 	class ScriptManager : public Module {
 	  public:
 		void                      onInit() override;
@@ -14,6 +17,14 @@ namespace Engine {
 		void                      onShutdown() override;
 		[[nodiscard]] std::string name() const override { return "ScriptModule"; }
 
+
+		struct CollisionEvent {
+			Entity& a;
+			Entity& b;
+		};
+
+		std::vector<CollisionEvent> pendingCollisions;
+		std::mutex                  collisionMutex; // optional for future threading safety
 
 		sol::state    lua;
 		sol::function luaUpdate;

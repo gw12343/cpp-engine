@@ -3,11 +3,9 @@
 //
 
 #include "ShadowMapRenderer.h"
-#include "core/Window.h"
 #include "glm/ext/matrix_transform.hpp"
 #include "spdlog/spdlog.h"
 #include "utils/Utils.h"
-#include "components/Components.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "physics/PhysicsManager.h"
 #include "core/EngineData.h"
@@ -32,7 +30,7 @@ namespace Engine {
 		for (unsigned int x = 0; x < 2; ++x) {
 			for (unsigned int y = 0; y < 2; ++y) {
 				for (unsigned int z = 0; z < 2; ++z) {
-					const glm::vec4 pt = inv * glm::vec4(2.0f * x - 1.0f, 2.0f * y - 1.0f, 2.0f * z - 1.0f, 1.0f);
+					const glm::vec4 pt = inv * glm::vec4(2.0f * static_cast<float>(x) - 1.0f, 2.0f * static_cast<float>(y) - 1.0f, 2.0f * static_cast<float>(z) - 1.0f, 1.0f);
 					frustumCorners.push_back(pt / pt.w);
 				}
 			}
@@ -145,8 +143,8 @@ namespace Engine {
 
 		int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		if (status != GL_FRAMEBUFFER_COMPLETE) {
-			spdlog::error("Framebuffer is not complete!");
-			throw 0;
+			GetRenderer().log->error("Framebuffer is not complete!");
+			return;
 		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -166,7 +164,7 @@ namespace Engine {
 		const auto lightMatrices = getLightSpaceMatrices();
 		glBindBuffer(GL_UNIFORM_BUFFER, matricesUBO);
 		for (size_t i = 0; i < lightMatrices.size(); ++i) {
-			glBufferSubData(GL_UNIFORM_BUFFER, i * sizeof(glm::mat4x4), sizeof(glm::mat4x4), glm::value_ptr(lightMatrices[i]));
+			glBufferSubData(GL_UNIFORM_BUFFER, static_cast<GLintptr>(i * sizeof(glm::mat4x4)), sizeof(glm::mat4x4), glm::value_ptr(lightMatrices[i]));
 		}
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -174,13 +172,18 @@ namespace Engine {
 		glViewport(0, 0, depthMapResolution, depthMapResolution);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// TODO check for shadow casting component
+
 		auto view = GetRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer, Engine::Components::ShadowCaster>();
+
 		for (auto [entity, metadata, transform, renderer, shadowCaster] : view.each()) {
-			if (!renderer.model) continue;
-			glm::mat4 model = CalculateModelMatrix(transform);
-			m_depthShader.SetMat4("model", &model);
-			renderer.model->Draw(m_depthShader);
+			if (!renderer.model.IsValid()) continue;
+
+			auto* model = GetAssetManager().Get(renderer.model);
+			if (!model) continue;
+
+			glm::mat4 modelMatrix = CalculateModelMatrix(transform);
+			m_depthShader.SetMat4("model", &modelMatrix);
+			model->Draw(m_depthShader);
 		}
 
 		// Unbind shadow buffer now
@@ -193,7 +196,7 @@ namespace Engine {
 	{
 		shader.Bind();
 		ENGINE_GLCheckError();
-		shader.SetInt("cascadeCount", shadowCascadeLevels.size());
+		shader.SetInt("cascadeCount", static_cast<int>(shadowCascadeLevels.size()));
 		shader.SetInt("shadowMap", 1);
 
 		for (size_t i = 0; i < shadowCascadeLevels.size(); ++i) {

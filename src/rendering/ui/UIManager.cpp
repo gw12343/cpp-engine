@@ -22,6 +22,7 @@
 #include "components/impl/SkinnedMeshComponent.h"
 #include "components/impl/ParticleSystemComponent.h"
 #include "components/impl/ShadowCasterComponent.h"
+#include "imgui_internal.h"
 
 namespace Engine::UI {
 
@@ -351,6 +352,9 @@ namespace Engine::UI {
 	void UIManager::onInit()
 	{
 		SetThemeColors(0);
+		drawFuncs[typeid(Texture)]          = [this]() { DrawTextureAssets(); };
+		drawFuncs[typeid(Rendering::Model)] = [this]() { DrawModelAssets(); };
+		// Register other asset draw functions here...
 	}
 
 	int selectedTheme = 0;
@@ -417,6 +421,7 @@ namespace Engine::UI {
 		RenderHierarchyWindow();
 		RenderInspectorWindow();
 		RenderAnimationWindow();
+		RenderAssetWindow();
 		// RenderAudioDebugUI();
 
 		// Display pause overlay when physics is disabled
@@ -723,6 +728,106 @@ namespace Engine::UI {
 
 		ImGui::PopStyleVar();
 		ImGui::End();
+	}
+
+	float m_iconSize = 64.0f;
+
+	void UIManager::RenderAssetWindow()
+	{
+		if (!ImGui::Begin("Assets")) return;
+
+		ImGui::SliderFloat("Icon Size", &m_iconSize, 16.0f, 256.0f, "%.0f", ImGuiSliderFlags_AlwaysClamp);
+
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup)) {
+			if (ImGui::GetIO().KeyCtrl) {
+				float scroll = ImGui::GetIO().MouseWheel;
+				if (scroll != 0.0f) {
+					m_iconSize += scroll * 8.0f;
+					m_iconSize = std::clamp(m_iconSize, 16.0f, 256.0f);
+				}
+			}
+		}
+
+
+		if (ImGui::BeginTabBar("AssetTabs")) {
+			for (auto& [type, drawFn] : drawFuncs) {
+				const char* label = type.name(); // fallback label
+				if (type == typeid(Texture))
+					label = "Textures";
+				else if (type == typeid(Rendering::Model))
+					label = "Models";
+				// Add custom labels per type
+
+				if (ImGui::BeginTabItem(label)) {
+					ImGui::BeginChild("AssetScroll", ImVec2(0, 0), false, ImGuiWindowFlags_AlwaysVerticalScrollbar);
+					drawFn();
+					ImGui::EndChild();
+					ImGui::EndTabItem();
+				}
+			}
+			ImGui::EndTabBar();
+		}
+
+		ImGui::End();
+	}
+
+	void UIManager::DrawTextureAssets()
+	{
+		auto& storage = GetAssetManager().GetStorage<Texture>();
+
+		float padding     = 8.0f;
+		int   columnCount = static_cast<int>(ImGui::GetContentRegionAvail().x / (m_iconSize + padding));
+		if (columnCount < 1) columnCount = 1;
+
+		ImGui::Columns(columnCount, nullptr, false);
+
+		for (auto& [id, texPtr] : storage.assets) {
+			if (!texPtr) continue;
+			ImGui::PushID(static_cast<int>(id));
+
+			ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(texPtr->GetID())), ImVec2(m_iconSize, m_iconSize));
+			ImGui::TextWrapped("%s", texPtr->GetName().c_str());
+
+			ImGui::NextColumn();
+			ImGui::PopID();
+		}
+
+		ImGui::Columns(1);
+	}
+
+
+	void UIManager::DrawModelAssets()
+	{
+		auto& storage = GetAssetManager().GetStorage<Rendering::Model>();
+
+		float padding     = 8.0f;
+		int   columnCount = static_cast<int>(ImGui::GetContentRegionAvail().x / (m_iconSize + padding));
+		if (columnCount < 1) columnCount = 1;
+
+		ImGui::Columns(columnCount, nullptr, false);
+
+		for (auto& [id, model] : storage.assets) {
+			if (!model) continue;
+			ImGui::PushID(static_cast<int>(id));
+
+			auto& preview  = m_modelPreviews[id];
+			preview.width  = static_cast<int>(m_iconSize);
+			preview.height = static_cast<int>(m_iconSize);
+			preview.Render(model.get(), GetRenderer().GetShader(), m_iconSize);
+
+			ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(preview.texture)),
+			             ImVec2(m_iconSize, m_iconSize),
+			             ImVec2(0, 1), // top-left
+			             ImVec2(1, 0)  // bottom-right
+			);
+			ImGui::TextWrapped("Model #%u", id);
+
+			ImGui::NextColumn();
+			ImGui::PopID();
+		}
+
+		ImGui::Columns(1);
 	}
 
 

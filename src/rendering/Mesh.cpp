@@ -4,6 +4,8 @@
 #include "core/Engine.h"
 #include "terrain/TerrainManager.h"
 #include "utils/Utils.h"
+#include "core/EngineData.h"
+#include "assets/AssetManager.h"
 
 #include <glad/glad.h>
 #include <spdlog/spdlog.h>
@@ -66,10 +68,10 @@ namespace Engine {
 			//				m_material->GetDiffuseTexture()->Bind(0);
 			//			}
 			ENGINE_GLCheckError();
-			if (m_material->GetDiffuseTexture()) {
+			if (m_material->GetDiffuseTexture().IsValid()) {
 				glActiveTexture(GL_TEXTURE0);
 				shader.SetInt("diffuseTexture", 0);
-				m_material->GetDiffuseTexture()->Bind(0);
+				GetAssetManager().Get(m_material->GetDiffuseTexture())->Bind(0);
 			}
 			ENGINE_GLCheckError();
 
@@ -107,9 +109,9 @@ namespace Engine {
 			//				glActiveTexture(GL_TEXTURE1);
 			//				m_material->GetSpecularTexture()->Unbind();
 			//			}
-			if (m_material->GetDiffuseTexture()) {
+			if (m_material->GetDiffuseTexture().IsValid()) {
 				glActiveTexture(GL_TEXTURE0);
-				m_material->GetDiffuseTexture()->Unbind();
+				GetAssetManager().Get(m_material->GetDiffuseTexture())->Unbind();
 			}
 			glActiveTexture(GL_TEXTURE0);
 		}
@@ -153,3 +155,6 @@ namespace Engine {
 		}
 	} // namespace Rendering
 } // namespace Engine
+
+
+#include "assets/AssetManager.inl"

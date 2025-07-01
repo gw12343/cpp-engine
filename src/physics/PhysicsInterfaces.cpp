@@ -2,7 +2,7 @@
 #include "core/EngineData.h"
 #include "physics/PhysicsManager.h"
 #include "components/impl/LuaScriptComponent.h"
-
+#include "scripting/ScriptManager.h"
 using namespace JPH;
 using namespace JPH::literals;
 
@@ -81,20 +81,17 @@ namespace Engine {
 
 	void ContactListenerImpl::OnContactAdded(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings)
 	{
-		Entity& entity1 = GetPhysics().bodyToEntityMap[inBody1.GetID()];
-		Entity& entity2 = GetPhysics().bodyToEntityMap[inBody2.GetID()];
+		auto& physics       = GetPhysics();
+		auto& scriptManager = GetScriptManager();
 
-		if (entity1.HasComponent<Components::LuaScript>()) {
-			auto& sc1 = entity1.GetComponent<Components::LuaScript>();
-			sc1.OnCollisionEnter(entity2);
-		}
+		Entity& entity1 = physics.bodyToEntityMap[inBody1.GetID()];
+		Entity& entity2 = physics.bodyToEntityMap[inBody2.GetID()];
 
-		if (entity2.HasComponent<Components::LuaScript>()) {
-			auto& sc2 = entity2.GetComponent<Components::LuaScript>();
-			sc2.OnCollisionEnter(entity1);
+		if (entity1.HasComponent<Components::LuaScript>() || entity2.HasComponent<Components::LuaScript>()) {
+			std::lock_guard<std::mutex> lock(scriptManager.collisionMutex);
+			scriptManager.pendingCollisions.push_back({entity1, entity2});
 		}
 	}
-
 	void ContactListenerImpl::OnContactPersisted(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings)
 	{
 		// SPDLOG_INFO("A contact was persisted");

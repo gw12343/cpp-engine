@@ -24,9 +24,11 @@ namespace Engine {
 	class ScriptManager;
 	class PhysicsManager;
 	class Camera;
+	class AssetManager;
 
 	class EngineData {
 	  public:
+		std::shared_ptr<AssetManager>            assetManager;
 		std::shared_ptr<Window>                  window;
 		std::shared_ptr<Renderer>                renderer;
 		std::shared_ptr<Audio::SoundManager>     sound;
@@ -44,6 +46,11 @@ namespace Engine {
 	EngineData& Get();
 
 	// Convenience inline accessors
+	inline auto& GetAssetManager()
+	{
+		return *Get().assetManager;
+	}
+
 	inline auto& GetWindow()
 	{
 		return *Get().window;

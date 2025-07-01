@@ -6,7 +6,7 @@
 
 #include "core/Entity.h"
 #include "components/impl/AnimationComponent.h"
-#include "utils/ModelLoader.h"
+#include "assets/ModelLoader.h"
 #include "physics/PhysicsManager.h"
 #include "components/impl/LuaScriptComponent.h"
 #include "components/impl/ShadowCasterComponent.h"
@@ -80,6 +80,7 @@ namespace Engine {
 
 	void ScriptManager::onUpdate(float dt)
 	{
+		// Editor script
 		if (luaUpdate.valid()) {
 			try {
 				luaUpdate(dt);
@@ -89,6 +90,29 @@ namespace Engine {
 			}
 		}
 
+		{
+			std::lock_guard<std::mutex> lock(collisionMutex);
+
+			for (const auto& event : pendingCollisions) {
+				Entity& a = event.a;
+				Entity& b = event.b;
+
+				if (a.HasComponent<Components::LuaScript>()) {
+					auto& sc = a.GetComponent<Components::LuaScript>();
+					sc.OnCollisionEnter(b);
+				}
+
+				if (b.HasComponent<Components::LuaScript>()) {
+					auto& sc = b.GetComponent<Components::LuaScript>();
+					sc.OnCollisionEnter(a);
+				}
+			}
+
+			pendingCollisions.clear();
+		}
+
+
+		// User scripts
 		GetRegistry().view<Components::LuaScript>().each([](entt::entity entity, Components::LuaScript& script) {
 			if (script.update.valid()) {
 				sol::protected_function_result result = script.update();
