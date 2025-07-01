@@ -204,10 +204,6 @@ namespace Engine {
 	}
 	void Window::setLuaBindings()
 	{
-		// Expose FramebufferID and Framebuffer as needed
-		GetScriptManager().lua.new_usertype<FramebufferID>("FramebufferID"); // customize as needed
-		GetScriptManager().lua.new_usertype<Framebuffer>("Framebuffer", sol::no_constructor);
-
 		// Bind the Window instance API
 		GetScriptManager().lua.new_usertype<Window>("Window",
 		                                            // Methods
@@ -233,9 +229,7 @@ namespace Engine {
 		                                            &Window::targetY);
 
 		// Provide access to the main window
-		GetScriptManager().lua.set_function("getWindow", []() -> Window& {
-			return Engine::GetWindow(); // You provide this somewhere
-		});
+		GetScriptManager().lua.set_function("getWindow", []() -> Window& { return Engine::GetWindow(); });
 	}
 
 

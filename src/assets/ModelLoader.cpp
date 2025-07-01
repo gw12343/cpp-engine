@@ -4,6 +4,7 @@
 #include "utils/Utils.h"
 #include "assets/AssetManager.h"
 #include "core/EngineData.h"
+#include "glm/gtc/type_ptr.hpp"
 
 #include <filesystem>
 #include <iostream>
@@ -23,29 +24,48 @@ namespace Engine {
 
 			std::vector<std::shared_ptr<Mesh>> meshes;
 			std::string                        directory = std::filesystem::path(path).parent_path().string();
-			ProcessNode(scene->mRootNode, scene, meshes, directory);
+			glm::vec3                          boundsMin(std::numeric_limits<float>::max());
+			glm::vec3                          boundsMax(std::numeric_limits<float>::lowest());
+
+			ProcessNode(scene->mRootNode, scene, meshes, directory, glm::mat4(1.0f), boundsMin, boundsMax);
 
 			auto model = std::make_unique<Model>();
 			ENGINE_ASSERT(model, "Failed to allocate Model");
-			model->m_meshes = std::move(meshes);
+			model->m_meshes    = std::move(meshes);
+			model->m_boundsMin = boundsMin;
+			model->m_boundsMax = boundsMax;
 			return model;
 		}
 
-		void ModelLoader::ProcessNode(aiNode* node, const aiScene* scene, std::vector<std::shared_ptr<Mesh>>& meshes, const std::string& directory)
+		void ModelLoader::ProcessNode(aiNode* node, const aiScene* scene, std::vector<std::shared_ptr<Mesh>>& meshes, const std::string& directory, const glm::mat4& parentTransform, glm::vec3& boundsMin, glm::vec3& boundsMax)
 		{
 			ENGINE_ASSERT(node && scene, "Invalid parameters passed to ProcessNode");
+
+			glm::mat4 transform = parentTransform * glm::transpose(glm::make_mat4(&node->mTransformation.a1));
 
 			for (unsigned int i = 0; i < node->mNumMeshes; i++) {
 				ENGINE_ASSERT(node->mMeshes[i] < scene->mNumMeshes, "Invalid mesh index in node");
 				aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 				ENGINE_ASSERT(mesh, "Null aiMesh pointer encountered");
+
+				// Bounding box accumulation
+				for (unsigned int v = 0; v < mesh->mNumVertices; ++v) {
+					aiVector3D pos         = mesh->mVertices[v];
+					glm::vec4  transformed = transform * glm::vec4(pos.x, pos.y, pos.z, 1.0f);
+					glm::vec3  p           = glm::vec3(transformed);
+
+					boundsMin = glm::min(boundsMin, p);
+					boundsMax = glm::max(boundsMax, p);
+				}
+
 				meshes.push_back(ProcessMesh(mesh, scene, directory));
 			}
 
 			for (unsigned int i = 0; i < node->mNumChildren; i++) {
-				ProcessNode(node->mChildren[i], scene, meshes, directory);
+				ProcessNode(node->mChildren[i], scene, meshes, directory, transform, boundsMin, boundsMax);
 			}
 		}
+
 
 		std::shared_ptr<Mesh> ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* scene, const std::string& directory)
 		{

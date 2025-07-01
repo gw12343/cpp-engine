@@ -18,6 +18,10 @@ namespace Engine::Rendering {
 
 		[[maybe_unused]] [[nodiscard]] const std::vector<std::shared_ptr<Mesh>>& GetMeshes() const { return m_meshes; }
 
+		glm::vec3 m_boundsMin;
+
+		glm::vec3 m_boundsMax;
+
 	  private:
 		friend class ModelLoader;
 

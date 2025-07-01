@@ -41,7 +41,7 @@ namespace Engine {
 	{
 		if (!initialized) {
 			width = height = MODEL_PREVIEW_SIZE;
-			Initialize(); // resize framebuffer + texture
+			Initialize();
 		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -50,8 +50,18 @@ namespace Engine {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		shader.Bind();
-		glm::mat4 proj     = glm::perspective(glm::radians(45.0f), 1.f, 0.1f, 10.0f);
-		glm::mat4 view     = glm::lookAt(glm::vec3(2, 2, 2), glm::vec3(0), glm::vec3(0, 1, 0));
+
+		// Compute bounding box center and radius
+		glm::vec3 center  = (model->m_boundsMin + model->m_boundsMax) * 0.5f;
+		glm::vec3 extents = model->m_boundsMax - model->m_boundsMin;
+		float     radius  = glm::length(extents) * 0.5f;
+
+		// Camera setup: back up along diagonal at 2.5x radius
+		glm::vec3 camDir = glm::normalize(glm::vec3(1.0f, 1.0f, 1.0f));
+		glm::vec3 camPos = center + camDir * (radius * 2.5f);
+
+		glm::mat4 proj     = glm::perspective(glm::radians(45.0f), 1.f, 0.1f, radius * 6.0f);
+		glm::mat4 view     = glm::lookAt(camPos, center, glm::vec3(0, 1, 0));
 		glm::mat4 modelMat = glm::mat4(1.0f);
 
 		shader.SetMat4("projection", &proj);
@@ -62,4 +72,5 @@ namespace Engine {
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
+
 } // namespace Engine
