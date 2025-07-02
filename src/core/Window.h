@@ -24,7 +24,6 @@ namespace Engine {
 
 		[[nodiscard]] bool ShouldClose() const;
 		void               SwapBuffers() const;
-		static void        PollEvents();
 		void               OnResize(int width, int height);
 		void               SetFullViewport() const;
 

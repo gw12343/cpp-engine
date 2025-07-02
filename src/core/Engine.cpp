@@ -1,11 +1,9 @@
 #include "Engine.h"
 
 #include "components/Components.h"
-#include "terrain/TerrainLoader.h"
-#include "assets/ModelLoader.h"
+#include "assets/impl/ModelLoader.h"
 #include "Jolt/Physics/Collision/Shape/MeshShape.h"
 #include "core/module/ModuleManager.h"
-#include "core/module/scriptingonly/TestModule.h"
 #include <memory>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include "EngineData.h"
@@ -31,7 +29,9 @@
 #include "components/impl/AnimationWorkerComponent.h"
 #include "components/impl/SkinnedMeshComponent.h"
 #include "assets/AssetManager.h"
-#include "assets/TextureLoader.h"
+#include "assets/impl/TextureLoader.h"
+#include "assets/impl/TerrainLoader.h"
+#include "components/impl/RigidBodyComponent.h"
 
 namespace Engine {
 	ModuleManager manager;
@@ -43,6 +43,7 @@ namespace Engine {
 		Get().assetManager = std::make_shared<AssetManager>();
 		GetAssetManager().RegisterLoader<Texture>(std::make_unique<TextureLoader>());
 		GetAssetManager().RegisterLoader<Rendering::Model>(std::make_unique<Rendering::ModelLoader>());
+		GetAssetManager().RegisterLoader<Terrain::TerrainTile>(std::make_unique<TerrainLoader>());
 
 		// Initialize Scene
 		Get().registry = std::make_shared<entt::registry>();
@@ -82,12 +83,6 @@ namespace Engine {
 		manager.InitAllLuaBindings();
 		manager.InitAll();
 
-
-		// auto texHandle = GetAssetManager().Load<Texture>("resources/textures/Bark_TwistedTree.png");
-
-		// SPDLOG_INFO("LOADED TEXTURE: width: {}", GetAssetManager().Get(texHandle)->GetWidth());
-
-
 		CreateInitialEntities();
 
 		return true;
@@ -97,12 +92,6 @@ namespace Engine {
 	{
 		AssetHandle<Rendering::Model> treeModel = GetAssetManager().Load<Rendering::Model>("resources/models/TwistedTree_1.obj");
 
-
-		// Create entities
-		//		Entity floor = Entity::Create("TestCube");
-		//		floor.AddComponent<Components::ModelRenderer>(cube);
-		//		floor.AddComponent<Components::Transform>(glm::vec3(0.0f, -10.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.01f, 0.01f, 0.01f));
-		//		floor.AddComponent<Components::RigidBodyComponent>(floor_id);
 
 		// cube          = Rendering::ModelLoader::LoadModel("resources/models/cube.obj");
 		//		Entity entity = Entity::Create("TestEntity");
@@ -133,9 +122,16 @@ namespace Engine {
 		//		std::cout << "Heights: " << tile.heightmap.size() << "\n";
 		//		std::cout << "Trees: " << tile.trees.size() << "\n";
 		//
-		//		auto& tile         = terrainManager.GetTerrains()[0];
-		//		Body* terrain_body = body_interface.CreateBody(BodyCreationSettings(new MeshShapeSettings(tile->physicsMesh), RVec3(0.0_r, 0.0_r, 0.0_r), Quat::sIdentity(), EMotionType::Static, Layers::NON_MOVING));
-		//		body_interface.AddBody(terrain_body->GetID(), EActivation::DontActivate);
+
+		Entity terrainWrapper = Entity::Create("TerrainWrapper");
+		terrainWrapper.AddComponent<Components::Transform>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+
+		auto& body_interface = GetPhysics().GetPhysicsSystem()->GetBodyInterface();
+		auto& tile           = GetTerrainManager().GetTerrains()[0];
+		Body* terrain_body   = body_interface.CreateBody(BodyCreationSettings(new MeshShapeSettings(GetAssetManager().Get(tile)->physicsMesh), RVec3(0.0_r, 0.0_r, 0.0_r), Quat::sIdentity(), EMotionType::Static, Layers::NON_MOVING));
+		spdlog::info("id {}", terrain_body->GetID().GetIndex());
+		body_interface.AddBody(terrain_body->GetID(), EActivation::DontActivate);
+		terrainWrapper.AddComponent<Components::RigidBodyComponent>(terrain_body->GetID());
 	}
 
 	void GEngine::Run()
@@ -145,16 +141,10 @@ namespace Engine {
 			m_deltaTime       = currentFrame - m_lastFrame;
 			m_lastFrame       = currentFrame;
 
-			Update();
+			manager.UpdateAll(m_deltaTime);
 		}
 	}
 
-
-	void GEngine::Update()
-	{
-		Window::PollEvents();
-		manager.UpdateAll(m_deltaTime);
-	}
 
 	void GEngine::Shutdown()
 	{

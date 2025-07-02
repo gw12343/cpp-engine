@@ -26,18 +26,23 @@ namespace Engine::Components {
 	void RigidBodyComponent::OnAdded(Entity& entity)
 	{
 		BodyInterface& body_interface = GetPhysics().GetPhysicsSystem()->GetBodyInterface();
+		if (!body_interface.IsAdded(bodyID)) {
+			RVec3 startPos(0, 0, 0);
+			Quat  startRot = Quat::sIdentity();
+			if (entity.HasComponent<Transform>()) {
+				Transform& tr  = entity.GetComponent<Transform>();
+				glm::vec3  pos = tr.position;
+				startPos       = Vec3(pos.x, pos.y, pos.z);
+				startRot       = ToJolt(tr.rotation);
+			}
 
-		RVec3 startPos(0, 0, 0);
-		Quat  startRot = Quat::sIdentity();
-		if (entity.HasComponent<Transform>()) {
-			Transform& tr  = entity.GetComponent<Transform>();
-			glm::vec3  pos = tr.position;
-			startPos       = Vec3(pos.x, pos.y, pos.z);
-			startRot       = ToJolt(tr.rotation);
+			BodyCreationSettings sphere_settings(new SphereShape(0.5f), startPos, startRot, EMotionType::Dynamic, Layers::MOVING);
+			bodyID = body_interface.CreateAndAddBody(sphere_settings, EActivation::Activate);
+			SPDLOG_INFO("NOT ALREAFY CREATED");
 		}
-
-		BodyCreationSettings sphere_settings(new SphereShape(0.5f), startPos, startRot, EMotionType::Dynamic, Layers::MOVING);
-		bodyID                               = body_interface.CreateAndAddBody(sphere_settings, EActivation::Activate);
+		else {
+			SPDLOG_INFO("ALREAFY CREATED");
+		}
 		GetPhysics().bodyToEntityMap[bodyID] = entity;
 	}
 
@@ -115,7 +120,7 @@ namespace Engine::Components {
 	// === Conversion Utilities ===
 	JPH::Vec3 RigidBodyComponent::ToJolt(const glm::vec3& v)
 	{
-		return JPH::Vec3(v.x, v.y, v.z);
+		return {v.x, v.y, v.z};
 	}
 
 	glm::vec3 RigidBodyComponent::ToGlm(const JPH::Vec3& v)

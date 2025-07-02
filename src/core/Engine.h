@@ -50,12 +50,6 @@ namespace Engine {
 		 */
 		static void CreateInitialEntities();
 
-		/**
-		 * @brief Updates all engine systems and entities.
-		 */
-		void Update();
-
-
 		std::shared_ptr<spdlog::logger> m_logger; ///< Logger instance.
 
 

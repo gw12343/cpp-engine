@@ -6,7 +6,7 @@
 #ifndef CPP_ENGINE_TEXTURELOADER_H
 #define CPP_ENGINE_TEXTURELOADER_H
 
-#include "IAssetLoader.h"
+#include "assets/IAssetLoader.h"
 #include "rendering/Texture.h"
 
 namespace Engine {

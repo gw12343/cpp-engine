@@ -58,8 +58,9 @@ namespace Engine {
 		std::string name() const override { return "PhysicsManger"; };
 		void        setLuaBindings() override;
 
-		void                              SyncPhysicsEntities();
-		std::shared_ptr<PhysicsSystem>    GetPhysicsSystem();
+		void                           SyncPhysicsEntities();
+		std::shared_ptr<PhysicsSystem> GetPhysicsSystem();
+
 		BPLayerInterfaceImpl              broad_phase_layer_interface;
 		ObjectVsBroadPhaseLayerFilterImpl object_vs_broadphase_layer_filter;
 		ObjectLayerPairFilterImpl         object_vs_object_layer_filter;

@@ -6,7 +6,7 @@
 
 #include "core/Entity.h"
 #include "components/impl/AnimationComponent.h"
-#include "assets/ModelLoader.h"
+#include "assets/impl/ModelLoader.h"
 #include "physics/PhysicsManager.h"
 #include "components/impl/LuaScriptComponent.h"
 #include "components/impl/ShadowCasterComponent.h"
@@ -96,6 +96,7 @@ namespace Engine {
 			for (const auto& event : pendingCollisions) {
 				Entity& a = event.a;
 				Entity& b = event.b;
+
 
 				if (a.HasComponent<Components::LuaScript>()) {
 					auto& sc = a.GetComponent<Components::LuaScript>();

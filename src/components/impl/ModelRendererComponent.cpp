@@ -9,7 +9,7 @@
 #include "rendering/particles/ParticleManager.h"
 #include "animation/AnimationManager.h"
 #include "scripting/ScriptManager.h"
-#include "assets/ModelLoader.h"
+#include "assets/impl/ModelLoader.h"
 #include "ModelRendererComponent.h"
 
 namespace Engine::Components {

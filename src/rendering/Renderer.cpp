@@ -1,6 +1,6 @@
 #include "Renderer.h"
 
-#include "assets/ModelLoader.h"
+#include "assets/impl/ModelLoader.h"
 #include "utils/Utils.h"
 #include "core/EngineData.h"
 #include "terrain/TerrainManager.h"

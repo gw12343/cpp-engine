@@ -30,11 +30,13 @@ namespace Engine {
 		void RenderSkybox();
 
 		Shader& GetShader() { return m_shader; }
+		Shader& GetTerrainShader() { return m_terrainShader; }
 
 	  private:
 		std::unique_ptr<ShadowMapRenderer> m_shadowRenderer;
 
 		Engine::Shader          m_shader;
+		Engine::Shader          m_terrainShader;
 		Engine::Shader          m_skyboxShader;
 		std::unique_ptr<Skybox> m_skybox;
 	};

@@ -16,7 +16,7 @@ function CollisionEnter(other)
     end
     print("Entered collision with other!!!!")
 
-    if other:getName() ~= "Floor" then
+    if other:getName() ~= "TerrainWrapper" then
         return
     end
 

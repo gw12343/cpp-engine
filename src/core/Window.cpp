@@ -112,6 +112,7 @@ namespace Engine {
 
 	void Window::onUpdate(float dt)
 	{
+		glfwPollEvents();
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -130,10 +131,6 @@ namespace Engine {
 		glfwSwapBuffers(m_window);
 	}
 
-	void Window::PollEvents()
-	{
-		glfwPollEvents();
-	}
 
 	void Window::SetFullViewport() const
 	{
