@@ -152,6 +152,8 @@ add_executable(${PROJECT_NAME} ${SOURCES}
         src/animation/TerrainRendererComponent.h
         src/assets/impl/TerrainLoader.cpp
         src/assets/impl/TerrainLoader.h
+        src/terrain/TerrainTile.cpp
+        src/terrain/TerrainTile.h
 )
 
 

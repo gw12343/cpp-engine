@@ -23,6 +23,7 @@
 #include "components/impl/ParticleSystemComponent.h"
 #include "components/impl/ShadowCasterComponent.h"
 #include "imgui_internal.h"
+#include "animation/TerrainRendererComponent.h"
 
 namespace Engine::UI {
 
@@ -547,6 +548,11 @@ namespace Engine::UI {
 			if (m_selectedEntity.HasComponent<Components::LuaScript>()) {
 				if (ImGui::CollapsingHeader(ICON_FA_SCROLL " Script")) {
 					m_selectedEntity.GetComponent<Components::LuaScript>().RenderInspector(m_selectedEntity);
+				}
+			}
+			if (m_selectedEntity.HasComponent<Components::TerrainRenderer>()) {
+				if (ImGui::CollapsingHeader(ICON_FA_MAP " Terrain Renderer")) {
+					m_selectedEntity.GetComponent<Components::TerrainRenderer>().RenderInspector(m_selectedEntity);
 				}
 			}
 		}

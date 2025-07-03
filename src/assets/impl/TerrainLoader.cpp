@@ -67,6 +67,10 @@ namespace Engine {
 			file.read(reinterpret_cast<char*>(&tree.prefabIndex), sizeof(uint32_t));
 		}
 
+		tile->GenerateMesh();
+		tile->GenerateSplatTextures();
+		tile->SetupShader();
+
 		return tile;
 	}
 } // namespace Engine

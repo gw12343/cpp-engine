@@ -26,6 +26,7 @@ namespace Engine::Components {
 	void RigidBodyComponent::OnAdded(Entity& entity)
 	{
 		BodyInterface& body_interface = GetPhysics().GetPhysicsSystem()->GetBodyInterface();
+
 		if (!body_interface.IsAdded(bodyID)) {
 			RVec3 startPos(0, 0, 0);
 			Quat  startRot = Quat::sIdentity();
@@ -38,11 +39,8 @@ namespace Engine::Components {
 
 			BodyCreationSettings sphere_settings(new SphereShape(0.5f), startPos, startRot, EMotionType::Dynamic, Layers::MOVING);
 			bodyID = body_interface.CreateAndAddBody(sphere_settings, EActivation::Activate);
-			SPDLOG_INFO("NOT ALREAFY CREATED");
 		}
-		else {
-			SPDLOG_INFO("ALREAFY CREATED");
-		}
+
 		GetPhysics().bodyToEntityMap[bodyID] = entity;
 	}
 

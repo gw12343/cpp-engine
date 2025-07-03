@@ -176,6 +176,7 @@ namespace Engine {
 		auto view = GetRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer, Engine::Components::ShadowCaster>();
 
 		for (auto [entity, metadata, transform, renderer, shadowCaster] : view.each()) {
+			if (!renderer.visible) continue;
 			if (!renderer.model.IsValid()) continue;
 
 			auto* model = GetAssetManager().Get(renderer.model);

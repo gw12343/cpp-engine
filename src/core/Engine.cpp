@@ -32,6 +32,7 @@
 #include "assets/impl/TextureLoader.h"
 #include "assets/impl/TerrainLoader.h"
 #include "components/impl/RigidBodyComponent.h"
+#include "animation/TerrainRendererComponent.h"
 
 namespace Engine {
 	ModuleManager manager;
@@ -79,10 +80,10 @@ namespace Engine {
 	bool GEngine::Initialize()
 	{
 		SPDLOG_INFO("Starting Engine");
+
 		Components::RegisterAllComponentBindings();
 		manager.InitAllLuaBindings();
 		manager.InitAll();
-
 		CreateInitialEntities();
 
 		return true;
@@ -123,15 +124,21 @@ namespace Engine {
 		//		std::cout << "Trees: " << tile.trees.size() << "\n";
 		//
 
+
 		Entity terrainWrapper = Entity::Create("TerrainWrapper");
 		terrainWrapper.AddComponent<Components::Transform>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
-		auto& body_interface = GetPhysics().GetPhysicsSystem()->GetBodyInterface();
-		auto& tile           = GetTerrainManager().GetTerrains()[0];
-		Body* terrain_body   = body_interface.CreateBody(BodyCreationSettings(new MeshShapeSettings(GetAssetManager().Get(tile)->physicsMesh), RVec3(0.0_r, 0.0_r, 0.0_r), Quat::sIdentity(), EMotionType::Static, Layers::NON_MOVING));
+
+		auto&                             body_interface = GetPhysics().GetPhysicsSystem()->GetBodyInterface();
+		AssetHandle<Terrain::TerrainTile> terrain        = GetAssetManager().Load<Terrain::TerrainTile>("resources/terrain/TerrainA.bin");
+
+		auto  tile         = GetAssetManager().Get(terrain); // GetTerrainManager().GetTerrains()[0];
+		Body* terrain_body = body_interface.CreateBody(BodyCreationSettings(new MeshShapeSettings(tile->physicsMesh), RVec3(0.0_r, 0.0_r, 0.0_r), Quat::sIdentity(), EMotionType::Static, Layers::NON_MOVING));
 		spdlog::info("id {}", terrain_body->GetID().GetIndex());
 		body_interface.AddBody(terrain_body->GetID(), EActivation::DontActivate);
+
 		terrainWrapper.AddComponent<Components::RigidBodyComponent>(terrain_body->GetID());
+		terrainWrapper.AddComponent<Components::TerrainRenderer>(terrain);
 	}
 
 	void GEngine::Run()

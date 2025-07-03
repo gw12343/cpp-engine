@@ -14,7 +14,6 @@ function CollisionEnter(other)
     if not isSmall then
         return
     end
-    print("Entered collision with other!!!!")
 
     if other:getName() ~= "TerrainWrapper" then
         return

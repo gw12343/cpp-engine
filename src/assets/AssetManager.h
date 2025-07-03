@@ -29,7 +29,6 @@ namespace Engine {
 		template <typename T>
 		void RegisterLoader(std::unique_ptr<IAssetLoader<T>> loader);
 
-	  private:
 		struct IStorageBase {
 			virtual ~IStorageBase() = default;
 		};
@@ -42,9 +41,11 @@ namespace Engine {
 			uint32_t                                         nextID = 1;
 		};
 
+
 		template <typename T>
 		AssetStorage<T>& GetStorage();
 
+	  private:
 		std::unordered_map<std::type_index, std::unique_ptr<IStorageBase>> storages;
 
 		friend class UI::UIManager;
