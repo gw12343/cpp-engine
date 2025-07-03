@@ -7,15 +7,12 @@
 #include "core/EngineData.h"
 #include "glad/glad.h"
 #include <filesystem>
-#include <fstream>
 #include <iostream>
 #include <sstream>
 #include "rendering/Renderer.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb/stb_image_write.h"
-#include "components/impl/EntityMetadataComponent.h"
-#include "components/impl/TransformComponent.h"
 #include "animation/TerrainRendererComponent.h"
 #include <stdexcept>
 
@@ -30,18 +27,66 @@ namespace Engine::Terrain {
 		ss << "in vec3 vWorldPos;\n";
 		ss << "out vec4 FragColor;\n";
 
-		ss << "uniform vec3 uLightDir = normalize(vec3(1.0, 1.0, 0.5));\n";
-		ss << "uniform vec3 uLightColor = vec3(1.0);\n";
-		ss << "uniform vec3 uAmbient = vec3(0.3);\n";
+		ss << "uniform vec3 lightDir;\n";
+		ss << "uniform vec3 viewPos;\n";
+		ss << "uniform float farPlane;\n";
+		ss << "uniform vec2 texScale;\n";
+		ss << "uniform mat4 view;\n";
+		ss << "uniform int cascadeCount;\n";
+		ss << "uniform int debugShadows;\n";
 
-		int totalLayers  = (int) splatLayerCount;
+
+		// Bind terrain texture samplers
+		int totalLayers  = static_cast<int>(splatLayerCount);
 		int textureCount = (totalLayers + 3) / 4;
+
+		// Shadow map sampler
+		ss << "layout(binding = " << (totalLayers + textureCount) << ") uniform sampler2DArray shadowMap;\n";
+
+		ss << "uniform float cascadePlaneDistances[16];\n";
+
+		// UBO for shadow matrices
+		ss << "layout(std140) uniform LightSpaceMatrices {\n";
+		ss << "    mat4 lightSpaceMatrices[16];\n";
+		ss << "};\n";
 
 		for (int i = 0; i < textureCount; ++i)
 			ss << "layout(binding = " << i << ") uniform sampler2D splat" << i << ";\n";
 		for (int i = 0; i < totalLayers; ++i)
 			ss << "layout(binding = " << (textureCount + i) << ") uniform sampler2D tex" << i << ";\n";
 
+		// Shadow utility functions
+		ss << R"(
+int GetCascadeLayer(vec3 fragPosWorldSpace) {
+	vec4 fragPosViewSpace = view * vec4(fragPosWorldSpace, 1.0);
+	float depthValue = abs(fragPosViewSpace.z);
+	for (int i = 0; i < cascadeCount; ++i)
+		if (depthValue < cascadePlaneDistances[i]) return i;
+	return cascadeCount;
+}
+
+float ShadowCalculation(vec3 fragPosWorldSpace, int layer) {
+	vec4 fragPosLightSpace = lightSpaceMatrices[layer] * vec4(fragPosWorldSpace, 1.0);
+	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+	projCoords = projCoords * 0.5 + 0.5;
+
+	float currentDepth = projCoords.z;
+	if (currentDepth > 1.0) return 0.0;
+
+	vec3 normal = normalize(vNormal);
+	float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+	bias *= 1.0 / ((layer == cascadeCount ? farPlane : cascadePlaneDistances[layer]) * 0.5);
+
+	float shadow = 0.0;
+	vec2 texelSize = 1.0 / vec2(textureSize(shadowMap, 0));
+	for (int x = -1; x <= 1; ++x)
+		for (int y = -1; y <= 1; ++y)
+			shadow += (currentDepth - bias) > texture(shadowMap, vec3(projCoords.xy + vec2(x, y) * texelSize, layer)).r ? 1.0 : 0.0;
+	return shadow / 9.0;
+}
+)";
+
+		// Begin main()
 		ss << "void main() {\n";
 		ss << "  float weights[" << totalLayers << "];\n";
 		ss << "  float total = 0.0001;\n";
@@ -58,16 +103,31 @@ namespace Engine::Terrain {
 
 		ss << "  vec4 baseColor = vec4(0.0);\n";
 		for (int i = 0; i < totalLayers; ++i) {
-			ss << "  baseColor += texture(tex" << i << ", vUV) * (weights[" << i << "] / total);\n";
+			ss << "  baseColor += texture(tex" << i << ", vUV * texScale) * (weights[" << i << "] / total);\n";
 		}
 
 		ss << "  vec3 N = normalize(vNormal);\n";
-		ss << "  vec3 L = normalize(uLightDir);\n";
-		ss << "  float NdotL = max(dot(N, L), 0.0);\n";
-		ss << "  vec3 lighting = uAmbient + uLightColor * NdotL;\n";
+		ss << "  vec3 L = normalize(lightDir);\n";
+		ss << "  float diff = max(dot(N, L), 0.0);\n";
+		ss << "  vec3 diffuse = vec3(1.0) * diff;\n";
+		ss << "  vec3 ambient = vec3(1.0) * baseColor.rgb;\n";
 
-		ss << "  FragColor = vec4(baseColor.rgb * lighting, baseColor.a);\n";
-		// ss << "  FragColor = vec4(vNormal.rgb, baseColor.a);\n";
+		ss << "  vec3 viewDir = normalize(viewPos - vWorldPos);\n";
+		ss << "  vec3 reflectDir = reflect(-L, N);\n";
+		ss << "  float spec = pow(max(dot(normalize(L + viewDir), N), 0.0), 64.0);\n";
+		ss << "  vec3 specular = vec3(1.0) * spec;\n";
+
+		ss << "  int layer = GetCascadeLayer(vWorldPos);\n";
+		ss << "  float shadow = ShadowCalculation(vWorldPos, layer);\n";
+		ss << "  vec3 lighting = ambient + (1.0 - shadow) * (diffuse + specular);\n";
+
+		ss << "  vec3 cascadeColor;\n";
+		ss << "  if (layer == 0) cascadeColor = vec3(1,0,0);\n";
+		ss << "  else if (layer == 1) cascadeColor = vec3(0,1,0);\n";
+		ss << "  else if (layer == 2) cascadeColor = vec3(0,0,1);\n";
+		ss << "  else cascadeColor = vec3(1);\n";
+
+		ss << "  FragColor = vec4(mix(baseColor.rgb * lighting, cascadeColor, debugShadows == 1 ? 0.35 : 0.0), baseColor.a);\n";
 		ss << "}\n";
 
 		return ss.str();
@@ -90,7 +150,7 @@ namespace Engine::Terrain {
 		ss << "  vUV = aUV;\n";
 		ss << "  vec4 worldPos = uModel * vec4(aPosition, 1.0);\n";
 		ss << "  vWorldPos = worldPos.xyz;\n";
-		ss << "  vNormal = mat3(transpose(inverse(uModel))) * aNormal;\n"; // transform normal correctly
+		ss << "  vNormal = mat3(transpose(inverse(uModel))) * aNormal;\n";
 		ss << "  gl_Position = uProjection * uView * worldPos;\n";
 		ss << "}\n";
 		return ss.str();
@@ -102,7 +162,8 @@ namespace Engine::Terrain {
 		std::string vertexCode   = GenerateGLSLVertexShader();
 		std::string fragmentCode = GenerateGLSLShader();
 
-		spdlog::debug("VERTEX CODE: \n{}\n FRAGMENT CODE: \n{}", vertexCode, fragmentCode);
+
+		spdlog::info("VERTEX CODE: \n{}\n FRAGMENT CODE: \n{}", vertexCode, fragmentCode);
 
 		terrainShader = std::make_shared<Engine::Shader>();
 		bool success  = terrainShader->LoadFromSource(vertexCode, fragmentCode);

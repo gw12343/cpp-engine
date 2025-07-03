@@ -5,13 +5,6 @@ layout (location = 2) in vec2 aTexCoord;
 layout (location = 3) in vec3 aTangent;
 layout (location = 4) in vec3 aBitangent;
 
-//out vec3 FragPos;
-//out vec3 Normal;
-//out vec2 TexCoord;
-//out vec3 Tangent;
-//out vec3 Bitangent;
-
-
 out VS_OUT {
     vec3 FragPos;
     vec3 Normal;
@@ -30,14 +23,6 @@ uniform mat4 model;
 
 void main()
 {
-    //    FragPos = vec3(model * vec4(aPos, 1.0));
-    //    Normal = mat3(transpose(inverse(model))) * aNormal;
-    //    Tangent = mat3(transpose(inverse(model))) * aTangent;
-    //    Bitangent = mat3(transpose(inverse(model))) * aBitangent;
-    //    TexCoord = aTexCoord;
-    //
-    //    gl_Position = projection * view * model * vec4(aPos, 1.0);
-
     vs_out.FragPos = vec3(model * vec4(aPos, 1.0));
     vs_out.Normal = transpose(inverse(mat3(model))) * aNormal;
     vs_out.TexCoords = aTexCoord;

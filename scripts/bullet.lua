@@ -1,7 +1,7 @@
 isSmall = true
 
 function Start()
-    print("Spawned bullet!");
+
 end
 
 

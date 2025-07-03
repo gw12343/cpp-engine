@@ -43,12 +43,16 @@ namespace Engine::Terrain {
 			if (!renderer.visible) continue;
 			if (!renderer.terrainTile.IsValid()) continue;
 
-			auto tile = GetAssetManager().Get(renderer.terrainTile);
-			tile->terrainShader->Bind();
+			auto      tile             = GetAssetManager().Get(renderer.terrainTile);
+			glm::mat4 viewM            = GetCamera().GetViewMatrix();
 			glm::mat4 terrainTransform = transform.GetMatrix();
-			tile->terrainShader->SetMat4("uModel", &terrainTransform);
 
-			glm::mat4 viewM       = GetCamera().GetViewMatrix();
+			GLuint shadowSlot = tile->splatTextures.size() + tile->diffuseTextures.size();
+			GetRenderer().GetShadowRenderer()->UploadShadowMatrices(*tile->terrainShader, viewM, shadowSlot);
+			tile->terrainShader->Bind();
+			tile->terrainShader->SetMat4("uModel", &terrainTransform);
+			tile->terrainShader->SetBool("debugShadows", false);
+
 			glm::mat4 projectionM = GetCamera().GetProjectionMatrix();
 
 			tile->terrainShader->SetMat4("uView", &viewM);

@@ -32,8 +32,10 @@ namespace Engine {
 		Shader& GetShader() { return m_shader; }
 		Shader& GetTerrainShader() { return m_terrainShader; }
 
+		std::shared_ptr<ShadowMapRenderer> GetShadowRenderer();
+
 	  private:
-		std::unique_ptr<ShadowMapRenderer> m_shadowRenderer;
+		std::shared_ptr<ShadowMapRenderer> m_shadowRenderer;
 
 		Engine::Shader          m_shader;
 		Engine::Shader          m_terrainShader;

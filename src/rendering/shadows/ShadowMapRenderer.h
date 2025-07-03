@@ -19,7 +19,7 @@ namespace Engine {
 	  public:
 		void Initalize();
 		void RenderShadowMaps();
-		void UploadShadowMatrices(Engine::Shader& shader, glm::mat4& V);
+		void UploadShadowMatrices(Engine::Shader& shader, glm::mat4& V, int textureSlot = 1);
 
 	  private:
 		///////////////////////////////////////// SHADOW MAPPING CONSTANTS

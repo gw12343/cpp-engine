@@ -1,4 +1,5 @@
 #include "Shader.h"
+#include "utils/Utils.h"
 
 #include <fstream>
 #include <glm/gtc/type_ptr.hpp>
@@ -77,11 +78,13 @@ namespace Engine {
 		if (geometryPath.has_value()) glDeleteShader(geometryShader);
 
 		SPDLOG_INFO("Linked shader with id {}", programID);
+		ENGINE_GLCheckError();
 		return true;
 	}
 
 	bool Shader::LoadFromSource(const std::string& vertexSource, const std::string& fragmentSource)
 	{
+		SPDLOG_INFO("LOADING TERRAIN SHADER FROM SOURCE");
 		if (vertexSource.empty() || fragmentSource.empty()) {
 			spdlog::error("Shader source code is empty");
 			return false;
@@ -107,6 +110,7 @@ namespace Engine {
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
 		SPDLOG_INFO("Linked shader from source with id {}", programID);
+		ENGINE_GLCheckError();
 		return true;
 	}
 
@@ -114,36 +118,43 @@ namespace Engine {
 	void Shader::Bind() const
 	{
 		glUseProgram(programID);
+		ENGINE_GLCheckError();
 	}
 
 	void Shader::SetBool(const std::string& name, bool value) const
 	{
 		glUniform1i(glGetUniformLocation(programID, name.c_str()), (int) value);
+		ENGINE_GLCheckError();
 	}
 
 	void Shader::SetInt(const std::string& name, int value) const
 	{
 		glUniform1i(glGetUniformLocation(programID, name.c_str()), value);
+		ENGINE_GLCheckError();
 	}
 
 	void Shader::SetFloat(const std::string& name, float value) const
 	{
 		glUniform1f(glGetUniformLocation(programID, name.c_str()), value);
+		ENGINE_GLCheckError();
 	}
 
 	void Shader::SetVec3(const std::string& name, glm::vec3 value) const
 	{
 		glUniform3fv(glGetUniformLocation(programID, name.c_str()), 1, (GLfloat*) glm::value_ptr(value));
+		ENGINE_GLCheckError();
 	}
 
 	void Shader::SetVec2(const std::string& name, glm::vec2 value) const
 	{
 		glUniform2fv(glGetUniformLocation(programID, name.c_str()), 1, (GLfloat*) glm::value_ptr(value));
+		ENGINE_GLCheckError();
 	}
 
 	void Shader::SetMat4(const std::string& name, glm::mat4* value) const
 	{
 		glUniformMatrix4fv(glGetUniformLocation(programID, name.c_str()), 1, GL_FALSE, glm::value_ptr(*value));
+		ENGINE_GLCheckError();
 	}
 
 	bool Shader::CompileShader(GLuint& shader, GLenum type, const std::string& source)

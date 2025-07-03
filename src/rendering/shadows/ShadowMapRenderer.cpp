@@ -193,12 +193,12 @@ namespace Engine {
 		GetWindow().SetFullViewport();
 	}
 
-	void ShadowMapRenderer::UploadShadowMatrices(Engine::Shader& shader, glm::mat4& V)
+	void ShadowMapRenderer::UploadShadowMatrices(Engine::Shader& shader, glm::mat4& V, int textureSlot)
 	{
 		shader.Bind();
 		ENGINE_GLCheckError();
 		shader.SetInt("cascadeCount", static_cast<int>(shadowCascadeLevels.size()));
-		shader.SetInt("shadowMap", 1);
+		shader.SetInt("shadowMap", textureSlot);
 
 		for (size_t i = 0; i < shadowCascadeLevels.size(); ++i) {
 			shader.SetFloat("cascadePlaneDistances[" + std::to_string(i) + "]", shadowCascadeLevels[i]);
@@ -216,7 +216,7 @@ namespace Engine {
 		glm::mat4 proj = GetCamera().GetProjectionMatrix();
 		shader.SetMat4("projection", &proj);
 		ENGINE_GLCheckError();
-		glActiveTexture(GL_TEXTURE1);
+		glActiveTexture(GL_TEXTURE0 + textureSlot);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, lightDepthMaps);
 	}
 } // namespace Engine

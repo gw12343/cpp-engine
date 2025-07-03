@@ -34,9 +34,7 @@ using namespace JPH::literals;
 namespace ozz::animation {
 	class Skeleton;
 	class Animation;
-
 	class LocalToModelJob;
-	class AnimationController;
 } // namespace ozz::animation
 
 namespace ozz::math {

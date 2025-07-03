@@ -15,7 +15,7 @@ namespace Engine {
 
 	void Renderer::onInit()
 	{
-		m_shadowRenderer = std::make_unique<ShadowMapRenderer>();
+		m_shadowRenderer = std::make_shared<ShadowMapRenderer>();
 
 		if (!m_shader.LoadFromFiles("resources/shaders/vert.glsl", "resources/shaders/frag.glsl", std::nullopt)) {
 			log->error("Failed to load default shader");
@@ -119,6 +119,10 @@ namespace Engine {
 	void Renderer::RenderShadowMaps()
 	{
 		m_shadowRenderer->RenderShadowMaps();
+	}
+	std::shared_ptr<ShadowMapRenderer> Renderer::GetShadowRenderer()
+	{
+		return m_shadowRenderer;
 	}
 
 
