@@ -8,7 +8,7 @@ namespace Engine {
 	void ModuleManager::InitAll()
 	{
 		for (auto& module : m_modules) {
-			module->log->info("Initializing...");
+			module->log->debug("Initializing...");
 			module->onInit();
 		}
 	}
@@ -16,7 +16,7 @@ namespace Engine {
 	void ModuleManager::InitAllLuaBindings()
 	{
 		for (auto& module : m_modules) {
-			module->log->info("Initializing Lua Bindings...");
+			module->log->debug("Initializing Lua Bindings...");
 			module->setLuaBindings();
 		}
 	}
@@ -31,7 +31,7 @@ namespace Engine {
 	void ModuleManager::ShutdownAll()
 	{
 		for (auto& module : m_modules) {
-			module->log->info("Shutting down...");
+			module->log->debug("Shutting down...");
 			module->onShutdown();
 		}
 	}

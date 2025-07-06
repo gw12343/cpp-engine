@@ -51,7 +51,7 @@ namespace Engine {
 		Factory::sInstance = new Factory();
 		RegisterTypes();
 
-		allocater = std::make_shared<TempAllocatorImpl>(10 * 1024 * 1024);
+		allocater = std::make_shared<TempAllocatorImpl>(10 * 1024 * 1024 * 20);
 		jobs      = std::make_shared<JobSystemThreadPool>(cMaxPhysicsJobs, cMaxPhysicsBarriers, thread::hardware_concurrency() - 1);
 		physics   = std::make_shared<PhysicsSystem>();
 

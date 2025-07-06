@@ -118,8 +118,15 @@ namespace Engine {
 					continue;
 				}
 
-				std::filesystem::path fullPath    = std::filesystem::path(directory) / str.C_Str();
-				std::string           fullPathStr = fullPath.string();
+				std::string rawStr = str.C_Str();
+
+				// Replace backslashes with slashes
+				std::replace(rawStr.begin(), rawStr.end(), '\\', '/');
+
+				std::filesystem::path oldPath(rawStr);
+				std::filesystem::path fullPath = std::filesystem::path("resources/textures") / oldPath.filename();
+
+				std::string fullPathStr = fullPath.string();
 
 				spdlog::info("Loading texture: {} (type: {})", fullPathStr, typeName);
 

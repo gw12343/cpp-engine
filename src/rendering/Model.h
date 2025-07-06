@@ -27,7 +27,5 @@ namespace Engine::Rendering {
 
 		std::vector<std::shared_ptr<Mesh>> m_meshes;
 		std::string                        m_directory;
-
-		[[maybe_unused]] void LoadModel(const std::string& path);
 	};
 } // namespace Engine::Rendering

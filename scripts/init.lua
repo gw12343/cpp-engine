@@ -58,7 +58,7 @@ function EditorUpdate(dt)
     end
 
 
-    if input:isKeyPressed(KEY_E) then
+    if input:isKeyPressedThisFrame(KEY_E) then
         local shape = SphereShape(0.5 / 4)
         ShootObject("resources/models/sphere.obj", shape, 12, 0.25)
     end

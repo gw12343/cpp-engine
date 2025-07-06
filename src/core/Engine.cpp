@@ -92,6 +92,7 @@ namespace Engine {
 	void GEngine::CreateInitialEntities()
 	{
 		AssetHandle<Rendering::Model> treeModel = GetAssetManager().Load<Rendering::Model>("resources/models/TwistedTree_1.obj");
+		AssetHandle<Rendering::Model> cubeModel = GetAssetManager().Load<Rendering::Model>("resources/models/Spruce2.fbx");
 
 
 		// cube          = Rendering::ModelLoader::LoadModel("resources/models/cube.obj");
@@ -139,6 +140,15 @@ namespace Engine {
 
 		terrainWrapper.AddComponent<Components::RigidBodyComponent>(terrain_body->GetID());
 		terrainWrapper.AddComponent<Components::TerrainRenderer>(terrain);
+
+
+		auto tr = GetAssetManager().Get(terrain);
+		for (auto tree : tr->trees) {
+			glm::vec3 pos     = {tree.x * tr->sizeX, tree.y * tr->sizeY, tree.z * tr->sizeZ};
+			Entity    entity2 = Entity::Create("tree");
+			entity2.AddComponent<Components::ModelRenderer>(cubeModel);
+			entity2.AddComponent<Components::Transform>(pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.01f, 0.01f, 0.01f));
+		}
 	}
 
 	void GEngine::Run()

@@ -57,34 +57,34 @@ namespace Engine::Terrain {
 
 		// Shadow utility functions
 		ss << R"(
-int GetCascadeLayer(vec3 fragPosWorldSpace) {
-	vec4 fragPosViewSpace = view * vec4(fragPosWorldSpace, 1.0);
-	float depthValue = abs(fragPosViewSpace.z);
-	for (int i = 0; i < cascadeCount; ++i)
-		if (depthValue < cascadePlaneDistances[i]) return i;
-	return cascadeCount;
-}
+		int GetCascadeLayer(vec3 fragPosWorldSpace) {
+			vec4 fragPosViewSpace = view * vec4(fragPosWorldSpace, 1.0);
+			float depthValue = abs(fragPosViewSpace.z);
+			for (int i = 0; i < cascadeCount; ++i)
+				if (depthValue < cascadePlaneDistances[i]) return i;
+			return cascadeCount;
+		}
 
-float ShadowCalculation(vec3 fragPosWorldSpace, int layer) {
-	vec4 fragPosLightSpace = lightSpaceMatrices[layer] * vec4(fragPosWorldSpace, 1.0);
-	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-	projCoords = projCoords * 0.5 + 0.5;
+		float ShadowCalculation(vec3 fragPosWorldSpace, int layer) {
+			vec4 fragPosLightSpace = lightSpaceMatrices[layer] * vec4(fragPosWorldSpace, 1.0);
+			vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+			projCoords = projCoords * 0.5 + 0.5;
 
-	float currentDepth = projCoords.z;
-	if (currentDepth > 1.0) return 0.0;
+			float currentDepth = projCoords.z;
+			if (currentDepth > 1.0) return 0.0;
 
-	vec3 normal = normalize(vNormal);
-	float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
-	bias *= 1.0 / ((layer == cascadeCount ? farPlane : cascadePlaneDistances[layer]) * 0.5);
+			vec3 normal = normalize(vNormal);
+			float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+			bias *= 1.0 / ((layer == cascadeCount ? farPlane : cascadePlaneDistances[layer]) * 0.5);
 
-	float shadow = 0.0;
-	vec2 texelSize = 1.0 / vec2(textureSize(shadowMap, 0));
-	for (int x = -1; x <= 1; ++x)
-		for (int y = -1; y <= 1; ++y)
-			shadow += (currentDepth - bias) > texture(shadowMap, vec3(projCoords.xy + vec2(x, y) * texelSize, layer)).r ? 1.0 : 0.0;
-	return shadow / 9.0;
-}
-)";
+			float shadow = 0.0;
+			vec2 texelSize = 1.0 / vec2(textureSize(shadowMap, 0));
+			for (int x = -1; x <= 1; ++x)
+				for (int y = -1; y <= 1; ++y)
+					shadow += (currentDepth - bias) > texture(shadowMap, vec3(projCoords.xy + vec2(x, y) * texelSize, layer)).r ? 1.0 : 0.0;
+			return shadow / 9.0;
+		}
+		)";
 
 		// Begin main()
 		ss << "void main() {\n";
@@ -110,7 +110,7 @@ float ShadowCalculation(vec3 fragPosWorldSpace, int layer) {
 		ss << "  vec3 L = normalize(lightDir);\n";
 		ss << "  float diff = max(dot(N, L), 0.0);\n";
 		ss << "  vec3 diffuse = vec3(1.0) * diff;\n";
-		ss << "  vec3 ambient = vec3(1.0) * baseColor.rgb;\n";
+		ss << "  vec3 ambient = vec3(0.2) * baseColor.rgb;\n";
 
 		ss << "  vec3 viewDir = normalize(viewPos - vWorldPos);\n";
 		ss << "  vec3 reflectDir = reflect(-L, N);\n";
@@ -163,7 +163,7 @@ float ShadowCalculation(vec3 fragPosWorldSpace, int layer) {
 		std::string fragmentCode = GenerateGLSLShader();
 
 
-		spdlog::info("VERTEX CODE: \n{}\n FRAGMENT CODE: \n{}", vertexCode, fragmentCode);
+		// spdlog::info("VERTEX CODE: \n{}\n FRAGMENT CODE: \n{}", vertexCode, fragmentCode);
 
 		terrainShader = std::make_shared<Engine::Shader>();
 		bool success  = terrainShader->LoadFromSource(vertexCode, fragmentCode);

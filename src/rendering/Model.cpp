@@ -10,7 +10,4 @@ namespace Engine::Rendering {
 			mesh->Draw(shader);
 		}
 	}
-	[[maybe_unused]] void Model::LoadModel(const std::string& path)
-	{
-	}
 } // namespace Engine::Rendering

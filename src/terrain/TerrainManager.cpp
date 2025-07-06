@@ -48,7 +48,7 @@ namespace Engine::Terrain {
 			glm::mat4 terrainTransform = transform.GetMatrix();
 
 			GLuint shadowSlot = tile->splatTextures.size() + tile->diffuseTextures.size();
-			GetRenderer().GetShadowRenderer()->UploadShadowMatrices(*tile->terrainShader, viewM, shadowSlot);
+			GetRenderer().GetShadowRenderer()->UploadShadowMatrices(*tile->terrainShader, viewM, static_cast<int>(shadowSlot));
 			tile->terrainShader->Bind();
 			tile->terrainShader->SetMat4("uModel", &terrainTransform);
 			tile->terrainShader->SetBool("debugShadows", false);

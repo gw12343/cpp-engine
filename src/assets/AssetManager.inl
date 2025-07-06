@@ -11,9 +11,6 @@ namespace Engine {
 		if (it != storage.pathToHandle.end()) {
 			return it->second;
 		}
-		else {
-			spdlog::info("not have cached");
-		}
 
 		assert(storage.loader && "No loader registered for this asset type.");
 		auto asset = storage.loader->LoadFromFile(path);
