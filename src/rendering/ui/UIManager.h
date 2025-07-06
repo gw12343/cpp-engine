@@ -48,7 +48,7 @@ namespace Engine {
 			Entity m_selectedEntity;
 
 			std::unordered_map<std::type_index, std::function<void()>> drawFuncs;
-			std::unordered_map<uint32_t, ModelPreview>                 m_modelPreviews;
+			std::unordered_map<std::string, ModelPreview>              m_modelPreviews;
 		};
 	} // namespace UI
 } // namespace Engine

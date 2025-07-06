@@ -135,6 +135,9 @@ namespace Engine {
 
 		auto  tile         = GetAssetManager().Get(terrain); // GetTerrainManager().GetTerrains()[0];
 		Body* terrain_body = body_interface.CreateBody(BodyCreationSettings(new MeshShapeSettings(tile->physicsMesh), RVec3(0.0_r, 0.0_r, 0.0_r), Quat::sIdentity(), EMotionType::Static, Layers::NON_MOVING));
+
+		JPH::HeightFieldShape shape;
+
 		spdlog::info("id {}", terrain_body->GetID().GetIndex());
 		body_interface.AddBody(terrain_body->GetID(), EActivation::DontActivate);
 

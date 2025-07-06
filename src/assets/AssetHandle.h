@@ -9,14 +9,15 @@
 namespace Engine {
 	template <typename T>
 	class AssetHandle {
-		uint32_t id = 0; // or hash, or UUID
-	  public:
-		constexpr AssetHandle() = default;
-		explicit AssetHandle(uint32_t id) : id(id) {}
-		[[nodiscard]] uint32_t GetID() const { return id; }
+		std::string guid;
 
-		[[nodiscard]] bool IsValid() const { return id != 0; }
-		bool               operator==(const AssetHandle<T>& other) const { return id == other.id; }
+	  public:
+		AssetHandle() = default;
+		explicit AssetHandle(const std::string& guid) : guid(guid) {}
+		const std::string& GetID() const { return guid; }
+		bool               IsValid() const { return !guid.empty(); }
+
+		bool operator==(const AssetHandle<T>& other) const { return guid == other.guid; }
 	};
 } // namespace Engine
 

@@ -100,7 +100,13 @@ FetchContent_Declare(
         GIT_TAG c1f95a773c6f8f4fde8ca3efe872e7286afe4444
 )
 
-FetchContent_MakeAvailable(spdlog jolt ozz imgui effekseer lua sol2)
+FetchContent_Declare(
+        nlohmann_json
+        GIT_REPOSITORY https://github.com/nlohmann/json.git
+        GIT_TAG v3.11.3 # or the latest stable version you prefer
+)
+
+FetchContent_MakeAvailable(spdlog jolt ozz imgui effekseer lua sol2 nlohmann_json)
 
 
 if (WIN32)
@@ -154,6 +160,7 @@ add_executable(${PROJECT_NAME} ${SOURCES}
         src/assets/impl/TerrainLoader.h
         src/terrain/TerrainTile.cpp
         src/terrain/TerrainTile.h
+        src/assets/AssetMeta.h
 )
 
 
@@ -260,6 +267,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         ozz_animation ozz_animation_offline ozz_geometry
         Effekseer
         EffekseerRendererGL
+        nlohmann_json::nlohmann_json
 )
 
 # ----------------- Debug Info -------------------

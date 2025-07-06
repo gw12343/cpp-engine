@@ -16,7 +16,7 @@ namespace Engine::Terrain {
 
 	void TerrainManager::onUpdate(float dt)
 	{
-		for (auto& terrPairs : GetAssetManager().GetStorage<TerrainTile>().assets) {
+		for (auto& terrPairs : GetAssetManager().GetStorage<TerrainTile>().guidToAsset) {
 			auto& tile = terrPairs.second;
 
 			// todo move!!

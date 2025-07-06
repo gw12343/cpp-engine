@@ -788,9 +788,9 @@ namespace Engine::UI {
 
 		ImGui::Columns(columnCount, nullptr, false);
 
-		for (auto& [id, texPtr] : storage.assets) {
+		for (auto& [id, texPtr] : storage.guidToAsset) {
 			if (!texPtr) continue;
-			ImGui::PushID(static_cast<int>(id));
+			ImGui::PushID(("tex" + id).c_str());
 
 			ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(texPtr->GetID())), ImVec2(m_iconSize, m_iconSize));
 			ImGui::TextWrapped("%s", texPtr->GetName().c_str());
@@ -813,9 +813,9 @@ namespace Engine::UI {
 
 		ImGui::Columns(columnCount, nullptr, false);
 
-		for (auto& [id, model] : storage.assets) {
+		for (auto& [id, model] : storage.guidToAsset) {
 			if (!model) continue;
-			ImGui::PushID(static_cast<int>(id));
+			ImGui::PushID(("model" + id).c_str());
 
 			auto& preview  = m_modelPreviews[id];
 			preview.width  = static_cast<int>(MODEL_PREVIEW_SIZE);
@@ -827,7 +827,7 @@ namespace Engine::UI {
 			             ImVec2(0, 1), // top-left
 			             ImVec2(1, 0)  // bottom-right
 			);
-			ImGui::TextWrapped("Model #%u", id);
+			ImGui::TextWrapped("Model #%s", id.c_str());
 
 			ImGui::NextColumn();
 			ImGui::PopID();
