@@ -32,7 +32,7 @@
 #include "assets/impl/TextureLoader.h"
 #include "assets/impl/TerrainLoader.h"
 #include "components/impl/RigidBodyComponent.h"
-#include "animation/TerrainRendererComponent.h"
+#include "components/impl/TerrainRendererComponent.h"
 
 namespace Engine {
 	ModuleManager manager;
@@ -92,8 +92,12 @@ namespace Engine {
 	void GEngine::CreateInitialEntities()
 	{
 		AssetHandle<Rendering::Model> treeModel = GetAssetManager().Load<Rendering::Model>("resources/models/TwistedTree_1.obj");
-		AssetHandle<Rendering::Model> cubeModel = GetAssetManager().Load<Rendering::Model>("resources/models/Spruce2.fbx");
 
+
+		GetAssetManager().Load<Rendering::Model>("resources/models/Spruce2.fbx");
+		AssetHandle<Rendering::Model> cubeModel = AssetHandle<Rendering::Model>("eb048fc8e5c5aa8d185a48312731d0f1");
+
+		// printf("IS SAME: %d\n", cubeModel == cubeModel2);
 
 		// cube          = Rendering::ModelLoader::LoadModel("resources/models/cube.obj");
 		//		Entity entity = Entity::Create("TestEntity");
@@ -132,16 +136,17 @@ namespace Engine {
 
 		auto&                             body_interface = GetPhysics().GetPhysicsSystem()->GetBodyInterface();
 		AssetHandle<Terrain::TerrainTile> terrain        = GetAssetManager().Load<Terrain::TerrainTile>("resources/terrain/TerrainA.bin");
+		auto                              tile           = GetAssetManager().Get(terrain);
 
-		auto  tile         = GetAssetManager().Get(terrain); // GetTerrainManager().GetTerrains()[0];
-		Body* terrain_body = body_interface.CreateBody(BodyCreationSettings(new MeshShapeSettings(tile->physicsMesh), RVec3(0.0_r, 0.0_r, 0.0_r), Quat::sIdentity(), EMotionType::Static, Layers::NON_MOVING));
+		if (!tile->heightfieldShape) {
+			spdlog::error("Terrain has no heightfield shape!");
+		}
+		else {
+			Body* terrain_body = body_interface.CreateBody(BodyCreationSettings(tile->heightfieldShape, JPH::RVec3(tile->posX, tile->posY, tile->posZ), JPH::Quat::sIdentity(), JPH::EMotionType::Static, Layers::NON_MOVING));
+			body_interface.AddBody(terrain_body->GetID(), JPH::EActivation::DontActivate);
 
-		JPH::HeightFieldShape shape;
-
-		spdlog::info("id {}", terrain_body->GetID().GetIndex());
-		body_interface.AddBody(terrain_body->GetID(), EActivation::DontActivate);
-
-		terrainWrapper.AddComponent<Components::RigidBodyComponent>(terrain_body->GetID());
+			terrainWrapper.AddComponent<Components::RigidBodyComponent>(terrain_body->GetID());
+		}
 		terrainWrapper.AddComponent<Components::TerrainRenderer>(terrain);
 
 
@@ -151,6 +156,9 @@ namespace Engine {
 			Entity    entity2 = Entity::Create("tree");
 			entity2.AddComponent<Components::ModelRenderer>(cubeModel);
 			entity2.AddComponent<Components::Transform>(pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.01f, 0.01f, 0.01f));
+			auto& rb = entity2.AddComponent<Components::RigidBodyComponent>();
+			rb.SetKinematic(true);
+			rb.SetCylinderShape(CylinderShapeSettings(2.5, 0.25));
 		}
 	}
 

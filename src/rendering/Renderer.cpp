@@ -28,6 +28,12 @@ namespace Engine {
 			return;
 		}
 
+		// Load model preview shader
+		if (!m_modelPreviewShader.LoadFromFiles("resources/shaders/preview_vert.glsl", "resources/shaders/preview_frag.glsl", std::nullopt)) {
+			log->error("Failed to load model preview shader");
+			return;
+		}
+
 
 		m_skybox            = std::make_unique<Skybox>();
 		const std::string p = "resources/textures/output.hdr";

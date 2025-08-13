@@ -24,12 +24,12 @@ namespace Engine {
 		void PreRender();
 		void PostRender();
 
-		void UploadShadowMatrices(Engine::Shader& shader, glm::mat4& V);
 		void RenderEntities();
 		void RenderShadowMaps();
 		void RenderSkybox();
 
 		Shader& GetShader() { return m_shader; }
+		Shader& GetModelPreviewShader() { return m_modelPreviewShader; }
 		Shader& GetTerrainShader() { return m_terrainShader; }
 
 		std::shared_ptr<ShadowMapRenderer> GetShadowRenderer();
@@ -38,6 +38,7 @@ namespace Engine {
 		std::shared_ptr<ShadowMapRenderer> m_shadowRenderer;
 
 		Engine::Shader          m_shader;
+		Engine::Shader          m_modelPreviewShader;
 		Engine::Shader          m_terrainShader;
 		Engine::Shader          m_skyboxShader;
 		std::unique_ptr<Skybox> m_skybox;

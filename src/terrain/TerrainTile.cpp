@@ -13,7 +13,8 @@
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb/stb_image_write.h"
-#include "animation/TerrainRendererComponent.h"
+#include "components/impl/TerrainRendererComponent.h"
+#include "Jolt/Physics/Collision/Shape/HeightFieldShape.h"
 #include <stdexcept>
 
 namespace Engine::Terrain {
@@ -177,6 +178,7 @@ namespace Engine::Terrain {
 		return {v.x, v.y, v.z};
 	}
 
+
 	void TerrainTile::GenerateMesh()
 	{
 		uint32_t res = heightRes;
@@ -187,21 +189,18 @@ namespace Engine::Terrain {
 		std::vector<float>     vertices;
 		std::vector<uint32_t>  indices;
 
-		physicsMesh = JPH::TriangleList();
-
 		auto getHeight = [&](int x, int z) -> float {
 			x = std::clamp(x, 0, int(res) - 1);
 			z = std::clamp(z, 0, int(res) - 1);
 			return heightmap[z * res + x];
 		};
 
-
 		// Step 1: Generate vertex positions and UVs
 		for (uint32_t z = 0; z < res; ++z) {
 			for (uint32_t x = 0; x < res; ++x) {
-				auto u = (float) ((float) x / float(res - 1));
-				auto v = (float) ((float) z / float(res - 1));
-				auto h = (float) (getHeight((int) x, (int) z));
+				auto u = float(x) / float(res - 1);
+				auto v = float(z) / float(res - 1);
+				auto h = getHeight((int) x, (int) z);
 
 				glm::vec3 pos(sizeX * u, h * sizeY, sizeZ * v);
 				positions[z * res + x] = pos;
@@ -209,7 +208,7 @@ namespace Engine::Terrain {
 			}
 		}
 
-		// Step 2: Generate indices, accumulate normals, and populate triangle list for physics
+		// Step 2: Generate indices and normals
 		for (uint32_t z = 0; z < res - 1; ++z) {
 			for (uint32_t x = 0; x < res - 1; ++x) {
 				uint32_t i0 = z * res + x;
@@ -217,7 +216,7 @@ namespace Engine::Terrain {
 				uint32_t i2 = i0 + res;
 				uint32_t i3 = i2 + 1;
 
-				// Triangle 1: i0, i2, i1
+				// Triangle 1
 				{
 					glm::vec3 edge1 = positions[i2] - positions[i0];
 					glm::vec3 edge2 = positions[i1] - positions[i0];
@@ -228,10 +227,8 @@ namespace Engine::Terrain {
 					indices.push_back(i0);
 					indices.push_back(i2);
 					indices.push_back(i1);
-					physicsMesh.emplace_back(toF3(positions[i0]), toF3(positions[i2]), toF3(positions[i1]));
 				}
-
-				// Triangle 2: i1, i2, i3
+				// Triangle 2
 				{
 					glm::vec3 edge1 = positions[i2] - positions[i1];
 					glm::vec3 edge2 = positions[i3] - positions[i1];
@@ -242,12 +239,11 @@ namespace Engine::Terrain {
 					indices.push_back(i1);
 					indices.push_back(i2);
 					indices.push_back(i3);
-					physicsMesh.emplace_back(toF3(positions[i1]), toF3(positions[i2]), toF3(positions[i3]));
 				}
 			}
 		}
 
-		// Step 3: Normalize normals and flatten vertex buffer
+		// Step 3: Normalize normals and create vertex buffer
 		for (uint32_t i = 0; i < positions.size(); ++i) {
 			glm::vec3 pos  = positions[i];
 			glm::vec2 uv   = uvs[i];
@@ -271,10 +267,10 @@ namespace Engine::Terrain {
 
 		glBindVertexArray(vao);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, (GLsizei) vertices.size() * (GLsizei) sizeof(float), vertices.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizei) indices.size() * (GLsizei) sizeof(uint32_t), indices.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint32_t), indices.data(), GL_STATIC_DRAW);
 
 		glEnableVertexAttribArray(0); // position
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) nullptr);
@@ -284,6 +280,30 @@ namespace Engine::Terrain {
 		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) (5 * sizeof(float)));
 
 		glBindVertexArray(0);
+
+		// -------- HEIGHTFIELD SHAPE CREATION (no body) --------
+
+		std::vector<uint8_t>       materialIndices(heightRes * heightRes, 0);
+		Array<PhysicsMaterialRefC> materials = {new JPH::PhysicsMaterial()};
+
+		const float cellSizeX = sizeX / float(res - 1);
+		const float cellSizeZ = sizeZ / float(res - 1);
+
+		JPH::Vec3 terrainOffset = JPH::Vec3(0, 0, 0);
+		JPH::Vec3 terrainScale  = JPH::Vec3(cellSizeX, sizeY, cellSizeZ);
+
+		JPH::HeightFieldShapeSettings settings(heightmap.data(), terrainOffset, terrainScale, res, materialIndices.data(), materials);
+		settings.mBlockSize     = 1 << 3;
+		settings.mBitsPerSample = 8;
+
+		auto shape_result = settings.Create();
+		if (shape_result.HasError()) {
+			spdlog::error("Failed to create HeightFieldShape: {}", shape_result.GetError().c_str());
+			return;
+		}
+
+		// Store for later body creation
+		heightfieldShape = shape_result.Get();
 	}
 
 	void TerrainTile::GenerateSplatTextures()

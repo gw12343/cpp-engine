@@ -33,20 +33,20 @@ namespace Engine::Terrain {
 		void GenerateSplatTextures();
 		void SetupShader();
 
-		std::string                     name;
-		uint32_t                        heightRes;
-		uint32_t                        splatRes;
-		uint32_t                        splatLayerCount;
-		float                           sizeX, sizeY, sizeZ;
-		std::vector<float>              heightmap;
-		std::vector<uint8_t>            splatmap;
-		std::vector<TreeInstance>       trees;
-		JPH::TriangleList               physicsMesh;
+		std::string               name;
+		uint32_t                  heightRes;
+		uint32_t                  splatRes;
+		uint32_t                  splatLayerCount;
+		float                     sizeX, sizeY, sizeZ;
+		std::vector<float>        heightmap;
+		std::vector<uint8_t>      splatmap;
+		std::vector<TreeInstance> trees;
+		JPH::Ref<JPH::Shape>      heightfieldShape;
+
 		std::shared_ptr<Engine::Shader> terrainShader;
 		float                           posX;
 		float                           posY;
 		float                           posZ;
-
 
 		// Runtime-generated OpenGL assets
 		GLuint                                    vao        = 0;

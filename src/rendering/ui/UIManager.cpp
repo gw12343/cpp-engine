@@ -23,7 +23,7 @@
 #include "components/impl/ParticleSystemComponent.h"
 #include "components/impl/ShadowCasterComponent.h"
 #include "imgui_internal.h"
-#include "animation/TerrainRendererComponent.h"
+#include "components/impl/TerrainRendererComponent.h"
 
 namespace Engine::UI {
 
@@ -820,7 +820,7 @@ namespace Engine::UI {
 			auto& preview  = m_modelPreviews[id];
 			preview.width  = static_cast<int>(MODEL_PREVIEW_SIZE);
 			preview.height = static_cast<int>(MODEL_PREVIEW_SIZE);
-			preview.Render(model.get(), GetRenderer().GetShader());
+			preview.Render(model.get(), GetRenderer().GetModelPreviewShader());
 
 			ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(preview.texture)),
 			             ImVec2(m_iconSize, m_iconSize),

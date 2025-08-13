@@ -154,8 +154,8 @@ file(GLOB_RECURSE SOURCES "lib/src/*.cpp" "lib/src/*.c" "src/*.cpp" "src/*.inl")
 add_executable(${PROJECT_NAME} ${SOURCES}
         src/rendering/ui/ModelPreview.h
         src/rendering/ui/ModelPreview.cpp
-        src/animation/TerrainRendererComponent.cpp
-        src/animation/TerrainRendererComponent.h
+        src/components/impl/TerrainRendererComponent.cpp
+        src/components/impl/TerrainRendererComponent.h
         src/assets/impl/TerrainLoader.cpp
         src/assets/impl/TerrainLoader.h
         src/terrain/TerrainTile.cpp

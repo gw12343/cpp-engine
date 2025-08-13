@@ -6,7 +6,7 @@
 #include "stb/stb_image_write.h"
 #include "components/impl/EntityMetadataComponent.h"
 #include "components/impl/TransformComponent.h"
-#include "animation/TerrainRendererComponent.h"
+#include "components/impl/TerrainRendererComponent.h"
 
 namespace Engine::Terrain {
 
