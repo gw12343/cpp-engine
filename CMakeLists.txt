@@ -59,6 +59,12 @@ if (USE_ASSIMP_FROM_SOURCE)
 endif ()
 
 FetchContent_Declare(
+        cereal
+        GIT_REPOSITORY https://github.com/USCiLab/cereal.git
+        GIT_TAG v1.3.2
+)
+
+FetchContent_Declare(
         spdlog
         GIT_REPOSITORY https://github.com/gabime/spdlog.git
         GIT_TAG v1.12.0
@@ -106,7 +112,7 @@ FetchContent_Declare(
         GIT_TAG v3.11.3 # or the latest stable version you prefer
 )
 
-FetchContent_MakeAvailable(spdlog jolt ozz imgui effekseer lua sol2 nlohmann_json)
+FetchContent_MakeAvailable(cereal spdlog jolt ozz imgui effekseer lua sol2 nlohmann_json)
 
 
 if (WIN32)
@@ -161,6 +167,11 @@ add_executable(${PROJECT_NAME} ${SOURCES}
         src/terrain/TerrainTile.cpp
         src/terrain/TerrainTile.h
         src/assets/AssetMeta.h
+        src/serialization/SerializationManager.h
+        src/serialization/SerializationManager.cpp
+        src/components/AllComponents.h
+        src/assets/impl/SoundLoader.h
+        src/assets/impl/SoundLoader.cpp
 )
 
 
@@ -262,6 +273,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         lua
         sol2::sol2
         imgui
+        cereal::cereal
         spdlog::spdlog
         Jolt
         ozz_animation ozz_animation_offline ozz_geometry

@@ -7,6 +7,10 @@
 
 #include "components/Components.h"
 
+#include <cereal/cereal.hpp>
+#include <cereal/types/vector.hpp>
+#include <cereal/types/array.hpp>
+
 namespace Engine::Components {
 	class SkinnedMeshComponent : public Component {
 	  public:
@@ -15,6 +19,14 @@ namespace Engine::Components {
 		std::string                       meshPath;
 
 		SkinnedMeshComponent() = default;
+
+		template <class Archive>
+		void serialize(Archive& ar)
+		{
+			ar(cereal::make_nvp("meshPath", meshPath));
+		}
+
+
 		explicit SkinnedMeshComponent(ozz::vector<Engine::Mesh>* meshes) : meshes(meshes) {}
 		explicit SkinnedMeshComponent(std::string meshPath) : meshPath(std::move(meshPath)) {}
 

@@ -28,17 +28,53 @@ namespace Engine::Components {
 		BodyInterface& body_interface = GetPhysics().GetPhysicsSystem()->GetBodyInterface();
 
 		if (!body_interface.IsAdded(bodyID)) {
-			RVec3 startPos(0, 0, 0);
-			Quat  startRot = Quat::sIdentity();
-			if (entity.HasComponent<Transform>()) {
-				Transform& tr  = entity.GetComponent<Transform>();
-				glm::vec3  pos = tr.position;
-				startPos       = Vec3(pos.x, pos.y, pos.z);
-				startRot       = ToJolt(tr.rotation);
+			JPH::Ref<JPH::Shape> shape;
+			if (shapeType == "Box") {
+				shape = new JPH::BoxShape(shapeSize);
+			}
+			else if (shapeType == "Sphere") {
+				shape = new JPH::SphereShape(shapeSize.GetX());
+			}
+			else if (shapeType == "Capsule") {
+				shape = new JPH::CapsuleShape(shapeSize.GetX(), shapeSize.GetY());
+			}
+			else if (shapeType == "Cylinder") {
+				shape = new JPH::CylinderShape(shapeSize.GetX(), shapeSize.GetY());
+			}
+			else if (shapeType == "Triangle") {
+				// shape = new JPH::CylinderShape(shapeSize.GetX(), shapeSize.GetY());
+				// TODO save triangle collider
+			}
+			else {
+				// default to box
+				shape = new JPH::BoxShape(shapeSize);
 			}
 
-			BodyCreationSettings sphere_settings(new SphereShape(0.5f), startPos, startRot, EMotionType::Dynamic, Layers::MOVING);
-			bodyID = body_interface.CreateAndAddBody(sphere_settings, EActivation::Activate);
+			RVec3 startPos(0, 0, 0);
+			Quat  startRot = Quat::sIdentity();
+			SPDLOG_INFO("init rb");
+			if (entity.HasComponent<Transform>()) {
+				SPDLOG_INFO("init rb1");
+				auto&     tr  = entity.GetComponent<Transform>();
+				glm::vec3 pos = tr.position;
+				startPos      = Vec3(pos.x, pos.y, pos.z);
+				startRot      = ToJolt(tr.rotation);
+			}
+
+			JPH::BodyCreationSettings settings(shape,
+			                                   startPos,
+			                                   startRot,
+			                                   (JPH::EMotionType) motionType,
+			                                   Layers::MOVING // replace with your layer definition
+			);
+
+			auto                physics       = GetPhysics().GetPhysicsSystem();
+			JPH::BodyInterface& bodyInterface = physics->GetBodyInterface();
+
+			settings.mMassPropertiesOverride.mMass = mass;
+			settings.mFriction                     = friction;
+			settings.mRestitution                  = restitution;
+			bodyID                                 = bodyInterface.CreateAndAddBody(settings, JPH::EActivation::Activate);
 		}
 
 		GetPhysics().bodyToEntityMap[bodyID] = entity;
@@ -152,7 +188,35 @@ namespace Engine::Components {
 	{
 		auto& bodyInterface = GetPhysics().GetPhysicsSystem()->GetBodyInterface();
 		bodyInterface.SetShape(bodyID, shape, true, JPH::EActivation::Activate);
+
+		if (shape.GetPtr()->GetSubType() == EShapeSubType::Box) {
+			shapeType             = "Box";
+			const auto* box_shape = static_cast<const BoxShape*>(shape.GetPtr());
+			shapeSize             = box_shape->GetHalfExtent();
+		}
+		else if (shape.GetPtr()->GetSubType() == EShapeSubType::Sphere) {
+			shapeType                = "Sphere";
+			const auto* sphere_shape = static_cast<const SphereShape*>(shape.GetPtr());
+			shapeSize                = Vec3(sphere_shape->GetRadius(), 0.0, 0.0);
+		}
+		else if (shape.GetPtr()->GetSubType() == EShapeSubType::Cylinder) {
+			shapeType                  = "Cylinder";
+			const auto* cylinder_shape = static_cast<const CylinderShape*>(shape.GetPtr());
+			shapeSize                  = Vec3(cylinder_shape->GetHalfHeight(), cylinder_shape->GetRadius(), 0.0);
+		}
+		else if (shape.GetPtr()->GetSubType() == EShapeSubType::Capsule) {
+			shapeType                 = "Capsule";
+			const auto* capsule_shape = static_cast<const CapsuleShape*>(shape.GetPtr());
+			shapeSize                 = Vec3(capsule_shape->GetHalfHeightOfCylinder(), capsule_shape->GetRadius(), 0.0);
+		}
+		else if (shape.GetPtr()->GetSubType() == EShapeSubType::Triangle) {
+			// TODO triangle
+		}
+		else {
+			shapeType = "Box";
+		}
 	}
+
 
 	void RigidBodyComponent::SetBoxShape(const JPH::BoxShapeSettings& settings)
 	{
@@ -161,6 +225,8 @@ namespace Engine::Components {
 			GetPhysics().log->error("BoxShape creation failed: " + result.GetError());
 		}
 		SetCollisionShapeRef(result.Get());
+		shapeType = "Box";
+		shapeSize = settings.mHalfExtent;
 	}
 
 	void RigidBodyComponent::SetSphereShape(const JPH::SphereShapeSettings& settings)
@@ -170,6 +236,8 @@ namespace Engine::Components {
 			GetPhysics().log->error("SphereShape creation failed: " + result.GetError());
 		}
 		SetCollisionShapeRef(result.Get());
+		shapeType = "Sphere";
+		shapeSize = Vec3(settings.mRadius, 0.0, 0.0);
 	}
 
 	void RigidBodyComponent::SetCapsuleShape(const JPH::CapsuleShapeSettings& settings)
@@ -179,6 +247,8 @@ namespace Engine::Components {
 			GetPhysics().log->error("CapsuleShape creation failed: " + result.GetError());
 		}
 		SetCollisionShapeRef(result.Get());
+		shapeType = "Capsule";
+		shapeSize = Vec3(settings.mHalfHeightOfCylinder, settings.mRadius, 0.0);
 	}
 
 	void RigidBodyComponent::SetCylinderShape(const JPH::CylinderShapeSettings& settings)
@@ -188,6 +258,8 @@ namespace Engine::Components {
 			GetPhysics().log->error("CylinderShape creation failed: " + result.GetError());
 		}
 		SetCollisionShapeRef(result.Get());
+		shapeType = "Cylinder";
+		shapeSize = Vec3(settings.mHalfHeight, settings.mRadius, 0.0);
 	}
 
 	void RigidBodyComponent::SetTriangleShape(const JPH::TriangleShapeSettings& settings)
@@ -197,6 +269,7 @@ namespace Engine::Components {
 			GetPhysics().log->error("TriangleShape creation failed: " + result.GetError());
 		}
 		SetCollisionShapeRef(result.Get());
+		shapeType = "Triangle";
 	}
 
 
@@ -263,6 +336,7 @@ namespace Engine::Components {
 	void RigidBodyComponent::SetGravityFactor(float factor)
 	{
 		GetPhysics().GetPhysicsSystem()->GetBodyInterface().SetGravityFactor(bodyID, factor);
+		gravityFactor = factor;
 	}
 
 	float RigidBodyComponent::GetGravityFactor() const
@@ -288,6 +362,7 @@ namespace Engine::Components {
 	void RigidBodyComponent::SetKinematic(bool enable)
 	{
 		GetPhysics().GetPhysicsSystem()->GetBodyInterface().SetMotionType(bodyID, enable ? JPH::EMotionType::Kinematic : JPH::EMotionType::Dynamic, JPH::EActivation::DontActivate);
+		motionType = enable ? (int) JPH::EMotionType::Kinematic : (int) JPH::EMotionType::Dynamic;
 	}
 
 	bool RigidBodyComponent::IsKinematic() const

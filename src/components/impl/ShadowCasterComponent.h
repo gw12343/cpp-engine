@@ -7,11 +7,21 @@
 
 #include "components/Components.h"
 
+#include <cereal/cereal.hpp>
+#include <cereal/types/vector.hpp>
+#include <cereal/types/array.hpp>
+
+
 namespace Engine::Components {
 	class ShadowCaster : public Component {
 	  public:
 		ShadowCaster() = default;
 
+		template <class Archive>
+		void serialize(Archive&)
+		{
+			// Intentionally empty — optional<> presence already indicates existence
+		}
 
 		void OnAdded(Entity& entity) override;
 		void RenderInspector(Entity& entity) override;

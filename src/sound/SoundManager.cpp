@@ -6,6 +6,8 @@
 #include "components/impl/AudioSourceComponent.h"
 #include "components/impl/TransformComponent.h"
 
+#include "assets/AssetManager.h"
+
 #include <cstring>
 #include <sndfile.h>
 #include <spdlog/spdlog.h>
@@ -122,18 +124,20 @@ namespace Engine::Audio {
 	}
 
 
-	void SoundSource::Play(const SoundBuffer& buffer) const
+	void SoundSource::Play(AssetHandle<Audio::SoundBuffer> buffer) const
 	{
 		// Clear any previous errors
 		alGetError();
 
-		if (!buffer.IsLoaded()) {
+		SoundBuffer* buff = GetAssetManager().Get(buffer);
+
+		if (!buff->IsLoaded()) {
 			GetSoundManager().log->error("Attempted to play unloaded buffer");
 			return;
 		}
 
 		// Get buffer ID
-		ALuint bufferID = buffer.GetBufferID();
+		ALuint bufferID = buff->GetBufferID();
 
 		// Verify buffer exists and has data
 		ALint size = 0;
@@ -228,17 +232,17 @@ namespace Engine::Audio {
 	}
 
 
-	void SoundManager::Play(const std::string& soundName, bool looping, float volume)
+	void SoundManager::Play(AssetHandle<Audio::SoundBuffer> soundBuffer, bool looping, float volume)
 	{
-		auto buffer = GetSound(soundName);
-		if (!buffer) {
-			log->error("Failed to play sound: sound not found");
-			return;
-		}
+		// auto buffer = GetSound(soundName);
+		//		if (!buffer) {
+		//			log->error("Failed to play sound: sound not found");
+		//			return;
+		//		}
 
 		auto source = std::make_shared<SoundSource>(looping);
 		source->SetGain(volume);
-		source->Play(*buffer);
+		source->Play(soundBuffer);
 		m_sources.push_back(source);
 	}
 
@@ -352,33 +356,33 @@ namespace Engine::Audio {
 		SPDLOG_INFO("OpenAL shutdown complete");
 	}
 
-	std::shared_ptr<SoundBuffer> SoundManager::LoadSound(const std::string& name, const std::string& filename)
-	{
-		// Check if sound is already loaded
-		auto it = m_soundBuffers.find(name);
-		if (it != m_soundBuffers.end()) {
-			return it->second;
-		}
+	// std::unique_ptr<SoundBuffer> SoundManager::LoadSound(const std::string& name, const std::string& filename)
+	//{
+	//		// Check if sound is already loaded
+	//		auto it = m_soundBuffers.find(name);
+	//		if (it != m_soundBuffers.end()) {
+	//			return it->second;
+	//		}
 
-		// Load new sound
-		auto buffer = std::make_shared<SoundBuffer>(filename);
-		if (!buffer->IsLoaded()) {
-			return nullptr;
-		}
+	// Load new sound
+	//		auto buffer = std::make_shared<SoundBuffer>(filename);
+	//		if (!buffer->IsLoaded()) {
+	//			return nullptr;
+	//		}
 
-		// Store and return
-		m_soundBuffers[name] = buffer;
-		return buffer;
-	}
+	// Store and return
+	//		m_soundBuffers[name] = buffer;
+	//		return buffer;
+	//}
 
-	std::shared_ptr<SoundBuffer> SoundManager::GetSound(const std::string& name)
-	{
-		auto it = m_soundBuffers.find(name);
-		if (it != m_soundBuffers.end()) {
-			return it->second;
-		}
-		return nullptr;
-	}
+	//	std::shared_ptr<SoundBuffer> SoundManager::GetSound(const std::string& name)
+	//	{
+	//		auto it = m_soundBuffers.find(name);
+	//		if (it != m_soundBuffers.end()) {
+	//			return it->second;
+	//		}
+	//		return nullptr;
+	//	}
 
 	void SoundManager::SetListenerPosition(float x, float y, float z)
 	{
@@ -405,11 +409,11 @@ namespace Engine::Audio {
 		alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
 
 		// Load sounds
-		auto backgroundMusic = LoadSound("background_music", "resources/sounds/quietmoments.wav");
+		// auto backgroundMusic = LoadSound("background_music", "resources/sounds/quietmoments.wav");
 
-		LoadSound("birds", "resources/sounds/bird_chirp.wav");
+		// LoadSound("birds", "resources/sounds/bird_chirp.wav");
 
-		Play("background_music", true, 1.0f);
+		// Play("background_music", true, 1.0f);
 	}
 
 	void SoundManager::CheckOpenALError(const char* operation)
@@ -422,3 +426,4 @@ namespace Engine::Audio {
 
 
 } // namespace Engine::Audio
+#include "assets/AssetManager.inl"

@@ -19,20 +19,23 @@
 #include "rendering/particles/ParticleManager.h"
 #include "rendering/ui/UIManager.h"
 #include "terrain/TerrainManager.h"
-#include "components/impl/AnimationComponent.h"
-#include "components/impl/LuaScriptComponent.h"
-#include "components/impl/ModelRendererComponent.h"
-#include "components/impl/AudioSourceComponent.h"
-#include "components/impl/ShadowCasterComponent.h"
-#include "components/impl/SkeletonComponent.h"
-#include "components/impl/AnimationPoseComponent.h"
 #include "components/impl/AnimationWorkerComponent.h"
 #include "components/impl/SkinnedMeshComponent.h"
 #include "assets/AssetManager.h"
 #include "assets/impl/TextureLoader.h"
 #include "assets/impl/TerrainLoader.h"
+#include "assets/impl/SoundLoader.h"
+#include "components/impl/ModelRendererComponent.h"
+#include "components/impl/AudioSourceComponent.h"
+#include "components/impl/ShadowCasterComponent.h"
+#include "components/impl/LuaScriptComponent.h"
+#include "components/impl/SkeletonComponent.h"
+#include "components/impl/AnimationComponent.h"
+#include "components/impl/AnimationPoseComponent.h"
 #include "components/impl/RigidBodyComponent.h"
 #include "components/impl/TerrainRendererComponent.h"
+
+#include "terrain/TerrainManager.h"
 
 namespace Engine {
 	ModuleManager manager;
@@ -45,6 +48,7 @@ namespace Engine {
 		GetAssetManager().RegisterLoader<Texture>(std::make_unique<TextureLoader>());
 		GetAssetManager().RegisterLoader<Rendering::Model>(std::make_unique<Rendering::ModelLoader>());
 		GetAssetManager().RegisterLoader<Terrain::TerrainTile>(std::make_unique<TerrainLoader>());
+		GetAssetManager().RegisterLoader<Audio::SoundBuffer>(std::make_unique<SoundLoader>());
 
 		// Initialize Scene
 		Get().registry = std::make_shared<entt::registry>();
@@ -89,81 +93,87 @@ namespace Engine {
 		return true;
 	}
 
+
 	void GEngine::CreateInitialEntities()
 	{
 		AssetHandle<Rendering::Model> treeModel = GetAssetManager().Load<Rendering::Model>("resources/models/TwistedTree_1.obj");
 
 
 		GetAssetManager().Load<Rendering::Model>("resources/models/Spruce2.fbx");
-		AssetHandle<Rendering::Model> cubeModel = AssetHandle<Rendering::Model>("eb048fc8e5c5aa8d185a48312731d0f1");
+		GetAssetManager().Load<Rendering::Model>("resources/models/cube.obj");
+		GetAssetManager().Load<Rendering::Model>("resources/models/sphere.obj");
+		AssetHandle<Rendering::Model>   cubeModel = AssetHandle<Rendering::Model>("eb048fc8e5c5aa8d185a48312731d0f1");
+		AssetHandle<Audio::SoundBuffer> snd       = GetAssetManager().Load<Audio::SoundBuffer>("resources/sounds/bird_chirp.wav");
 
-		// printf("IS SAME: %d\n", cubeModel == cubeModel2);
 
-		// cube          = Rendering::ModelLoader::LoadModel("resources/models/cube.obj");
 		//		Entity entity = Entity::Create("TestEntity");
 		//		entity.AddComponent<Components::ModelRenderer>(treeModel);
 		//		entity.AddComponent<Components::Transform>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 		//		entity.AddComponent<Components::ParticleSystem>("resources/particles/testleaf.efk");
 
 
-		Entity entity2 = Entity::Create("TestEntity2");
-		entity2.AddComponent<Components::ModelRenderer>(treeModel);
-		entity2.AddComponent<Components::Transform>(glm::vec3(2.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		entity2.AddComponent<Components::AudioSource>("birds", true, 0.1f, 1.0f, true, 5.0f, 50.0f, 1.0f);
-		entity2.AddComponent<Components::ShadowCaster>();
-		entity2.AddComponent<Components::LuaScript>("scripts/test.lua");
+		//		Entity entity2 = Entity::Create("TestEntity2");
+		//		entity2.AddComponent<Components::ModelRenderer>(treeModel);
+		//		entity2.AddComponent<Components::Transform>(glm::vec3(2.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		//
+		//
+		//		entity2.AddComponent<Components::AudioSource>(snd, true, 0.1f, 1.0f, true, 5.0f, 50.0f, 1.0f);
+		//		entity2.AddComponent<Components::ShadowCaster>();
+		//		entity2.AddComponent<Components::LuaScript>("scripts/test.lua");
+		//
+		//
+		//		Entity animatedEntity = Entity::Create("AnimatedEntity");
+		//		animatedEntity.AddComponent<Components::Transform>(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		//		animatedEntity.AddComponent<Components::SkeletonComponent>("resources/models/ruby_skeleton.ozz");
+		//		animatedEntity.AddComponent<Components::AnimationComponent>("resources/models/ruby_animation.ozz");
+		//		animatedEntity.AddComponent<Components::AnimationPoseComponent>();
+		//		animatedEntity.AddComponent<Components::AnimationWorkerComponent>();
+		//		animatedEntity.AddComponent<Components::SkinnedMeshComponent>("resources/models/ruby_mesh.ozz");
 
 
-		Entity animatedEntity = Entity::Create("AnimatedEntity");
-		animatedEntity.AddComponent<Components::Transform>(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		animatedEntity.AddComponent<Components::SkeletonComponent>("resources/models/ruby_skeleton.ozz");
-		animatedEntity.AddComponent<Components::AnimationComponent>("resources/models/ruby_animation.ozz");
-		animatedEntity.AddComponent<Components::AnimationPoseComponent>();
-		animatedEntity.AddComponent<Components::AnimationWorkerComponent>();
-		animatedEntity.AddComponent<Components::SkinnedMeshComponent>("resources/models/ruby_mesh.ozz");
-
-
-		//		Terrain::TerrainTile tile = Terrain::LoadTerrainTile("resources/terrain/terrain.bin");
-		//		std::cout << "Loaded tile: " << tile.name << "\n";
-		//		std::cout << "Heights: " << tile.heightmap.size() << "\n";
-		//		std::cout << "Trees: " << tile.trees.size() << "\n";
+		// Terrain::TerrainTile tile = Terrain::LoadTerrainTile("resources/terrain/terrain.bin");
+		// std::cout << "Loaded tile: " << tile.name << "\n";
+		// std::cout << "Heights: " << tile.heightmap.size() << "\n";
+		// std::cout << "Trees: " << tile.trees.size() << "\n";
 		//
 
 
-		Entity terrainWrapper = Entity::Create("TerrainWrapper");
-		terrainWrapper.AddComponent<Components::Transform>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		//		Entity terrainWrapper = Entity::Create("TerrainWrapper");
+		//		terrainWrapper.AddComponent<Components::Transform>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		//
+		//
+		//		auto&                             body_interface = GetPhysics().GetPhysicsSystem()->GetBodyInterface();
+		//		AssetHandle<Terrain::TerrainTile> terrain        = GetAssetManager().Load<Terrain::TerrainTile>("resources/terrain/TerrainA.bin");
+		//		auto                              tile           = GetAssetManager().Get(terrain);
+		//
+		//		if (!tile->heightfieldShape) {
+		//			spdlog::error("Terrain has no heightfield shape!");
+		//		}
+		//		else {
+		//			Body* terrain_body = body_interface.CreateBody(BodyCreationSettings(tile->heightfieldShape, JPH::RVec3(tile->posX, tile->posY, tile->posZ), JPH::Quat::sIdentity(), JPH::EMotionType::Static, Layers::NON_MOVING));
+		//			body_interface.AddBody(terrain_body->GetID(), JPH::EActivation::DontActivate);
+		//
+		//			terrainWrapper.AddComponent<Components::RigidBodyComponent>(terrain_body->GetID());
+		//		}
+		//		terrainWrapper.AddComponent<Components::TerrainRenderer>(terrain);
 
 
-		auto&                             body_interface = GetPhysics().GetPhysicsSystem()->GetBodyInterface();
-		AssetHandle<Terrain::TerrainTile> terrain        = GetAssetManager().Load<Terrain::TerrainTile>("resources/terrain/TerrainA.bin");
-		auto                              tile           = GetAssetManager().Get(terrain);
-
-		if (!tile->heightfieldShape) {
-			spdlog::error("Terrain has no heightfield shape!");
-		}
-		else {
-			Body* terrain_body = body_interface.CreateBody(BodyCreationSettings(tile->heightfieldShape, JPH::RVec3(tile->posX, tile->posY, tile->posZ), JPH::Quat::sIdentity(), JPH::EMotionType::Static, Layers::NON_MOVING));
-			body_interface.AddBody(terrain_body->GetID(), JPH::EActivation::DontActivate);
-
-			terrainWrapper.AddComponent<Components::RigidBodyComponent>(terrain_body->GetID());
-		}
-		terrainWrapper.AddComponent<Components::TerrainRenderer>(terrain);
-
-
-		auto tr = GetAssetManager().Get(terrain);
-		for (auto tree : tr->trees) {
-			glm::vec3 pos     = {tree.x * tr->sizeX, tree.y * tr->sizeY, tree.z * tr->sizeZ};
-			Entity    entity2 = Entity::Create("tree");
-			entity2.AddComponent<Components::ModelRenderer>(cubeModel);
-			entity2.AddComponent<Components::Transform>(pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.01f, 0.01f, 0.01f));
-			auto& rb = entity2.AddComponent<Components::RigidBodyComponent>();
-			rb.SetKinematic(true);
-			rb.SetCylinderShape(CylinderShapeSettings(2.5, 0.25));
-		}
+		//		auto tr = GetAssetManager().Get(terrain);
+		//		for (auto tree : tr->trees) {
+		//			glm::vec3 pos     = {tree.x * tr->sizeX, tree.y * tr->sizeY, tree.z * tr->sizeZ};
+		//			Entity    entity2 = Entity::Create("tree");
+		//			entity2.AddComponent<Components::ModelRenderer>(cubeModel);
+		//			entity2.AddComponent<Components::Transform>(pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.01f, 0.01f, 0.01f));
+		//			auto& rb = entity2.AddComponent<Components::RigidBodyComponent>();
+		//			rb.SetKinematic(true);
+		//			rb.SetCylinderShape(CylinderShapeSettings(2.5, 0.25));
+		//		}
 	}
+
 
 	void GEngine::Run()
 	{
+		std::vector<Entity> ets = GetSerializationManager().LoadScene(GetRegistry(), "debug/savescene.json");
 		while (!GetWindow().ShouldClose()) {
 			auto currentFrame = static_cast<float>(glfwGetTime());
 			m_deltaTime       = currentFrame - m_lastFrame;
@@ -171,6 +181,7 @@ namespace Engine {
 
 			manager.UpdateAll(m_deltaTime);
 		}
+		GetSerializationManager().SaveScene(GetRegistry(), "debug/savescene.json");
 	}
 
 
@@ -185,3 +196,4 @@ namespace Engine {
 		SPDLOG_INFO("Engine shutdown complete");
 	}
 } // namespace Engine
+#include "assets/AssetManager.inl"

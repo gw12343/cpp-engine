@@ -7,14 +7,35 @@
 
 #include "physics/PhysicsManager.h"
 
+#include <cereal/cereal.hpp>
+#include <cereal/types/vector.hpp>
+#include <cereal/types/array.hpp>
+
+
 namespace Engine::Components {
 	class RigidBodyComponent : public Component {
 	  public:
 		JPH::BodyID bodyID;
 
-		RigidBodyComponent() = default;
+		// Stored physics configuration
+		int         motionType    = (int) JPH::EMotionType::Dynamic;
+		float       mass          = 1.0f;
+		float       friction      = 0.5f;
+		float       restitution   = 0.0f;
+		float       gravityFactor = 1.0f;
+		std::string shapeType     = "Box";                       // For now store by name (Sphere, Box, Capsule, etc.)
+		JPH::Vec3   shapeSize     = JPH::Vec3::sReplicate(1.0f); // size/half-extents
+
+		RigidBodyComponent() : bodyID(0) {}
 		~RigidBodyComponent() override;
+
 		explicit RigidBodyComponent(const JPH::BodyID& bodyID) : bodyID(bodyID) {}
+
+		template <class Archive>
+		void serialize(Archive& ar)
+		{
+			ar(CEREAL_NVP(motionType), CEREAL_NVP(mass), CEREAL_NVP(friction), CEREAL_NVP(restitution), CEREAL_NVP(gravityFactor), CEREAL_NVP(shapeType), CEREAL_NVP(shapeSize));
+		}
 
 		void OnAdded(Entity& entity) override;
 		void RenderInspector(Entity& entity) override;
@@ -23,6 +44,7 @@ namespace Engine::Components {
 
 		void SetCollisionShape(const JPH::ShapeSettings& settings);
 		void SetCollisionShapeRef(const JPH::ShapeRefC& shape);
+
 
 		// Useful manipulation methods
 		glm::vec3 GetPosition() const;

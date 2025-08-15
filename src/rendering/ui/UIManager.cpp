@@ -497,12 +497,12 @@ namespace Engine::UI {
 					audioSource.RenderInspector(m_selectedEntity);
 
 					// Handle the Play button functionality here since we have access to the sound manager
-					if (!audioSource.isPlaying && ImGui::Button("Play")) {
-						if (audioSource.source && !audioSource.soundName.empty()) {
-							audioSource.Play(GetSoundManager());
-							spdlog::error("Playing sound");
-						}
-					}
+					//					if (!audioSource.isPlaying && ImGui::Button("Play")) {
+					//						if (audioSource.source && !audioSource.soundName.empty()) {
+					//							audioSource.Play(GetSoundManager());
+					//							spdlog::error("Playing sound");
+					//						}
+					//					}
 				}
 			}
 

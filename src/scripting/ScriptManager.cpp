@@ -19,6 +19,7 @@
 #include "components/impl/AnimationWorkerComponent.h"
 #include "components/impl/SkinnedMeshComponent.h"
 #include "components/impl/ParticleSystemComponent.h"
+#include "components/AllComponents.h"
 
 
 #define COMPONENT_METHODS(COMPONENT_TYPE, COMPONENT_NAME)                                                                                                                                                                                      \
@@ -37,25 +38,16 @@ namespace Engine {
 		try {
 			lua.script_file("scripts/init.lua");
 
+#define X(type, name) COMPONENT_METHODS(type, name),
 			// Bind Entity
 			lua.new_usertype<Engine::Entity>("Entity",
 			                                 "getName",
 			                                 &Engine::Entity::GetName,
 			                                 "setName",
 			                                 &Engine::Entity::SetName,
-			                                 COMPONENT_METHODS(Components::LuaScript, LuaScript),
-			                                 COMPONENT_METHODS(Components::ShadowCaster, ShadowCaster),
-			                                 COMPONENT_METHODS(Components::EntityMetadata, EntityMetadata),
-			                                 COMPONENT_METHODS(Components::Transform, Transform),
-			                                 COMPONENT_METHODS(Components::ModelRenderer, ModelRenderer),
-			                                 COMPONENT_METHODS(Components::RigidBodyComponent, RigidBodyComponent),
-			                                 COMPONENT_METHODS(Components::AudioSource, AudioSource),
-			                                 COMPONENT_METHODS(Components::SkeletonComponent, SkeletonComponent),
-			                                 COMPONENT_METHODS(Components::AnimationComponent, AnimationComponent),
-			                                 COMPONENT_METHODS(Components::AnimationPoseComponent, AnimationPoseComponent),
-			                                 COMPONENT_METHODS(Components::AnimationWorkerComponent, AnimationWorkerComponent),
-			                                 COMPONENT_METHODS(Components::SkinnedMeshComponent, SkinnedMeshComponent),
-			                                 COMPONENT_METHODS(Components::ParticleSystem, ParticleSystem));
+			                                 
+			                                 COMPONENT_LIST COMPONENT_METHODS(Components::EntityMetadata, EntityMetadata));
+#undef X
 
 
 			// create_entity(name)

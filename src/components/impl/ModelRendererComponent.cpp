@@ -21,6 +21,22 @@ namespace Engine::Components {
 		lua.new_usertype<ModelRenderer>("ModelRenderer", "setModel", &ModelRenderer::SetModel);
 	}
 
+	void ModelRenderer::Draw(const Shader& shader, const Components::Transform& transform) const
+	{
+		if (visible && model.IsValid()) {
+			const auto* actualModel = GetAssetManager().Get(model);
+			if (!actualModel) return;
+
+			// Set model matrix in shader
+			shader.Bind();
+			glm::mat4 modelMatrix = transform.GetMatrix();
+			shader.SetMat4("model", &modelMatrix);
+
+			// Draw the model
+			actualModel->Draw(shader);
+		}
+	}
+
 	void ModelRenderer::SetModel(const std::string& path)
 	{
 		model = GetAssetManager().Load<Rendering::Model>(path);
@@ -43,4 +59,6 @@ namespace Engine::Components {
 			ImGui::Text("Model: None");
 		}
 	}
+
 } // namespace Engine::Components
+#include "assets/AssetManager.inl"

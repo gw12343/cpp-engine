@@ -2,7 +2,7 @@
 function EditorInit()
     print("[Lua] editor init called!")
 
-    local floor = createEntity("Floor")
+    --[[local floor = createEntity("Floor")
     local tr = floor:AddTransform()
     local mr = floor:AddModelRenderer();
     local rb = floor:AddRigidBodyComponent();
@@ -10,11 +10,12 @@ function EditorInit()
 
     mr:setModel("resources/models/cube.obj")
     rb:setKinematic(true)
-    rb:setBoxShape(BoxShape(vec3(30.0, 1.0, 30.0)))
+    rb:setBoxShape(BoxShape(vec3(30.0, 1.0, 30.0)))--]]
 end
 
 
 function ShootObject(model, shape, speed, scale)
+
     local cam = getCamera()
     local cpos = cam:getPosition()
     local foward = cam:getFront()

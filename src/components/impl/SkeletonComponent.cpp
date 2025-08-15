@@ -18,6 +18,7 @@ namespace Engine::Components {
 
 	void SkeletonComponent::OnAdded(Entity& entity)
 	{
+		SPDLOG_INFO("added!!");
 		if (!skeletonPath.empty()) {
 			skeleton = GetAnimationManager().LoadSkeletonFromPath(skeletonPath);
 			if (!skeleton) {

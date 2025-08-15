@@ -2,6 +2,7 @@
 
 #include "Camera.h"
 #include "core/module/Module.h"
+#include "assets/AssetHandle.h"
 
 #include <AL/al.h>
 #include <AL/alc.h>
@@ -31,7 +32,7 @@ namespace Engine::Audio {
 		explicit SoundSource(bool looping = false);
 		~SoundSource();
 
-		void                  Play(const SoundBuffer& buffer) const;
+		void                  Play(AssetHandle<Audio::SoundBuffer> buffer) const;
 		void                  Stop() const;
 		void                  Pause() const;
 		[[maybe_unused]] void Resume() const;
@@ -55,13 +56,14 @@ namespace Engine::Audio {
 		void        onShutdown() override;
 		std::string name() const override { return "SoundManager"; };
 
-		std::shared_ptr<SoundBuffer> LoadSound(const std::string& name, const std::string& filename);
-		std::shared_ptr<SoundBuffer> GetSound(const std::string& name);
+		// std::unique_ptr<SoundBuffer> LoadSound(const std::string& name, const std::string& filename);
+
+		// std::shared_ptr<SoundBuffer> GetSound(const std::string& name);
 
 		static void                  SetListenerPosition(float x, float y, float z);
 		[[maybe_unused]] static void SetListenerVelocity(float x, float y, float z);
 		static void                  SetListenerOrientation(float atX, float atY, float atZ, float upX, float upY, float upZ);
-		void                         Play(const std::string& soundName, bool looping = false, float volume = 1.0f);
+		void                         Play(AssetHandle<Audio::SoundBuffer> buffer, bool looping = false, float volume = 1.0f);
 
 		static void CheckOpenALError(const char* operation);
 

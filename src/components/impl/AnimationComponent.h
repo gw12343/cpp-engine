@@ -34,12 +34,21 @@
 
 #include "components/Components.h"
 
+#include <cereal/cereal.hpp>
+#include <cereal/types/vector.hpp>
+#include <cereal/types/array.hpp>
 
 namespace Engine::Components {
 	class AnimationComponent : public Component {
 	  public:
 		ozz::animation::Animation* animation = nullptr;
 		std::string                animationPath;
+
+		template <class Archive>
+		void serialize(Archive& ar)
+		{
+			ar(cereal::make_nvp("animationPath", animationPath));
+		}
 
 		AnimationComponent() = default;
 		explicit AnimationComponent(ozz::animation::Animation* animation) : animation(animation) {}

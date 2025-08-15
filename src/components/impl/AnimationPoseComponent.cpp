@@ -22,7 +22,7 @@ namespace Engine::Components {
 	{
 		ENGINE_VERIFY(entity.HasComponent<SkeletonComponent>(), "AnimationPoseComponent::OnAdded: Missing SkeletonComponent");
 		auto& skeletonComponent = entity.GetComponent<SkeletonComponent>();
-		ENGINE_VERIFY(skeletonComponent.skeleton, "AnimationPoseComponent::OnAdded: SkeletonComponent has null skeleton");
+		ENGINE_VERIFY(skeletonComponent.skeleton != nullptr, "AnimationPoseComponent::OnAdded: SkeletonComponent has null skeleton");
 
 
 		// Allocate pose data

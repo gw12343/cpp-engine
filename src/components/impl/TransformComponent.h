@@ -11,6 +11,10 @@
 #include "glm/gtc/quaternion.hpp"
 #include "glm/gtx/quaternion.hpp"
 
+#include <cereal/cereal.hpp>
+#include <cereal/types/vector.hpp>
+#include <cereal/types/array.hpp>
+
 namespace Engine {
 	class Mesh;
 	class Entity;
@@ -23,6 +27,20 @@ namespace Engine {
 			glm::vec3 scale    = glm::vec3(1.0f);
 
 			Transform() = default;
+
+			template <class Archive>
+			void serialize(Archive& ar)
+			{
+				ar(cereal::make_nvp("position", position), cereal::make_nvp("rotation", rotation), cereal::make_nvp("scale", scale));
+			}
+
+
+			//			Transform(const Transform& copy)
+			//			{
+			//				position = copy.position;
+			//				rotation = copy.rotation;
+			//				scale    = copy.scale;
+			//			}
 
 			explicit Transform(const glm::vec3& position) : position(position) {}
 

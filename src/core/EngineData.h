@@ -6,6 +6,7 @@
 #include <memory>
 #include "entt/entt.hpp"
 #include "Input.h"
+#include "serialization/SerializationManager.h"
 
 namespace Engine {
 	class Window;
@@ -29,6 +30,7 @@ namespace Engine {
 	class EngineData {
 	  public:
 		std::shared_ptr<AssetManager>            assetManager;
+		std::shared_ptr<SerializationManager>    serialization;
 		std::shared_ptr<Window>                  window;
 		std::shared_ptr<Renderer>                renderer;
 		std::shared_ptr<Audio::SoundManager>     sound;
@@ -49,6 +51,11 @@ namespace Engine {
 	inline auto& GetAssetManager()
 	{
 		return *Get().assetManager;
+	}
+
+	inline auto& GetSerializationManager()
+	{
+		return *Get().serialization;
 	}
 
 	inline auto& GetWindow()

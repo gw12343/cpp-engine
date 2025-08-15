@@ -7,6 +7,11 @@
 
 #include "components/Components.h"
 
+#include <cereal/cereal.hpp>
+#include <cereal/types/vector.hpp>
+#include <cereal/types/array.hpp>
+
+
 namespace Engine::Components {
 	class SkeletonComponent : public Component {
 	  public:
@@ -14,6 +19,14 @@ namespace Engine::Components {
 		std::string               skeletonPath;
 
 		SkeletonComponent() = default;
+
+		template <class Archive>
+		void serialize(Archive& ar)
+		{
+			ar(cereal::make_nvp("skeletonPath", skeletonPath));
+		}
+
+
 		explicit SkeletonComponent(ozz::animation::Skeleton* skeleton) : skeleton(skeleton) {}
 		explicit SkeletonComponent(std::string skeletonPath) : skeletonPath(std::move(skeletonPath)) {}
 

@@ -19,7 +19,7 @@ namespace Engine::Components {
 	void AudioSource::OnAdded(Entity& entity)
 	{
 		// If autoPlay is enabled, try to play the sound
-		if (autoPlay && !soundName.empty()) {
+		if (autoPlay && buffer.IsValid()) {
 			// Get the sound manager from the engine
 			auto& soundManager = GetSoundManager();
 			Play(soundManager);
@@ -29,9 +29,10 @@ namespace Engine::Components {
 	void AudioSource::RenderInspector(Entity& entity)
 	{
 		char soundNameBuffer[256];
-		strcpy(soundNameBuffer, soundName.c_str());
+		strcpy(soundNameBuffer, buffer.GetID().c_str());
 		if (ImGui::InputText("Sound", soundNameBuffer, sizeof(soundNameBuffer))) {
-			soundName = soundNameBuffer;
+			// soundName = soundNameBuffer;
+			// TODO asset picker?
 		}
 
 		ImGui::Checkbox("Auto Play", &autoPlay);
@@ -56,3 +57,5 @@ namespace Engine::Components {
 
 
 } // namespace Engine::Components
+
+// #include "assets/AssetManager.inl"

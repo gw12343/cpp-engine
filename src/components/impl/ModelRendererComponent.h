@@ -11,6 +11,10 @@
 #include "assets/AssetManager.h"
 #include "core/EngineData.h"
 
+#include <cereal/cereal.hpp>
+#include <cereal/types/vector.hpp>
+#include <cereal/types/array.hpp>
+
 namespace Engine::Components {
 	// Renderer component for 3D models
 	class ModelRenderer : public Component {
@@ -20,23 +24,16 @@ namespace Engine::Components {
 
 		ModelRenderer() = default;
 
+		template <class Archive>
+		void serialize(Archive& ar)
+		{
+			ar(cereal::make_nvp("visible", visible), cereal::make_nvp("model", model) // only save GUID
+			);
+		}
+
 		explicit ModelRenderer(const AssetHandle<Rendering::Model>& handle) : model(handle) {}
 		// Draw the model with the given shader and transform
-		void Draw(const Shader& shader, const Components::Transform& transform) const
-		{
-			if (visible && model.IsValid()) {
-				const auto* actualModel = GetAssetManager().Get(model);
-				if (!actualModel) return;
-
-				// Set model matrix in shader
-				shader.Bind();
-				glm::mat4 modelMatrix = transform.GetMatrix();
-				shader.SetMat4("model", &modelMatrix);
-
-				// Draw the model
-				actualModel->Draw(shader);
-			}
-		}
+		void Draw(const Shader& shader, const Components::Transform& transform) const;
 
 		void SetModel(const std::string& path);
 
@@ -47,6 +44,5 @@ namespace Engine::Components {
 	};
 } // namespace Engine::Components
 
-#include "assets/AssetManager.inl"
 
 #endif // CPP_ENGINE_MODELRENDERERCOMPONENT_H

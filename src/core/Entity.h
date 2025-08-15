@@ -48,7 +48,7 @@ namespace Engine {
 		template <typename T>
 		bool HasComponent() const
 		{
-            return GetRegistry().template all_of<T>(m_handle);
+			return GetRegistry().template all_of<T>(m_handle);
 		}
 
 		template <typename T>
