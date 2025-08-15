@@ -350,12 +350,17 @@ namespace Engine::UI {
 	{
 	}
 
+	std::shared_ptr<Texture> audioTexture;
+
 	void UIManager::onInit()
 	{
 		SetThemeColors(0);
-		drawFuncs[typeid(Texture)]          = [this]() { DrawTextureAssets(); };
-		drawFuncs[typeid(Rendering::Model)] = [this]() { DrawModelAssets(); };
-		// Register other asset draw functions here...
+		drawFuncs[typeid(Audio::SoundBuffer)] = [this]() { DrawSoundAssets(); };
+		drawFuncs[typeid(Texture)]            = [this]() { DrawTextureAssets(); };
+		drawFuncs[typeid(Rendering::Model)]   = [this]() { DrawModelAssets(); };
+
+		audioTexture = std::make_shared<Texture>();
+		audioTexture->LoadFromFile("resources/engine/speaker.png");
 	}
 
 	int selectedTheme = 0;
@@ -763,6 +768,8 @@ namespace Engine::UI {
 					label = "Textures";
 				else if (type == typeid(Rendering::Model))
 					label = "Models";
+				else if (type == typeid(Audio::SoundBuffer))
+					label = "Sounds";
 				// Add custom labels per type
 
 				if (ImGui::BeginTabItem(label)) {
@@ -776,6 +783,31 @@ namespace Engine::UI {
 		}
 
 		ImGui::End();
+	}
+
+	void UIManager::DrawSoundAssets()
+	{
+		auto& storage = GetAssetManager().GetStorage<Audio::SoundBuffer>();
+
+		float padding     = 8.0f;
+		int   columnCount = static_cast<int>(ImGui::GetContentRegionAvail().x / (m_iconSize + padding));
+		if (columnCount < 1) columnCount = 1;
+
+		ImGui::Columns(columnCount, nullptr, false);
+
+		for (auto& [id, soundPtr] : storage.guidToAsset) {
+			if (!soundPtr) continue;
+			ImGui::PushID(("tex" + id).c_str());
+
+
+			ImGui::Image(audioTexture->GetID(), ImVec2(m_iconSize, m_iconSize));
+			ImGui::TextWrapped("Sound Buffer %s", id.c_str());
+
+			ImGui::NextColumn();
+			ImGui::PopID();
+		}
+
+		ImGui::Columns(1);
 	}
 
 	void UIManager::DrawTextureAssets()

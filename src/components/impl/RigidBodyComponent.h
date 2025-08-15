@@ -23,7 +23,7 @@ namespace Engine::Components {
 		float       friction      = 0.5f;
 		float       restitution   = 0.0f;
 		float       gravityFactor = 1.0f;
-		std::string shapeType     = "Box";                       // For now store by name (Sphere, Box, Capsule, etc.)
+		std::string shapeType     = "Box";
 		JPH::Vec3   shapeSize     = JPH::Vec3::sReplicate(1.0f); // size/half-extents
 
 		RigidBodyComponent() : bodyID(0) {}
@@ -80,7 +80,6 @@ namespace Engine::Components {
 		[[maybe_unused]] void SetBoxShape(const BoxShapeSettings& settings);
 		[[maybe_unused]] void SetCapsuleShape(const CapsuleShapeSettings& settings);
 		[[maybe_unused]] void SetCylinderShape(const CylinderShapeSettings& settings);
-		[[maybe_unused]] void SetTriangleShape(const TriangleShapeSettings& settings);
 
 	  private:
 		// Conversion utilities

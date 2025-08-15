@@ -41,10 +41,6 @@ namespace Engine::Components {
 			else if (shapeType == "Cylinder") {
 				shape = new JPH::CylinderShape(shapeSize.GetX(), shapeSize.GetY());
 			}
-			else if (shapeType == "Triangle") {
-				// shape = new JPH::CylinderShape(shapeSize.GetX(), shapeSize.GetY());
-				// TODO save triangle collider
-			}
 			else {
 				// default to box
 				shape = new JPH::BoxShape(shapeSize);
@@ -52,9 +48,8 @@ namespace Engine::Components {
 
 			RVec3 startPos(0, 0, 0);
 			Quat  startRot = Quat::sIdentity();
-			SPDLOG_INFO("init rb");
+
 			if (entity.HasComponent<Transform>()) {
-				SPDLOG_INFO("init rb1");
 				auto&     tr  = entity.GetComponent<Transform>();
 				glm::vec3 pos = tr.position;
 				startPos      = Vec3(pos.x, pos.y, pos.z);
@@ -145,9 +140,7 @@ namespace Engine::Components {
 		                                     "setCapsuleShape",
 		                                     &RigidBodyComponent::SetCapsuleShape,
 		                                     "setCylinderShape",
-		                                     &RigidBodyComponent::SetCylinderShape,
-		                                     "setTriangleShape",
-		                                     &RigidBodyComponent::SetTriangleShape);
+		                                     &RigidBodyComponent::SetCylinderShape);
 	}
 
 
@@ -209,9 +202,6 @@ namespace Engine::Components {
 			const auto* capsule_shape = static_cast<const CapsuleShape*>(shape.GetPtr());
 			shapeSize                 = Vec3(capsule_shape->GetHalfHeightOfCylinder(), capsule_shape->GetRadius(), 0.0);
 		}
-		else if (shape.GetPtr()->GetSubType() == EShapeSubType::Triangle) {
-			// TODO triangle
-		}
 		else {
 			shapeType = "Box";
 		}
@@ -260,16 +250,6 @@ namespace Engine::Components {
 		SetCollisionShapeRef(result.Get());
 		shapeType = "Cylinder";
 		shapeSize = Vec3(settings.mHalfHeight, settings.mRadius, 0.0);
-	}
-
-	void RigidBodyComponent::SetTriangleShape(const JPH::TriangleShapeSettings& settings)
-	{
-		auto result = settings.Create();
-		if (result.HasError()) {
-			GetPhysics().log->error("TriangleShape creation failed: " + result.GetError());
-		}
-		SetCollisionShapeRef(result.Get());
-		shapeType = "Triangle";
 	}
 
 

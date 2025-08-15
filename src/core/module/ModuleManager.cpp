@@ -16,7 +16,6 @@ namespace Engine {
 	void ModuleManager::InitAllLuaBindings()
 	{
 		for (auto& module : m_modules) {
-			module->log->debug("Initializing Lua Bindings...");
 			module->setLuaBindings();
 		}
 	}

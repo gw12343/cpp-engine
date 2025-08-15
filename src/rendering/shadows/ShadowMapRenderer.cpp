@@ -220,3 +220,5 @@ namespace Engine {
 		glBindTexture(GL_TEXTURE_2D_ARRAY, lightDepthMaps);
 	}
 } // namespace Engine
+
+#include "assets/AssetManager.inl"

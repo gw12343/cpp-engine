@@ -41,6 +41,7 @@ namespace Engine {
 			void RenderSceneView(GLuint texId);
 			void RenderAssetWindow();
 
+			void DrawSoundAssets();
 			void DrawTextureAssets();
 			void DrawModelAssets();
 

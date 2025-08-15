@@ -64,7 +64,7 @@ namespace Engine {
 			virtual void RenderInspector(Entity& entity) {}
 
 
-			static void AddBindings() { SPDLOG_INFO("unimpl!"); }
+			static void AddBindings() { SPDLOG_WARN("No bindings specified for a module!"); }
 		};
 
 	} // namespace Components

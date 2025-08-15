@@ -325,7 +325,7 @@ namespace Engine::Audio {
 		}
 
 		m_initialized = true;
-		log->info("OpenAL initialized successfully");
+		log->debug("OpenAL initialized successfully");
 
 
 		if (!m_initialized) {
