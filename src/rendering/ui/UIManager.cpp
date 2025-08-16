@@ -350,17 +350,21 @@ namespace Engine::UI {
 	{
 	}
 
-	std::shared_ptr<Texture> audioTexture;
+	std::shared_ptr<Texture> audioIconTexture;
+	std::shared_ptr<Texture> terrainIconTexture;
 
 	void UIManager::onInit()
 	{
 		SetThemeColors(0);
-		drawFuncs[typeid(Audio::SoundBuffer)] = [this]() { DrawSoundAssets(); };
-		drawFuncs[typeid(Texture)]            = [this]() { DrawTextureAssets(); };
-		drawFuncs[typeid(Rendering::Model)]   = [this]() { DrawModelAssets(); };
+		drawFuncs[typeid(Terrain::TerrainTile)] = [this]() { DrawTerrainAssets(); };
+		drawFuncs[typeid(Audio::SoundBuffer)]   = [this]() { DrawSoundAssets(); };
+		drawFuncs[typeid(Texture)]              = [this]() { DrawTextureAssets(); };
+		drawFuncs[typeid(Rendering::Model)]     = [this]() { DrawModelAssets(); };
 
-		audioTexture = std::make_shared<Texture>();
-		audioTexture->LoadFromFile("resources/engine/speaker.png");
+		audioIconTexture   = std::make_shared<Texture>();
+		terrainIconTexture = std::make_shared<Texture>();
+		audioIconTexture->LoadFromFile("resources/engine/speaker.png");
+		terrainIconTexture->LoadFromFile("resources/engine/mountain.png");
 	}
 
 	int selectedTheme = 0;
@@ -780,6 +784,8 @@ namespace Engine::UI {
 					label = "Models";
 				else if (type == typeid(Audio::SoundBuffer))
 					label = "Sounds";
+				else if (type == typeid(Terrain::TerrainTile))
+					label = "Terrains";
 				// Add custom labels per type
 
 				if (ImGui::BeginTabItem(label)) {
@@ -810,8 +816,33 @@ namespace Engine::UI {
 			ImGui::PushID(("tex" + id).c_str());
 
 
-			ImGui::Image(audioTexture->GetID(), ImVec2(m_iconSize, m_iconSize));
+			ImGui::Image(audioIconTexture->GetID(), ImVec2(m_iconSize, m_iconSize));
 			ImGui::TextWrapped("Sound Buffer %s", id.c_str());
+
+			ImGui::NextColumn();
+			ImGui::PopID();
+		}
+
+		ImGui::Columns(1);
+	}
+
+	void UIManager::DrawTerrainAssets()
+	{
+		auto& storage = GetAssetManager().GetStorage<Terrain::TerrainTile>();
+
+		float padding     = 8.0f;
+		int   columnCount = static_cast<int>(ImGui::GetContentRegionAvail().x / (m_iconSize + padding));
+		if (columnCount < 1) columnCount = 1;
+
+		ImGui::Columns(columnCount, nullptr, false);
+
+		for (auto& [id, terrainPtr] : storage.guidToAsset) {
+			if (!terrainPtr) continue;
+			ImGui::PushID(("tex" + id).c_str());
+
+
+			ImGui::Image(terrainIconTexture->GetID(), ImVec2(m_iconSize, m_iconSize));
+			ImGui::TextWrapped("Terrain %s", terrainPtr->name.c_str());
 
 			ImGui::NextColumn();
 			ImGui::PopID();
