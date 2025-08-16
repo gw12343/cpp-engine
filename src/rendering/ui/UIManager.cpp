@@ -457,6 +457,16 @@ namespace Engine::UI {
 				m_selectedEntity = e;
 			}
 		}
+		if (ImGui::BeginPopupContextWindow()) {
+			if (ImGui::MenuItem("Create Entity")) {
+				// Action for menu item
+				Entity entity    = Entity::Create("New Entity");
+				m_selectedEntity = entity;
+			}
+
+			ImGui::EndPopup();
+		}
+
 
 		ImGui::End();
 	}
