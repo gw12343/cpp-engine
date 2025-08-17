@@ -447,10 +447,10 @@ namespace Engine::UI {
 		ImGui::Begin("Hierarchy");
 
 		// Get all entities with EntityMetadata component
-		auto view = GetRegistry().view<Components::EntityMetadata>();
+		auto view = GetCurrentSceneRegistry().view<Components::EntityMetadata>();
 
 		for (auto entity : view) {
-			Entity e(entity);
+			Entity e(entity, GetCurrentScene());
 			auto&  metadata = e.GetComponent<Components::EntityMetadata>();
 
 			// Create a selectable item for each entity
@@ -464,7 +464,7 @@ namespace Engine::UI {
 		if (ImGui::BeginPopupContextWindow()) {
 			if (ImGui::MenuItem("Create Entity")) {
 				// Action for menu item
-				Entity entity    = Entity::Create("New Entity");
+				Entity entity    = Entity::Create("New Entity", GetCurrentScene());
 				m_selectedEntity = entity;
 			}
 
@@ -645,7 +645,7 @@ namespace Engine::UI {
 	void UIManager::RenderAudioDebugUI()
 	{
 		ImGui::Begin("Audio Debug");
-		auto      audioView = GetRegistry().view<Components::EntityMetadata, Components::Transform, Components::AudioSource>();
+		auto      audioView = GetCurrentSceneRegistry().view<Components::EntityMetadata, Components::Transform, Components::AudioSource>();
 		glm::vec3 cameraPos = GetCamera().GetPosition();
 
 		for (auto [entity, metadata, transform, audio] : audioView.each()) {

@@ -12,7 +12,8 @@
 
 #include <spdlog/spdlog.h>
 #include <utils/Utils.h>
-
+#include "core/SceneManager.h"
+#include "assets/AssetManager.h"
 namespace Engine {
 
 	void AnimationManager::onInit()
@@ -61,9 +62,9 @@ namespace Engine {
 	void AnimationManager::onUpdate(float deltaTime)
 	{
 		// Get all entities with a AnimationWorkerComponent and AnimationComponent and AnimationPoseComponent and SkeletonComponent
-		auto view = GetRegistry().view<Components::AnimationWorkerComponent, Components::AnimationComponent>();
+		auto view = GetCurrentSceneRegistry().view<Components::AnimationWorkerComponent, Components::AnimationComponent>();
 		for (auto entity : view) {
-			Entity e(entity);
+			Entity e(entity, GetCurrentScene());
 			auto&  animationWorkerComponent = e.GetComponent<Components::AnimationWorkerComponent>();
 			auto&  animationComponent       = e.GetComponent<Components::AnimationComponent>();
 			auto&  animationPoseComponent   = e.GetComponent<Components::AnimationPoseComponent>();
@@ -98,9 +99,9 @@ namespace Engine {
 	void AnimationManager::Render()
 	{
 		// Get all entities with a SkinnedMeshComponent and transform and AnimationPoseComponent
-		auto view = GetRegistry().view<Components::SkinnedMeshComponent, Components::Transform>();
+		auto view = GetCurrentSceneRegistry().view<Components::SkinnedMeshComponent, Components::Transform>();
 		for (auto entity : view) {
-			Entity                    e(entity);
+			Entity                    e(entity, GetCurrentScene());
 			auto&                     skinnedMeshComponent   = e.GetComponent<Components::SkinnedMeshComponent>();
 			auto&                     animationPoseComponent = e.GetComponent<Components::AnimationPoseComponent>();
 			const ozz::math::Float4x4 transform              = FromMatrix(e.GetComponent<Components::Transform>().GetMatrix());
@@ -219,3 +220,6 @@ namespace Engine {
 
 
 } // namespace Engine
+
+
+#include "assets/AssetManager.inl"

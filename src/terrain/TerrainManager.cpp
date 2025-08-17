@@ -38,7 +38,7 @@ namespace Engine::Terrain {
 
 	void TerrainManager::Render()
 	{
-		auto view = GetRegistry().view<Components::EntityMetadata, Components::Transform, Components::TerrainRenderer>();
+		auto view = GetCurrentSceneRegistry().view<Components::EntityMetadata, Components::Transform, Components::TerrainRenderer>();
 		for (auto [entity, metadata, transform, renderer] : view.each()) {
 			if (!renderer.visible) continue;
 			if (!renderer.terrainTile.IsValid()) continue;

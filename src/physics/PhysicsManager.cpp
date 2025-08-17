@@ -80,7 +80,7 @@ namespace Engine {
 	{
 		SPDLOG_INFO("cleaning up physics");
 
-		auto           physicsView    = GetRegistry().view<Engine::Components::RigidBodyComponent>();
+		auto           physicsView    = GetCurrentSceneRegistry().view<Engine::Components::RigidBodyComponent>();
 		BodyInterface& body_interface = physics->GetBodyInterface();
 
 		for (auto [entity, rb] : physicsView.each()) {
@@ -195,7 +195,7 @@ namespace Engine {
 
 	void PhysicsManager::SyncPhysicsEntities()
 	{
-		auto           physicsView    = GetRegistry().view<Engine::Components::Transform, Engine::Components::RigidBodyComponent>();
+		auto           physicsView    = GetCurrentSceneRegistry().view<Engine::Components::Transform, Engine::Components::RigidBodyComponent>();
 		BodyInterface& body_interface = physics->GetBodyInterface();
 
 		for (auto [entity, transform, rb] : physicsView.each()) {

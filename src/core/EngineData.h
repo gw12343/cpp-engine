@@ -6,7 +6,7 @@
 #include <memory>
 #include "entt/entt.hpp"
 #include "Input.h"
-#include "serialization/SerializationManager.h"
+
 
 namespace Engine {
 	class Window;
@@ -23,14 +23,18 @@ namespace Engine {
 		class UIManager;
 	}
 	class ScriptManager;
+	class SceneManager;
+	// class SerializationManager;
 	class PhysicsManager;
 	class Camera;
 	class AssetManager;
+	class Scene;
 
 	class EngineData {
 	  public:
-		std::shared_ptr<AssetManager>            assetManager;
-		std::shared_ptr<SerializationManager>    serialization;
+		std::shared_ptr<AssetManager> assetManager;
+		//	std::shared_ptr<SerializationManager>    serialization;
+		std::shared_ptr<SceneManager>            scene;
 		std::shared_ptr<Window>                  window;
 		std::shared_ptr<Renderer>                renderer;
 		std::shared_ptr<Audio::SoundManager>     sound;
@@ -42,7 +46,7 @@ namespace Engine {
 		std::shared_ptr<PhysicsManager>          physics;
 		std::shared_ptr<Camera>                  camera;
 		std::shared_ptr<Input>                   input;
-		std::shared_ptr<entt::registry>          registry;
+		// std::shared_ptr<entt::registry>          registry;
 	};
 
 	EngineData& Get();
@@ -53,9 +57,14 @@ namespace Engine {
 		return *Get().assetManager;
 	}
 
-	inline auto& GetSerializationManager()
+	//	inline auto& GetSerializationManager()
+	//	{
+	//		return *Get().serialization;
+	//	}
+
+	inline auto& GetSceneManager()
 	{
-		return *Get().serialization;
+		return *Get().scene;
 	}
 
 	inline auto& GetWindow()
@@ -98,10 +107,14 @@ namespace Engine {
 	{
 		return *Get().input;
 	}
-	inline auto& GetRegistry()
-	{
-		return *Get().registry;
-	}
+
+	entt::registry& GetCurrentSceneRegistry();
+	Scene*          GetCurrentScene();
+
+	//	inline auto& GetRegistry()
+	//	{
+	//		return *Get().registry;
+	//	}
 
 
 } // namespace Engine

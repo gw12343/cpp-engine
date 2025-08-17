@@ -3,6 +3,8 @@
 //
 
 #include "EngineData.h"
+#include "assets/AssetManager.h"
+#include "SceneManager.h"
 
 namespace Engine {
 	EngineData& Get()
@@ -11,4 +13,16 @@ namespace Engine {
 		return instance;
 	}
 
+	entt::registry& GetCurrentSceneRegistry()
+	{
+		auto* scene = GetCurrentScene();
+		return *scene->GetRegistry().get();
+	}
+	Scene* GetCurrentScene()
+	{
+		return GetAssetManager().Get(GetSceneManager().GetActiveScene());
+	}
+
 } // namespace Engine
+
+#include "assets/AssetManager.inl"

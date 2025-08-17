@@ -158,20 +158,26 @@ target_include_directories(lua PUBLIC ${lua_SOURCE_DIR}/src)
 file(GLOB_RECURSE SOURCES "lib/src/*.cpp" "lib/src/*.c" "src/*.cpp" "src/*.inl")
 
 add_executable(${PROJECT_NAME} ${SOURCES}
-        src/rendering/ui/ModelPreview.h
-        src/rendering/ui/ModelPreview.cpp
-        src/components/impl/TerrainRendererComponent.cpp
-        src/components/impl/TerrainRendererComponent.h
-        src/assets/impl/TerrainLoader.cpp
-        src/assets/impl/TerrainLoader.h
-        src/terrain/TerrainTile.cpp
-        src/terrain/TerrainTile.h
-        src/assets/AssetMeta.h
-        src/serialization/SerializationManager.h
-        src/serialization/SerializationManager.cpp
-        src/components/AllComponents.h
-        src/assets/impl/SoundLoader.h
-        src/assets/impl/SoundLoader.cpp
+        #        src/rendering/ui/ModelPreview.h
+        #        src/rendering/ui/ModelPreview.cpp
+        #        src/components/impl/TerrainRendererComponent.cpp
+        #        src/components/impl/TerrainRendererComponent.h
+        #        src/assets/impl/TerrainLoader.cpp
+        #        src/assets/impl/TerrainLoader.h
+        #        src/terrain/TerrainTile.cpp
+        #        src/terrain/TerrainTile.h
+        #        src/assets/AssetMeta.h
+        #        src/serialization/SerializationManager.h
+        #        src/serialization/SerializationManager.cpp
+        #        src/components/AllComponents.h
+        #        src/assets/impl/SoundLoader.h
+        #        src/assets/impl/SoundLoader.cpp
+        #        src/core/Scene.h
+        #        src/core/SceneManager.h
+        #        src/core/SceneManager.cpp
+        #        src/assets/impl/SceneLoader.h
+        #        src/assets/impl/SceneLoader.cpp
+        #        src/serialization/SerializedEntity.h
 )
 
 

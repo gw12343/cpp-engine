@@ -100,7 +100,7 @@ namespace Engine {
 		m_shadowRenderer->UploadShadowMatrices(m_shader, V);
 		ENGINE_GLCheckError();
 		// Create a view for entities with Transform and ModelRenderer components
-		auto view = GetRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer>();
+		auto view = GetCurrentSceneRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer>();
 		for (auto [entity, metadata, transform, renderer] : view.each()) {
 			if (!renderer.visible) continue;
 			// Draw model

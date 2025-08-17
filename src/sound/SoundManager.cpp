@@ -272,7 +272,7 @@ namespace Engine::Audio {
 		CheckOpenALError("setting listener orientation");
 
 		// Update all audio sources based on their entity transforms
-		auto audioView = GetRegistry().view<Components::EntityMetadata, Components::Transform, Components::AudioSource>();
+		auto audioView = GetCurrentSceneRegistry().view<Components::EntityMetadata, Components::Transform, Components::AudioSource>();
 
 		for (auto [entity, metadata, transform, audio] : audioView.each()) {
 			// Update audio source position based on entity transform

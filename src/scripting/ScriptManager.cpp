@@ -45,13 +45,13 @@ namespace Engine {
 			                                 &Engine::Entity::GetName,
 			                                 "setName",
 			                                 &Engine::Entity::SetName,
-			                                 
+
 			                                 COMPONENT_LIST COMPONENT_METHODS(Components::EntityMetadata, EntityMetadata));
 #undef X
 
 
 			// create_entity(name)
-			lua.set_function("createEntity", [](const std::string& name) { return Engine::Entity::Create(name); });
+			lua.set_function("createEntity", [](const std::string& name) { return Engine::Entity::Create(name, GetCurrentScene()); });
 
 
 			if (lua["EditorInit"].valid()) {
@@ -106,7 +106,7 @@ namespace Engine {
 
 
 		// User scripts
-		GetRegistry().view<Components::LuaScript>().each([](entt::entity entity, Components::LuaScript& script) {
+		GetCurrentSceneRegistry().view<Components::LuaScript>().each([](entt::entity entity, Components::LuaScript& script) {
 			if (script.update.valid()) {
 				sol::protected_function_result result = script.update();
 				if (!result.valid()) {

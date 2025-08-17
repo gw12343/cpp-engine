@@ -10,6 +10,9 @@
 #include "Input.h"
 #include "scripting/ScriptManager.h"
 
+#include "SceneManager.h"
+// #include "serialization/SerializationManager.h"
+
 
 #include "Window.h"
 #include "rendering/Renderer.h"
@@ -25,17 +28,18 @@
 #include "assets/impl/TextureLoader.h"
 #include "assets/impl/TerrainLoader.h"
 #include "assets/impl/SoundLoader.h"
-#include "components/impl/ModelRendererComponent.h"
-#include "components/impl/AudioSourceComponent.h"
-#include "components/impl/ShadowCasterComponent.h"
-#include "components/impl/LuaScriptComponent.h"
-#include "components/impl/SkeletonComponent.h"
-#include "components/impl/AnimationComponent.h"
-#include "components/impl/AnimationPoseComponent.h"
-#include "components/impl/RigidBodyComponent.h"
-#include "components/impl/TerrainRendererComponent.h"
-
-#include "terrain/TerrainManager.h"
+// #include "components/impl/ModelRendererComponent.h"
+// #include "components/impl/AudioSourceComponent.h"
+// #include "components/impl/ShadowCasterComponent.h"
+// #include "components/impl/LuaScriptComponent.h"
+// #include "components/impl/SkeletonComponent.h"
+// #include "components/impl/AnimationComponent.h"
+// #include "components/impl/AnimationPoseComponent.h"
+// #include "components/impl/RigidBodyComponent.h"
+// #include "components/impl/TerrainRendererComponent.h"
+//
+// #include "terrain/TerrainManager.h"
+#include "assets/impl/SceneLoader.h"
 
 namespace Engine {
 	ModuleManager manager;
@@ -49,9 +53,10 @@ namespace Engine {
 		GetAssetManager().RegisterLoader<Rendering::Model>(std::make_unique<Rendering::ModelLoader>());
 		GetAssetManager().RegisterLoader<Terrain::TerrainTile>(std::make_unique<TerrainLoader>());
 		GetAssetManager().RegisterLoader<Audio::SoundBuffer>(std::make_unique<SoundLoader>());
+		GetAssetManager().RegisterLoader<Scene>(std::make_unique<SceneLoader>());
 
 		// Initialize Scene
-		Get().registry = std::make_shared<entt::registry>();
+		// Get().registry = std::make_shared<entt::registry>();
 
 		// Initialize Modules
 		Get().window    = std::make_shared<Window>(width, height, title);
@@ -65,6 +70,7 @@ namespace Engine {
 		Get().ui        = std::make_shared<UI::UIManager>();
 		Get().terrain   = std::make_shared<Terrain::TerrainManager>();
 		Get().script    = std::make_shared<ScriptManager>();
+		Get().scene     = std::make_shared<SceneManager>();
 
 		// Register Modules to handle lifecycle
 		manager.RegisterExternal(Get().window);
@@ -78,6 +84,7 @@ namespace Engine {
 		manager.RegisterExternal(Get().terrain);
 		manager.RegisterExternal(Get().renderer);
 		manager.RegisterExternal(Get().script);
+		manager.RegisterExternal(Get().scene);
 	}
 
 
@@ -173,7 +180,10 @@ namespace Engine {
 
 	void GEngine::Run()
 	{
-		std::vector<Entity> ets = GetSerializationManager().LoadScene(GetRegistry(), "debug/savescene.json");
+		// std::vector<Entity> ets = GetSerializationManager().LoadScene(GetRegistry(), "debug/savescene.json");
+
+		GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>("scenes/scene1.json"));
+
 		while (!GetWindow().ShouldClose()) {
 			auto currentFrame = static_cast<float>(glfwGetTime());
 			m_deltaTime       = currentFrame - m_lastFrame;
@@ -181,7 +191,7 @@ namespace Engine {
 
 			manager.UpdateAll(m_deltaTime);
 		}
-		GetSerializationManager().SaveScene(GetRegistry(), "debug/savescene.json");
+		// GetSerializationManager().SaveScene(GetRegistry(), "debug/savescene.json");
 	}
 
 

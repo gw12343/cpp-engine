@@ -1,16 +1,19 @@
 //
-// Created by gabe on 8/14/25.
+// Created by gabe on 8/16/25.
 //
+#include "SceneLoader.h"
 
-#include "SerializationManager.h"
-#include "components/AllComponents.h"
 #include <cereal/archives/json.hpp>
 #include <cereal/types/vector.hpp>
 #include <cereal/types/optional.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/types/common.hpp>
 
-#include "core/Entity.h"
+#include <iostream>
+#include "glm/glm.hpp"
+#include "components/AllComponents.h"
+#include "components/Components.h"
+#include "core/SceneManager.h"
 
 #include <fstream>
 #include <optional>
@@ -31,15 +34,6 @@ namespace glm {
 } // namespace glm
 
 namespace JPH {
-	//	template <class Archive>
-	//	void serialize(Archive& ar, EMotionType& motionType)
-	//	{
-	//		int value = static_cast<int>(motionType);
-	//		ar(value);
-	//		if constexpr (Archive::is_loading::value) {
-	//			motionType = static_cast<JPH::EMotionType>(value);
-	//		}
-	//	}
 
 	template <class Archive>
 	void serialize(Archive& ar, Vec3& v)
@@ -108,7 +102,7 @@ namespace Engine {
 	};
 
 
-	void SerializationManager::SaveScene(const entt::registry& registry, const std::string& filename)
+	void SaveScene(const entt::registry& registry, const std::string& filename)
 	{
 		std::ofstream             os(filename);
 		cereal::JSONOutputArchive archive(os);
@@ -133,27 +127,23 @@ namespace Engine {
 		archive(cereal::make_nvp("entities", entities));
 	}
 
-	std::vector<Entity> SerializationManager::LoadScene(entt::registry& registry, const std::string& filename)
+
+	std::unique_ptr<Scene> SceneLoader::LoadFromFile(const std::string& path)
 	{
-		std::ifstream            is(filename);
+		std::unique_ptr<Scene> scene = GetSceneManager().CreateScene(path);
+
+		std::ifstream            is(path);
 		cereal::JSONInputArchive archive(is);
 
 		std::vector<SerializedEntity> entities;
 		archive(cereal::make_nvp("entities", entities)); // This causes an error
 		std::vector<Entity> loaded_entities;
 		for (auto& se : entities) {
-			auto e = registry.create();
-			registry.emplace<Engine::Components::EntityMetadata>(e, se.meta);
-			Entity entity(e);
+			auto e = scene->GetRegistry()->create();
+			scene->GetRegistry()->emplace<Engine::Components::EntityMetadata>(e, se.meta);
+			Entity entity(e, scene.get());
 			loaded_entities.push_back(entity);
 
-			// #define X(type, name) \
-//	if (se.name.has_value()) { \
-//		registry.emplace_or_replace<type>(e, se.name.value()); \
-//		se.name.value().OnAdded(entity); \
-//	}
-			//			COMPONENT_LIST
-			// #undef X
 
 #define X(type, name)                                                                                                                                                                                                                          \
 	if (se.name.has_value()) entity.AddComponent<type>(se.name.value());
@@ -161,18 +151,8 @@ namespace Engine {
 #undef X
 		}
 
-		return loaded_entities;
+		return scene;
 	}
 
-	void SerializationManager::onInit()
-	{
-	}
 
-	void SerializationManager::onUpdate(float dt)
-	{
-	}
-
-	void SerializationManager::onShutdown()
-	{
-	}
 } // namespace Engine
