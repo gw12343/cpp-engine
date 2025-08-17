@@ -13,6 +13,9 @@
 #include "ShadowCasterComponent.h"
 
 namespace Engine::Components {
+	void ShadowCaster::OnRemoved(Entity& entity)
+	{
+	}
 	void ShadowCaster::OnAdded(Entity& entity)
 	{
 	}

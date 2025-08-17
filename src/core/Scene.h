@@ -9,18 +9,23 @@
 #include <unordered_map>
 #include <entt/entt.hpp>
 #include <spdlog/spdlog.h>
-
+#include <vector>
+#include "core/Entity.h"
 
 namespace Engine {
+
 
 	// A single scene, essentially just a wrapper for entt::registry
 	class Scene {
 	  public:
-		Scene(std::string name) : m_name(std::move(name)) { m_registry = std::make_shared<entt::registry>(); }
+		Scene(std::string name);
+
+		Scene(std::string name, std::vector<Entity> entities);
 
 		std::shared_ptr<entt::registry> GetRegistry() { return m_registry; }
 
-		const std::string& GetName() const { return m_name; }
+		const std::string&  GetName() const { return m_name; }
+		std::vector<Entity> m_entityList;
 
 	  private:
 		std::string                     m_name;

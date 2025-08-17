@@ -158,6 +158,7 @@ target_include_directories(lua PUBLIC ${lua_SOURCE_DIR}/src)
 file(GLOB_RECURSE SOURCES "lib/src/*.cpp" "lib/src/*.c" "src/*.cpp" "src/*.inl")
 
 add_executable(${PROJECT_NAME} ${SOURCES}
+        src/core/Scene.cpp
         #        src/rendering/ui/ModelPreview.h
         #        src/rendering/ui/ModelPreview.cpp
         #        src/components/impl/TerrainRendererComponent.cpp

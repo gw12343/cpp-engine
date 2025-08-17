@@ -17,6 +17,9 @@
 
 
 namespace Engine::Components {
+	void LuaScript::OnRemoved(Entity& entity)
+	{
+	}
 	void LuaScript::OnAdded(Entity& entity)
 	{
 		LoadScript(entity, scriptPath);

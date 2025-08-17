@@ -25,6 +25,8 @@
 #include "imgui_internal.h"
 #include "components/impl/TerrainRendererComponent.h"
 
+#include "components/AllComponents.h"
+
 namespace Engine::UI {
 
 	void SetThemeColors(int t)
@@ -483,6 +485,25 @@ namespace Engine::UI {
 			// Display entity name at the top
 			auto& metadata = m_selectedEntity.GetComponent<Components::EntityMetadata>();
 			ImGui::Text("Selected: %s", metadata.name.c_str());
+			ImGui::SameLine();
+			ImVec4 myColor = ImVec4(1.0f, 0.0f, 0.0f, 1.0f); // bluish
+
+			ImGui::PushStyleColor(ImGuiCol_Button, myColor);
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(myColor.x * 1.1f, myColor.y * 1.1f, myColor.z * 1.1f, 1.0f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(myColor.x * 0.9f, myColor.y * 0.9f, myColor.z * 0.9f, 1.0f));
+
+			if (ImGui::Button(ICON_FA_TRASH_CAN "", ImVec2(100, 40))) {
+				m_selectedEntity.Destroy();
+				if (GetCurrentSceneRegistry().valid(m_selectedEntity.GetHandle())) GetCurrentSceneRegistry().destroy(m_selectedEntity.GetHandle());
+				ImGui::PopStyleColor(3);
+				ImGui::End();
+				m_selectedEntity = Entity();
+				return;
+			}
+			// m_selectedEntity = ;
+
+			ImGui::PopStyleColor(3);
+
 			ImGui::Separator();
 
 			// Render each component in the inspector
@@ -491,6 +512,7 @@ namespace Engine::UI {
 					m_selectedEntity.GetComponent<Components::EntityMetadata>().RenderInspector(m_selectedEntity);
 				}
 			}
+
 
 			if (m_selectedEntity.HasComponent<Components::Transform>()) {
 				if (ImGui::CollapsingHeader(ICON_FA_MAXIMIZE " Transform", ImGuiTreeNodeFlags_DefaultOpen)) {

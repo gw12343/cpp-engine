@@ -19,6 +19,9 @@
 #include "scripting/ScriptManager.h"
 
 namespace Engine::Components {
+	void ParticleSystem::OnRemoved(Entity& entity)
+	{
+	}
 	void ParticleSystem::OnAdded(Entity& entity)
 	{
 		if (!effect) {

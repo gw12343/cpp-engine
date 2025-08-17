@@ -58,7 +58,8 @@ namespace Engine {
 			Component()          = default;
 			virtual ~Component() = default;
 
-			virtual void OnAdded(Entity& entity) = 0;
+			virtual void OnAdded(Entity& entity)   = 0;
+			virtual void OnRemoved(Entity& entity) = 0;
 
 			// New method for rendering component in inspector
 			virtual void RenderInspector(Entity& entity) {}

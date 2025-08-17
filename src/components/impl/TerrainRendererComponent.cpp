@@ -6,6 +6,9 @@
 
 namespace Engine {
 
+	void Components::TerrainRenderer::OnRemoved(Entity& entity)
+	{
+	}
 	void Components::TerrainRenderer::OnAdded(Entity& entity)
 	{
 	}

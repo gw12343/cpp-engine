@@ -21,6 +21,9 @@ namespace Engine::Components {
 	std::unordered_set<ozz::vector<Engine::Mesh>*>        SkinnedMeshComponent::s_all_meshes;
 
 
+	void SkinnedMeshComponent::OnRemoved(Entity& entity)
+	{
+	}
 	void SkinnedMeshComponent::OnAdded(Entity& entity)
 	{
 		if (!meshPath.empty()) {

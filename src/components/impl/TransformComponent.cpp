@@ -16,6 +16,9 @@
 
 
 namespace Engine::Components {
+	void Transform::OnRemoved(Entity& entity)
+	{
+	}
 	void Transform::OnAdded(Entity& entity)
 	{
 	}

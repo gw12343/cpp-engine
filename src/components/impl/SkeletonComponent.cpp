@@ -16,6 +16,9 @@
 
 namespace Engine::Components {
 
+	void SkeletonComponent::OnRemoved(Entity& entity)
+	{
+	}
 	void SkeletonComponent::OnAdded(Entity& entity)
 	{
 		SPDLOG_INFO("added!!");

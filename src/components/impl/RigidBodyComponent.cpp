@@ -21,9 +21,17 @@ namespace Engine::Components {
 
 	RigidBodyComponent::~RigidBodyComponent()
 	{
-		GetPhysics().bodyToEntityMap.erase(bodyID);
+		// BodyInterface& body_interface = GetPhysics().GetPhysicsSystem()->GetBodyInterface();
+		// body_interface.RemoveBody(bodyID);
 	}
 
+
+	void RigidBodyComponent::OnRemoved(Entity& entity)
+	{
+		SPDLOG_INFO("REMOVING RIGIDBODY {}", bodyID.IsInvalid());
+		GetPhysics().GetPhysicsSystem()->GetBodyInterface().RemoveBody(bodyID);
+		GetPhysics().bodyToEntityMap.erase(bodyID);
+	}
 	void RigidBodyComponent::OnAdded(Entity& entity)
 	{
 		BodyInterface& body_interface = GetPhysics().GetPhysicsSystem()->GetBodyInterface();

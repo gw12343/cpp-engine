@@ -26,6 +26,7 @@ namespace Engine::Components {
 		}
 
 		void        OnAdded(Entity& entity) override;
+		void        OnRemoved(Entity& entity) override;
 		void        RenderInspector(Entity& entity) override;
 		void        LoadScript(Engine::Entity& entity, std::string path);
 		void        OnCollisionEnter(Entity& other);

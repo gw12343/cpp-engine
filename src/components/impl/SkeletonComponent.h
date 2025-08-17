@@ -31,6 +31,7 @@ namespace Engine::Components {
 		explicit SkeletonComponent(std::string skeletonPath) : skeletonPath(std::move(skeletonPath)) {}
 
 		void OnAdded(Entity& entity) override;
+		void OnRemoved(Entity& entity) override;
 		void RenderInspector(Entity& entity) override;
 	};
 } // namespace Engine::Components

@@ -151,6 +151,8 @@ namespace Engine {
 #undef X
 		}
 
+		scene->m_entityList = loaded_entities;
+
 		return scene;
 	}
 

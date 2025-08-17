@@ -43,6 +43,9 @@ namespace Engine::Components {
 	}
 
 
+	void ModelRenderer::OnRemoved(Entity& entity)
+	{
+	}
 	void ModelRenderer::OnAdded(Entity& entity)
 	{
 	}

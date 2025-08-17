@@ -18,7 +18,7 @@ namespace Engine {
 
 		// Static methods for entity creation and destruction
 		static Entity Create(const std::string& name, Scene* scene);
-		static void   Destroy(Entity entity);
+		void          Destroy();
 
 		// Check if entity is valid
 		explicit operator bool() const { return m_handle != entt::null; }

@@ -16,6 +16,10 @@
 #include "scripting/ScriptManager.h"
 
 namespace Engine::Components {
+	void AudioSource::OnRemoved(Entity& entity)
+	{
+	}
+
 	void AudioSource::OnAdded(Entity& entity)
 	{
 		// If autoPlay is enabled, try to play the sound

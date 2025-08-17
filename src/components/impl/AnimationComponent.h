@@ -54,6 +54,7 @@ namespace Engine::Components {
 		explicit AnimationComponent(ozz::animation::Animation* animation) : animation(animation) {}
 		explicit AnimationComponent(std::string animationPath) : animationPath(std::move(animationPath)) {}
 		void OnAdded(Entity& entity) override;
+		void OnRemoved(Entity& entity) override;
 		void RenderInspector(Entity& entity) override;
 	};
 } // namespace Engine::Components

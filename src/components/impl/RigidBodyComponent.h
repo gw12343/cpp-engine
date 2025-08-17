@@ -38,6 +38,7 @@ namespace Engine::Components {
 		}
 
 		void OnAdded(Entity& entity) override;
+		void OnRemoved(Entity& entity) override;
 		void RenderInspector(Entity& entity) override;
 
 		static void AddBindings();

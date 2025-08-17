@@ -31,6 +31,7 @@ namespace Engine::Components {
 		explicit SkinnedMeshComponent(std::string meshPath) : meshPath(std::move(meshPath)) {}
 
 		void OnAdded(Entity& entity) override;
+		void OnRemoved(Entity& entity) override;
 		void RenderInspector(Entity& entity) override;
 
 		static void CleanSkinnedModels();

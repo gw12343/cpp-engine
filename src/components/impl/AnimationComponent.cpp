@@ -29,6 +29,10 @@ namespace Engine::Components {
 		}
 	}
 
+	void AnimationComponent::OnRemoved(Entity& entity)
+	{
+	}
+
 	void AnimationComponent::RenderInspector(Entity& entity)
 	{
 		ImGui::Text("Animation: %s", animation ? "Loaded" : "Null");

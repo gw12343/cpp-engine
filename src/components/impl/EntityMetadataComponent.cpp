@@ -7,6 +7,9 @@
 
 
 namespace Engine::Components {
+	void EntityMetadata::OnRemoved(Entity& entity)
+	{
+	}
 	void EntityMetadata::OnAdded(Entity& entity)
 	{
 	}

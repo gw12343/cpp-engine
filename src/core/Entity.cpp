@@ -1,9 +1,9 @@
 #include "Entity.h"
 
 #include "Engine.h"
-#include "components/Components.h"
 #include "EngineData.h"
 #include "components/impl/EntityMetadataComponent.h"
+#include "components/AllComponents.h"
 
 namespace Engine {
 
@@ -18,10 +18,22 @@ namespace Engine {
 		return entity;
 	}
 
-	void Entity::Destroy(Entity entity)
+	void Entity::Destroy()
 	{
-		if (entity) {
-			GetCurrentSceneRegistry().destroy(entity.GetHandle());
+		auto& reg = GetCurrentSceneRegistry();
+		if (reg.valid(GetHandle())) {
+			if (HasComponent<Components::EntityMetadata>()) {
+				GetComponent<Components::EntityMetadata>().OnRemoved(*this);
+			}
+
+#define X(type, name)                                                                                                                                                                                                                          \
+	if (HasComponent<type>()) {                                                                                                                                                                                                                \
+		GetComponent<type>().OnRemoved(*this);                                                                                                                                                                                                 \
+	}
+			COMPONENT_LIST
+#undef X
+
+			reg.destroy(GetHandle());
 		}
 	}
 

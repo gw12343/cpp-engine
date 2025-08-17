@@ -18,6 +18,10 @@
 
 namespace Engine::Components {
 
+	void AnimationPoseComponent::OnRemoved(Entity& entity)
+	{
+	}
+
 	void AnimationPoseComponent::OnAdded(Entity& entity)
 	{
 		ENGINE_VERIFY(entity.HasComponent<SkeletonComponent>(), "AnimationPoseComponent::OnAdded: Missing SkeletonComponent");

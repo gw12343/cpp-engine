@@ -28,6 +28,7 @@ namespace Engine::Components {
 		explicit EntityMetadata(std::string name, std::string tag) : name(std::move(name)), tag(std::move(tag)) {}
 
 		void OnAdded(Entity& entity) override;
+		void OnRemoved(Entity& entity) override;
 		void RenderInspector(Entity& entity) override;
 	};
 } // namespace Engine::Components

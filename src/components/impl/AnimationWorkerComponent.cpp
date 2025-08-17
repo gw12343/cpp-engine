@@ -25,6 +25,9 @@ namespace Engine::Components {
 		}
 	}
 
+	void AnimationWorkerComponent::OnRemoved(Entity& entity)
+	{
+	}
 	void AnimationWorkerComponent::OnAdded(Entity& entity)
 	{
 		context = new ozz::animation::SamplingJob::Context();
