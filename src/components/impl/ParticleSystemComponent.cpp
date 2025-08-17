@@ -21,7 +21,17 @@
 namespace Engine::Components {
 	void ParticleSystem::OnRemoved(Entity& entity)
 	{
+		auto manager = GetParticleManager().GetManager();
+		if (manager && handle >= 0) {
+			manager->StopRoot(handle); // force stop this one instance
+			handle = -1;
+		}
+
+		// release effect reference
+		effect = nullptr; // RefPtr release, safe to just null it
 	}
+
+
 	void ParticleSystem::OnAdded(Entity& entity)
 	{
 		if (!effect) {

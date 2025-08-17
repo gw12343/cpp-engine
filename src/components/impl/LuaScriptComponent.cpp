@@ -19,7 +19,25 @@
 namespace Engine::Components {
 	void LuaScript::OnRemoved(Entity& entity)
 	{
+		if (start.valid()) {
+			start = sol::lua_nil;
+		}
+		if (update.valid()) {
+			update = sol::lua_nil;
+		}
+		if (collisionEnter.valid()) {
+			collisionEnter = sol::lua_nil;
+		}
+
+		if (env.valid()) {
+			env.clear();
+			env = sol::lua_nil;
+		}
+
+		GetScriptManager().lua.collect_garbage();
 	}
+
+
 	void LuaScript::OnAdded(Entity& entity)
 	{
 		LoadScript(entity, scriptPath);

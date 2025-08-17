@@ -9,9 +9,7 @@
 #include "ozz/animation/runtime/sampling_job.h"
 #include "ozz/animation/runtime/track.h"
 #include "ozz/base/containers/vector.h"
-#include "rendering/particles/ParticleManager.h"
 #include "animation/AnimationManager.h"
-#include "scripting/ScriptManager.h"
 
 namespace Engine::Components {
 
@@ -27,10 +25,14 @@ namespace Engine::Components {
 
 	void AnimationWorkerComponent::OnRemoved(Entity& entity)
 	{
+		s_contexts.erase(context);
+		delete context;
+		context = nullptr;
 	}
 	void AnimationWorkerComponent::OnAdded(Entity& entity)
 	{
 		context = new ozz::animation::SamplingJob::Context();
+
 		s_contexts.insert(context);
 		// Get the animation component, then resize context for correct number of tracks
 		ENGINE_ASSERT(context, "AnimationWorkerComponent::OnAdded: Failed to allocate SamplingJob::Context");

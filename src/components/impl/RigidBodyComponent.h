@@ -27,7 +27,6 @@ namespace Engine::Components {
 		JPH::Vec3   shapeSize     = JPH::Vec3::sReplicate(1.0f); // size/half-extents
 
 		RigidBodyComponent() : bodyID(0) {}
-		~RigidBodyComponent() override;
 
 		explicit RigidBodyComponent(const JPH::BodyID& bodyID) : bodyID(bodyID) {}
 

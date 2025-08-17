@@ -20,6 +20,16 @@ namespace Engine::Components {
 
 	void AnimationPoseComponent::OnRemoved(Entity& entity)
 	{
+		SPDLOG_INFO("DELETING ANIMATION POSES");
+		if (local_pose) {
+			delete local_pose;
+			local_pose = nullptr;
+		}
+
+		if (model_pose) {
+			delete model_pose;
+			model_pose = nullptr;
+		}
 	}
 
 	void AnimationPoseComponent::OnAdded(Entity& entity)

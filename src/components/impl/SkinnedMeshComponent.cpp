@@ -23,6 +23,18 @@ namespace Engine::Components {
 
 	void SkinnedMeshComponent::OnRemoved(Entity& entity)
 	{
+		SPDLOG_INFO("REMOVING SKINNED MESH COMPONENT");
+		if (skinning_matrices) {
+			s_skin_mats.erase(skinning_matrices);
+			delete skinning_matrices;
+			skinning_matrices = nullptr;
+		}
+
+		if (meshes) {
+			s_all_meshes.erase(meshes);
+			delete meshes;
+			meshes = nullptr;
+		}
 	}
 	void SkinnedMeshComponent::OnAdded(Entity& entity)
 	{
