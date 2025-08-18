@@ -6,6 +6,7 @@
 #define CPP_ENGINE_PARTICLESYSTEMCOMPONENT_H
 
 #include "components/Components.h"
+#include "rendering/particles/Particle.h"
 
 #include <cereal/cereal.hpp>
 #include <cereal/types/vector.hpp>
@@ -15,20 +16,19 @@
 namespace Engine::Components {
 	class ParticleSystem : public Component {
 	  public:
-		std::string                          effectPath;
-		Effekseer::RefPtr<Effekseer::Effect> effect;
-		bool                                 autoPlay = true;
-		bool                                 looping  = false;
+		AssetHandle<Particle> effect;
+		bool                  autoPlay = true;
+		bool                  looping  = false;
 
 		ParticleSystem() = default;
 
 		template <class Archive>
 		void serialize(Archive& ar)
 		{
-			ar(cereal::make_nvp("effectPath", effectPath), cereal::make_nvp("autoPlay", autoPlay), cereal::make_nvp("looping", looping));
+			ar(cereal::make_nvp("effect", effect), cereal::make_nvp("autoPlay", autoPlay), cereal::make_nvp("looping", looping));
 		}
 
-		explicit ParticleSystem(const std::string& path) : effectPath(path) {}
+		// explicit ParticleSystem(const AssetHandle<Particle>& effectRef) : effect(effectRef) {}
 		void OnAdded(Entity& entity) override;
 		void OnRemoved(Entity& entity) override;
 		void RenderInspector(Entity& entity) override;

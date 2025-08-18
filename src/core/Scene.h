@@ -13,8 +13,6 @@
 #include "core/Entity.h"
 
 namespace Engine {
-
-
 	// A single scene, essentially just a wrapper for entt::registry
 	class Scene {
 	  public:

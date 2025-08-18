@@ -38,11 +38,26 @@ namespace Engine {
 		}                                                                                                                                                                                                                                      \
 	} while (false)
 
+
+#define ENGINE_WARN_IMPL(message, ...)                                                                                                                                                                                                         \
+	do {                                                                                                                                                                                                                                       \
+		spdlog::warn("Message: " message, ##__VA_ARGS__);                                                                                                                                                                                      \
+		spdlog::warn("At {}:{} in function {}", __FILE__, __LINE__, __func__);                                                                                                                                                                 \
+	} while (false)
+
+
 // ENGINE_ASSERT only in debug mode
 #ifndef NDEBUG
 #define ENGINE_ASSERT(condition, ...) ENGINE_ASSERT_IMPL(condition, "" __VA_ARGS__)
 #else
 #define ENGINE_ASSERT(condition, ...) ((void) 0)
+#endif
+
+// ENGINE_ASSERT only in debug mode
+#ifndef NDEBUG
+#define ENGINE_WARN(...) ENGINE_WARN_IMPL("" __VA_ARGS__)
+#else
+#define ENGINE_WARN(condition, ...) ((void) 0)
 #endif
 
 // ENGINE_VERIFY always runs (can be used for runtime checks)

@@ -11,7 +11,6 @@ add_compile_options(-w)
 if (WIN32)
     add_compile_definitions(NOMINMAX)
 endif ()
-
 # Global dependency flags
 set(SPDLOG_BUILD_WARNINGS OFF CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
@@ -158,34 +157,10 @@ target_include_directories(lua PUBLIC ${lua_SOURCE_DIR}/src)
 file(GLOB_RECURSE SOURCES "lib/src/*.cpp" "lib/src/*.c" "src/*.cpp" "src/*.inl")
 
 add_executable(${PROJECT_NAME} ${SOURCES}
-        src/core/Scene.cpp
-        src/assets/impl/BinarySceneLoader.h
-        src/assets/impl/BinarySceneLoader.cpp
-        src/rendering/ui/Themes.h
-        src/rendering/ui/AssetUIRenderer.h
-        src/rendering/ui/AssetUIRenderer.cpp
-        src/assets/impl/SceneLoader.h
-        #        src/rendering/ui/ModelPreview.h
-        #        src/rendering/ui/ModelPreview.cpp
-        #        src/components/impl/TerrainRendererComponent.cpp
-        #        src/components/impl/TerrainRendererComponent.h
-        #        src/assets/impl/TerrainLoader.cpp
-        #        src/assets/impl/TerrainLoader.h
-        #        src/terrain/TerrainTile.cpp
-        #        src/terrain/TerrainTile.h
-        #        src/assets/AssetMeta.h
-        #        src/serialization/SerializationManager.h
-        #        src/serialization/SerializationManager.cpp
-        #        src/components/AllComponents.h
-        #        src/assets/impl/SoundLoader.h
-        #        src/assets/impl/SoundLoader.cpp
-        #        src/core/Scene.h
-        #        src/core/SceneManager.h
-        #        src/core/SceneManager.cpp
-        #        src/assets/impl/JSONSceneLoader.h
-        #        src/assets/impl/JSONSceneLoader.cpp
-        #        src/serialization/SerializedEntity.h
-)
+        src/rendering/particles/Particle.h
+        src/rendering/particles/Particle.cpp
+        src/assets/impl/ParticleLoader.h
+        src/assets/impl/ParticleLoader.cpp)
 
 
 target_include_directories(${PROJECT_NAME} PRIVATE

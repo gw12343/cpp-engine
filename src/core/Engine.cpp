@@ -42,6 +42,8 @@
 #include "assets/impl/JSONSceneLoader.h"
 #include "components/impl/ModelRendererComponent.h"
 #include "components/impl/ParticleSystemComponent.h"
+#include "rendering/particles/Particle.h"
+#include "assets/impl/ParticleLoader.h"
 
 namespace Engine {
 	ModuleManager manager;
@@ -56,6 +58,7 @@ namespace Engine {
 		GetAssetManager().RegisterLoader<Terrain::TerrainTile>(std::make_unique<TerrainLoader>());
 		GetAssetManager().RegisterLoader<Audio::SoundBuffer>(std::make_unique<SoundLoader>());
 		GetAssetManager().RegisterLoader<Scene>(std::make_unique<JSONSceneLoader>());
+		GetAssetManager().RegisterLoader<Particle>(std::make_unique<ParticleLoader>());
 
 		// Initialize Modules
 		Get().window    = std::make_shared<Window>(width, height, title);
@@ -94,6 +97,9 @@ namespace Engine {
 		Components::RegisterAllComponentBindings();
 		manager.InitAllLuaBindings();
 		manager.InitAll();
+
+		AssetHandle<Particle> testParticle = GetAssetManager().Load<Particle>("resources/particles/testleaf.efk");
+
 		GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>("scenes/scene1.json"));
 		CreateInitialEntities();
 
@@ -107,9 +113,9 @@ namespace Engine {
 
 
 		GetAssetManager().Load<Rendering::Model>("resources/models/Spruce2.fbx");
-		GetAssetManager().Load<Rendering::Model>("resources/models/cube.obj");
+
 		GetAssetManager().Load<Rendering::Model>("resources/models/sphere.obj");
-		AssetHandle<Rendering::Model>   cubeModel = AssetHandle<Rendering::Model>("eb048fc8e5c5aa8d185a48312731d0f1");
+		AssetHandle<Rendering::Model>   cubeModel = GetAssetManager().Load<Rendering::Model>("resources/models/cube.obj");
 		AssetHandle<Audio::SoundBuffer> snd       = GetAssetManager().Load<Audio::SoundBuffer>("resources/sounds/bird_chirp.wav");
 
 
