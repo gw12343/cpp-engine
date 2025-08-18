@@ -79,6 +79,10 @@ namespace Engine {
 	{
 		return *Get().sound;
 	}
+	inline auto& GetUI()
+	{
+		return *Get().ui;
+	}
 	inline auto& GetAnimationManager()
 	{
 		return *Get().animation;

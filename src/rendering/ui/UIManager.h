@@ -9,6 +9,7 @@
 #include "imgui.h"
 #include "core/module/Module.h"
 #include "ModelPreview.h"
+#include "AssetUIRenderer.h"
 #include <memory>
 #include <typeindex>
 #include <string>
@@ -31,6 +32,10 @@ namespace Engine {
 			void BeginDockspace();
 			void EndDockspace();
 
+
+			std::shared_ptr<Texture> audioIconTexture;
+			std::shared_ptr<Texture> terrainIconTexture;
+
 		  private:
 			// UI rendering methods
 			void RenderHierarchyWindow();
@@ -39,18 +44,11 @@ namespace Engine {
 			void RenderAudioDebugUI();
 			void RenderPauseOverlay();
 			void RenderSceneView(GLuint texId);
-			void RenderAssetWindow();
 
-			void DrawTerrainAssets();
-			void DrawSoundAssets();
-			void DrawTextureAssets();
-			void DrawModelAssets();
 
+			std::unique_ptr<AssetUIRenderer> m_uiAssetRenderer;
 			// Selected entity
 			Entity m_selectedEntity;
-
-			std::unordered_map<std::type_index, std::function<void()>> drawFuncs;
-			std::unordered_map<std::string, ModelPreview>              m_modelPreviews;
 		};
 	} // namespace UI
 } // namespace Engine

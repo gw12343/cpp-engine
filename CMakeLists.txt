@@ -159,6 +159,12 @@ file(GLOB_RECURSE SOURCES "lib/src/*.cpp" "lib/src/*.c" "src/*.cpp" "src/*.inl")
 
 add_executable(${PROJECT_NAME} ${SOURCES}
         src/core/Scene.cpp
+        src/assets/impl/BinarySceneLoader.h
+        src/assets/impl/BinarySceneLoader.cpp
+        src/rendering/ui/Themes.h
+        src/rendering/ui/AssetUIRenderer.h
+        src/rendering/ui/AssetUIRenderer.cpp
+        src/assets/impl/SceneLoader.h
         #        src/rendering/ui/ModelPreview.h
         #        src/rendering/ui/ModelPreview.cpp
         #        src/components/impl/TerrainRendererComponent.cpp
@@ -176,8 +182,8 @@ add_executable(${PROJECT_NAME} ${SOURCES}
         #        src/core/Scene.h
         #        src/core/SceneManager.h
         #        src/core/SceneManager.cpp
-        #        src/assets/impl/SceneLoader.h
-        #        src/assets/impl/SceneLoader.cpp
+        #        src/assets/impl/JSONSceneLoader.h
+        #        src/assets/impl/JSONSceneLoader.cpp
         #        src/serialization/SerializedEntity.h
 )
 

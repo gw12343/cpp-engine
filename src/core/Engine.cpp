@@ -39,7 +39,9 @@
 // #include "components/impl/TerrainRendererComponent.h"
 //
 // #include "terrain/TerrainManager.h"
-#include "assets/impl/SceneLoader.h"
+#include "assets/impl/JSONSceneLoader.h"
+#include "components/impl/ModelRendererComponent.h"
+#include "components/impl/ParticleSystemComponent.h"
 
 namespace Engine {
 	ModuleManager manager;
@@ -53,10 +55,7 @@ namespace Engine {
 		GetAssetManager().RegisterLoader<Rendering::Model>(std::make_unique<Rendering::ModelLoader>());
 		GetAssetManager().RegisterLoader<Terrain::TerrainTile>(std::make_unique<TerrainLoader>());
 		GetAssetManager().RegisterLoader<Audio::SoundBuffer>(std::make_unique<SoundLoader>());
-		GetAssetManager().RegisterLoader<Scene>(std::make_unique<SceneLoader>());
-
-		// Initialize Scene
-		// Get().registry = std::make_shared<entt::registry>();
+		GetAssetManager().RegisterLoader<Scene>(std::make_unique<JSONSceneLoader>());
 
 		// Initialize Modules
 		Get().window    = std::make_shared<Window>(width, height, title);
@@ -95,6 +94,7 @@ namespace Engine {
 		Components::RegisterAllComponentBindings();
 		manager.InitAllLuaBindings();
 		manager.InitAll();
+		GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>("scenes/scene1.json"));
 		CreateInitialEntities();
 
 		return true;
@@ -113,9 +113,9 @@ namespace Engine {
 		AssetHandle<Audio::SoundBuffer> snd       = GetAssetManager().Load<Audio::SoundBuffer>("resources/sounds/bird_chirp.wav");
 
 
-		//		Entity entity = Entity::Create("TestEntity");
+		//		Entity entity = Entity::Create("TestEntity", GetCurrentScene());
 		//		entity.AddComponent<Components::ModelRenderer>(treeModel);
-		//		entity.AddComponent<Components::Transform>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		//		entity.AddComponent<Components::Transform>(glm::vec3(0.0f, 15.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 		//		entity.AddComponent<Components::ParticleSystem>("resources/particles/testleaf.efk");
 
 
@@ -180,10 +180,6 @@ namespace Engine {
 
 	void GEngine::Run()
 	{
-		// std::vector<Entity> ets = GetSerializationManager().LoadScene(GetRegistry(), "debug/savescene.json");
-
-		GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>("scenes/scene1.json"));
-
 		while (!GetWindow().ShouldClose()) {
 			auto currentFrame = static_cast<float>(glfwGetTime());
 			m_deltaTime       = currentFrame - m_lastFrame;
@@ -191,12 +187,12 @@ namespace Engine {
 
 			manager.UpdateAll(m_deltaTime);
 		}
-		// GetSerializationManager().SaveScene(GetRegistry(), "debug/savescene.json");
 	}
 
 
 	void GEngine::Shutdown()
 	{
+		JSONSceneLoader::SerializeScene(GetSceneManager().GetActiveScene(), "scenes/scene1.json");
 		manager.ShutdownAll();
 
 		Components::AnimationWorkerComponent::CleanAnimationContexts();

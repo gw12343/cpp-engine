@@ -1,7 +1,7 @@
 //
 // Created by gabe on 8/16/25.
 //
-#include "SceneLoader.h"
+#include "JSONSceneLoader.h"
 
 #include <cereal/archives/json.hpp>
 #include <cereal/types/vector.hpp>
@@ -10,7 +10,6 @@
 #include <cereal/types/common.hpp>
 
 #include <iostream>
-#include "glm/glm.hpp"
 #include "components/AllComponents.h"
 #include "components/Components.h"
 #include "core/SceneManager.h"
@@ -101,21 +100,24 @@ namespace Engine {
 		}
 	};
 
-
-	void SaveScene(const entt::registry& registry, const std::string& filename)
+	void JSONSceneLoader::SerializeScene(AssetHandle<Scene> sceneRef, const std::string& path)
 	{
-		std::ofstream             os(filename);
+		std::ofstream             os(path);
 		cereal::JSONOutputArchive archive(os);
 
 		std::vector<SerializedEntity> entities;
 
-		registry.view<Components::EntityMetadata>().each([&](auto entity, auto meta) {
+		Scene* scene = GetAssetManager().Get(sceneRef);
+
+		auto registry = scene->GetRegistry();
+
+		registry->view<Components::EntityMetadata>().each([&](auto entity, auto meta) {
 			SerializedEntity se;
 			se.meta = meta;
 
 			// Now loop over all the components in the list
 #define X(type, name)                                                                                                                                                                                                                          \
-	if (registry.all_of<type>(entity)) se.name = registry.get<type>(entity);
+	if (registry->all_of<type>(entity)) se.name = registry->get<type>(entity);
 			COMPONENT_LIST
 #undef X
 
@@ -128,7 +130,7 @@ namespace Engine {
 	}
 
 
-	std::unique_ptr<Scene> SceneLoader::LoadFromFile(const std::string& path)
+	std::unique_ptr<Scene> JSONSceneLoader::LoadFromFile(const std::string& path)
 	{
 		std::unique_ptr<Scene> scene = GetSceneManager().CreateScene(path);
 
