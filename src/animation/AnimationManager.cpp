@@ -14,6 +14,8 @@
 #include <utils/Utils.h>
 #include "core/SceneManager.h"
 #include "assets/AssetManager.h"
+#include "physics/PhysicsManager.h"
+
 namespace Engine {
 
 	void AnimationManager::onInit()
@@ -71,7 +73,9 @@ namespace Engine {
 			auto&  skeletonComponent        = e.GetComponent<Components::SkeletonComponent>();
 
 			// Update animation time
-			controller_.set_time_ratio((float) (sin(glfwGetTime() / 3.0f) / 2.0 + 0.5f));
+			if (!GetPhysics().isPhysicsPaused) {
+				controller_.set_time_ratio((float) (sin(glfwGetTime() / 3.0f) / 2.0 + 0.5f));
+			}
 
 			// Samples optimized animation at t = animation_time_
 			ozz::animation::SamplingJob sampling_job;

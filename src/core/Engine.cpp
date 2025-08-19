@@ -198,7 +198,7 @@ namespace Engine {
 
 	void GEngine::Shutdown()
 	{
-		JSONSceneLoader::SerializeScene(GetSceneManager().GetActiveScene(), "scenes/scene1.json");
+		// JSONSceneLoader::SerializeScene(GetSceneManager().GetActiveScene(), "scenes/scene1.json");
 		manager.ShutdownAll();
 
 		Components::AnimationWorkerComponent::CleanAnimationContexts();

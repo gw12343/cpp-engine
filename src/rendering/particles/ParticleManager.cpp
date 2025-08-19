@@ -1,14 +1,13 @@
 #include "ParticleManager.h"
 
-// #include "components/Components.h"
 #include "utils/Utils.h"
 #include "components/Components.h"
 #include "core/EngineData.h"
 #include "components/impl/TransformComponent.h"
 #include "components/impl/ParticleSystemComponent.h"
 
-// #include <components/Components.h>
 #include <spdlog/spdlog.h>
+#include "physics/PhysicsManager.h"
 namespace Engine {
 	static const int MAX_INSTANCES = 8000;
 
@@ -67,6 +66,8 @@ namespace Engine {
 
 	void ParticleManager::onUpdate(float dt)
 	{
+		if (GetPhysics().isPhysicsPaused) return;
+
 		if (m_manager) {
 			m_manager->Update(dt * 60.0);
 		}

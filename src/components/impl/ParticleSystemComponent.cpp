@@ -34,23 +34,6 @@ namespace Engine::Components {
 
 	void ParticleSystem::OnAdded(Entity& entity)
 	{
-		SPDLOG_INFO("SYSTEM GUID: {}", effect.GetID());
-		//		if (!effect) {
-		//			// Convert path string
-		//			ENGINE_ASSERT(!effectPath.empty(), "ParticleSystem::OnAdded: effectPath is empty");
-		//			std::u16string  utf16 = std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes(effectPath);
-		//			const char16_t* raw   = utf16.c_str();
-		//
-		//			const auto& manager = GetParticleManager().GetManager();
-		//			ENGINE_VERIFY(manager != nullptr, "ParticleSystem::OnAdded: Failed to get Effekseer manager");
-		//			// Spawn effect
-		//			effect = Effekseer::Effect::Create(manager, raw);
-		//			ENGINE_VERIFY(effect != nullptr, "ParticleSystem::OnAdded: Failed to create Effekseer effect");
-		//			// Get initial transform
-		//			auto transform = entity.GetComponent<Components::Transform>();
-		//			// Spawn particle
-		//			handle = manager->Play(effect, transform.position.x, transform.position.y, transform.position.z);
-		//		}
 		if (effect.IsValid()) {
 			Particle* particle = GetAssetManager().Get(effect);
 			ENGINE_VERIFY(particle, "Particle effect is null!");

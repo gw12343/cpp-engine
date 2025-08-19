@@ -51,7 +51,7 @@ namespace Engine::UI {
 
 	int selectedTheme = 0;
 
-	void UIManager::DrawTopBar()
+	void UIManager::DrawMenuBar()
 	{
 		if (ImGui::BeginMainMenuBar()) {
 			if (ImGui::BeginMenu("Themes")) {
@@ -71,7 +71,7 @@ namespace Engine::UI {
 	void UIManager::BeginDockspace()
 	{
 		// 1. Draw top menu bar *before* dockspace
-		DrawTopBar();
+		// DrawTopBar();
 
 		// 2. Apply theme colors
 		SetThemeColors(selectedTheme);
@@ -104,9 +104,77 @@ namespace Engine::UI {
 		ImGui::End();
 	}
 
+
+	void UIManager::RenderTopBar()
+	{
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+		// Place the top bar exactly at the top of the viewport
+		ImGui::SetNextWindowPos(viewport->Pos);
+		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, 32.0f)); // fixed height
+		ImGui::SetNextWindowViewport(viewport->ID);
+
+		// Style: no title, no scroll, no resize, no move, no collapse, no docking
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBringToFrontOnFocus |
+		                                ImGuiWindowFlags_NoDocking;
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 4));
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 4));
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 0));
+
+		if (ImGui::Begin("##TopBar", nullptr, window_flags)) {
+			// --- Left Tool Buttons ---
+			if (ImGui::Button(ICON_FA_ARROWS_UP_DOWN_LEFT_RIGHT "##tool1")) { /* tool1 */
+			}
+			ImGui::SameLine();
+			if (ImGui::Button(ICON_FA_ROTATE "##tool2")) { /* tool2 */
+			}
+			ImGui::SameLine();
+			if (ImGui::Button(ICON_FA_CAMERA "##tool3")) { /* tool3 */
+			}
+			ImGui::SameLine();
+			if (ImGui::Button(ICON_FA_UP_RIGHT_AND_DOWN_LEFT_FROM_CENTER "##tool4")) { /* tool4 */
+			}
+
+			// --- Center Play Controls ---
+			float windowWidth        = ImGui::GetWindowSize().x;
+			float playBtnWidth       = ImGui::CalcTextSize(ICON_FA_PLAY).x + ImGui::GetStyle().FramePadding.x * 2;
+			float pauseBtnWidth      = ImGui::CalcTextSize(ICON_FA_PAUSE).x + ImGui::GetStyle().FramePadding.x * 2;
+			float stopBtnWidth       = ImGui::CalcTextSize(ICON_FA_STOP).x + ImGui::GetStyle().FramePadding.x * 2;
+			float totalControlsWidth = playBtnWidth + pauseBtnWidth + stopBtnWidth + ImGui::GetStyle().ItemSpacing.x * 2;
+
+			float cursorX = (windowWidth - totalControlsWidth) * 0.5f;
+			ImGui::SameLine();
+			ImGui::SetCursorPosX(cursorX);
+
+			if (ImGui::Button(ICON_FA_PLAY "##play")) { /* play */
+			}
+			ImGui::SameLine();
+
+			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);                        // Disable input
+			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.25f); // Dim look
+
+			if (ImGui::Button(ICON_FA_PAUSE "##pause")) { /* pause */
+			}
+
+			ImGui::PopStyleVar();
+			ImGui::PopItemFlag();
+
+			ImGui::SameLine();
+			if (ImGui::Button(ICON_FA_STOP "##stop")) { /* stop */
+			}
+		}
+		ImGui::End();
+
+		ImGui::PopStyleVar(3);
+	}
+
 	void UIManager::onUpdate(float dt)
 	{
 		GetRenderer().PreRender();
+		RenderTopBar();
+
+
 		BeginDockspace();
 
 		RenderSceneView(Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->texture);
@@ -157,6 +225,7 @@ namespace Engine::UI {
 
 		ImGui::End();
 	}
+
 
 	void UIManager::RenderInspectorWindow()
 	{

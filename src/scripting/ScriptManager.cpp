@@ -21,6 +21,7 @@
 #include "components/impl/ParticleSystemComponent.h"
 #include "components/AllComponents.h"
 
+#include "physics/PhysicsManager.h"
 
 #define COMPONENT_METHODS(COMPONENT_TYPE, COMPONENT_NAME)                                                                                                                                                                                      \
 	"Add" #COMPONENT_NAME, [](Entity& e) -> COMPONENT_TYPE& { return e.AddComponent<COMPONENT_TYPE>(); }, "Get" #COMPONENT_NAME, [](Entity& e) -> COMPONENT_TYPE& { return e.GetComponent<COMPONENT_TYPE>(); }, "Has" #COMPONENT_NAME,         \
@@ -82,6 +83,7 @@ namespace Engine {
 			}
 		}
 
+		if (GetPhysics().isPhysicsPaused) return;
 		{
 			std::lock_guard<std::mutex> lock(collisionMutex);
 

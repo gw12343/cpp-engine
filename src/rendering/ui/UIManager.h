@@ -28,7 +28,7 @@ namespace Engine {
 			std::string name() const override { return "UIModule"; };
 
 
-			void DrawTopBar();
+			void DrawMenuBar();
 			void BeginDockspace();
 			void EndDockspace();
 
@@ -39,6 +39,7 @@ namespace Engine {
 		  private:
 			// UI rendering methods
 			void RenderHierarchyWindow();
+			void RenderTopBar();
 			void RenderInspectorWindow();
 			void RenderAnimationWindow();
 			void RenderAudioDebugUI();
