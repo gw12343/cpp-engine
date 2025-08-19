@@ -46,6 +46,8 @@ namespace Engine {
 
 			explicit Transform(const glm::vec3& position, const glm::vec3& eulerAngles = glm::vec3(0.0f), const glm::vec3& scale = glm::vec3(1.0f)) : position(position), rotation(glm::quat(glm::radians(eulerAngles))), scale(scale) {}
 
+			void SyncWithPhysics(Entity& entity);
+
 			// Set rotation using Euler angles (in degrees)
 			void SetRotation(const glm::vec3& eulerAngles) { rotation = glm::quat(glm::radians(eulerAngles)); }
 

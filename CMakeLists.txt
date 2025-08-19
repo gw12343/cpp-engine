@@ -160,7 +160,8 @@ add_executable(${PROJECT_NAME} ${SOURCES}
         src/rendering/particles/Particle.h
         src/rendering/particles/Particle.cpp
         src/assets/impl/ParticleLoader.h
-        src/assets/impl/ParticleLoader.cpp)
+        src/assets/impl/ParticleLoader.cpp
+        lib/include/imguizmo/ImGuizmo.h)
 
 
 target_include_directories(${PROJECT_NAME} PRIVATE

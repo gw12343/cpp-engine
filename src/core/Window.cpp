@@ -9,6 +9,7 @@
 #include <utility>
 #include "scripting/ScriptManager.h"
 #include "rendering/ui/IconsFontAwesome6.h"
+#include "imguizmo/ImGuizmo.h"
 
 namespace Engine {
 
@@ -107,15 +108,18 @@ namespace Engine {
 
 
 		io.FontGlobalScale = 1.0f;
+		ImGuizmo::SetImGuiContext(ImGui::GetCurrentContext());
 		return true;
 	}
 
 	void Window::onUpdate(float dt)
 	{
 		glfwPollEvents();
+
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+		ImGuizmo::BeginFrame();
 	}
 
 	bool Window::ShouldClose() const

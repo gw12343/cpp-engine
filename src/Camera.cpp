@@ -8,6 +8,7 @@
 #include "core/Window.h"
 
 #include "scripting/ScriptManager.h"
+#include "imgui.h"
 
 namespace Engine {
 
@@ -31,6 +32,8 @@ namespace Engine {
 			// Only capture cursor if it's not already captured
 			if (GetInput().GetCursorMode() != GLFW_CURSOR_DISABLED) {
 				GetInput().SetCursorMode(GLFW_CURSOR_DISABLED);
+				ImGuiIO& io = ImGui::GetIO();
+				io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
 			}
 
 			// Process camera movement with keyboard
@@ -55,6 +58,8 @@ namespace Engine {
 			if (GetInput().GetCursorMode() == GLFW_CURSOR_DISABLED) {
 				GetInput().SetCursorMode(GLFW_CURSOR_NORMAL);
 			}
+			ImGuiIO& io = ImGui::GetIO();
+			io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
 		}
 
 

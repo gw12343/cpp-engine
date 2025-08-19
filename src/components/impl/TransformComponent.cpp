@@ -23,6 +23,18 @@ namespace Engine::Components {
 	{
 	}
 
+	void Transform::SyncWithPhysics(Entity& entity)
+	{
+		if (entity.HasComponent<RigidBodyComponent>()) {
+			auto&          rb             = entity.GetComponent<RigidBodyComponent>();
+			BodyInterface& body_interface = Engine::GetPhysics().GetPhysicsSystem()->GetBodyInterface();
+			// convert pos and rot to jolt types
+			RVec3 joltPos = RVec3(position.x, position.y, position.z);
+			Quat  joltRot = Quat(rotation.x, rotation.y, rotation.z, rotation.w);
+			body_interface.SetPositionAndRotation(rb.bodyID, joltPos, joltRot, EActivation::Activate);
+		}
+	}
+
 	void Transform::RenderInspector(Entity& entity)
 	{
 		bool updatePhysicsPositionManually = false;
@@ -37,14 +49,7 @@ namespace Engine::Components {
 		}
 
 		if (updatePhysicsPositionManually) {
-			if (entity.HasComponent<RigidBodyComponent>()) {
-				auto&          rb             = entity.GetComponent<RigidBodyComponent>();
-				BodyInterface& body_interface = Engine::GetPhysics().GetPhysicsSystem()->GetBodyInterface();
-				// convert pos and rot to jolt types
-				RVec3 joltPos = RVec3(position.x, position.y, position.z);
-				Quat  joltRot = Quat::sEulerAngles(RVec3(glm::radians(eulerAngles.x), glm::radians(eulerAngles.y), glm::radians(eulerAngles.z)));
-				body_interface.SetPositionAndRotation(rb.bodyID, joltPos, joltRot, EActivation::Activate);
-			}
+			SyncWithPhysics(entity);
 		}
 
 		ImGui::DragFloat3("Scale", glm::value_ptr(scale), 0.1f);

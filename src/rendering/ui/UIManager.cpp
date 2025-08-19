@@ -27,6 +27,12 @@
 
 
 #include "rendering/ui/Themes.h"
+#include "imguizmo/ImGuizmo.h"
+
+#include "glm/glm.hpp"
+#include "glm/gtc/type_ptr.hpp"
+#include "glm/gtx/matrix_decompose.inl"
+
 
 namespace Engine::UI {
 
@@ -104,6 +110,8 @@ namespace Engine::UI {
 		ImGui::End();
 	}
 
+	static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
+	static ImGuizmo::MODE      mCurrentGizmoMode(ImGuizmo::LOCAL);
 
 	void UIManager::RenderTopBar()
 	{
@@ -124,16 +132,20 @@ namespace Engine::UI {
 
 		if (ImGui::Begin("##TopBar", nullptr, window_flags)) {
 			// --- Left Tool Buttons ---
-			if (ImGui::Button(ICON_FA_ARROWS_UP_DOWN_LEFT_RIGHT "##tool1")) { /* tool1 */
+			if (ImGui::Button(ICON_FA_ARROWS_UP_DOWN_LEFT_RIGHT "##tool1")) {
+				mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
 			}
 			ImGui::SameLine();
-			if (ImGui::Button(ICON_FA_ROTATE "##tool2")) { /* tool2 */
+			if (ImGui::Button(ICON_FA_ROTATE "##tool2")) {
+				mCurrentGizmoOperation = ImGuizmo::ROTATE;
 			}
 			ImGui::SameLine();
-			if (ImGui::Button(ICON_FA_CAMERA "##tool3")) { /* tool3 */
+			if (ImGui::Button(ICON_FA_UP_RIGHT_AND_DOWN_LEFT_FROM_CENTER "##tool3")) {
+				mCurrentGizmoOperation = ImGuizmo::SCALE;
 			}
 			ImGui::SameLine();
-			if (ImGui::Button(ICON_FA_UP_RIGHT_AND_DOWN_LEFT_FROM_CENTER "##tool4")) { /* tool4 */
+			if (ImGui::Button(ICON_FA_BORDER_TOP_LEFT "##tool4")) {
+				mCurrentGizmoOperation = ImGuizmo::BOUNDS;
 			}
 
 			// --- Center Play Controls ---
@@ -488,6 +500,8 @@ namespace Engine::UI {
 		ImGui::Text("Press P to resume");
 		ImGui::End();
 	}
+
+
 	void UIManager::RenderSceneView(GLuint texId)
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -516,13 +530,39 @@ namespace Engine::UI {
 			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offsetX);
 		}
 
-		ImVec2 topLeft = ImGui::GetCursorScreenPos(); // Now it's correct
+		ImVec2 topLeft = ImGui::GetCursorScreenPos();
 
-		GLuint tex = texId; // Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->texture;
+		GLuint tex = texId;
 		ImGui::Image((ImTextureID) tex, ImVec2(width, height), ImVec2(0, 1), ImVec2(1, 0));
-		// Now the topLeft is the actual top-left of the displayed image
+
 		GetWindow().UpdateViewportSize(width, height, topLeft.x, topLeft.y);
 
+		if (m_selectedEntity && GetCurrentSceneRegistry().valid(m_selectedEntity.GetHandle())) {
+			if (m_selectedEntity.HasComponent<Components::Transform>()) {
+				Components::Transform& transform = m_selectedEntity.GetComponent<Components::Transform>();
+
+				ImGuizmo::SetRect(topLeft.x, topLeft.y, width, height);
+
+				glm::mat4 view       = GetCamera().GetViewMatrix();
+				glm::mat4 projection = GetCamera().GetProjectionMatrix();
+
+				glm::mat4 model = transform.GetMatrix();
+				ImGuizmo::SetDrawlist(ImGui::GetCurrentWindow()->DrawList);
+				ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), mCurrentGizmoOperation, mCurrentGizmoMode, glm::value_ptr(model));
+				if (ImGuizmo::IsUsingAny()) {
+					glm::vec3 outTrans, outScale, notUsed1;
+					glm::vec4 notUsed2;
+					glm::quat newRotation;
+
+					glm::decompose(model, outScale, newRotation, outTrans, notUsed1, notUsed2);
+
+					transform.position = outTrans;
+					transform.rotation = newRotation;
+					transform.scale    = outScale;
+					transform.SyncWithPhysics(m_selectedEntity);
+				}
+			}
+		}
 		ImGui::PopStyleVar();
 		ImGui::End();
 	}
