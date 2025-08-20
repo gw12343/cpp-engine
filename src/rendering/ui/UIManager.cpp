@@ -129,22 +129,50 @@ namespace Engine::UI {
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 0));
 
 		if (ImGui::Begin("##TopBar", nullptr, window_flags)) {
-			// --- Left Tool Buttons ---
-			if (ImGui::Button(ICON_FA_ARROWS_UP_DOWN_LEFT_RIGHT "##tool1")) {
-				mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-			}
+#define TOOLBUTTON(name, type)                                                                                                                                                                                                                 \
+	if (mCurrentGizmoOperation == ImGuizmo::type) {                                                                                                                                                                                            \
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.25, 0.25, 0.75, 1.0));                                                                                                                                                                 \
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.35, 0.35, 0.85, 1.0));                                                                                                                                                          \
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.45, 0.45, 0.95, 1.0));                                                                                                                                                           \
+	}                                                                                                                                                                                                                                          \
+	bool Tool##type = ImGui::Button(name);                                                                                                                                                                                                     \
+	if (mCurrentGizmoOperation == ImGuizmo::type) {                                                                                                                                                                                            \
+		ImGui::PopStyleColor(3);                                                                                                                                                                                                               \
+	}                                                                                                                                                                                                                                          \
+	if (Tool##type) {                                                                                                                                                                                                                          \
+		mCurrentGizmoOperation = ImGuizmo::type;                                                                                                                                                                                               \
+	}
+
+
+			TOOLBUTTON(ICON_FA_ARROWS_UP_DOWN_LEFT_RIGHT "##tooltranslate", TRANSLATE)
 			ImGui::SameLine();
-			if (ImGui::Button(ICON_FA_ROTATE "##tool2")) {
-				mCurrentGizmoOperation = ImGuizmo::ROTATE;
-			}
+			TOOLBUTTON(ICON_FA_ROTATE "##toolrotate", ROTATE)
 			ImGui::SameLine();
-			if (ImGui::Button(ICON_FA_UP_RIGHT_AND_DOWN_LEFT_FROM_CENTER "##tool3")) {
-				mCurrentGizmoOperation = ImGuizmo::SCALE;
-			}
+			TOOLBUTTON(ICON_FA_UP_RIGHT_AND_DOWN_LEFT_FROM_CENTER "##toolscale", SCALE)
 			ImGui::SameLine();
-			if (ImGui::Button(ICON_FA_BORDER_TOP_LEFT "##tool4")) {
-				mCurrentGizmoOperation = ImGuizmo::BOUNDS;
+			TOOLBUTTON(ICON_FA_BORDER_TOP_LEFT "##toolscalebounds", BOUNDS)
+
+
+#undef TOOLBUTTON
+
+			ImGui::SameLine(185);
+
+
+			const char* modeNames[] = {"Local", "World"};
+			int         current     = (mCurrentGizmoMode == ImGuizmo::MODE::LOCAL ? 0 : 1);
+			ImGui::SetNextItemWidth(80);
+			if (ImGui::BeginCombo("##WorldMode", modeNames[current])) {
+				for (int i = 0; i < 2; i++) {
+					bool isSelected = (current == i);
+					if (ImGui::Selectable(modeNames[i], isSelected)) current = i;
+
+					if (isSelected) ImGui::SetItemDefaultFocus();
+				}
+				ImGui::EndCombo();
 			}
+
+			mCurrentGizmoMode = (current == 0 ? ImGuizmo::MODE::LOCAL : ImGuizmo::MODE::WORLD);
+
 
 			// --- Center Play Controls ---
 			float windowWidth        = ImGui::GetWindowSize().x;
