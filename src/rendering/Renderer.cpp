@@ -22,6 +22,11 @@ namespace Engine {
 			return;
 		}
 
+		if (!m_mousePickingShader.LoadFromFiles("resources/shaders/picking.vert", "resources/shaders/picking.frag", std::nullopt)) {
+			log->error("Failed to load mouse picking shader");
+			return;
+		}
+
 		// Load skybox shader
 		if (!m_skyboxShader.LoadFromFiles("resources/shaders/skybox_vert.glsl", "resources/shaders/skybox_frag.glsl", std::nullopt)) {
 			log->error("Failed to load skybox shader");
@@ -87,6 +92,8 @@ namespace Engine {
 		GetTerrainManager().Render();
 		RenderSkybox();
 		GetParticleManager().Render();
+		Engine::Window::GetFramebuffer(Window::FramebufferID::MOUSE_PICKING)->Bind();
+		RenderEntitiesMousePicking();
 		Engine::Framebuffer::Unbind();
 		PostRender();
 	}
@@ -105,6 +112,43 @@ namespace Engine {
 			if (!renderer.visible) continue;
 			// Draw model
 			renderer.Draw(GetShader(), transform);
+		}
+	}
+
+	glm::vec3 EncodeEntityID(entt::entity entityID)
+	{
+		auto  id = static_cast<uint32_t>(entityID);
+		float r  = (float) (id & 0xFF) / 255.0f;
+		float g  = (float) ((id >> 8) & 0xFF) / 255.0f;
+		float b  = (float) ((id >> 16) & 0xFF) / 255.0f;
+		return {r, g, b};
+	}
+
+	void Renderer::RenderEntitiesMousePicking()
+	{
+		glDisable(GL_CULL_FACE);
+
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		GetMousePickingShader().Bind();
+
+		ENGINE_GLCheckError();
+		glm::mat4 V = GetCamera().GetViewMatrix();
+		GetMousePickingShader().SetMat4("view", &V);
+		glm::mat4 proj = GetCamera().GetProjectionMatrix();
+		GetMousePickingShader().SetMat4("projection", &proj);
+
+
+		ENGINE_GLCheckError();
+		// Create a view for entities with Transform and ModelRenderer components
+		auto view = GetCurrentSceneRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer>();
+		for (auto [entity, metadata, transform, renderer] : view.each()) {
+			glm::vec3 encodedColor = EncodeEntityID(entity);
+			GetMousePickingShader().SetVec3("entityIDColor", encodedColor);
+			if (!renderer.visible) continue;
+			// Draw model
+			renderer.Draw(GetMousePickingShader(), transform);
 		}
 	}
 

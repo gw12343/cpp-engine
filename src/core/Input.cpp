@@ -68,6 +68,28 @@ namespace Engine {
 		return m_mousePosition;
 	}
 
+	bool Input::IsMousePositionInViewport() const
+	{
+		glm::vec2 mousePosWindow = GetMousePositionInViewport();
+		auto&     window         = GetWindow();
+		return mousePosWindow.x >= 0 && mousePosWindow.y >= 0 && mousePosWindow.x < window.targetWidth && mousePosWindow.y < window.targetHeight;
+	}
+
+	glm::vec2 Input::GetMousePositionInViewportScaledFlipped() const
+	{
+		glm::vec2 mousePosWindow = GetMousePositionInViewport();
+		auto&     window         = GetWindow();
+
+		return {mousePosWindow.x * (float) window.GetWidth() / (float) window.targetWidth, window.GetHeight() - mousePosWindow.y * (float) window.GetHeight() / (float) window.targetHeight};
+	}
+
+	glm::vec2 Input::GetMousePositionInViewport() const
+	{
+		auto& window = GetWindow();
+
+		return {m_mousePosition.x - window.targetX, m_mousePosition.y - window.targetY};
+	}
+
 	glm::vec2 Input::GetMouseDelta() const
 	{
 		return glm::vec2(m_mousePosition.x, m_lastMousePosition.y) - glm::vec2(m_lastMousePosition.x, m_mousePosition.y); // m_mousePosition - m_lastMousePosition;

@@ -25,6 +25,9 @@ namespace Engine {
 		// Mouse input
 		bool                       IsMousePressed(int btn);
 		[[maybe_unused]] glm::vec2 GetMousePosition();
+		bool                       IsMousePositionInViewport() const;
+		glm::vec2                  GetMousePositionInViewport() const;
+		glm::vec2                  GetMousePositionInViewportScaledFlipped() const;
 		glm::vec2                  GetMouseDelta() const;
 		// float                      GetMouseScrollDelta();
 		[[maybe_unused]] void SetMousePosition(const glm::vec2& position);

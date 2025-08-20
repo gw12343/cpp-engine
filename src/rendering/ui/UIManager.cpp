@@ -10,7 +10,6 @@
 #include "rendering/Renderer.h"
 #include "rendering/ui/IconsFontAwesome6.h"
 
-#include "physics/PhysicsManager.h"
 #include "components/impl/LuaScriptComponent.h"
 #include "components/impl/EntityMetadataComponent.h"
 #include "components/impl/SkeletonComponent.h"
@@ -29,7 +28,6 @@
 #include "rendering/ui/Themes.h"
 #include "imguizmo/ImGuizmo.h"
 
-#include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/matrix_decompose.inl"
 
@@ -497,6 +495,36 @@ namespace Engine::UI {
 		ImGui::SetNextWindowBgAlpha(0.35f);
 		ImGui::Begin("PauseOverlay", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove);
 		ImGui::Text("PHYSICS PAUSED");
+		ImGui::Text("Mouse  (%f, %f)", GetInput().GetMousePosition().x, GetInput().GetMousePosition().y);
+		glm::vec2 pos = GetInput().GetMousePositionInViewportScaledFlipped();
+		ImGui::Text("MouseW (%f, %f)", pos.x, pos.y);
+		ImGui::Text("m %d", GetInput().IsMousePositionInViewport());
+
+
+		if (GetInput().IsMousePositionInViewport()) {
+			Engine::Window::GetFramebuffer(Window::FramebufferID::MOUSE_PICKING)->Bind();
+
+
+			GLfloat pixelData[3]; // Use GLfloat for normalized color values
+			glReadPixels(pos.x, pos.y, 1, 1, GL_RGB, GL_FLOAT, pixelData);
+
+			uint32_t entityID = (static_cast<uint32_t>(pixelData[0] * 255.0f)) | (static_cast<uint32_t>(pixelData[1] * 255.0f) << 8) | (static_cast<uint32_t>(pixelData[2] * 255.0f) << 16);
+
+			ImGui::Text("color %d", entityID);
+			if (GetInput().IsMousePressed(0) && !ImGuizmo::IsOver()) {
+				if (entityID != 0xFFFFFF) {
+					m_selectedEntity = (Entity){static_cast<entt::entity>(entityID), GetCurrentScene()};
+				}
+				else {
+					m_selectedEntity = Entity();
+				}
+			}
+
+
+			Engine::Framebuffer::Unbind();
+		}
+
+
 		ImGui::Text("Press P to resume");
 		ImGui::End();
 	}
