@@ -3,6 +3,7 @@
 #include "physics/PhysicsManager.h"
 #include "components/impl/LuaScriptComponent.h"
 #include "scripting/ScriptManager.h"
+#include "utils/Utils.h"
 using namespace JPH;
 using namespace JPH::literals;
 
@@ -84,8 +85,14 @@ namespace Engine {
 		auto& physics       = GetPhysics();
 		auto& scriptManager = GetScriptManager();
 
+
 		Entity& entity1 = physics.bodyToEntityMap[inBody1.GetID()];
 		Entity& entity2 = physics.bodyToEntityMap[inBody2.GetID()];
+
+		if (!entity1 || !entity2) {
+			ENGINE_WARN("SHOULD NOT BE NULL");
+			return;
+		}
 
 		if (entity1.HasComponent<Components::LuaScript>() || entity2.HasComponent<Components::LuaScript>()) {
 			std::lock_guard<std::mutex> lock(scriptManager.collisionMutex);

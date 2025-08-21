@@ -28,22 +28,10 @@
 #include "assets/impl/TextureLoader.h"
 #include "assets/impl/TerrainLoader.h"
 #include "assets/impl/SoundLoader.h"
-// #include "components/impl/ModelRendererComponent.h"
-// #include "components/impl/AudioSourceComponent.h"
-// #include "components/impl/ShadowCasterComponent.h"
-// #include "components/impl/LuaScriptComponent.h"
-// #include "components/impl/SkeletonComponent.h"
-// #include "components/impl/AnimationComponent.h"
-// #include "components/impl/AnimationPoseComponent.h"
-// #include "components/impl/RigidBodyComponent.h"
-// #include "components/impl/TerrainRendererComponent.h"
-//
-// #include "terrain/TerrainManager.h"
 #include "assets/impl/JSONSceneLoader.h"
-#include "components/impl/ModelRendererComponent.h"
-#include "components/impl/ParticleSystemComponent.h"
 #include "rendering/particles/Particle.h"
 #include "assets/impl/ParticleLoader.h"
+#include "assets/impl/JSONSceneLoader.h"
 
 namespace Engine {
 	ModuleManager manager;
@@ -51,13 +39,14 @@ namespace Engine {
 
 	GEngine::GEngine(int width, int height, const char* title) : m_deltaTime(0.0f), m_lastFrame(0.0f)
 	{
+		SetState(EDITOR);
 		// Initialize asset loaders
 		Get().assetManager = std::make_shared<AssetManager>();
 		GetAssetManager().RegisterLoader<Texture>(std::make_unique<TextureLoader>());
 		GetAssetManager().RegisterLoader<Rendering::Model>(std::make_unique<Rendering::ModelLoader>());
 		GetAssetManager().RegisterLoader<Terrain::TerrainTile>(std::make_unique<TerrainLoader>());
 		GetAssetManager().RegisterLoader<Audio::SoundBuffer>(std::make_unique<SoundLoader>());
-		GetAssetManager().RegisterLoader<Scene>(std::make_unique<JSONSceneLoader>());
+		GetAssetManager().RegisterLoader<Scene>(std::make_unique<SCENE_LOADER>());
 		GetAssetManager().RegisterLoader<Particle>(std::make_unique<ParticleLoader>());
 
 		// Initialize Modules
@@ -198,7 +187,7 @@ namespace Engine {
 
 	void GEngine::Shutdown()
 	{
-		// JSONSceneLoader::SerializeScene(GetSceneManager().GetActiveScene(), "scenes/scene1.json");
+		// SCENE_LOADER::SerializeScene(GetSceneManager().GetActiveScene(), "scenes/scene1.json");
 		manager.ShutdownAll();
 
 		Components::AnimationWorkerComponent::CleanAnimationContexts();

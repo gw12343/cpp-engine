@@ -70,7 +70,7 @@ namespace Engine {
 		// Collision Steps to simulate. Should be around 1 per 16ms
 		int cCollisionSteps = static_cast<int>(glm::ceil(dt * 60.0f));
 		// Step the world
-		if (!isPhysicsPaused) physics->Update(dt, cCollisionSteps, allocater.get(), jobs.get());
+		if (GetState() == PLAYING) physics->Update(dt, cCollisionSteps, allocater.get(), jobs.get());
 
 		SyncPhysicsEntities();
 	}
@@ -99,10 +99,11 @@ namespace Engine {
 	void PhysicsManager::setLuaBindings()
 	{
 		// Bind the PhysicsManager class
-		GetScriptManager().lua.new_usertype<PhysicsManager>("PhysicsManager",
-		                                                    // Public members
-		                                                    "isPhysicsPaused",
-		                                                    &PhysicsManager::isPhysicsPaused);
+		GetScriptManager().lua.new_usertype<PhysicsManager>("PhysicsManager" //,
+		                                                                     // Public members
+		                                                                     // "isPhysicsPaused",
+		                                                                     // &PhysicsManager::isPhysicsPaused
+		);
 
 		// Provide access to the main PhysicsManager
 		GetScriptManager().lua.set_function("getPhysics", []() -> PhysicsManager& { return Engine::GetPhysics(); });

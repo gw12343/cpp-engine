@@ -28,6 +28,9 @@ namespace Engine {
 		T* Get(const AssetHandle<T>& handle);
 
 		template <typename T>
+		void Unload(const AssetHandle<T>& handle);
+
+		template <typename T>
 		void RegisterLoader(std::unique_ptr<IAssetLoader<T>> loader);
 
 		struct IStorageBase {

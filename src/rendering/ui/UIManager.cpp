@@ -30,7 +30,9 @@
 
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/matrix_decompose.inl"
-
+#include "core/EngineData.h"
+#include "assets/impl/JSONSceneLoader.h"
+#include "core/SceneManager.h"
 
 namespace Engine::UI {
 
@@ -75,7 +77,7 @@ namespace Engine::UI {
 	void UIManager::BeginDockspace()
 	{
 		// 1. Draw top menu bar *before* dockspace
-		// DrawTopBar();
+		// DrawMenuBar();
 
 		// 2. Apply theme colors
 		SetThemeColors(selectedTheme);
@@ -185,21 +187,60 @@ namespace Engine::UI {
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(cursorX);
 
-			if (ImGui::Button(ICON_FA_PLAY "##play")) { /* play */
+
+			if (GetState() == PLAYING) {
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);                        // Disable input
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.25f); // Dim look
+			}
+			bool startPlay = ImGui::Button(ICON_FA_PLAY "##play");
+			if (GetState() == PLAYING) {
+				ImGui::PopStyleVar();
+				ImGui::PopItemFlag();
+			}
+			if (startPlay) {
+				// todo save scene, load scene
+				if (GetState() != PLAYING) {
+					SCENE_LOADER::SerializeScene(GetSceneManager().GetActiveScene(), "scenes/scene1.json");
+					SetState(PLAYING); // TODO call start in scripts?
+				}
 			}
 			ImGui::SameLine();
 
-			ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);                        // Disable input
-			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.25f); // Dim look
-
-			if (ImGui::Button(ICON_FA_PAUSE "##pause")) { /* pause */
+			if (GetState() != PLAYING) {
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);                        // Disable input
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.25f); // Dim look
+			}
+			bool startPause = ImGui::Button(ICON_FA_PAUSE "##pause");
+			if (GetState() != PLAYING) {
+				ImGui::PopStyleVar();
+				ImGui::PopItemFlag();
+			}
+			if (startPause) {
+				if (GetState() == PLAYING) {
+					SetState(PAUSED);
+				}
 			}
 
-			ImGui::PopStyleVar();
-			ImGui::PopItemFlag();
 
 			ImGui::SameLine();
-			if (ImGui::Button(ICON_FA_STOP "##stop")) { /* stop */
+
+
+			if (GetState() == EDITOR) {
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);                        // Disable input
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.25f); // Dim look
+			}
+			bool startStop = ImGui::Button(ICON_FA_STOP "##stop");
+			if (GetState() == EDITOR) {
+				ImGui::PopStyleVar();
+				ImGui::PopItemFlag();
+			}
+			if (startStop) {
+				// unload scene, load backup
+				if (GetState() != EDITOR) {
+					GetAssetManager().Unload<Scene>(GetSceneManager().GetActiveScene());
+					GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>("scenes/scene1.json"));
+					SetState(EDITOR);
+				}
 			}
 		}
 		ImGui::End();
@@ -224,7 +265,7 @@ namespace Engine::UI {
 		RenderAudioDebugUI();
 
 		// Display pause overlay when physics is disabled
-		if (GetPhysics().isPhysicsPaused) {
+		if (GetState() == PAUSED) {
 			RenderPauseOverlay();
 		}
 
@@ -322,16 +363,7 @@ namespace Engine::UI {
 
 			if (m_selectedEntity.HasComponent<Components::AudioSource>()) {
 				if (ImGui::CollapsingHeader(ICON_FA_VOLUME_HIGH " Audio Source")) {
-					auto& audioSource = m_selectedEntity.GetComponent<Components::AudioSource>();
-					audioSource.RenderInspector(m_selectedEntity);
-
-					// Handle the Play button functionality here since we have access to the sound manager
-					//					if (!audioSource.isPlaying && ImGui::Button("Play")) {
-					//						if (audioSource.source && !audioSource.soundName.empty()) {
-					//							audioSource.Play(GetSoundManager());
-					//							spdlog::error("Playing sound");
-					//						}
-					//					}
+					m_selectedEntity.GetComponent<Components::AudioSource>().RenderInspector(m_selectedEntity);
 				}
 			}
 
@@ -517,43 +549,12 @@ namespace Engine::UI {
 	void UIManager::RenderPauseOverlay()
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		// ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 10, 10), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
 
 		ImGui::SetNextWindowPos(ImVec2(GetWindow().targetX + GetWindow().targetWidth - 10, GetWindow().targetY + 10), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
 		ImGui::SetNextWindowBgAlpha(0.35f);
 		ImGui::Begin("PauseOverlay", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove);
-		ImGui::Text("PHYSICS PAUSED");
-		ImGui::Text("Mouse  (%f, %f)", GetInput().GetMousePosition().x, GetInput().GetMousePosition().y);
-		glm::vec2 pos = GetInput().GetMousePositionInViewportScaledFlipped();
-		ImGui::Text("MouseW (%f, %f)", pos.x, pos.y);
-		ImGui::Text("m %d", GetInput().IsMousePositionInViewport());
-
-
-		if (GetInput().IsMousePositionInViewport()) {
-			Engine::Window::GetFramebuffer(Window::FramebufferID::MOUSE_PICKING)->Bind();
-
-
-			GLfloat pixelData[3]; // Use GLfloat for normalized color values
-			glReadPixels(pos.x, pos.y, 1, 1, GL_RGB, GL_FLOAT, pixelData);
-
-			uint32_t entityID = (static_cast<uint32_t>(pixelData[0] * 255.0f)) | (static_cast<uint32_t>(pixelData[1] * 255.0f) << 8) | (static_cast<uint32_t>(pixelData[2] * 255.0f) << 16);
-
-			ImGui::Text("color %d", entityID);
-			if (GetInput().IsMousePressed(0) && !ImGuizmo::IsOver()) {
-				if (entityID != 0xFFFFFF) {
-					m_selectedEntity = (Entity){static_cast<entt::entity>(entityID), GetCurrentScene()};
-				}
-				else {
-					m_selectedEntity = Entity();
-				}
-			}
-
-
-			Engine::Framebuffer::Unbind();
-		}
-
-
-		ImGui::Text("Press P to resume");
+		ImGui::Text("GAME PAUSED");
+		ImGui::Text("Press PLAY to resume");
 		ImGui::End();
 	}
 
@@ -591,11 +592,11 @@ namespace Engine::UI {
 		GLuint tex = texId;
 		ImGui::Image((ImTextureID) tex, ImVec2(width, height), ImVec2(0, 1), ImVec2(1, 0));
 
-		GetWindow().UpdateViewportSize(width, height, topLeft.x, topLeft.y);
+		GetWindow().UpdateViewportSize((int) width, (int) height, (int) topLeft.x, (int) topLeft.y);
 
 		if (m_selectedEntity && GetCurrentSceneRegistry().valid(m_selectedEntity.GetHandle())) {
 			if (m_selectedEntity.HasComponent<Components::Transform>()) {
-				Components::Transform& transform = m_selectedEntity.GetComponent<Components::Transform>();
+				auto& transform = m_selectedEntity.GetComponent<Components::Transform>();
 
 				ImGuizmo::SetRect(topLeft.x, topLeft.y, width, height);
 
@@ -621,7 +622,33 @@ namespace Engine::UI {
 		}
 		ImGui::PopStyleVar();
 		ImGui::End();
+
+
+		if (GetInput().IsMousePositionInViewport()) {
+			Engine::Window::GetFramebuffer(Window::FramebufferID::MOUSE_PICKING)->Bind();
+			glm::vec2 pos = GetInput().GetMousePositionInViewportScaledFlipped();
+
+			GLfloat pixelData[3];
+			glReadPixels(static_cast<GLint>(pos.x), static_cast<GLint>(pos.y), 1, 1, GL_RGB, GL_FLOAT, pixelData);
+
+			uint32_t entityID = (static_cast<uint32_t>(pixelData[0] * 255.0f)) | (static_cast<uint32_t>(pixelData[1] * 255.0f) << 8) | (static_cast<uint32_t>(pixelData[2] * 255.0f) << 16);
+
+			ImGui::Text("color %d", entityID);
+			if (GetInput().IsMousePressed(0) && !ImGuizmo::IsOver()) {
+				if (entityID != 0xFFFFFF) {
+					m_selectedEntity = (Entity){static_cast<entt::entity>(entityID), GetCurrentScene()};
+				}
+				else {
+					m_selectedEntity = Entity();
+				}
+			}
+
+
+			Engine::Framebuffer::Unbind();
+		}
 	}
 
 
 } // namespace Engine::UI
+
+#include "assets/AssetManager.inl"

@@ -48,7 +48,7 @@ namespace Engine {
 
 	class PhysicsManager : public Module {
 	  public:
-		bool        isPhysicsPaused = true;
+		// bool        isPhysicsPaused = true;
 		static void TraceImpl(const char* inFMT, ...);
 		static bool AssertFailedImpl(const char* inExpression, const char* inMessage, const char* inFile, uint inLine);
 

@@ -66,7 +66,7 @@ namespace Engine {
 
 	void ParticleManager::onUpdate(float dt)
 	{
-		if (GetPhysics().isPhysicsPaused) return;
+		if (GetState() != PLAYING) return;
 
 		if (m_manager) {
 			m_manager->Update(dt * 60.0);

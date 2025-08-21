@@ -40,6 +40,16 @@ namespace Engine {
 	}
 
 	template <typename T>
+	void AssetManager::Unload(const AssetHandle<T>& handle)
+	{
+		auto& storage = GetStorage<T>();
+		auto  it      = storage.guidToAsset.find(handle.GetID());
+		if (it != storage.guidToAsset.end()) {
+			storage.guidToAsset.erase(it); // deletes the asset, unique_ptr cleans it up
+		}
+	}
+
+	template <typename T>
 	void AssetManager::RegisterLoader(std::unique_ptr<IAssetLoader<T>> loader)
 	{
 		auto& storage  = GetStorage<T>();

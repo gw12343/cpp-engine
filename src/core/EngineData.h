@@ -6,7 +6,10 @@
 #include <memory>
 #include "entt/entt.hpp"
 #include "Input.h"
+#include "assets/AssetHandle.h"
 
+// TODO probably use binary on game binaries
+#define SCENE_LOADER JSONSceneLoader
 
 namespace Engine {
 	class Window;
@@ -24,16 +27,16 @@ namespace Engine {
 	}
 	class ScriptManager;
 	class SceneManager;
-	// class SerializationManager;
 	class PhysicsManager;
 	class Camera;
 	class AssetManager;
 	class Scene;
 
+	enum EngineState { EDITOR, PAUSED, PLAYING };
+
 	class EngineData {
 	  public:
-		std::shared_ptr<AssetManager> assetManager;
-		//	std::shared_ptr<SerializationManager>    serialization;
+		std::shared_ptr<AssetManager>            assetManager;
 		std::shared_ptr<SceneManager>            scene;
 		std::shared_ptr<Window>                  window;
 		std::shared_ptr<Renderer>                renderer;
@@ -46,21 +49,27 @@ namespace Engine {
 		std::shared_ptr<PhysicsManager>          physics;
 		std::shared_ptr<Camera>                  camera;
 		std::shared_ptr<Input>                   input;
-		// std::shared_ptr<entt::registry>          registry;
+		EngineState                              state;
 	};
 
 	EngineData& Get();
+
+
+	inline EngineState GetState()
+	{
+		return Get().state;
+	}
+
+	inline void SetState(EngineState st)
+	{
+		Get().state = st;
+	}
 
 	// Convenience inline accessors
 	inline auto& GetAssetManager()
 	{
 		return *Get().assetManager;
 	}
-
-	//	inline auto& GetSerializationManager()
-	//	{
-	//		return *Get().serialization;
-	//	}
 
 	inline auto& GetSceneManager()
 	{
@@ -114,11 +123,4 @@ namespace Engine {
 
 	entt::registry& GetCurrentSceneRegistry();
 	Scene*          GetCurrentScene();
-
-	//	inline auto& GetRegistry()
-	//	{
-	//		return *Get().registry;
-	//	}
-
-
 } // namespace Engine

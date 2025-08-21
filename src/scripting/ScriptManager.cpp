@@ -83,7 +83,9 @@ namespace Engine {
 			}
 		}
 
-		if (GetPhysics().isPhysicsPaused) return;
+		if (GetState() != PLAYING) return;
+
+
 		{
 			std::lock_guard<std::mutex> lock(collisionMutex);
 

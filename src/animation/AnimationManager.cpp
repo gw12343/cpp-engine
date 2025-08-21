@@ -73,7 +73,7 @@ namespace Engine {
 			auto&  skeletonComponent        = e.GetComponent<Components::SkeletonComponent>();
 
 			// Update animation time
-			if (!GetPhysics().isPhysicsPaused) {
+			if (GetState() == PLAYING) {
 				controller_.set_time_ratio((float) (sin(glfwGetTime() / 3.0f) / 2.0 + 0.5f));
 			}
 

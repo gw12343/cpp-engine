@@ -16,7 +16,7 @@ namespace Engine {
 	entt::registry& GetCurrentSceneRegistry()
 	{
 		auto* scene = GetCurrentScene();
-		return *scene->GetRegistry().get();
+		return *scene->GetRegistry();
 	}
 	Scene* GetCurrentScene()
 	{

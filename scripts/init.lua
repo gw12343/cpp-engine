@@ -55,7 +55,7 @@ function EditorUpdate(dt)
 
     if input:isKeyPressedThisFrame(KEY_P) then
         local physics = getPhysics()
-        physics.isPhysicsPaused = not physics.isPhysicsPaused
+        --physics.isPhysicsPaused = not physics.isPhysicsPaused
     end
 
 

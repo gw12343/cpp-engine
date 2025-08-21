@@ -4,6 +4,9 @@
 
 #include "SceneManager.h"
 
+#include <utility>
+#include "physics/PhysicsManager.h"
+#include "scripting/ScriptManager.h"
 namespace Engine {
 
 	// Module overrides
@@ -37,6 +40,13 @@ namespace Engine {
 		// m_scenes[name] = scene;
 		log->info("Created scene '{}'", name);
 		return scene;
+	}
+
+	void SceneManager::SetActiveScene(AssetHandle<Scene> scene)
+	{
+		m_activeScene = std::move(scene);
+		GetScriptManager().pendingCollisions.clear();
+		GetPhysics().bodyToEntityMap.clear();
 	}
 
 	//	void SceneManager::RemoveScene(const std::string& name)

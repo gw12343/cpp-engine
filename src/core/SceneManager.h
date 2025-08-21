@@ -31,7 +31,7 @@ namespace Engine {
 
 		//		std::shared_ptr<Scene> GetScene(const std::string& name);
 		//
-		void SetActiveScene(AssetHandle<Scene> scene) { m_activeScene = scene; }
+		void SetActiveScene(AssetHandle<Scene> scene);
 
 		AssetHandle<Scene> GetActiveScene() { return m_activeScene; }
 

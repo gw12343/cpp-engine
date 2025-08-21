@@ -62,8 +62,6 @@ namespace Engine {
 
 		void Mesh::Draw(const Shader& shader) const
 		{
-			bool bindTextures = shader.GetProgramID() == GetRenderer().GetShader().GetProgramID();
-
 			//			if (m_material->GetDiffuseTexture()) {
 			//				glActiveTexture(GL_TEXTURE0);
 			//				shader.SetInt("material.diffuse", 0);
@@ -72,7 +70,7 @@ namespace Engine {
 			ENGINE_GLCheckError();
 
 
-			if (bindTextures && m_material->GetDiffuseTexture().IsValid()) {
+			if (m_material->GetDiffuseTexture().IsValid()) {
 				glActiveTexture(GL_TEXTURE0);
 				shader.SetInt("diffuseTexture", 0);
 				GetAssetManager().Get(m_material->GetDiffuseTexture())->Bind(0);
@@ -113,7 +111,7 @@ namespace Engine {
 			//				glActiveTexture(GL_TEXTURE1);
 			//				m_material->GetSpecularTexture()->Unbind();
 			//			}
-			if (bindTextures && m_material->GetDiffuseTexture().IsValid()) {
+			if (m_material->GetDiffuseTexture().IsValid()) {
 				glActiveTexture(GL_TEXTURE0);
 				GetAssetManager().Get(m_material->GetDiffuseTexture())->Unbind();
 			}
