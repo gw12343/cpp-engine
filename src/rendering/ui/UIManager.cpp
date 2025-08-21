@@ -34,6 +34,8 @@
 #include "assets/impl/JSONSceneLoader.h"
 #include "core/SceneManager.h"
 
+#include "components/AllComponents.h"
+
 namespace Engine::UI {
 
 
@@ -47,7 +49,8 @@ namespace Engine::UI {
 		SetThemeColors(0);
 
 
-		m_uiAssetRenderer = std::make_unique<AssetUIRenderer>();
+		m_uiAssetRenderer   = std::make_unique<AssetUIRenderer>();
+		m_inspectorRenderer = std::make_unique<InspectorRenderer>();
 
 		audioIconTexture   = std::make_shared<Texture>();
 		terrainIconTexture = std::make_shared<Texture>();
@@ -258,7 +261,7 @@ namespace Engine::UI {
 
 		RenderSceneView(Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->texture);
 		RenderHierarchyWindow();
-		RenderInspectorWindow();
+		m_inspectorRenderer->RenderInspectorWindow(&m_selectedEntity);
 		RenderAnimationWindow();
 
 		m_uiAssetRenderer->RenderAssetWindow();
@@ -305,124 +308,6 @@ namespace Engine::UI {
 		ImGui::End();
 	}
 
-
-	void UIManager::RenderInspectorWindow()
-	{
-		ImGui::Begin("Inspector");
-
-		if (m_selectedEntity) {
-			// Display entity name at the top
-			auto& metadata = m_selectedEntity.GetComponent<Components::EntityMetadata>();
-			ImGui::Text("Selected: %s", metadata.name.c_str());
-			ImGui::SameLine();
-			ImVec4 myColor = ImVec4(1.0f, 0.0f, 0.0f, 1.0f); // bluish
-
-			ImGui::PushStyleColor(ImGuiCol_Button, myColor);
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(myColor.x * 1.1f, myColor.y * 1.1f, myColor.z * 1.1f, 1.0f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(myColor.x * 0.9f, myColor.y * 0.9f, myColor.z * 0.9f, 1.0f));
-
-			if (ImGui::Button(ICON_FA_TRASH_CAN "", ImVec2(100, 40))) {
-				m_selectedEntity.Destroy();
-				if (GetCurrentSceneRegistry().valid(m_selectedEntity.GetHandle())) GetCurrentSceneRegistry().destroy(m_selectedEntity.GetHandle());
-				ImGui::PopStyleColor(3);
-				ImGui::End();
-				m_selectedEntity = Entity();
-				return;
-			}
-
-
-			ImGui::PopStyleColor(3);
-
-			ImGui::Separator();
-
-			// Render each component in the inspector
-			if (m_selectedEntity.HasComponent<Components::EntityMetadata>()) {
-				if (ImGui::CollapsingHeader(ICON_FA_ID_CARD " Entity Metadata", ImGuiTreeNodeFlags_DefaultOpen)) {
-					m_selectedEntity.GetComponent<Components::EntityMetadata>().RenderInspector(m_selectedEntity);
-				}
-			}
-
-
-			if (m_selectedEntity.HasComponent<Components::Transform>()) {
-				if (ImGui::CollapsingHeader(ICON_FA_MAXIMIZE " Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
-					m_selectedEntity.GetComponent<Components::Transform>().RenderInspector(m_selectedEntity);
-				}
-			}
-
-			if (m_selectedEntity.HasComponent<Components::ModelRenderer>()) {
-				if (ImGui::CollapsingHeader(ICON_FA_CUBE " Model Renderer")) {
-					m_selectedEntity.GetComponent<Components::ModelRenderer>().RenderInspector(m_selectedEntity);
-				}
-			}
-
-			if (m_selectedEntity.HasComponent<Components::RigidBodyComponent>()) {
-				if (ImGui::CollapsingHeader(ICON_FA_CUBES_STACKED " Rigid Body")) {
-					m_selectedEntity.GetComponent<Components::RigidBodyComponent>().RenderInspector(m_selectedEntity);
-				}
-			}
-
-			if (m_selectedEntity.HasComponent<Components::AudioSource>()) {
-				if (ImGui::CollapsingHeader(ICON_FA_VOLUME_HIGH " Audio Source")) {
-					m_selectedEntity.GetComponent<Components::AudioSource>().RenderInspector(m_selectedEntity);
-				}
-			}
-
-			if (m_selectedEntity.HasComponent<Components::SkeletonComponent>()) {
-				if (ImGui::CollapsingHeader("Skeleton")) {
-					m_selectedEntity.GetComponent<Components::SkeletonComponent>().RenderInspector(m_selectedEntity);
-				}
-			}
-
-			if (m_selectedEntity.HasComponent<Components::AnimationComponent>()) {
-				if (ImGui::CollapsingHeader("Animation")) {
-					m_selectedEntity.GetComponent<Components::AnimationComponent>().RenderInspector(m_selectedEntity);
-				}
-			}
-
-			if (m_selectedEntity.HasComponent<Components::AnimationPoseComponent>()) {
-				if (ImGui::CollapsingHeader("Animation Pose")) {
-					m_selectedEntity.GetComponent<Components::AnimationPoseComponent>().RenderInspector(m_selectedEntity);
-				}
-			}
-
-			if (m_selectedEntity.HasComponent<Components::AnimationWorkerComponent>()) {
-				if (ImGui::CollapsingHeader("Animation Context")) {
-					m_selectedEntity.GetComponent<Components::AnimationWorkerComponent>().RenderInspector(m_selectedEntity);
-				}
-			}
-
-			if (m_selectedEntity.HasComponent<Components::SkinnedMeshComponent>()) {
-				if (ImGui::CollapsingHeader("Skinned Mesh")) {
-					m_selectedEntity.GetComponent<Components::SkinnedMeshComponent>().RenderInspector(m_selectedEntity);
-				}
-			}
-			if (m_selectedEntity.HasComponent<Components::ParticleSystem>()) {
-				if (ImGui::CollapsingHeader(ICON_FA_STAR_HALF_STROKE "Particle System")) {
-					m_selectedEntity.GetComponent<Components::ParticleSystem>().RenderInspector(m_selectedEntity);
-				}
-			}
-			if (m_selectedEntity.HasComponent<Components::ShadowCaster>()) {
-				if (ImGui::CollapsingHeader(ICON_FA_MOON " Shadow Caster")) {
-					m_selectedEntity.GetComponent<Components::ShadowCaster>().RenderInspector(m_selectedEntity);
-				}
-			}
-			if (m_selectedEntity.HasComponent<Components::LuaScript>()) {
-				if (ImGui::CollapsingHeader(ICON_FA_SCROLL " Script")) {
-					m_selectedEntity.GetComponent<Components::LuaScript>().RenderInspector(m_selectedEntity);
-				}
-			}
-			if (m_selectedEntity.HasComponent<Components::TerrainRenderer>()) {
-				if (ImGui::CollapsingHeader(ICON_FA_MAP " Terrain Renderer")) {
-					m_selectedEntity.GetComponent<Components::TerrainRenderer>().RenderInspector(m_selectedEntity);
-				}
-			}
-		}
-		else {
-			ImGui::Text("No entity selected");
-		}
-
-		ImGui::End();
-	}
 
 	void UIManager::RenderAnimationWindow()
 	{
@@ -633,8 +518,7 @@ namespace Engine::UI {
 
 			uint32_t entityID = (static_cast<uint32_t>(pixelData[0] * 255.0f)) | (static_cast<uint32_t>(pixelData[1] * 255.0f) << 8) | (static_cast<uint32_t>(pixelData[2] * 255.0f) << 16);
 
-			ImGui::Text("color %d", entityID);
-			if (GetInput().IsMousePressed(0) && !ImGuizmo::IsOver()) {
+			if (!m_inspectorRenderer->m_openPopup && GetInput().IsMousePressed(0) && !ImGuizmo::IsOver()) {
 				if (entityID != 0xFFFFFF) {
 					m_selectedEntity = (Entity){static_cast<entt::entity>(entityID), GetCurrentScene()};
 				}

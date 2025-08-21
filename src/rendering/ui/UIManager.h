@@ -10,6 +10,7 @@
 #include "core/module/Module.h"
 #include "ModelPreview.h"
 #include "AssetUIRenderer.h"
+#include "InspectorRenderer.h"
 #include <memory>
 #include <typeindex>
 #include <string>
@@ -40,14 +41,14 @@ namespace Engine {
 			// UI rendering methods
 			void RenderHierarchyWindow();
 			void RenderTopBar();
-			void RenderInspectorWindow();
 			void RenderAnimationWindow();
 			void RenderAudioDebugUI();
 			void RenderPauseOverlay();
 			void RenderSceneView(GLuint texId);
 
 
-			std::unique_ptr<AssetUIRenderer> m_uiAssetRenderer;
+			std::unique_ptr<AssetUIRenderer>   m_uiAssetRenderer;
+			std::unique_ptr<InspectorRenderer> m_inspectorRenderer;
 			// Selected entity
 			Entity m_selectedEntity;
 		};

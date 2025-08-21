@@ -39,7 +39,7 @@ namespace Engine {
 		try {
 			lua.script_file("scripts/init.lua");
 
-#define X(type, name) COMPONENT_METHODS(type, name),
+#define X(type, name, fancy) COMPONENT_METHODS(type, name),
 			// Bind Entity
 			lua.new_usertype<Engine::Entity>("Entity",
 			                                 "getName",

@@ -21,18 +21,19 @@
 #include "impl/TransformComponent.h"
 
 #define COMPONENT_LIST                                                                                                                                                                                                                         \
-	X(Components::LuaScript, LuaScript)                                                                                                                                                                                                        \
-	X(Components::ShadowCaster, ShadowCaster)                                                                                                                                                                                                  \
-	X(Components::Transform, Transform)                                                                                                                                                                                                        \
-	X(Components::ModelRenderer, ModelRenderer)                                                                                                                                                                                                \
-	X(Components::RigidBodyComponent, RigidBodyComponent)                                                                                                                                                                                      \
-	X(Components::AudioSource, AudioSource)                                                                                                                                                                                                    \
-	X(Components::SkeletonComponent, SkeletonComponent)                                                                                                                                                                                        \
-	X(Components::AnimationComponent, AnimationComponent)                                                                                                                                                                                      \
-	X(Components::AnimationPoseComponent, AnimationPoseComponent)                                                                                                                                                                              \
-	X(Components::AnimationWorkerComponent, AnimationWorkerComponent)                                                                                                                                                                          \
-	X(Components::SkinnedMeshComponent, SkinnedMeshComponent)                                                                                                                                                                                  \
-	X(Components::ParticleSystem, ParticleSystem)
+	X(Components::LuaScript, LuaScript, ICON_FA_SCROLL " Script")                                                                                                                                                                              \
+	X(Components::ShadowCaster, ShadowCaster, ICON_FA_MOON " Shadow Caster")                                                                                                                                                                   \
+	X(Components::Transform, Transform, ICON_FA_MAXIMIZE " Transform")                                                                                                                                                                         \
+	X(Components::TerrainRenderer, TerrainRenderer, ICON_FA_MAP " Terrain Renderer")                                                                                                                                                           \
+	X(Components::ModelRenderer, ModelRenderer, ICON_FA_CUBE " Model Renderer")                                                                                                                                                                \
+	X(Components::RigidBodyComponent, RigidBodyComponent, ICON_FA_CUBES_STACKED " Rigid Body")                                                                                                                                                 \
+	X(Components::AudioSource, AudioSource, ICON_FA_VOLUME_HIGH " Audio Source")                                                                                                                                                               \
+	X(Components::SkeletonComponent, SkeletonComponent, "Skeleton")                                                                                                                                                                            \
+	X(Components::AnimationComponent, AnimationComponent, "Animation")                                                                                                                                                                         \
+	X(Components::AnimationPoseComponent, AnimationPoseComponent, "Animation Pose")                                                                                                                                                            \
+	X(Components::AnimationWorkerComponent, AnimationWorkerComponent, "Animation Context")                                                                                                                                                     \
+	X(Components::SkinnedMeshComponent, SkinnedMeshComponent, "Skinned Mesh")                                                                                                                                                                  \
+	X(Components::ParticleSystem, ParticleSystem, ICON_FA_STAR_HALF_STROKE "Particle System")
 
 
 #endif // CPP_ENGINE_ALLCOMPONENTS_H

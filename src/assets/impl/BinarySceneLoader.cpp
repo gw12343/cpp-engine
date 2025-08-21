@@ -81,7 +81,7 @@ namespace Engine {
 		Engine::Components::EntityMetadata meta;
 
 		// add all components as std::optional<T>
-#define X(type, name) std::optional<type> name;
+#define X(type, name, fancy) std::optional<type> name;
 		COMPONENT_LIST
 #undef X
 
@@ -92,7 +92,7 @@ namespace Engine {
 			ar(cereal::make_nvp("EntityMetadata", meta));
 
 // Now loop over all the components in the list
-#define X(type, name) ar(cereal::make_nvp(#name, name));
+#define X(type, name, fancy) ar(cereal::make_nvp(#name, name));
 			COMPONENT_LIST
 #undef X
 
@@ -116,7 +116,7 @@ namespace Engine {
 			se.meta = meta;
 
 			// Now loop over all the components in the list
-#define X(type, name)                                                                                                                                                                                                                          \
+#define X(type, name, fancy)                                                                                                                                                                                                                   \
 	if (registry->all_of<type>(entity)) se.name = registry->get<type>(entity);
 			COMPONENT_LIST
 #undef X
@@ -149,7 +149,7 @@ namespace Engine {
 				loaded_entities.push_back(entity);
 
 
-#define X(type, name)                                                                                                                                                                                                                          \
+#define X(type, name, fancy)                                                                                                                                                                                                                   \
 	if (se.name.has_value()) entity.AddComponent<type>(se.name.value());
 				COMPONENT_LIST
 #undef X

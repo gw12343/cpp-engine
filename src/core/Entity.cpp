@@ -26,7 +26,7 @@ namespace Engine {
 				GetComponent<Components::EntityMetadata>().OnRemoved(*this);
 			}
 
-#define X(type, name)                                                                                                                                                                                                                          \
+#define X(type, name, fancy)                                                                                                                                                                                                                   \
 	if (HasComponent<type>()) {                                                                                                                                                                                                                \
 		GetComponent<type>().OnRemoved(*this);                                                                                                                                                                                                 \
 	}

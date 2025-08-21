@@ -161,7 +161,9 @@ add_executable(${PROJECT_NAME} ${SOURCES}
         src/rendering/particles/Particle.cpp
         src/assets/impl/ParticleLoader.h
         src/assets/impl/ParticleLoader.cpp
-        lib/include/imguizmo/ImGuizmo.h)
+        lib/include/imguizmo/ImGuizmo.h
+        src/rendering/ui/InspectorRenderer.cpp
+        src/rendering/ui/InspectorRenderer.h)
 
 
 target_include_directories(${PROJECT_NAME} PRIVATE

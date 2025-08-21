@@ -186,7 +186,6 @@ namespace Engine {
 	void Window::UpdateFramebufferSizes(int render_width, int render_height)
 	{
 		for (const auto& [id, fb] : m_frameBuffers) {
-			GetWindow().log->debug("Resizing framebuffer {}, new size: ({}, {})", (int) id, render_width, render_height);
 			fb->Resize(render_width, render_height);
 		}
 	}

@@ -1,666 +1,619 @@
 {
-    "entities": [
-        {
-            "EntityMetadata": {
-                "name": "New Entity",
-                "tag": "",
-                "active": true
-            },
-            "LuaScript": {
-                "nullopt": true
-            },
-            "ShadowCaster": {
-                "nullopt": true
-            },
-            "Transform": {
-                "nullopt": true
-            },
-            "ModelRenderer": {
-                "nullopt": true
-            },
-            "RigidBodyComponent": {
-                "nullopt": true
-            },
-            "AudioSource": {
-                "nullopt": true
-            },
-            "SkeletonComponent": {
-                "nullopt": true
-            },
-            "AnimationComponent": {
-                "nullopt": true
-            },
-            "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
-            "SkinnedMeshComponent": {
-                "nullopt": true
-            },
-            "ParticleSystem": {
-                "nullopt": true
-            }
-        },
-        {
-            "EntityMetadata": {
-                "name": "BigBall",
-                "tag": "",
-                "active": true
-            },
-            "LuaScript": {
-                "nullopt": false,
-                "data": {
-                    "scriptPath": "scripts/bullet.lua"
-                }
-            },
-            "ShadowCaster": {
-                "nullopt": false,
-                "data": {}
-            },
-            "Transform": {
-                "nullopt": false,
-                "data": {
-                    "position": {
-                        "x": -15.146770477294922,
-                        "y": -3.8704164028167726,
-                        "z": 3.018522262573242
-                    },
-                    "rotation": {
-                        "x": -0.27681764960289,
-                        "y": -0.05017438530921936,
-                        "z": 0.10627556592226029,
-                        "w": 0.9537085890769959
-                    },
-                    "scale": {
-                        "x": 2.0,
-                        "y": 2.0000030994415285,
-                        "z": 2.00000262260437
-                    }
-                }
-            },
-            "ModelRenderer": {
-                "nullopt": false,
-                "data": {
-                    "visible": true,
-                    "model": {
-                        "guid": "16ab47c200b25ccb2b9dbcf46297059f"
-                    }
-                }
-            },
-            "RigidBodyComponent": {
-                "nullopt": false,
-                "data": {
-                    "motionType": 2,
-                    "mass": 1.0,
-                    "friction": 0.5,
-                    "restitution": 0.0,
-                    "gravityFactor": 1.0,
-                    "shapeType": "Sphere",
-                    "shapeSize": {
-                        "x": 1.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    }
-                }
-            },
-            "AudioSource": {
-                "nullopt": true
-            },
-            "SkeletonComponent": {
-                "nullopt": true
-            },
-            "AnimationComponent": {
-                "nullopt": true
-            },
-            "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
-            "SkinnedMeshComponent": {
-                "nullopt": true
-            },
-            "ParticleSystem": {
-                "nullopt": true
-            }
-        },
-        {
-            "EntityMetadata": {
-                "name": "Ball",
-                "tag": "",
-                "active": true
-            },
-            "LuaScript": {
-                "nullopt": false,
-                "data": {
-                    "scriptPath": "scripts/bullet.lua"
-                }
-            },
-            "ShadowCaster": {
-                "nullopt": false,
-                "data": {}
-            },
-            "Transform": {
-                "nullopt": false,
-                "data": {
-                    "position": {
-                        "x": 11.358264923095704,
-                        "y": -95.79621124267578,
-                        "z": 30.34259033203125
-                    },
-                    "rotation": {
-                        "x": 0.809569239616394,
-                        "y": 0.23729149997234345,
-                        "z": -0.5117066502571106,
-                        "w": -0.16262449324131013
-                    },
-                    "scale": {
-                        "x": 0.5,
-                        "y": 0.5,
-                        "z": 0.5
-                    }
-                }
-            },
-            "ModelRenderer": {
-                "nullopt": false,
-                "data": {
-                    "visible": true,
-                    "model": {
-                        "guid": "16ab47c200b25ccb2b9dbcf46297059f"
-                    }
-                }
-            },
-            "RigidBodyComponent": {
-                "nullopt": false,
-                "data": {
-                    "motionType": 2,
-                    "mass": 1.0,
-                    "friction": 0.5,
-                    "restitution": 0.0,
-                    "gravityFactor": 1.0,
-                    "shapeType": "Sphere",
-                    "shapeSize": {
-                        "x": 0.25,
-                        "y": 0.0,
-                        "z": 0.0
-                    }
-                }
-            },
-            "AudioSource": {
-                "nullopt": true
-            },
-            "SkeletonComponent": {
-                "nullopt": true
-            },
-            "AnimationComponent": {
-                "nullopt": true
-            },
-            "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
-            "SkinnedMeshComponent": {
-                "nullopt": true
-            },
-            "ParticleSystem": {
-                "nullopt": true
-            }
-        },
-        {
-            "EntityMetadata": {
-                "name": "AnimatedEntity",
-                "tag": "",
-                "active": true
-            },
-            "LuaScript": {
-                "nullopt": true
-            },
-            "ShadowCaster": {
-                "nullopt": true
-            },
-            "Transform": {
-                "nullopt": false,
-                "data": {
-                    "position": {
-                        "x": 0.0,
-                        "y": 3.0,
-                        "z": 0.0
-                    },
-                    "rotation": {
-                        "x": -0.14729256927967072,
-                        "y": 0.41287270188331606,
-                        "z": 0.048636410385370257,
-                        "w": 0.8974829912185669
-                    },
-                    "scale": {
-                        "x": 10.0,
-                        "y": 10.0,
-                        "z": 10.0
-                    }
-                }
-            },
-            "ModelRenderer": {
-                "nullopt": true
-            },
-            "RigidBodyComponent": {
-                "nullopt": true
-            },
-            "AudioSource": {
-                "nullopt": true
-            },
-            "SkeletonComponent": {
-                "nullopt": false,
-                "data": {
-                    "skeletonPath": "resources/models/ruby_skeleton.ozz"
-                }
-            },
-            "AnimationComponent": {
-                "nullopt": false,
-                "data": {
-                    "animationPath": "resources/models/ruby_animation.ozz"
-                }
-            },
-            "AnimationPoseComponent": {
-                "nullopt": false,
-                "data": {}
-            },
-            "AnimationWorkerComponent": {
-                "nullopt": false,
-                "data": {}
-            },
-            "SkinnedMeshComponent": {
-                "nullopt": false,
-                "data": {
-                    "meshPath": "resources/models/ruby_mesh.ozz"
-                }
-            },
-            "ParticleSystem": {
-                "nullopt": true
-            }
-        },
-        {
-            "EntityMetadata": {
-                "name": "Tree",
-                "tag": "",
-                "active": true
-            },
-            "LuaScript": {
-                "nullopt": false,
-                "data": {
-                    "scriptPath": "scripts/test.lua"
-                }
-            },
-            "ShadowCaster": {
-                "nullopt": false,
-                "data": {}
-            },
-            "Transform": {
-                "nullopt": false,
-                "data": {
-                    "position": {
-                        "x": 11.124083518981934,
-                        "y": -2.9066152572631838,
-                        "z": -17.7896728515625
-                    },
-                    "rotation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0,
-                        "w": 1.0
-                    },
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    }
-                }
-            },
-            "ModelRenderer": {
-                "nullopt": false,
-                "data": {
-                    "visible": true,
-                    "model": {
-                        "guid": "440eeeeb3deb20a70e023d8d0146dfcd"
-                    }
-                }
-            },
-            "RigidBodyComponent": {
-                "nullopt": true
-            },
-            "AudioSource": {
-                "nullopt": false,
-                "data": {
-                    "autoPlay": true,
-                    "looping": true,
-                    "volume": 0.10000000149011612,
-                    "pitch": 1.0,
-                    "isPlaying": true,
-                    "referenceDistance": 5.0,
-                    "maxDistance": 50.0,
-                    "rolloffFactor": 1.0,
-                    "buffer": {
-                        "guid": "5934d5e25811aaab0768ad9457b3af78"
-                    }
-                }
-            },
-            "SkeletonComponent": {
-                "nullopt": true
-            },
-            "AnimationComponent": {
-                "nullopt": true
-            },
-            "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
-            "SkinnedMeshComponent": {
-                "nullopt": true
-            },
-            "ParticleSystem": {
-                "nullopt": true
-            }
-        },
-        {
-            "EntityMetadata": {
-                "name": "Ball",
-                "tag": "",
-                "active": true
-            },
-            "LuaScript": {
-                "nullopt": false,
-                "data": {
-                    "scriptPath": "scripts/bullet.lua"
-                }
-            },
-            "ShadowCaster": {
-                "nullopt": false,
-                "data": {}
-            },
-            "Transform": {
-                "nullopt": false,
-                "data": {
-                    "position": {
-                        "x": 8.67392349243164,
-                        "y": -10.80233097076416,
-                        "z": 29.72528648376465
-                    },
-                    "rotation": {
-                        "x": 0.06214037165045738,
-                        "y": 0.000010072355507872999,
-                        "z": -0.020190050825476648,
-                        "w": 0.9978631734848023
-                    },
-                    "scale": {
-                        "x": 0.5,
-                        "y": 0.5,
-                        "z": 0.5
-                    }
-                }
-            },
-            "ModelRenderer": {
-                "nullopt": false,
-                "data": {
-                    "visible": true,
-                    "model": {
-                        "guid": "16ab47c200b25ccb2b9dbcf46297059f"
-                    }
-                }
-            },
-            "RigidBodyComponent": {
-                "nullopt": false,
-                "data": {
-                    "motionType": 2,
-                    "mass": 1.0,
-                    "friction": 0.5,
-                    "restitution": 0.0,
-                    "gravityFactor": 1.0,
-                    "shapeType": "Sphere",
-                    "shapeSize": {
-                        "x": 0.25,
-                        "y": 0.0,
-                        "z": 0.0
-                    }
-                }
-            },
-            "AudioSource": {
-                "nullopt": true
-            },
-            "SkeletonComponent": {
-                "nullopt": true
-            },
-            "AnimationComponent": {
-                "nullopt": true
-            },
-            "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
-            "SkinnedMeshComponent": {
-                "nullopt": true
-            },
-            "ParticleSystem": {
-                "nullopt": true
-            }
-        },
-        {
-            "EntityMetadata": {
-                "name": "Ball",
-                "tag": "",
-                "active": true
-            },
-            "LuaScript": {
-                "nullopt": false,
-                "data": {
-                    "scriptPath": "scripts/bullet.lua"
-                }
-            },
-            "ShadowCaster": {
-                "nullopt": false,
-                "data": {}
-            },
-            "Transform": {
-                "nullopt": false,
-                "data": {
-                    "position": {
-                        "x": 8.603832244873047,
-                        "y": -31.46572494506836,
-                        "z": 33.41265106201172
-                    },
-                    "rotation": {
-                        "x": 0.7896899580955505,
-                        "y": 0.5291089415550232,
-                        "z": -0.2942368984222412,
-                        "w": -0.09928826242685318
-                    },
-                    "scale": {
-                        "x": 0.5,
-                        "y": 0.5,
-                        "z": 0.5
-                    }
-                }
-            },
-            "ModelRenderer": {
-                "nullopt": false,
-                "data": {
-                    "visible": true,
-                    "model": {
-                        "guid": "16ab47c200b25ccb2b9dbcf46297059f"
-                    }
-                }
-            },
-            "RigidBodyComponent": {
-                "nullopt": false,
-                "data": {
-                    "motionType": 2,
-                    "mass": 1.0,
-                    "friction": 0.5,
-                    "restitution": 0.0,
-                    "gravityFactor": 1.0,
-                    "shapeType": "Sphere",
-                    "shapeSize": {
-                        "x": 0.25,
-                        "y": 0.0,
-                        "z": 0.0
-                    }
-                }
-            },
-            "AudioSource": {
-                "nullopt": true
-            },
-            "SkeletonComponent": {
-                "nullopt": true
-            },
-            "AnimationComponent": {
-                "nullopt": true
-            },
-            "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
-            "SkinnedMeshComponent": {
-                "nullopt": true
-            },
-            "ParticleSystem": {
-                "nullopt": true
-            }
-        },
-        {
-            "EntityMetadata": {
-                "name": "New Entity1",
-                "tag": "",
-                "active": true
-            },
-            "LuaScript": {
-                "nullopt": true
-            },
-            "ShadowCaster": {
-                "nullopt": true
-            },
-            "Transform": {
-                "nullopt": true
-            },
-            "ModelRenderer": {
-                "nullopt": true
-            },
-            "RigidBodyComponent": {
-                "nullopt": true
-            },
-            "AudioSource": {
-                "nullopt": true
-            },
-            "SkeletonComponent": {
-                "nullopt": true
-            },
-            "AnimationComponent": {
-                "nullopt": true
-            },
-            "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
-            "SkinnedMeshComponent": {
-                "nullopt": true
-            },
-            "ParticleSystem": {
-                "nullopt": true
-            }
-        },
-        {
-            "EntityMetadata": {
-                "name": "Ball",
-                "tag": "",
-                "active": true
-            },
-            "LuaScript": {
-                "nullopt": false,
-                "data": {
-                    "scriptPath": "scripts/bullet.lua"
-                }
-            },
-            "ShadowCaster": {
-                "nullopt": false,
-                "data": {}
-            },
-            "Transform": {
-                "nullopt": false,
-                "data": {
-                    "position": {
-                        "x": 10.959762573242188,
-                        "y": -8.659116744995118,
-                        "z": 18.550745010375978
-                    },
-                    "rotation": {
-                        "x": -0.12071876972913742,
-                        "y": 0.6187773942947388,
-                        "z": -0.12904620170593263,
-                        "w": 0.7654336094856262
-                    },
-                    "scale": {
-                        "x": 0.5,
-                        "y": 0.5,
-                        "z": 0.5
-                    }
-                }
-            },
-            "ModelRenderer": {
-                "nullopt": false,
-                "data": {
-                    "visible": true,
-                    "model": {
-                        "guid": "16ab47c200b25ccb2b9dbcf46297059f"
-                    }
-                }
-            },
-            "RigidBodyComponent": {
-                "nullopt": false,
-                "data": {
-                    "motionType": 2,
-                    "mass": 1.0,
-                    "friction": 0.5,
-                    "restitution": 0.0,
-                    "gravityFactor": 1.0,
-                    "shapeType": "Sphere",
-                    "shapeSize": {
-                        "x": 0.25,
-                        "y": 0.0,
-                        "z": 0.0
-                    }
-                }
-            },
-            "AudioSource": {
-                "nullopt": true
-            },
-            "SkeletonComponent": {
-                "nullopt": true
-            },
-            "AnimationComponent": {
-                "nullopt": true
-            },
-            "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
-            "SkinnedMeshComponent": {
-                "nullopt": true
-            },
-            "ParticleSystem": {
-                "nullopt": true
-            }
+  "entities": [
+    {
+      "EntityMetadata": {
+        "name": "New Entity",
+        "tag": "",
+        "active": true
+      },
+      "LuaScript": {
+        "nullopt": true
+      },
+      "ShadowCaster": {
+        "nullopt": true
+      },
+      "Transform": {
+        "nullopt": true
+      },
+      "TerrainRenderer": {
+        "nullopt": true
+      },
+      "ModelRenderer": {
+        "nullopt": true
+      },
+      "RigidBodyComponent": {
+        "nullopt": true
+      },
+      "AudioSource": {
+        "nullopt": true
+      },
+      "SkeletonComponent": {
+        "nullopt": true
+      },
+      "AnimationComponent": {
+        "nullopt": true
+      },
+      "AnimationPoseComponent": {
+        "nullopt": true
+      },
+      "AnimationWorkerComponent": {
+        "nullopt": true
+      },
+      "SkinnedMeshComponent": {
+        "nullopt": true
+      },
+      "ParticleSystem": {
+        "nullopt": true
+      }
+    },
+    {
+      "EntityMetadata": {
+        "name": "New Entity1",
+        "tag": "",
+        "active": true
+      },
+      "LuaScript": {
+        "nullopt": true
+      },
+      "ShadowCaster": {
+        "nullopt": true
+      },
+      "Transform": {
+        "nullopt": true
+      },
+      "TerrainRenderer": {
+        "nullopt": true
+      },
+      "ModelRenderer": {
+        "nullopt": true
+      },
+      "RigidBodyComponent": {
+        "nullopt": true
+      },
+      "AudioSource": {
+        "nullopt": true
+      },
+      "SkeletonComponent": {
+        "nullopt": true
+      },
+      "AnimationComponent": {
+        "nullopt": true
+      },
+      "AnimationPoseComponent": {
+        "nullopt": true
+      },
+      "AnimationWorkerComponent": {
+        "nullopt": true
+      },
+      "SkinnedMeshComponent": {
+        "nullopt": true
+      },
+      "ParticleSystem": {
+        "nullopt": true
+      }
+    },
+    {
+      "EntityMetadata": {
+        "name": "Ball",
+        "tag": "",
+        "active": true
+      },
+      "LuaScript": {
+        "nullopt": false,
+        "data": {
+          "scriptPath": "scripts/bullet.lua"
         }
-    ]
+      },
+      "ShadowCaster": {
+        "nullopt": false,
+        "data": {}
+      },
+      "Transform": {
+        "nullopt": false,
+        "data": {
+          "position": {
+            "x": 8.603832244873047,
+            "y": -44.557403564453128,
+            "z": 33.41265106201172
+          },
+          "rotation": {
+            "x": 0.7896899580955505,
+            "y": 0.5291089415550232,
+            "z": -0.2942368686199188,
+            "w": -0.09928826242685318
+          },
+          "scale": {
+            "x": 0.5,
+            "y": 0.5,
+            "z": 0.5
+          }
+        }
+      },
+      "TerrainRenderer": {
+        "nullopt": true
+      },
+      "ModelRenderer": {
+        "nullopt": false,
+        "data": {
+          "visible": true,
+          "model": {
+            "guid": "16ab47c200b25ccb2b9dbcf46297059f"
+          }
+        }
+      },
+      "RigidBodyComponent": {
+        "nullopt": false,
+        "data": {
+          "motionType": 2,
+          "mass": 1.0,
+          "friction": 0.5,
+          "restitution": 0.0,
+          "gravityFactor": 1.0,
+          "shapeType": "Sphere",
+          "shapeSize": {
+            "x": 0.25,
+            "y": 0.0,
+            "z": 0.0
+          }
+        }
+      },
+      "AudioSource": {
+        "nullopt": true
+      },
+      "SkeletonComponent": {
+        "nullopt": true
+      },
+      "AnimationComponent": {
+        "nullopt": true
+      },
+      "AnimationPoseComponent": {
+        "nullopt": true
+      },
+      "AnimationWorkerComponent": {
+        "nullopt": true
+      },
+      "SkinnedMeshComponent": {
+        "nullopt": true
+      },
+      "ParticleSystem": {
+        "nullopt": true
+      }
+    },
+    {
+      "EntityMetadata": {
+        "name": "Ball",
+        "tag": "",
+        "active": true
+      },
+      "LuaScript": {
+        "nullopt": false,
+        "data": {
+          "scriptPath": "scripts/bullet.lua"
+        }
+      },
+      "ShadowCaster": {
+        "nullopt": false,
+        "data": {}
+      },
+      "Transform": {
+        "nullopt": false,
+        "data": {
+          "position": {
+            "x": 8.67392349243164,
+            "y": -23.894044876098634,
+            "z": 29.72528648376465
+          },
+          "rotation": {
+            "x": 0.06214036047458649,
+            "y": 0.000010072355507872999,
+            "z": -0.020190050825476648,
+            "w": 0.9978631734848023
+          },
+          "scale": {
+            "x": 0.5,
+            "y": 0.5,
+            "z": 0.5
+          }
+        }
+      },
+      "TerrainRenderer": {
+        "nullopt": true
+      },
+      "ModelRenderer": {
+        "nullopt": false,
+        "data": {
+          "visible": true,
+          "model": {
+            "guid": "16ab47c200b25ccb2b9dbcf46297059f"
+          }
+        }
+      },
+      "RigidBodyComponent": {
+        "nullopt": false,
+        "data": {
+          "motionType": 2,
+          "mass": 1.0,
+          "friction": 0.5,
+          "restitution": 0.0,
+          "gravityFactor": 1.0,
+          "shapeType": "Sphere",
+          "shapeSize": {
+            "x": 0.25,
+            "y": 0.0,
+            "z": 0.0
+          }
+        }
+      },
+      "AudioSource": {
+        "nullopt": true
+      },
+      "SkeletonComponent": {
+        "nullopt": true
+      },
+      "AnimationComponent": {
+        "nullopt": true
+      },
+      "AnimationPoseComponent": {
+        "nullopt": true
+      },
+      "AnimationWorkerComponent": {
+        "nullopt": true
+      },
+      "SkinnedMeshComponent": {
+        "nullopt": true
+      },
+      "ParticleSystem": {
+        "nullopt": true
+      }
+    },
+    {
+      "EntityMetadata": {
+        "name": "Tree",
+        "tag": "",
+        "active": true
+      },
+      "LuaScript": {
+        "nullopt": false,
+        "data": {
+          "scriptPath": "scripts/test.lua"
+        }
+      },
+      "ShadowCaster": {
+        "nullopt": false,
+        "data": {}
+      },
+      "Transform": {
+        "nullopt": false,
+        "data": {
+          "position": {
+            "x": 11.124083518981934,
+            "y": -2.9066152572631838,
+            "z": -17.7896728515625
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        }
+      },
+      "TerrainRenderer": {
+        "nullopt": true
+      },
+      "ModelRenderer": {
+        "nullopt": false,
+        "data": {
+          "visible": true,
+          "model": {
+            "guid": "440eeeeb3deb20a70e023d8d0146dfcd"
+          }
+        }
+      },
+      "RigidBodyComponent": {
+        "nullopt": false,
+        "data": {
+          "motionType": 2,
+          "mass": 1.0,
+          "friction": 0.5,
+          "restitution": 0.0,
+          "gravityFactor": 1.0,
+          "shapeType": "Box",
+          "shapeSize": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          }
+        }
+      },
+      "AudioSource": {
+        "nullopt": false,
+        "data": {
+          "autoPlay": true,
+          "looping": true,
+          "volume": 0.10000000149011612,
+          "pitch": 1.0,
+          "isPlaying": true,
+          "referenceDistance": 5.0,
+          "maxDistance": 50.0,
+          "rolloffFactor": 1.0,
+          "buffer": {
+            "guid": "5934d5e25811aaab0768ad9457b3af78"
+          }
+        }
+      },
+      "SkeletonComponent": {
+        "nullopt": true
+      },
+      "AnimationComponent": {
+        "nullopt": true
+      },
+      "AnimationPoseComponent": {
+        "nullopt": true
+      },
+      "AnimationWorkerComponent": {
+        "nullopt": true
+      },
+      "SkinnedMeshComponent": {
+        "nullopt": true
+      },
+      "ParticleSystem": {
+        "nullopt": true
+      }
+    },
+    {
+      "EntityMetadata": {
+        "name": "AnimatedEntity",
+        "tag": "",
+        "active": true
+      },
+      "LuaScript": {
+        "nullopt": true
+      },
+      "ShadowCaster": {
+        "nullopt": true
+      },
+      "Transform": {
+        "nullopt": false,
+        "data": {
+          "position": {
+            "x": 0.0,
+            "y": 3.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": -0.14729256927967072,
+            "y": 0.41287270188331606,
+            "z": 0.048636410385370257,
+            "w": 0.8974829912185669
+          },
+          "scale": {
+            "x": 10.0,
+            "y": 10.0,
+            "z": 10.0
+          }
+        }
+      },
+      "TerrainRenderer": {
+        "nullopt": true
+      },
+      "ModelRenderer": {
+        "nullopt": true
+      },
+      "RigidBodyComponent": {
+        "nullopt": true
+      },
+      "AudioSource": {
+        "nullopt": true
+      },
+      "SkeletonComponent": {
+        "nullopt": false,
+        "data": {
+          "skeletonPath": "resources/models/ruby_skeleton.ozz"
+        }
+      },
+      "AnimationComponent": {
+        "nullopt": false,
+        "data": {
+          "animationPath": "resources/models/ruby_animation.ozz"
+        }
+      },
+      "AnimationPoseComponent": {
+        "nullopt": false,
+        "data": {}
+      },
+      "AnimationWorkerComponent": {
+        "nullopt": false,
+        "data": {}
+      },
+      "SkinnedMeshComponent": {
+        "nullopt": false,
+        "data": {
+          "meshPath": "resources/models/ruby_mesh.ozz"
+        }
+      },
+      "ParticleSystem": {
+        "nullopt": true
+      }
+    },
+    {
+      "EntityMetadata": {
+        "name": "Ball",
+        "tag": "",
+        "active": true
+      },
+      "LuaScript": {
+        "nullopt": false,
+        "data": {
+          "scriptPath": "scripts/bullet.lua"
+        }
+      },
+      "ShadowCaster": {
+        "nullopt": false,
+        "data": {}
+      },
+      "Transform": {
+        "nullopt": false,
+        "data": {
+          "position": {
+            "x": 11.358264923095704,
+            "y": -108.88797760009766,
+            "z": 30.34259033203125
+          },
+          "rotation": {
+            "x": 0.809569239616394,
+            "y": 0.23729149997234345,
+            "z": -0.5117066502571106,
+            "w": -0.16262449324131013
+          },
+          "scale": {
+            "x": 0.5,
+            "y": 0.5,
+            "z": 0.5
+          }
+        }
+      },
+      "TerrainRenderer": {
+        "nullopt": true
+      },
+      "ModelRenderer": {
+        "nullopt": false,
+        "data": {
+          "visible": true,
+          "model": {
+            "guid": "16ab47c200b25ccb2b9dbcf46297059f"
+          }
+        }
+      },
+      "RigidBodyComponent": {
+        "nullopt": false,
+        "data": {
+          "motionType": 2,
+          "mass": 1.0,
+          "friction": 0.5,
+          "restitution": 0.0,
+          "gravityFactor": 1.0,
+          "shapeType": "Sphere",
+          "shapeSize": {
+            "x": 0.25,
+            "y": 0.0,
+            "z": 0.0
+          }
+        }
+      },
+      "AudioSource": {
+        "nullopt": true
+      },
+      "SkeletonComponent": {
+        "nullopt": true
+      },
+      "AnimationComponent": {
+        "nullopt": true
+      },
+      "AnimationPoseComponent": {
+        "nullopt": true
+      },
+      "AnimationWorkerComponent": {
+        "nullopt": true
+      },
+      "SkinnedMeshComponent": {
+        "nullopt": true
+      },
+      "ParticleSystem": {
+        "nullopt": true
+      }
+    },
+    {
+      "EntityMetadata": {
+        "name": "BigBall",
+        "tag": "",
+        "active": true
+      },
+      "LuaScript": {
+        "nullopt": false,
+        "data": {
+          "scriptPath": "scripts/bullet.lua"
+        }
+      },
+      "ShadowCaster": {
+        "nullopt": false,
+        "data": {}
+      },
+      "Transform": {
+        "nullopt": false,
+        "data": {
+          "position": {
+            "x": -15.146770477294922,
+            "y": -16.962133407592775,
+            "z": 3.018522262573242
+          },
+          "rotation": {
+            "x": -0.27681764960289,
+            "y": -0.05017438530921936,
+            "z": 0.10627556592226029,
+            "w": 0.9537085890769959
+          },
+          "scale": {
+            "x": 2.0,
+            "y": 2.0000030994415285,
+            "z": 2.00000262260437
+          }
+        }
+      },
+      "TerrainRenderer": {
+        "nullopt": true
+      },
+      "ModelRenderer": {
+        "nullopt": false,
+        "data": {
+          "visible": true,
+          "model": {
+            "guid": "16ab47c200b25ccb2b9dbcf46297059f"
+          }
+        }
+      },
+      "RigidBodyComponent": {
+        "nullopt": false,
+        "data": {
+          "motionType": 2,
+          "mass": 1.0,
+          "friction": 0.5,
+          "restitution": 0.0,
+          "gravityFactor": 1.0,
+          "shapeType": "Sphere",
+          "shapeSize": {
+            "x": 1.0,
+            "y": 0.0,
+            "z": 0.0
+          }
+        }
+      },
+      "AudioSource": {
+        "nullopt": true
+      },
+      "SkeletonComponent": {
+        "nullopt": true
+      },
+      "AnimationComponent": {
+        "nullopt": true
+      },
+      "AnimationPoseComponent": {
+        "nullopt": true
+      },
+      "AnimationWorkerComponent": {
+        "nullopt": true
+      },
+      "SkinnedMeshComponent": {
+        "nullopt": true
+      },
+      "ParticleSystem": {
+        "nullopt": true
+      }
+    }
+  ]
 }
