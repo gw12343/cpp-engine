@@ -27,7 +27,7 @@ namespace Engine {
 	}
 	void Camera::onUpdate(float dt)
 	{
-		if (GetState() == EDITOR) {
+		if (GetState() != PLAYING) {
 			// Handle camera movement based on right mouse button state
 			if (GetInput().IsMousePressed(GLFW_MOUSE_BUTTON_RIGHT)) {
 				// Only capture cursor if it's not already captured

@@ -24,12 +24,19 @@ namespace Engine {
 		glfwGetCursorPos(GetWindow().GetNativeWindow(), &x, &y);
 		m_lastMousePosition = glm::vec2((float) x, (float) y);
 
+		m_gameCursorMode = GLFW_CURSOR_NORMAL;
 		SetCursorMode(GLFW_CURSOR_NORMAL);
 	}
 
 
 	void Input::onUpdate(float dt)
 	{
+		if (GetState() == PLAYING) {
+			if (IsKeyPressed(GLFW_KEY_ESCAPE)) {
+				m_gameCursorMode = GLFW_CURSOR_NORMAL;
+			}
+			glfwSetInputMode(GetWindow().GetNativeWindow(), GLFW_CURSOR, m_gameCursorMode);
+		}
 		// Update mouse position
 		// m_scrollDelta       = 0;
 		m_lastMousePosition = m_mousePosition;
@@ -107,6 +114,16 @@ namespace Engine {
 		glfwSetCursorPos(GetWindow().GetNativeWindow(), pos.x, pos.y);
 	}
 
+	void Input::SetCursorModeGame(int mode)
+	{
+		m_gameCursorMode = mode;
+	}
+
+	int Input::GetCursorModeGame()
+	{
+		return m_gameCursorMode;
+	}
+
 	void Input::SetCursorMode(int mode)
 	{
 		glfwSetInputMode(GetWindow().GetNativeWindow(), GLFW_CURSOR, mode);
@@ -116,6 +133,7 @@ namespace Engine {
 	{
 		return glfwGetInputMode(GetWindow().GetNativeWindow(), GLFW_CURSOR);
 	}
+
 
 	//	[[maybe_unused]] void Input::MouseCallback(GLFWwindow* /*wnd*/, double /*x*/, double /*y*/)
 	//	{
@@ -171,9 +189,9 @@ namespace Engine {
 		                                           "setMousePosition",
 		                                           &Input::SetMousePosition,
 		                                           "setCursorMode",
-		                                           &Input::SetCursorMode,
+		                                           &Input::SetCursorModeGame,
 		                                           "getCursorMode",
-		                                           &Input::GetCursorMode);
+		                                           &Input::GetCursorModeGame);
 
 		GetScriptManager().lua["KEY_SPACE"]         = GLFW_KEY_SPACE;
 		GetScriptManager().lua["KEY_APOSTROPHE"]    = GLFW_KEY_APOSTROPHE;

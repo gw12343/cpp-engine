@@ -31,8 +31,11 @@ namespace Engine {
 		glm::vec2                  GetMouseDelta() const;
 		// float                      GetMouseScrollDelta();
 		[[maybe_unused]] void SetMousePosition(const glm::vec2& position);
-		void                  SetCursorMode(int mode);
-		int                   GetCursorMode();
+
+		void SetCursorMode(int mode);
+		int  GetCursorMode();
+		void SetCursorModeGame(int mode);
+		int  GetCursorModeGame();
 
 
 		//		// Callbacks
@@ -46,5 +49,7 @@ namespace Engine {
 		// float                         m_scrollDelta;
 		std::unordered_map<int, bool> m_keyStates;     // Current frame
 		std::unordered_map<int, bool> m_prevKeyStates; // Previous frame
+
+		int m_gameCursorMode;
 	};
 } // namespace Engine
