@@ -12,7 +12,8 @@
 
 #include "SceneManager.h"
 // #include "serialization/SerializationManager.h"
-
+#include <filesystem>
+#include <string>
 
 #include "Window.h"
 #include "rendering/Renderer.h"
@@ -32,6 +33,8 @@
 #include "rendering/particles/Particle.h"
 #include "assets/impl/ParticleLoader.h"
 #include "assets/impl/JSONSceneLoader.h"
+
+namespace fs = std::filesystem;
 
 namespace Engine {
 	ModuleManager manager;
@@ -98,15 +101,33 @@ namespace Engine {
 
 	void GEngine::CreateInitialEntities()
 	{
-		AssetHandle<Rendering::Model> treeModel = GetAssetManager().Load<Rendering::Model>("resources/models/TwistedTree_1.obj");
+		//		AssetHandle<Rendering::Model> treeModel = GetAssetManager().Load<Rendering::Model>("resources/models/TwistedTree_1.obj");
+		//
+		//
+		//		GetAssetManager().Load<Rendering::Model>("resources/models/Spruce2.fbx");
+		//
+		//		GetAssetManager().Load<Rendering::Model>("resources/models/sphere.obj");
+		//		AssetHandle<Rendering::Model>   cubeModel   = GetAssetManager().Load<Rendering::Model>("resources/models/cube.obj");
+		//		AssetHandle<Rendering::Model>   cuccbeModel = GetAssetManager().Load<Rendering::Model>("resources/models/capsule.obj");
+		AssetHandle<Audio::SoundBuffer> snd = GetAssetManager().Load<Audio::SoundBuffer>("resources/sounds/bird_chirp.wav");
 
+		std::string folder = "resources/textures";
 
-		GetAssetManager().Load<Rendering::Model>("resources/models/Spruce2.fbx");
+		for (const auto& entry : fs::directory_iterator(folder)) {
+			if (entry.is_regular_file() && entry.path().extension() == ".png") {
+				std::string path = entry.path().string();
+				GetAssetManager().Load<Texture>(path);
+			}
+		}
+		folder = "resources/models";
 
-		GetAssetManager().Load<Rendering::Model>("resources/models/sphere.obj");
-		AssetHandle<Rendering::Model>   cubeModel   = GetAssetManager().Load<Rendering::Model>("resources/models/cube.obj");
-		AssetHandle<Rendering::Model>   cuccbeModel = GetAssetManager().Load<Rendering::Model>("resources/models/capsule.obj");
-		AssetHandle<Audio::SoundBuffer> snd         = GetAssetManager().Load<Audio::SoundBuffer>("resources/sounds/bird_chirp.wav");
+		for (const auto& entry : fs::directory_iterator(folder)) {
+			if (entry.is_regular_file() && entry.path().extension() == ".obj") {
+				std::string path = entry.path().string();
+				GetAssetManager().Load<Rendering::Model>(path);
+			}
+		}
+
 		// AssetHandle<Terrain::TerrainTile> terr        = GetAssetManager().Load<Terrain::TerrainTile>("resources/terrain/terrain1.bin");
 
 
