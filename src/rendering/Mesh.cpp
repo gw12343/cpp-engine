@@ -98,7 +98,8 @@ namespace Engine {
 			//			shader.SetVec3("material.emissiveColor", m_material->GetEmissiveColor());
 			//			shader.SetFloat("material.shininess", m_material->GetShininess());
 			//
-
+			glEnable(GL_CULL_FACE);
+			
 			glBindVertexArray(m_vao);
 			glDrawElements(GL_TRIANGLES, static_cast<int>(m_indices.size()), GL_UNSIGNED_INT, nullptr);
 			glBindVertexArray(0);

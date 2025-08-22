@@ -64,14 +64,55 @@ namespace Engine {
 				}
 			}
 
+			//#define X(type, name, fancy)                                                                                                                                                                                                                   \
+//	if ((*m_selectedEntityP).HasComponent<type>()) {                                                                                                                                                                                           \
+//		if (ImGui::CollapsingHeader(fancy)) {                                                                                                                                                                                                  \
+//			(*m_selectedEntityP).GetComponent<type>().RenderInspector((*m_selectedEntityP));                                                                                                                                                   \
+//		}                                                                                                                                                                                                                                      \
+//	}
+			//			COMPONENT_LIST
+			// #undef X
+
+
+			std::vector<std::function<void()>> pendingRemovals;
+
+
 #define X(type, name, fancy)                                                                                                                                                                                                                   \
 	if ((*m_selectedEntityP).HasComponent<type>()) {                                                                                                                                                                                           \
-		if (ImGui::CollapsingHeader(fancy)) {                                                                                                                                                                                                  \
-			(*m_selectedEntityP).GetComponent<type>().RenderInspector((*m_selectedEntityP));                                                                                                                                                   \
+		ImGui::PushID(#type);                                                                                                                                                                                                                  \
+                                                                                                                                                                                                                                               \
+		if (ImGui::BeginTable("compHeader", 2, ImGuiTableFlags_SizingStretchSame)) {                                                                                                                                                           \
+			ImGui::TableNextRow();                                                                                                                                                                                                             \
+                                                                                                                                                                                                                                               \
+			/* Header cell */                                                                                                                                                                                                                  \
+			ImGui::TableSetColumnIndex(0);                                                                                                                                                                                                     \
+			bool open = ImGui::CollapsingHeader(fancy, ImGuiTreeNodeFlags_DefaultOpen);                                                                                                                                                        \
+                                                                                                                                                                                                                                               \
+			/* Trashcan cell */                                                                                                                                                                                                                \
+			ImGui::TableSetColumnIndex(1);                                                                                                                                                                                                     \
+			float buttonSize = ImGui::GetFrameHeight();                                                                                                                                                                                        \
+			if (ImGui::Button(ICON_FA_TRASH_CAN, ImVec2(buttonSize, buttonSize))) {                                                                                                                                                            \
+				auto entityPtr = m_selectedEntityP;                                                                                                                                                                                            \
+				pendingRemovals.push_back([entityPtr]() { (*entityPtr).RemoveComponent<type>(); });                                                                                                                                            \
+			}                                                                                                                                                                                                                                  \
+                                                                                                                                                                                                                                               \
+			ImGui::EndTable();                                                                                                                                                                                                                 \
+                                                                                                                                                                                                                                               \
+			if (open) {                                                                                                                                                                                                                        \
+				(*m_selectedEntityP).GetComponent<type>().RenderInspector((*m_selectedEntityP));                                                                                                                                               \
+			}                                                                                                                                                                                                                                  \
 		}                                                                                                                                                                                                                                      \
+                                                                                                                                                                                                                                               \
+		ImGui::PopID();                                                                                                                                                                                                                        \
 	}
 			COMPONENT_LIST
 #undef X
+
+
+			for (auto& remove : pendingRemovals) {
+				remove();
+			}
+			pendingRemovals.clear();
 
 
 			ImGui::Separator();

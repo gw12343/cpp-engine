@@ -33,7 +33,7 @@ namespace Engine {
 	  public:
 		std::shared_ptr<CharacterVirtual> InitPlayer(std::shared_ptr<PhysicsSystem> physics, std::shared_ptr<TempAllocatorImpl> allocater);
 		void                              Update(std::shared_ptr<CharacterVirtual> mCharacter, std::shared_ptr<PhysicsSystem> physics, std::shared_ptr<TempAllocatorImpl> allocater, float dt);
-		glm::vec3                         getPlayerPosition();
+		glm::vec3                         GetPlayerPosition();
 
 	  private:
 		std::shared_ptr<CharacterVirtual> mCharacter;

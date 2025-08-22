@@ -71,8 +71,12 @@ namespace Engine {
 		}
 	}
 
+
+	float scriptDeltaTime = 0.0;
+
 	void ScriptManager::onUpdate(float dt)
 	{
+		scriptDeltaTime = dt;
 		// Editor script
 		if (luaUpdate.valid()) {
 			try {
@@ -111,6 +115,9 @@ namespace Engine {
 
 		// User scripts
 		GetCurrentSceneRegistry().view<Components::LuaScript>().each([](entt::entity entity, Components::LuaScript& script) {
+			if (script.env) {
+				script.env["deltaTime"] = scriptDeltaTime;
+			}
 			if (script.update.valid()) {
 				sol::protected_function_result result = script.update();
 				if (!result.valid()) {

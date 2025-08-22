@@ -16,7 +16,8 @@ namespace Engine {
 		void        onUpdate(float dt) override;
 		void        onShutdown() override;
 		std::string name() const override { return "ParticleModule"; };
-		
+		void        StopAllEffects();
+
 		void Render();
 
 		Effekseer::Handle            PlayEffect(const std::u16string& path, float x, float y, float z);

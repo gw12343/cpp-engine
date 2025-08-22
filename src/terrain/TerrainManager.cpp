@@ -43,7 +43,8 @@ namespace Engine::Terrain {
 			if (!renderer.visible) continue;
 			if (!renderer.terrainTile.IsValid()) continue;
 
-			auto      tile             = GetAssetManager().Get(renderer.terrainTile);
+			auto tile = GetAssetManager().Get(renderer.terrainTile);
+			if (tile == NULL) continue; // todo warn
 			glm::mat4 viewM            = GetCamera().GetViewMatrix();
 			glm::mat4 terrainTransform = transform.GetMatrix();
 

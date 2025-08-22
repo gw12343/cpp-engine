@@ -104,33 +104,10 @@ namespace Engine {
 		GetAssetManager().Load<Rendering::Model>("resources/models/Spruce2.fbx");
 
 		GetAssetManager().Load<Rendering::Model>("resources/models/sphere.obj");
-		AssetHandle<Rendering::Model>   cubeModel = GetAssetManager().Load<Rendering::Model>("resources/models/cube.obj");
-		AssetHandle<Audio::SoundBuffer> snd       = GetAssetManager().Load<Audio::SoundBuffer>("resources/sounds/bird_chirp.wav");
-
-
-		//		Entity entity = Entity::Create("TestEntity", GetCurrentScene());
-		//		entity.AddComponent<Components::ModelRenderer>(treeModel);
-		//		entity.AddComponent<Components::Transform>(glm::vec3(0.0f, 15.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		//		entity.AddComponent<Components::ParticleSystem>("resources/particles/testleaf.efk");
-
-
-		//		Entity entity2 = Entity::Create("TestEntity2");
-		//		entity2.AddComponent<Components::ModelRenderer>(treeModel);
-		//		entity2.AddComponent<Components::Transform>(glm::vec3(2.0f, 0.0f, -5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		//
-		//
-		//		entity2.AddComponent<Components::AudioSource>(snd, true, 0.1f, 1.0f, true, 5.0f, 50.0f, 1.0f);
-		//		entity2.AddComponent<Components::ShadowCaster>();
-		//		entity2.AddComponent<Components::LuaScript>("scripts/test.lua");
-		//
-		//
-		//		Entity animatedEntity = Entity::Create("AnimatedEntity");
-		//		animatedEntity.AddComponent<Components::Transform>(glm::vec3(0.0f, 3.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		//		animatedEntity.AddComponent<Components::SkeletonComponent>("resources/models/ruby_skeleton.ozz");
-		//		animatedEntity.AddComponent<Components::AnimationComponent>("resources/models/ruby_animation.ozz");
-		//		animatedEntity.AddComponent<Components::AnimationPoseComponent>();
-		//		animatedEntity.AddComponent<Components::AnimationWorkerComponent>();
-		//		animatedEntity.AddComponent<Components::SkinnedMeshComponent>("resources/models/ruby_mesh.ozz");
+		AssetHandle<Rendering::Model>   cubeModel   = GetAssetManager().Load<Rendering::Model>("resources/models/cube.obj");
+		AssetHandle<Rendering::Model>   cuccbeModel = GetAssetManager().Load<Rendering::Model>("resources/models/capsule.obj");
+		AssetHandle<Audio::SoundBuffer> snd         = GetAssetManager().Load<Audio::SoundBuffer>("resources/sounds/bird_chirp.wav");
+		// AssetHandle<Terrain::TerrainTile> terr        = GetAssetManager().Load<Terrain::TerrainTile>("resources/terrain/terrain1.bin");
 
 
 		// Terrain::TerrainTile tile = Terrain::LoadTerrainTile("resources/terrain/terrain.bin");

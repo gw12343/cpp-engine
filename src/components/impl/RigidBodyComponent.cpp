@@ -70,7 +70,9 @@ namespace Engine::Components {
 			settings.mMassPropertiesOverride.mMass = mass;
 			settings.mFriction                     = friction;
 			settings.mRestitution                  = restitution;
-			bodyID                                 = bodyInterface.CreateAndAddBody(settings, JPH::EActivation::Activate);
+			settings.mOverrideMassProperties       = EOverrideMassProperties::MassAndInertiaProvided;
+
+			bodyID = bodyInterface.CreateAndAddBody(settings, JPH::EActivation::Activate);
 		}
 
 		GetPhysics().bodyToEntityMap[bodyID] = entity;
@@ -86,6 +88,48 @@ namespace Engine::Components {
 
 		auto                physics       = GetPhysics().GetPhysicsSystem();
 		JPH::BodyInterface& bodyInterface = physics->GetBodyInterface();
+
+
+		const char* motionTypes[] = {"Kinematic", "Dynamic"};
+		int         current       = (motionType == (int) JPH::EMotionType::Kinematic) ? 0 : 1;
+
+		if (ImGui::Combo("Motion Type", &current, motionTypes, IM_ARRAYSIZE(motionTypes))) {
+			// Update when changed
+			motionType = (current == 0) ? (int) JPH::EMotionType::Kinematic : (int) JPH::EMotionType::Dynamic;
+
+			bodyInterface.SetMotionType(bodyID, (JPH::EMotionType) motionType, JPH::EActivation::Activate);
+		}
+
+		if (ImGui::SliderFloat("Mass", &mass, 1.0, 1000.0)) {
+			JPH::BodyLockWrite lock(physics->GetBodyLockInterface(), bodyID);
+			if (lock.Succeeded()) {
+				auto&               body = lock.GetBody();
+				auto*               mot  = body.GetMotionProperties();
+				JPH::MassProperties mp;
+				mp.ScaleToMass(mass);
+				mot->SetMassProperties(JPH::EAllowedDOFs::All, mp);
+			}
+		}
+
+		if (ImGui::SliderFloat("Friction", &friction, 0.00, 1.0)) {
+			JPH::BodyLockWrite lock(physics->GetBodyLockInterface(), bodyID);
+			if (lock.Succeeded()) {
+				auto& body = lock.GetBody();
+				body.SetFriction(friction);
+			}
+		}
+
+		if (ImGui::SliderFloat("Restitution", &restitution, 0.00, 1.0)) {
+			JPH::BodyLockWrite lock(physics->GetBodyLockInterface(), bodyID);
+			if (lock.Succeeded()) {
+				auto& body = lock.GetBody();
+				body.SetRestitution(restitution);
+			}
+		}
+
+		if (ImGui::SliderFloat("Gravity Factor", &gravityFactor, 0.00, 2.0)) {
+			bodyInterface.SetGravityFactor(bodyID, gravityFactor);
+		}
 
 
 		auto& tr = entity.GetComponent<Transform>();

@@ -28,7 +28,6 @@ namespace Engine::Components {
 			ar(cereal::make_nvp("effect", effect), cereal::make_nvp("autoPlay", autoPlay), cereal::make_nvp("looping", looping));
 		}
 
-		// explicit ParticleSystem(const AssetHandle<Particle>& effectRef) : effect(effectRef) {}
 		void OnAdded(Entity& entity) override;
 		void OnRemoved(Entity& entity) override;
 		void RenderInspector(Entity& entity) override;

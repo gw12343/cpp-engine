@@ -14,6 +14,8 @@
 #include "animation/AnimationManager.h"
 #include "scripting/ScriptManager.h"
 
+#include "misc/cpp/imgui_stdlib.h"
+
 namespace Engine::Components {
 
 	void AnimationComponent::OnAdded(Entity& entity)
@@ -38,6 +40,16 @@ namespace Engine::Components {
 		ImGui::Text("Animation: %s", animation ? "Loaded" : "Null");
 		ImGui::Text("Tracks: %d", animation ? animation->num_tracks() : 0);
 		ImGui::Text("Duration: %.2f", animation ? animation->duration() : 0.0f);
+		ImGui::Separator();
+		if (ImGui::InputText("Animation Path", &animationPath)) {
+			animation = GetAnimationManager().LoadAnimationFromPath(animationPath);
+			if (!animation) {
+				spdlog::error("Failed to load animation from path: {}", animationPath);
+			}
+			else {
+				SPDLOG_INFO("Loaded animation from path: {}", animationPath);
+			}
+		}
 	}
 
 } // namespace Engine::Components

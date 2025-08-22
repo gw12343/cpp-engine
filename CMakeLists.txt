@@ -138,6 +138,8 @@ add_library(imgui STATIC
         ${imgui_SOURCE_DIR}/imgui_demo.cpp
         ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
         ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
+
+        ${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.cpp
 )
 
 target_include_directories(imgui PUBLIC
@@ -166,7 +168,9 @@ add_executable(${PROJECT_NAME} ${SOURCES}
         src/rendering/ui/InspectorRenderer.h
         src/physics/PlayerController.h
         src/physics/PlayerController.cpp
-        src/physics/PlayerSettings.h)
+        src/physics/PlayerSettings.h
+        src/components/impl/PlayerControllerComponent.h
+        src/components/impl/PlayerControllerComponent.cpp)
 
 
 target_include_directories(${PROJECT_NAME} PRIVATE

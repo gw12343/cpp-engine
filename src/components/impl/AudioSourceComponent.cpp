@@ -14,6 +14,8 @@
 #include "rendering/particles/ParticleManager.h"
 #include "animation/AnimationManager.h"
 #include "scripting/ScriptManager.h"
+#include "misc/cpp/imgui_stdlib.h"
+#include "assets/AssetManager.h"
 
 namespace Engine::Components {
 	void AudioSource::OnRemoved(Entity& entity)
@@ -32,11 +34,9 @@ namespace Engine::Components {
 
 	void AudioSource::RenderInspector(Entity& entity)
 	{
-		char soundNameBuffer[256];
-		strcpy(soundNameBuffer, buffer.GetID().c_str());
-		if (ImGui::InputText("Sound", soundNameBuffer, sizeof(soundNameBuffer))) {
-			// soundName = soundNameBuffer;
-			// TODO asset picker?
+		std::string newID = buffer.GetID();
+		if (ImGui::InputText("Sound", &newID)) {
+			buffer = AssetHandle<Audio::SoundBuffer>(newID);
 		}
 
 		ImGui::Checkbox("Auto Play", &autoPlay);

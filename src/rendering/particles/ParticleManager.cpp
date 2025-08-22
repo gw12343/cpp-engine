@@ -121,6 +121,10 @@ namespace Engine {
 
 		return m_manager->Play(effect, x, y, z);
 	}
+	void ParticleManager::StopAllEffects()
+	{
+		m_manager->StopAllEffects();
+	}
 
 
 } // namespace Engine

@@ -13,6 +13,7 @@
 #include "physics/PhysicsManager.h"
 #include "TransformComponent.h"
 #include "RigidBodyComponent.h"
+#include "PlayerControllerComponent.h"
 
 
 namespace Engine::Components {
@@ -32,6 +33,13 @@ namespace Engine::Components {
 			RVec3 joltPos = RVec3(position.x, position.y, position.z);
 			Quat  joltRot = Quat(rotation.x, rotation.y, rotation.z, rotation.w);
 			body_interface.SetPositionAndRotation(rb.bodyID, joltPos, joltRot, EActivation::Activate);
+		}
+
+		if (entity.HasComponent<PlayerControllerComponent>()) {
+			auto& player = entity.GetComponent<PlayerControllerComponent>();
+
+			player.SetPosition(position);
+			player.SetRotation(rotation);
 		}
 	}
 
@@ -60,8 +68,39 @@ namespace Engine::Components {
 		auto& lua = GetScriptManager().lua;
 
 
-		lua.new_usertype<glm::vec3>("vec3", sol::constructors<glm::vec3(), glm::vec3(float, float, float)>(), "x", &glm::vec3::x, "y", &glm::vec3::y, "z", &glm::vec3::z);
+		lua.new_usertype<glm::vec3>(
+		    "vec3",
+		    sol::constructors<glm::vec3(), glm::vec3(float, float, float)>(),
+		    "x",
+		    &glm::vec3::x,
+		    "y",
+		    &glm::vec3::y,
+		    "z",
+		    &glm::vec3::z,
+		    "normalize",
+		    [](const glm::vec3& v) {
+			    if (glm::length2(v) == 0.0f) return v; // avoid NaN
+			    return glm::normalize(v);
+		    },
+
+		    // cross product
+		    "cross",
+		    [](const glm::vec3& a, const glm::vec3& b) { return glm::cross(a, b); },
+
+		    // vector length
+		    "length",
+		    [](const glm::vec3& v) { return glm::length(v); },
+
+		    // dot product
+		    "dot",
+		    [](const glm::vec3& a, const glm::vec3& b) { return glm::dot(a, b); });
+
+		
 		lua.set_function("vec3", [](float x, float y, float z) { return glm::vec3(x, y, z); });
+
+		lua.new_usertype<glm::vec2>("vec2", sol::constructors<glm::vec2(), glm::vec2(float, float)>(), "x", &glm::vec2::x, "y", &glm::vec2::y);
+		lua.set_function("vec2", [](float x, float y, float z) { return glm::vec2(x, y); });
+
 
 		// Bind glm::quat (if you want to access rotations directly)
 		if (!lua["quat"].valid()) {

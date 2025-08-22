@@ -31,6 +31,7 @@ namespace Engine {
 		glm::vec3 GetPosition() const { return m_position; }
 		glm::vec3 GetFront() const { return m_front; }
 
+		void SetPosition(glm::vec3 position) { m_position = position; }
 
 		float m_fov;
 

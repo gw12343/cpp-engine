@@ -8,16 +8,15 @@
 #include "core/Entity.h"
 #include "utils/Utils.h"
 
-#include <codecvt>
-#include <locale>
-
 #include "imgui.h"
 #include "ozz/animation/runtime/track.h"
-#include <string>
 #include "rendering/particles/ParticleManager.h"
 #include "animation/AnimationManager.h"
 #include "scripting/ScriptManager.h"
+#include <string>
+#include "misc/cpp/imgui_stdlib.h"
 #include "assets/AssetManager.h"
+
 
 namespace Engine::Components {
 	void ParticleSystem::OnRemoved(Entity& entity)
@@ -53,6 +52,11 @@ namespace Engine::Components {
 		const auto& manager = GetParticleManager().GetManager();
 		ENGINE_VERIFY(manager != nullptr, "ParticleSystem::RenderInspector: Failed to get Effekseer manager");
 		bool paused = manager->GetPaused(handle);
+
+		std::string newID = effect.GetID();
+		if (ImGui::InputText("Particle Effect", &newID)) {
+			effect = AssetHandle<Particle>(newID);
+		}
 
 		if (ImGui::Button(paused ? "Unpause" : "Pause")) {
 			manager->SetPaused(handle, !paused);

@@ -4,8 +4,10 @@
 #include "core/EngineData.h"
 #include "scripting/ScriptManager.h"
 #include "components/impl/RigidBodyComponent.h"
+#include "Jolt/Physics/Character/CharacterVirtual.h"
 #include <cstdarg>
-
+#include "PlayerController.h"
+#include "components/impl/PlayerControllerComponent.h"
 
 using namespace JPH;
 using namespace JPH::literals;
@@ -15,6 +17,10 @@ namespace Engine {
 	std::shared_ptr<PhysicsSystem>       physics;
 	std::shared_ptr<TempAllocatorImpl>   allocater;
 	std::shared_ptr<JobSystemThreadPool> jobs;
+
+
+	std::unique_ptr<PlayerController> controller;
+	std::shared_ptr<CharacterVirtual> character;
 
 	std::shared_ptr<PhysicsSystem> PhysicsManager::GetPhysicsSystem()
 	{
@@ -63,6 +69,8 @@ namespace Engine {
 
 		// Set the body activation listener
 		physics->SetBodyActivationListener(&body_activation_listener);
+		controller = std::make_unique<PlayerController>();
+		character  = controller->InitPlayer(physics, allocater);
 	}
 
 	void PhysicsManager::onUpdate(float dt)
@@ -70,8 +78,14 @@ namespace Engine {
 		// Collision Steps to simulate. Should be around 1 per 16ms
 		int cCollisionSteps = static_cast<int>(glm::ceil(dt * 60.0f));
 		// Step the world
-		if (GetState() == PLAYING) physics->Update(dt, cCollisionSteps, allocater.get(), jobs.get());
+		if (GetState() == PLAYING) {
+			// Update Character controller
+			controller->Update(character, physics, allocater, dt);
+			// Update Physics
+			physics->Update(dt, cCollisionSteps, allocater.get(), jobs.get());
+		}
 
+		SyncCharacterEntities();
 		SyncPhysicsEntities();
 	}
 
@@ -99,11 +113,15 @@ namespace Engine {
 	void PhysicsManager::setLuaBindings()
 	{
 		// Bind the PhysicsManager class
-		GetScriptManager().lua.new_usertype<PhysicsManager>("PhysicsManager" //,
-		                                                                     // Public members
-		                                                                     // "isPhysicsPaused",
-		                                                                     // &PhysicsManager::isPhysicsPaused
-		);
+		GetScriptManager().lua.new_usertype<PhysicsManager>("PhysicsManager",
+		                                                    // getGravity lambda
+		                                                    "getGravity",
+		                                                    [](PhysicsManager& self) {
+			                                                    // Replace this with however your engine stores gravity
+			                                                    // Example: assume PhysicsManager has a glm::vec3 member `m_gravity`
+			                                                    auto g = physics->GetGravity();
+			                                                    return glm::vec3(g.GetX(), g.GetY(), g.GetZ());
+		                                                    });
 
 		// Provide access to the main PhysicsManager
 		GetScriptManager().lua.set_function("getPhysics", []() -> PhysicsManager& { return Engine::GetPhysics(); });
@@ -194,6 +212,16 @@ namespace Engine {
 		return modelMatrix;
 	}
 
+	void PhysicsManager::SyncCharacterEntities()
+	{
+		auto playerView = GetCurrentSceneRegistry().view<Engine::Components::Transform, Engine::Components::PlayerControllerComponent>();
+
+		for (auto [entity, transform, rb] : playerView.each()) {
+			transform.position = controller->GetPlayerPosition();
+		}
+	}
+
+
 	void PhysicsManager::SyncPhysicsEntities()
 	{
 		auto           physicsView    = GetCurrentSceneRegistry().view<Engine::Components::Transform, Engine::Components::RigidBodyComponent>();
@@ -205,6 +233,10 @@ namespace Engine {
 			DecomposeMatrix(tform, transform.position, transform.rotation, scl);
 			Vec3 velocity = body_interface.GetLinearVelocity(rb.bodyID);
 		}
+	}
+	std::shared_ptr<CharacterVirtual> PhysicsManager::GetCharacter()
+	{
+		return character;
 	}
 
 

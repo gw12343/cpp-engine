@@ -15,6 +15,7 @@
 #include "animation/AnimationManager.h"
 #include "scripting/ScriptManager.h"
 
+#include "misc/cpp/imgui_stdlib.h"
 
 namespace Engine::Components {
 	void LuaScript::OnRemoved(Entity& entity)
@@ -58,7 +59,11 @@ namespace Engine::Components {
 
 	void LuaScript::RenderInspector(Engine::Entity& entity)
 	{
-		ImGui::Text("Path %s", scriptPath.c_str());
+		if (ImGui::InputText("Script Path", &scriptPath)) {
+			GetScriptManager().log->info("Reloading script.");
+			OnRemoved(entity);
+			LoadScript(entity, scriptPath);
+		}
 	}
 
 	void LuaScript::LoadScript(Engine::Entity& entity, std::string path)
@@ -89,7 +94,7 @@ namespace Engine::Components {
 			collisionEnter = env["CollisionEnter"];
 
 			if (start.valid()) {
-				start(); // Optionally run
+				start(); // TODO move elsewhere to scene start
 			}
 		}
 		catch (const sol::error& err) {

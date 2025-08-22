@@ -5,6 +5,7 @@
 #include "utils/Utils.h"
 
 #include "imgui.h"
+#include "misc/cpp/imgui_stdlib.h"
 #include "ozz/animation/runtime/track.h"
 #include "rendering/particles/ParticleManager.h"
 #include "animation/AnimationManager.h"
@@ -54,12 +55,17 @@ namespace Engine::Components {
 	{
 		ImGui::Checkbox("Visible", &visible);
 
+		std::string newID = model.GetID();
+		if (ImGui::InputText("Model", &newID)) {
+			model = AssetHandle<Rendering::Model>(newID);
+		}
+
 		if (model.IsValid()) {
 			ImGui::Text("Model: Loaded");
-			// Could add more model info here
+			// TODO add more model info here
 		}
 		else {
-			ImGui::Text("Model: None");
+			ImGui::Text("Model: Invalid");
 		}
 	}
 

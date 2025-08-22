@@ -30,6 +30,7 @@
 #include <Jolt/RegisterTypes.h>
 #include "core/Entity.h"
 #include "components/impl/TransformComponent.h"
+#include "Jolt/Physics/Character/CharacterVirtual.h"
 
 using namespace JPH;
 using namespace JPH::literals;
@@ -59,8 +60,10 @@ namespace Engine {
 		std::string name() const override { return "PhysicsManger"; };
 		void        setLuaBindings() override;
 
-		void                           SyncPhysicsEntities();
-		std::shared_ptr<PhysicsSystem> GetPhysicsSystem();
+		void                              SyncPhysicsEntities();
+		void                              SyncCharacterEntities();
+		std::shared_ptr<PhysicsSystem>    GetPhysicsSystem();
+		std::shared_ptr<CharacterVirtual> GetCharacter();
 
 		BPLayerInterfaceImpl              broad_phase_layer_interface;
 		ObjectVsBroadPhaseLayerFilterImpl object_vs_broadphase_layer_filter;

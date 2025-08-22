@@ -19,6 +19,7 @@
 #include "impl/SkinnedMeshComponent.h"
 #include "impl/TerrainRendererComponent.h"
 #include "impl/TransformComponent.h"
+#include "impl/PlayerControllerComponent.h"
 
 #define COMPONENT_LIST                                                                                                                                                                                                                         \
 	X(Components::LuaScript, LuaScript, ICON_FA_SCROLL " Script")                                                                                                                                                                              \
@@ -33,7 +34,7 @@
 	X(Components::AnimationPoseComponent, AnimationPoseComponent, "Animation Pose")                                                                                                                                                            \
 	X(Components::AnimationWorkerComponent, AnimationWorkerComponent, "Animation Context")                                                                                                                                                     \
 	X(Components::SkinnedMeshComponent, SkinnedMeshComponent, "Skinned Mesh")                                                                                                                                                                  \
-	X(Components::ParticleSystem, ParticleSystem, ICON_FA_STAR_HALF_STROKE "Particle System")
-
+	X(Components::ParticleSystem, ParticleSystem, ICON_FA_STAR_HALF_STROKE "Particle System")                                                                                                                                                  \
+	X(Components::PlayerControllerComponent, PlayerControllerComponent, "Player Controller")
 
 #endif // CPP_ENGINE_ALLCOMPONENTS_H

@@ -5,5 +5,5 @@ end
 
 function Update()
     local input = getInput()
-
+    print("hello i am old")
 end

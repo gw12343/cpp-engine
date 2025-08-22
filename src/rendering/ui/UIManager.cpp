@@ -1,7 +1,6 @@
 #include "UIManager.h"
 
 #include "components/Components.h"
-#include "components/impl/AnimationComponent.h"
 #include "spdlog/spdlog.h"
 #include "glm/glm.hpp"
 #include "core/EngineData.h"
@@ -10,20 +9,14 @@
 #include "rendering/Renderer.h"
 #include "rendering/ui/IconsFontAwesome6.h"
 
-#include "components/impl/LuaScriptComponent.h"
 #include "components/impl/EntityMetadataComponent.h"
-#include "components/impl/SkeletonComponent.h"
 #include "components/impl/RigidBodyComponent.h"
 #include "components/impl/AudioSourceComponent.h"
 #include "components/impl/ModelRendererComponent.h"
-#include "components/impl/AnimationPoseComponent.h"
-#include "components/impl/AnimationWorkerComponent.h"
-#include "components/impl/SkinnedMeshComponent.h"
-#include "components/impl/ParticleSystemComponent.h"
-#include "components/impl/ShadowCasterComponent.h"
+
 #include "imgui_internal.h"
 #include "components/impl/TerrainRendererComponent.h"
-
+#include "rendering/particles/ParticleManager.h"
 
 #include "rendering/ui/Themes.h"
 #include "imguizmo/ImGuizmo.h"
@@ -240,6 +233,8 @@ namespace Engine::UI {
 			if (startStop) {
 				// unload scene, load backup
 				if (GetState() != EDITOR) {
+					m_selectedEntity = Entity();
+					GetParticleManager().StopAllEffects();
 					GetAssetManager().Unload<Scene>(GetSceneManager().GetActiveScene());
 					GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>("scenes/scene1.json"));
 					SetState(EDITOR);
@@ -479,29 +474,32 @@ namespace Engine::UI {
 
 		GetWindow().UpdateViewportSize((int) width, (int) height, (int) topLeft.x, (int) topLeft.y);
 
-		if (m_selectedEntity && GetCurrentSceneRegistry().valid(m_selectedEntity.GetHandle())) {
-			if (m_selectedEntity.HasComponent<Components::Transform>()) {
-				auto& transform = m_selectedEntity.GetComponent<Components::Transform>();
 
-				ImGuizmo::SetRect(topLeft.x, topLeft.y, width, height);
+		if (GetState() == EDITOR) {
+			if (m_selectedEntity && GetCurrentSceneRegistry().valid(m_selectedEntity.GetHandle())) {
+				if (m_selectedEntity.HasComponent<Components::Transform>()) {
+					auto& transform = m_selectedEntity.GetComponent<Components::Transform>();
 
-				glm::mat4 view       = GetCamera().GetViewMatrix();
-				glm::mat4 projection = GetCamera().GetProjectionMatrix();
+					ImGuizmo::SetRect(topLeft.x, topLeft.y, width, height);
 
-				glm::mat4 model = transform.GetMatrix();
-				ImGuizmo::SetDrawlist(ImGui::GetCurrentWindow()->DrawList);
-				ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), mCurrentGizmoOperation, mCurrentGizmoMode, glm::value_ptr(model));
-				if (ImGuizmo::IsUsingAny()) {
-					glm::vec3 outTrans, outScale, notUsed1;
-					glm::vec4 notUsed2;
-					glm::quat newRotation;
+					glm::mat4 view       = GetCamera().GetViewMatrix();
+					glm::mat4 projection = GetCamera().GetProjectionMatrix();
 
-					glm::decompose(model, outScale, newRotation, outTrans, notUsed1, notUsed2);
+					glm::mat4 model = transform.GetMatrix();
+					ImGuizmo::SetDrawlist(ImGui::GetCurrentWindow()->DrawList);
+					ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), mCurrentGizmoOperation, mCurrentGizmoMode, glm::value_ptr(model));
+					if (ImGuizmo::IsUsingAny()) {
+						glm::vec3 outTrans, outScale, notUsed1;
+						glm::vec4 notUsed2;
+						glm::quat newRotation;
 
-					transform.position = outTrans;
-					transform.rotation = newRotation;
-					transform.scale    = outScale;
-					transform.SyncWithPhysics(m_selectedEntity);
+						glm::decompose(model, outScale, newRotation, outTrans, notUsed1, notUsed2);
+
+						transform.position = outTrans;
+						transform.rotation = newRotation;
+						transform.scale    = outScale;
+						transform.SyncWithPhysics(m_selectedEntity);
+					}
 				}
 			}
 		}
@@ -509,7 +507,7 @@ namespace Engine::UI {
 		ImGui::End();
 
 
-		if (GetInput().IsMousePositionInViewport()) {
+		if (GetState() == EDITOR && GetInput().IsMousePositionInViewport()) {
 			Engine::Window::GetFramebuffer(Window::FramebufferID::MOUSE_PICKING)->Bind();
 			glm::vec2 pos = GetInput().GetMousePositionInViewportScaledFlipped();
 

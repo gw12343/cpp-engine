@@ -27,39 +27,41 @@ namespace Engine {
 	}
 	void Camera::onUpdate(float dt)
 	{
-		// Handle camera movement based on right mouse button state
-		if (GetInput().IsMousePressed(GLFW_MOUSE_BUTTON_RIGHT)) {
-			// Only capture cursor if it's not already captured
-			if (GetInput().GetCursorMode() != GLFW_CURSOR_DISABLED) {
-				GetInput().SetCursorMode(GLFW_CURSOR_DISABLED);
+		if (GetState() == EDITOR) {
+			// Handle camera movement based on right mouse button state
+			if (GetInput().IsMousePressed(GLFW_MOUSE_BUTTON_RIGHT)) {
+				// Only capture cursor if it's not already captured
+				if (GetInput().GetCursorMode() != GLFW_CURSOR_DISABLED) {
+					GetInput().SetCursorMode(GLFW_CURSOR_DISABLED);
+					ImGuiIO& io = ImGui::GetIO();
+					io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
+				}
+
+				// Process camera movement with keyboard
+				GetCamera().ProcessKeyboard(dt);
+
+				// Process mouse movement for camera rotation
+				glm::vec2 mouseDelta = GetInput().GetMouseDelta();
+
+				float xoffset = mouseDelta.x;
+				float yoffset = mouseDelta.y;
+
+				xoffset *= m_mouseSensitivity;
+				yoffset *= m_mouseSensitivity;
+
+				m_yaw += xoffset;
+				m_pitch += yoffset;
+
+				m_pitch = std::clamp(m_pitch, -89.0f, 89.0f);
+			}
+			else {
+				// Release cursor when right mouse button is released
+				if (GetInput().GetCursorMode() == GLFW_CURSOR_DISABLED) {
+					GetInput().SetCursorMode(GLFW_CURSOR_NORMAL);
+				}
 				ImGuiIO& io = ImGui::GetIO();
-				io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
+				io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
 			}
-
-			// Process camera movement with keyboard
-			GetCamera().ProcessKeyboard(dt);
-
-			// Process mouse movement for camera rotation
-			glm::vec2 mouseDelta = GetInput().GetMouseDelta();
-
-			float xoffset = mouseDelta.x;
-			float yoffset = mouseDelta.y;
-
-			xoffset *= m_mouseSensitivity;
-			yoffset *= m_mouseSensitivity;
-
-			m_yaw += xoffset;
-			m_pitch += yoffset;
-
-			m_pitch = std::clamp(m_pitch, -89.0f, 89.0f);
-		}
-		else {
-			// Release cursor when right mouse button is released
-			if (GetInput().GetCursorMode() == GLFW_CURSOR_DISABLED) {
-				GetInput().SetCursorMode(GLFW_CURSOR_NORMAL);
-			}
-			ImGuiIO& io = ImGui::GetIO();
-			io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
 		}
 
 
@@ -144,6 +146,9 @@ namespace Engine {
 		                                            &Camera::GetPosition,
 		                                            "getFront",
 		                                            &Camera::GetFront,
+
+		                                            "setPosition",
+		                                            &Camera::SetPosition,
 
 		                                            // Public fields
 		                                            "fov",
