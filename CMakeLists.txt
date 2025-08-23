@@ -170,7 +170,11 @@ add_executable(${PROJECT_NAME} ${SOURCES}
         src/physics/PlayerController.cpp
         src/physics/PlayerSettings.h
         src/components/impl/PlayerControllerComponent.h
-        src/components/impl/PlayerControllerComponent.cpp)
+        src/components/impl/PlayerControllerComponent.cpp
+        src/assets/impl/MaterialLoader.h
+        src/assets/impl/MaterialLoader.cpp
+        src/rendering/ui/MaterialEditor.h
+        src/rendering/ui/MaterialEditor.cpp)
 
 
 target_include_directories(${PROJECT_NAME} PRIVATE

@@ -11,6 +11,7 @@
 #include "ModelPreview.h"
 #include "AssetUIRenderer.h"
 #include "InspectorRenderer.h"
+#include "MaterialEditor.h"
 #include <memory>
 #include <typeindex>
 #include <string>
@@ -36,6 +37,7 @@ namespace Engine {
 
 			std::shared_ptr<Texture> audioIconTexture;
 			std::shared_ptr<Texture> terrainIconTexture;
+			AssetHandle<Material>    selectedMaterial;
 
 		  private:
 			// UI rendering methods
@@ -49,6 +51,7 @@ namespace Engine {
 
 			std::unique_ptr<AssetUIRenderer>   m_uiAssetRenderer;
 			std::unique_ptr<InspectorRenderer> m_inspectorRenderer;
+			std::unique_ptr<MaterialEditor>    m_materialEditor;
 			// Selected entity
 			Entity m_selectedEntity;
 		};

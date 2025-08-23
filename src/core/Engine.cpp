@@ -33,6 +33,7 @@
 #include "rendering/particles/Particle.h"
 #include "assets/impl/ParticleLoader.h"
 #include "assets/impl/JSONSceneLoader.h"
+#include "assets/impl/MaterialLoader.h"
 
 namespace fs = std::filesystem;
 
@@ -51,6 +52,7 @@ namespace Engine {
 		GetAssetManager().RegisterLoader<Audio::SoundBuffer>(std::make_unique<SoundLoader>());
 		GetAssetManager().RegisterLoader<Scene>(std::make_unique<SCENE_LOADER>());
 		GetAssetManager().RegisterLoader<Particle>(std::make_unique<ParticleLoader>());
+		GetAssetManager().RegisterLoader<Material>(std::make_unique<MaterialLoader>());
 
 		// Initialize Modules
 		Get().window    = std::make_shared<Window>(width, height, title);
@@ -119,6 +121,20 @@ namespace Engine {
 				GetAssetManager().Load<Rendering::Model>(path);
 			}
 		}
+
+		AssetHandle<Rendering::Model> sphere = GetAssetManager().Load<Rendering::Model>("resources/models/sphere.obj");
+		Rendering::Model*             m      = GetAssetManager().Get(sphere);
+
+		auto mat = m->GetMeshes()[0]->GetMaterial();
+
+		auto matloader = std::make_unique<MaterialLoader>();
+
+		matloader->SaveMaterial(*mat, "resources/materials/mat1.material");
+
+		AssetHandle<Material> sphereMat = GetAssetManager().Load<Material>("resources/materials/mat1.material");
+		auto                  mmm       = GetAssetManager().Get(sphereMat);
+		SPDLOG_INFO("SPHERE MATERIAL: {}", mmm->GetDiffuseTexture().GetID());
+
 
 		// AssetHandle<Terrain::TerrainTile> terr        = GetAssetManager().Load<Terrain::TerrainTile>("resources/terrain/terrain1.bin");
 

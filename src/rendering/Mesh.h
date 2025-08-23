@@ -26,7 +26,7 @@ namespace Engine::Rendering {
 		Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::shared_ptr<Material>& material);
 		~Mesh() = default;
 
-		void                                           Draw(const Shader& shader) const;
+		void                                           Draw(const Shader& shader, const AssetHandle<Material>& materialOverride) const;
 		[[maybe_unused]] void                          CleanUp();
 		[[maybe_unused]] static void                   CleanAllMeshes();
 		[[nodiscard]] const std::shared_ptr<Material>& GetMaterial() const { return m_material; }
@@ -38,6 +38,8 @@ namespace Engine::Rendering {
 		std::vector<unsigned int> m_indices;
 		std::shared_ptr<Material> m_material;
 
+
+	  private:
 		GLuint m_vao;
 		GLuint m_vbo;
 		GLuint m_ebo;

@@ -34,7 +34,7 @@ namespace Engine::Components {
 			shader.SetMat4("model", &modelMatrix);
 
 			// Draw the model
-			actualModel->Draw(shader);
+			actualModel->Draw(shader, materialOverride);
 		}
 	}
 
@@ -51,9 +51,11 @@ namespace Engine::Components {
 	{
 	}
 
+
 	void ModelRenderer::RenderInspector(Entity& entity)
 	{
 		ImGui::Checkbox("Visible", &visible);
+		ImGui::Checkbox("Cull Backface", &backfaceCulling);
 
 		std::string newID = model.GetID();
 		if (ImGui::InputText("Model", &newID)) {
@@ -66,7 +68,7 @@ namespace Engine::Components {
 				const char* type;
 				char        id[64];
 			};
-			
+
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_MODEL")) {
 				if (payload->DataSize == sizeof(PayloadData)) {
 					const PayloadData* data = static_cast<const PayloadData*>(payload->Data);
@@ -74,6 +76,31 @@ namespace Engine::Components {
 					if (std::strcmp(data->type, "Rendering::Model") == 0) {
 						model = AssetHandle<Rendering::Model>(data->id);
 						newID = data->id;
+					}
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+		newID = materialOverride.GetID();
+		if (ImGui::InputText("Material", &newID)) {
+			materialOverride = AssetHandle<Material>(newID);
+		}
+
+		// Handle drag-and-drop on same item
+		if (ImGui::BeginDragDropTarget()) {
+			struct PayloadData {
+				const char* type;
+				char        id[64];
+			};
+
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_MATERIAL")) {
+				if (payload->DataSize == sizeof(PayloadData)) {
+					const auto* data = static_cast<const PayloadData*>(payload->Data);
+					// Extra safety: check type string
+					if (std::strcmp(data->type, "Material") == 0) {
+						materialOverride = AssetHandle<Material>(data->id);
+						newID            = data->id;
 					}
 				}
 			}

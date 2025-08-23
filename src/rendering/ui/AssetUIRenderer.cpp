@@ -24,9 +24,49 @@ namespace Engine {
 		drawFuncs = {{typeid(Terrain::TerrainTile), [this]() { DrawTerrainAssets(); }},
 		             {typeid(Audio::SoundBuffer), [this]() { DrawSoundAssets(); }},
 		             {typeid(Rendering::Model), [this]() { DrawModelAssets(); }},
+		             {typeid(Material), [this]() { DrawMaterialAssets(); }},
 		             {typeid(Texture), [this]() { DrawTextureAssets(); }}
 
 		};
+	}
+
+	bool SelectableBackground(ImVec2 textSize, std::string id, const char* type, const char* typeName)
+	{
+		ImVec2 startPos = ImGui::GetCursorScreenPos();
+
+		ImVec2 itemSize(iconSize, iconSize + textSize.y + 7.0f);
+		bool   clicked = false;
+		// Unique ID for button: use asset id
+		std::string btnId = "drag_area_" + id;
+		if (ImGui::InvisibleButton(btnId.c_str(), itemSize)) {
+			clicked = true;
+		}
+		// Drag-drop source must come immediately after button
+		if (ImGui::BeginDragDropSource()) {
+			struct PayloadData {
+				const char* type;
+				char        id[64];
+			};
+			PayloadData payload;
+			payload.type = type;
+			strncpy(payload.id, id.c_str(), sizeof(payload.id));
+			payload.id[sizeof(payload.id) - 1] = '\0';
+
+			ImGui::SetDragDropPayload(typeName, &payload, sizeof(payload));
+			ImGui::Text("Model: %s", id.c_str());
+
+			ImGui::EndDragDropSource();
+		}
+
+		// Hover highlight
+		if (ImGui::IsItemHovered()) {
+			ImU32 col = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+			ImGui::GetWindowDrawList()->AddRectFilled(startPos, ImVec2(startPos.x + itemSize.x, startPos.y + itemSize.y), col, 4.0f);
+		}
+
+		// --- Draw content inside rect ---
+		ImGui::SetCursorScreenPos(startPos);
+		return clicked;
 	}
 
 	void AssetUIRenderer::RenderAssetWindow()
@@ -56,6 +96,8 @@ namespace Engine {
 					label = "Models";
 				else if (type == typeid(Audio::SoundBuffer))
 					label = "Sounds";
+				else if (type == typeid(Material))
+					label = "Materials";
 				else if (type == typeid(Terrain::TerrainTile))
 					label = "Terrains";
 				// Add custom labels per type
@@ -137,8 +179,57 @@ namespace Engine {
 			if (!texPtr) continue;
 			ImGui::PushID(("tex" + id).c_str());
 
+
+			// --- Measure text to get correct rect size ---
+			std::string label     = texPtr->GetName();
+			float       wrapWidth = iconSize; // restrict text to same width as preview
+			ImVec2      textSize  = ImGui::CalcTextSize(label.c_str(), nullptr, false, wrapWidth);
+			SelectableBackground(textSize, id, "Texture", "ASSET_TEXTURE");
+
+
 			ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(texPtr->GetID())), ImVec2(iconSize, iconSize));
-			ImGui::TextWrapped("%s", texPtr->GetName().c_str());
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.0f);
+			ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + iconSize);
+			ImGui::TextWrapped("%s", label.c_str());
+			ImGui::PopTextWrapPos();
+
+			ImGui::NextColumn();
+			ImGui::PopID();
+		}
+
+		ImGui::Columns(1);
+	}
+
+	void AssetUIRenderer::DrawMaterialAssets()
+	{
+		auto& storage = GetAssetManager().GetStorage<Material>();
+
+		float padding     = 8.0f;
+		int   columnCount = static_cast<int>(ImGui::GetContentRegionAvail().x / (iconSize + padding));
+		if (columnCount < 1) columnCount = 1;
+
+		ImGui::Columns(columnCount, nullptr, false);
+
+		for (auto& [id, matPtr] : storage.guidToAsset) {
+			if (!matPtr) continue;
+			ImGui::PushID(("mat" + id).c_str());
+			auto tx = GetAssetManager().Get(matPtr->GetDiffuseTexture());
+
+			// --- Measure text to get correct rect size ---
+			std::string label     = matPtr->GetName();
+			float       wrapWidth = iconSize; // restrict text to same width as preview
+			ImVec2      textSize  = ImGui::CalcTextSize(label.c_str(), nullptr, false, wrapWidth);
+
+			if (SelectableBackground(textSize, id, "Material", "ASSET_MATERIAL")) {
+				GetUI().selectedMaterial = AssetHandle<Material>(id);
+			}
+
+			ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(tx->GetID())), ImVec2(iconSize, iconSize), ImVec2(0, 1), ImVec2(1, 0));
+
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.0f);
+			ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + iconSize);
+			ImGui::TextWrapped("%s", label.c_str());
+			ImGui::PopTextWrapPos();
 
 			ImGui::NextColumn();
 			ImGui::PopID();
@@ -172,41 +263,7 @@ namespace Engine {
 			float       wrapWidth = iconSize; // restrict text to same width as preview
 			ImVec2      textSize  = ImGui::CalcTextSize(label.c_str(), nullptr, false, wrapWidth);
 
-			ImVec2 startPos = ImGui::GetCursorScreenPos();
-			
-			ImVec2 itemSize(iconSize, iconSize + textSize.y + 7.0f);
-
-			// Unique ID for button: use asset id
-			std::string btnId = "drag_area_" + id;
-			if (ImGui::InvisibleButton(btnId.c_str(), itemSize)) {
-				// optional: click handling
-			}
-
-			// Drag-drop source must come immediately after button
-			if (ImGui::BeginDragDropSource()) {
-				struct PayloadData {
-					const char* type;
-					char        id[64];
-				};
-				PayloadData payload;
-				payload.type = "Rendering::Model";
-				strncpy(payload.id, id.c_str(), sizeof(payload.id));
-				payload.id[sizeof(payload.id) - 1] = '\0';
-
-				ImGui::SetDragDropPayload("ASSET_MODEL", &payload, sizeof(payload));
-				ImGui::Text("Model: %s", id.c_str());
-
-				ImGui::EndDragDropSource();
-			}
-
-			// Hover highlight
-			if (ImGui::IsItemHovered()) {
-				ImU32 col = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
-				ImGui::GetWindowDrawList()->AddRectFilled(startPos, ImVec2(startPos.x + itemSize.x, startPos.y + itemSize.y), col, 4.0f);
-			}
-
-			// --- Draw content inside rect ---
-			ImGui::SetCursorScreenPos(startPos);
+			SelectableBackground(textSize, id, "Rendering::Model", "ASSET_MODEL");
 
 			ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(preview.texture)), ImVec2(iconSize, iconSize), ImVec2(0, 1), ImVec2(1, 0));
 

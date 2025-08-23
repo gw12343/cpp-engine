@@ -25,6 +25,7 @@ namespace Engine {
 		void DrawSoundAssets();
 		void DrawTextureAssets();
 		void DrawModelAssets();
+		void DrawMaterialAssets();
 
 	  private:
 		std::unordered_map<std::type_index, std::function<void()>> drawFuncs;

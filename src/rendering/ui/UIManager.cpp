@@ -44,6 +44,7 @@ namespace Engine::UI {
 
 
 		m_uiAssetRenderer   = std::make_unique<AssetUIRenderer>();
+		m_materialEditor    = std::make_unique<MaterialEditor>();
 		m_inspectorRenderer = std::make_unique<InspectorRenderer>();
 
 		audioIconTexture   = std::make_shared<Texture>();
@@ -197,7 +198,9 @@ namespace Engine::UI {
 			if (startPlay) {
 				// todo save scene, load scene
 				if (GetState() != PLAYING) {
-					SCENE_LOADER::SerializeScene(GetSceneManager().GetActiveScene(), "scenes/scene1.json");
+					if (GetState() == EDITOR) {
+						SCENE_LOADER::SerializeScene(GetSceneManager().GetActiveScene(), "scenes/scene1.json");
+					}
 					SetState(PLAYING); // TODO call start in scripts?
 				}
 			}
@@ -272,10 +275,11 @@ namespace Engine::UI {
 		RenderSceneView(Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->texture);
 		RenderHierarchyWindow();
 		m_inspectorRenderer->RenderInspectorWindow(&m_selectedEntity);
+		m_materialEditor->RenderMaterialEditor(selectedMaterial);
 		RenderAnimationWindow();
 
 		m_uiAssetRenderer->RenderAssetWindow();
-		RenderAudioDebugUI();
+		// RenderAudioDebugUI();
 
 		// Display pause overlay when physics is disabled
 		if (GetState() == PAUSED) {

@@ -26,6 +26,51 @@ end
 
 
 
+function ShootObject(model, shape, speed, scale)
+
+    local cam = getCamera()
+    local cpos = cam:getPosition()
+    local foward = cam:getFront()
+    -- Summon entity
+    local newBall = createEntity("Ball")
+    -- Add Components
+    local tr = newBall:AddTransform()
+    local mr = newBall:AddModelRenderer();
+    local rb = newBall:AddRigidBodyComponent();
+    local sc = newBall:AddLuaScript();
+    newBall:AddShadowCaster();
+
+    tr.scale = vec3(scale, scale, scale)
+    mr:setModel(model)
+
+    local camPos = cam:getPosition()
+
+    local inFrontPos = vec3(
+        camPos.x + foward.x * 2,
+        camPos.y + foward.y * 2,
+        camPos.z + foward.z * 2
+    )
+
+    rb:setPosition(inFrontPos)
+    rb:addLinearVelocity(vec3(foward.x * speed, foward.y * speed, foward.z * speed))
+    local t = shape:getType()
+    if t == "BoxShape" then
+        rb:setBoxShape(shape)
+    elseif t == "SphereShape" then
+        rb:setSphereShape(shape)
+    elseif t == "CapsuleShape" then
+        rb:setCapsuleShape(shape)
+    elseif t == "CylinderShape" then
+        rb:setCylinderShape(shape)
+    elseif t == "TriangleShape" then
+        rb:setTriangleShape(shape)
+    else
+        print("Unknown shape type: " .. tostring(t))
+    end
+    sc:setScript(newBall, "scripts/bullet.lua")
+end
+
+
 function Update()
     local input = getInput()
     local camera = getCamera()
@@ -138,4 +183,10 @@ function Update()
     -- Move Camera
     local nextPos = vec3(tr.position.x, tr.position.y + constants.CAMERA_Y_OFFSET, tr.position.z)
     camera:setPosition(nextPos)
+
+    -- Shoot Balls
+    if input:isKeyPressedThisFrame(KEY_E) then
+        local shape = SphereShape(0.5 / 2)
+        ShootObject("resources/models/sphere.obj", shape, 12, 0.5)
+    end
 end

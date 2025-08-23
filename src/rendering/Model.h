@@ -14,13 +14,13 @@ namespace Engine::Rendering {
 		Model()  = default;
 		~Model() = default;
 
-		void Draw(const Shader& shader) const;
+		void Draw(const Shader& shader, const AssetHandle<Material>& materialOverride) const;
 
 		[[maybe_unused]] [[nodiscard]] const std::vector<std::shared_ptr<Mesh>>& GetMeshes() const { return m_meshes; }
 
-		glm::vec3 m_boundsMin;
+		glm::vec3 m_boundsMin{};
 
-		glm::vec3 m_boundsMax;
+		glm::vec3 m_boundsMax{};
 
 	  private:
 		friend class ModelLoader;
