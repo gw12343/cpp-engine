@@ -32,10 +32,13 @@ namespace Engine {
 		// float                      GetMouseScrollDelta();
 		[[maybe_unused]] void SetMousePosition(const glm::vec2& position);
 
-		void SetCursorMode(int mode);
-		int  GetCursorMode();
-		void SetCursorModeGame(int mode);
-		int  GetCursorModeGame();
+		void                          SetCursorMode(int mode);
+		int                           GetCursorMode();
+		void                          SetCursorModeGame(int mode);
+		int                           GetCursorModeGame();
+		bool                          IsMouseClicked(int btn);
+		std::unordered_map<int, bool> m_mouseButtonStates;
+		std::unordered_map<int, bool> m_prevMouseButtonStates;
 
 
 		//		// Callbacks

@@ -21,7 +21,7 @@ namespace Engine {
 		settings->mShape                             = mStandingShape;
 		settings->mBackFaceMode                      = EBackFaceMode::CollideWithBackFaces;
 		settings->mCharacterPadding                  = 0.02f;
-		settings->mPenetrationRecoverySpeed          = 1.0f;
+		settings->mPenetrationRecoverySpeed          = 0.5f;
 		settings->mPredictiveContactDistance         = 0.1f;
 		settings->mSupportingVolume                  = Plane(Vec3::sAxisY(), -0.3f); // Accept contacts that touch the lower sphere of the capsule
 

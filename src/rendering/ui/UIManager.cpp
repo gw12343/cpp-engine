@@ -28,6 +28,7 @@
 #include "core/SceneManager.h"
 
 #include "components/AllComponents.h"
+#include "physics/PhysicsManager.h"
 
 namespace Engine::UI {
 
@@ -235,6 +236,20 @@ namespace Engine::UI {
 				if (GetState() != EDITOR) {
 					m_selectedEntity = Entity();
 					GetParticleManager().StopAllEffects();
+					{
+						// TODO move to physics manager
+						//  clear scene
+						auto& physics = GetPhysics();
+
+						BodyIDVector outBodies;
+						physics.GetPhysicsSystem()->GetBodies(outBodies);
+
+						for (auto body : outBodies) {
+							if (physics.GetPhysicsSystem()->GetBodyInterface().IsAdded(body)) {
+								physics.GetPhysicsSystem()->GetBodyInterface().RemoveBody(body);
+							}
+						}
+					}
 					GetAssetManager().Unload<Scene>(GetSceneManager().GetActiveScene());
 					GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>("scenes/scene1.json"));
 					SetState(EDITOR);
@@ -447,7 +462,6 @@ namespace Engine::UI {
 		ImGui::Begin("Viewport", &open);
 
 		ImVec2 sizeOut = ImGui::GetContentRegionAvail();
-		bool   focus   = ImGui::IsWindowFocused();
 
 		float aspect = (float) sizeOut.y / (float) sizeOut.x;
 
@@ -506,7 +520,6 @@ namespace Engine::UI {
 		ImGui::PopStyleVar();
 		ImGui::End();
 
-
 		if (GetState() == EDITOR && GetInput().IsMousePositionInViewport()) {
 			Engine::Window::GetFramebuffer(Window::FramebufferID::MOUSE_PICKING)->Bind();
 			glm::vec2 pos = GetInput().GetMousePositionInViewportScaledFlipped();
@@ -516,7 +529,7 @@ namespace Engine::UI {
 
 			uint32_t entityID = (static_cast<uint32_t>(pixelData[0] * 255.0f)) | (static_cast<uint32_t>(pixelData[1] * 255.0f) << 8) | (static_cast<uint32_t>(pixelData[2] * 255.0f) << 16);
 
-			if (!m_inspectorRenderer->m_openPopup && GetInput().IsMousePressed(0) && !ImGuizmo::IsOver()) {
+			if (!m_inspectorRenderer->m_openPopup && GetInput().IsMouseClicked(0) && !ImGuizmo::IsOver()) {
 				if (entityID != 0xFFFFFF) {
 					m_selectedEntity = (Entity){static_cast<entt::entity>(entityID), GetCurrentScene()};
 				}

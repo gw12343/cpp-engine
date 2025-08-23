@@ -60,6 +60,26 @@ namespace Engine::Components {
 			model = AssetHandle<Rendering::Model>(newID);
 		}
 
+		// Handle drag-and-drop on same item
+		if (ImGui::BeginDragDropTarget()) {
+			struct PayloadData {
+				const char* type;
+				char        id[64];
+			};
+			
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_MODEL")) {
+				if (payload->DataSize == sizeof(PayloadData)) {
+					const PayloadData* data = static_cast<const PayloadData*>(payload->Data);
+					// Extra safety: check type string
+					if (std::strcmp(data->type, "Rendering::Model") == 0) {
+						model = AssetHandle<Rendering::Model>(data->id);
+						newID = data->id;
+					}
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
+
 		if (model.IsValid()) {
 			ImGui::Text("Model: Loaded");
 			// TODO add more model info here

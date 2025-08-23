@@ -162,22 +162,63 @@ namespace Engine {
 			if (!model) continue;
 			ImGui::PushID(("model" + id).c_str());
 
-
 			auto& preview  = m_modelPreviews[id];
 			preview.width  = static_cast<int>(MODEL_PREVIEW_SIZE);
 			preview.height = static_cast<int>(MODEL_PREVIEW_SIZE);
 			preview.Render(model.get(), GetRenderer().GetModelPreviewShader());
 
-			ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(preview.texture)),
-			             ImVec2(iconSize, iconSize),
-			             ImVec2(0, 1), // top-left
-			             ImVec2(1, 0)  // bottom-right
-			);
-			ImGui::TextWrapped("Model #%s", id.c_str());
+			// --- Measure text to get correct rect size ---
+			std::string label     = "Model #" + id;
+			float       wrapWidth = iconSize; // restrict text to same width as preview
+			ImVec2      textSize  = ImGui::CalcTextSize(label.c_str(), nullptr, false, wrapWidth);
+
+			ImVec2 startPos = ImGui::GetCursorScreenPos();
+			
+			ImVec2 itemSize(iconSize, iconSize + textSize.y + 7.0f);
+
+			// Unique ID for button: use asset id
+			std::string btnId = "drag_area_" + id;
+			if (ImGui::InvisibleButton(btnId.c_str(), itemSize)) {
+				// optional: click handling
+			}
+
+			// Drag-drop source must come immediately after button
+			if (ImGui::BeginDragDropSource()) {
+				struct PayloadData {
+					const char* type;
+					char        id[64];
+				};
+				PayloadData payload;
+				payload.type = "Rendering::Model";
+				strncpy(payload.id, id.c_str(), sizeof(payload.id));
+				payload.id[sizeof(payload.id) - 1] = '\0';
+
+				ImGui::SetDragDropPayload("ASSET_MODEL", &payload, sizeof(payload));
+				ImGui::Text("Model: %s", id.c_str());
+
+				ImGui::EndDragDropSource();
+			}
+
+			// Hover highlight
+			if (ImGui::IsItemHovered()) {
+				ImU32 col = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+				ImGui::GetWindowDrawList()->AddRectFilled(startPos, ImVec2(startPos.x + itemSize.x, startPos.y + itemSize.y), col, 4.0f);
+			}
+
+			// --- Draw content inside rect ---
+			ImGui::SetCursorScreenPos(startPos);
+
+			ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(preview.texture)), ImVec2(iconSize, iconSize), ImVec2(0, 1), ImVec2(1, 0));
+
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.0f);
+			ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + iconSize);
+			ImGui::TextWrapped("%s", label.c_str());
+			ImGui::PopTextWrapPos();
 
 			ImGui::NextColumn();
 			ImGui::PopID();
 		}
+
 
 		ImGui::Columns(1);
 	}

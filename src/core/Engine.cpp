@@ -101,14 +101,6 @@ namespace Engine {
 
 	void GEngine::CreateInitialEntities()
 	{
-		//		AssetHandle<Rendering::Model> treeModel = GetAssetManager().Load<Rendering::Model>("resources/models/TwistedTree_1.obj");
-		//
-		//
-		//		GetAssetManager().Load<Rendering::Model>("resources/models/Spruce2.fbx");
-		//
-		//		GetAssetManager().Load<Rendering::Model>("resources/models/sphere.obj");
-		//		AssetHandle<Rendering::Model>   cubeModel   = GetAssetManager().Load<Rendering::Model>("resources/models/cube.obj");
-		//		AssetHandle<Rendering::Model>   cuccbeModel = GetAssetManager().Load<Rendering::Model>("resources/models/capsule.obj");
 		AssetHandle<Audio::SoundBuffer> snd = GetAssetManager().Load<Audio::SoundBuffer>("resources/sounds/bird_chirp.wav");
 
 		std::string folder = "resources/textures";

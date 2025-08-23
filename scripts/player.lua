@@ -11,7 +11,8 @@ constants = {
     CAMERA_Y_OFFSET =  1.1, --1.45,
     MOUSE_SENSITIVITY = 0.1,
     MOVE_SPEED = 7.0,
-    JUMP_POWER = 8.0
+    JUMP_POWER = 8.0,
+    GRAVITY_SCALE = 2.0
 }
 constants = protect(constants)
 
@@ -102,16 +103,16 @@ function Update()
     local g = getPhysics():getGravity()
     new_velocity = vec3(
         new_velocity.x + g.x * deltaTime,
-        new_velocity.y + g.y * deltaTime,
+        new_velocity.y + g.y * deltaTime * constants.GRAVITY_SCALE,
         new_velocity.z + g.z * deltaTime
     )
 
     -- Player input
     new_velocity = vec3(
-            new_velocity.x + desiredVelocity.x,
-            new_velocity.y + desiredVelocity.y,
-            new_velocity.z + desiredVelocity.z
-        )
+        new_velocity.x + desiredVelocity.x,
+        new_velocity.y + desiredVelocity.y,
+        new_velocity.z + desiredVelocity.z
+    )
 
 
     -- Update character velocity

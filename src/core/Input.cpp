@@ -53,6 +53,24 @@ namespace Engine {
 			int key          = pair.first;
 			m_keyStates[key] = IsKeyPressed(key);
 		}
+
+		// Save previous mouse button states
+		m_prevMouseButtonStates = m_mouseButtonStates;
+
+		// Update current mouse button states
+		m_mouseButtonStates[GLFW_MOUSE_BUTTON_LEFT]   = glfwGetMouseButton(GetWindow().GetNativeWindow(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
+		m_mouseButtonStates[GLFW_MOUSE_BUTTON_RIGHT]  = glfwGetMouseButton(GetWindow().GetNativeWindow(), GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
+		m_mouseButtonStates[GLFW_MOUSE_BUTTON_MIDDLE] = glfwGetMouseButton(GetWindow().GetNativeWindow(), GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
+	}
+
+	bool Input::IsMouseClicked(int btn)
+	{
+		bool current  = m_mouseButtonStates[btn];
+		bool previous = false;
+		auto it       = m_prevMouseButtonStates.find(btn);
+		if (it != m_prevMouseButtonStates.end()) previous = it->second;
+
+		return current && !previous;
 	}
 
 	bool Input::IsMousePressed(int btn)
@@ -191,7 +209,9 @@ namespace Engine {
 		                                           "setCursorMode",
 		                                           &Input::SetCursorModeGame,
 		                                           "getCursorMode",
-		                                           &Input::GetCursorModeGame);
+		                                           &Input::GetCursorModeGame,
+		                                           "isMouseClicked",
+		                                           &Input::IsMouseClicked);
 
 		GetScriptManager().lua["KEY_SPACE"]         = GLFW_KEY_SPACE;
 		GetScriptManager().lua["KEY_APOSTROPHE"]    = GLFW_KEY_APOSTROPHE;

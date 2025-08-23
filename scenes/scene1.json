@@ -20,15 +20,15 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": 1.9659665822982789,
-                        "y": -1.0400009155273438,
-                        "z": 6.902945518493652
+                        "x": -10.442129135131836,
+                        "y": -3.00000262260437,
+                        "z": -7.168938159942627
                     },
                     "rotation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0,
-                        "w": 1.0
+                        "x": 0.1670130491256714,
+                        "y": -0.5382199287414551,
+                        "z": 0.7923464775085449,
+                        "w": -0.23369431495666505
                     },
                     "scale": {
                         "x": 2.0,
@@ -110,9 +110,9 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": 0.7929151058197022,
-                        "y": -3.29000186920166,
-                        "z": -12.198163032531739
+                        "x": 0.7897809743881226,
+                        "y": -2.579514741897583,
+                        "z": -2.298460006713867
                     },
                     "rotation": {
                         "x": 0.0621400810778141,
@@ -135,7 +135,7 @@
                 "data": {
                     "visible": true,
                     "model": {
-                        "guid": "16ab47c200b25ccb2b9dbcf46297059f"
+                        "guid": "db54c662aea0a2c2556d727a28f94dfa"
                     }
                 }
             },
@@ -278,9 +278,9 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": 7.068495750427246,
-                        "y": -0.34501755237579348,
-                        "z": 0.2935901880264282
+                        "x": -15.979198455810547,
+                        "y": -2.5,
+                        "z": -8.052495956420899
                     },
                     "rotation": {
                         "x": 0.0,
@@ -356,9 +356,9 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": 0.0,
+                        "x": -4.75253963470459,
                         "y": -5.0,
-                        "z": 0.0
+                        "z": -2.9657161235809328
                     },
                     "rotation": {
                         "x": 0.0,
@@ -530,20 +530,20 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": 6.54263973236084,
-                        "y": -1.5,
-                        "z": 7.770000457763672
+                        "x": -15.06658935546875,
+                        "y": -3.197972297668457,
+                        "z": 7.725384712219238
                     },
                     "rotation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0,
-                        "w": 1.0
+                        "x": 0.18199478089809419,
+                        "y": 0.08453239500522614,
+                        "z": -0.14578735828399659,
+                        "w": 0.9687508344650269
                     },
                     "scale": {
-                        "x": 5.0,
-                        "y": 5.0,
-                        "z": 5.0
+                        "x": 5.000001907348633,
+                        "y": 5.000000953674316,
+                        "z": 4.999995231628418
                     }
                 }
             },
@@ -569,9 +569,99 @@
                     "gravityFactor": 1.0,
                     "shapeType": "Box",
                     "shapeSize": {
-                        "x": 2.5,
+                        "x": 2.5000009536743166,
+                        "y": 2.500000476837158,
+                        "z": 2.499997615814209
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "AnimationWorkerComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Ball",
+                "tag": "",
+                "active": true
+            },
+            "LuaScript": {
+                "nullopt": false,
+                "data": {
+                    "scriptPath": "scripts/bullet.lua"
+                }
+            },
+            "ShadowCaster": {
+                "nullopt": false,
+                "data": {}
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": -12.502313613891602,
+                        "y": -3.981179714202881,
+                        "z": -10.725627899169922
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.32595500349998476,
+                        "z": 0.0,
+                        "w": 0.9453852772712708
+                    },
+                    "scale": {
+                        "x": 2.0,
+                        "y": 2.0,
+                        "z": 2.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "440eeeeb3deb20a70e023d8d0146dfcd"
+                    }
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 1,
+                    "mass": 1.0,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 1.0,
+                    "shapeType": "Cylinder",
+                    "shapeSize": {
+                        "x": 6.125,
                         "y": 2.5,
-                        "z": 2.5
+                        "z": 0.0
                     }
                 }
             },
