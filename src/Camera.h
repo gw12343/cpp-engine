@@ -32,7 +32,20 @@ namespace Engine {
 		glm::vec3 GetFront() const { return m_front; }
 
 		void SetPosition(glm::vec3 position) { m_position = position; }
+		void SaveEditorLocation()
+		{
+			m_editorSavePos   = m_position;
+			m_editorSaveRot.x = m_pitch;
+			m_editorSaveRot.y = m_yaw;
+		}
 
+		void LoadEditorLocation()
+		{
+			m_position = m_editorSavePos;
+			m_pitch    = m_editorSaveRot.x;
+			m_yaw      = m_editorSaveRot.y;
+			UpdateCameraVectors();
+		}
 		float m_fov;
 
 		// Camera options
@@ -45,6 +58,10 @@ namespace Engine {
 		// Euler Angles
 		float m_yaw;
 		float m_pitch;
+
+		glm::vec3 m_editorSavePos;
+		glm::vec3 m_editorSaveRot;
+
 
 	  private:
 		void UpdateCameraVectors();

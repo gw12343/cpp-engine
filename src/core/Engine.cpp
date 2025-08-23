@@ -105,16 +105,26 @@ namespace Engine {
 	{
 		AssetHandle<Audio::SoundBuffer> snd = GetAssetManager().Load<Audio::SoundBuffer>("resources/sounds/bird_chirp.wav");
 
-		std::string folder = "resources/textures";
+		// TODO store assets to be loaded at the start in scene json
 
+		// Load all textures
+		std::string folder = "resources/textures";
 		for (const auto& entry : fs::directory_iterator(folder)) {
 			if (entry.is_regular_file() && entry.path().extension() == ".png") {
 				std::string path = entry.path().string();
 				GetAssetManager().Load<Texture>(path);
 			}
 		}
+		// Load all materials
+		folder = "resources/materials";
+		for (const auto& entry : fs::directory_iterator(folder)) {
+			if (entry.is_regular_file() && entry.path().extension() == ".material") {
+				std::string path = entry.path().string();
+				GetAssetManager().Load<Material>(path);
+			}
+		}
+		// Load all models
 		folder = "resources/models";
-
 		for (const auto& entry : fs::directory_iterator(folder)) {
 			if (entry.is_regular_file() && entry.path().extension() == ".obj") {
 				std::string path = entry.path().string();
@@ -122,33 +132,14 @@ namespace Engine {
 			}
 		}
 
-		AssetHandle<Rendering::Model> sphere = GetAssetManager().Load<Rendering::Model>("resources/models/sphere.obj");
-		Rendering::Model*             m      = GetAssetManager().Get(sphere);
 
-		auto mat = m->GetMeshes()[0]->GetMaterial();
+		// TODO terrain instanced detail rendereing
+		// TODO terrain mesh shape?? maybe component
 
-		auto matloader = std::make_unique<MaterialLoader>();
-
-		matloader->SaveMaterial(*mat, "resources/materials/mat1.material");
-
-		AssetHandle<Material> sphereMat = GetAssetManager().Load<Material>("resources/materials/mat1.material");
-		auto                  mmm       = GetAssetManager().Get(sphereMat);
-		SPDLOG_INFO("SPHERE MATERIAL: {}", mmm->GetDiffuseTexture().GetID());
-
-
-		// AssetHandle<Terrain::TerrainTile> terr        = GetAssetManager().Load<Terrain::TerrainTile>("resources/terrain/terrain1.bin");
-
-
-		// Terrain::TerrainTile tile = Terrain::LoadTerrainTile("resources/terrain/terrain.bin");
-		// std::cout << "Loaded tile: " << tile.name << "\n";
-		// std::cout << "Heights: " << tile.heightmap.size() << "\n";
-		// std::cout << "Trees: " << tile.trees.size() << "\n";
-		//
-
+		//  AssetHandle<Terrain::TerrainTile> terr        = GetAssetManager().Load<Terrain::TerrainTile>("resources/terrain/terrain1.bin");
 
 		//		Entity terrainWrapper = Entity::Create("TerrainWrapper");
 		//		terrainWrapper.AddComponent<Components::Transform>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		//
 		//
 		//		auto&                             body_interface = GetPhysics().GetPhysicsSystem()->GetBodyInterface();
 		//		AssetHandle<Terrain::TerrainTile> terrain        = GetAssetManager().Load<Terrain::TerrainTile>("resources/terrain/TerrainA.bin");
@@ -164,8 +155,6 @@ namespace Engine {
 		//			terrainWrapper.AddComponent<Components::RigidBodyComponent>(terrain_body->GetID());
 		//		}
 		//		terrainWrapper.AddComponent<Components::TerrainRenderer>(terrain);
-
-
 		//		auto tr = GetAssetManager().Get(terrain);
 		//		for (auto tree : tr->trees) {
 		//			glm::vec3 pos     = {tree.x * tr->sizeX, tree.y * tr->sizeY, tree.z * tr->sizeZ};

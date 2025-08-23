@@ -198,6 +198,7 @@ namespace Engine::UI {
 			if (startPlay) {
 				// todo save scene, load scene
 				if (GetState() != PLAYING) {
+					GetCamera().SaveEditorLocation();
 					if (GetState() == EDITOR) {
 						SCENE_LOADER::SerializeScene(GetSceneManager().GetActiveScene(), "scenes/scene1.json");
 					}
@@ -217,6 +218,7 @@ namespace Engine::UI {
 			}
 			if (startPause) {
 				if (GetState() == PLAYING) {
+					GetCamera().LoadEditorLocation();
 					SetState(PAUSED);
 				}
 			}
@@ -237,6 +239,7 @@ namespace Engine::UI {
 			if (startStop) {
 				// unload scene, load backup
 				if (GetState() != EDITOR) {
+					GetCamera().LoadEditorLocation();
 					m_selectedEntity = Entity();
 					GetParticleManager().StopAllEffects();
 					{
@@ -493,7 +496,7 @@ namespace Engine::UI {
 		GetWindow().UpdateViewportSize((int) width, (int) height, (int) topLeft.x, (int) topLeft.y);
 
 
-		if (GetState() == EDITOR) {
+		if (GetState() != PLAYING) {
 			if (m_selectedEntity && GetCurrentSceneRegistry().valid(m_selectedEntity.GetHandle())) {
 				if (m_selectedEntity.HasComponent<Components::Transform>()) {
 					auto& transform = m_selectedEntity.GetComponent<Components::Transform>();
@@ -524,7 +527,7 @@ namespace Engine::UI {
 		ImGui::PopStyleVar();
 		ImGui::End();
 
-		if (GetState() == EDITOR && GetInput().IsMousePositionInViewport()) {
+		if (GetState() != PLAYING && GetInput().IsMousePositionInViewport()) {
 			Engine::Window::GetFramebuffer(Window::FramebufferID::MOUSE_PICKING)->Bind();
 			glm::vec2 pos = GetInput().GetMousePositionInViewportScaledFlipped();
 

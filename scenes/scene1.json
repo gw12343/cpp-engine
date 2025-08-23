@@ -20,8 +20,8 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": 6.220794200897217,
-                        "y": -2.5,
+                        "x": 8.13255500793457,
+                        "y": -1.3127259016036988,
                         "z": -6.460174560546875
                     },
                     "rotation": {
@@ -47,7 +47,7 @@
                     "model": {
                         "guid": "8f4859e3ac89632544374bc702a531e9"
                     },
-                    "backfaceCulling": true,
+                    "backfaceCulling": false,
                     "materialOverride": {
                         "guid": ""
                     }

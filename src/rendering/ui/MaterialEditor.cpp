@@ -10,6 +10,7 @@
 #include "core/EngineData.h"
 #include "assets/AssetManager.h"
 #include "misc/cpp/imgui_stdlib.h"
+#include "assets/impl/MaterialLoader.h"
 
 namespace Engine {
 
@@ -86,6 +87,10 @@ namespace Engine {
 		float shininess = material->GetShininess();
 		if (ImGui::SliderFloat("Shininess", &shininess, 0.0f, 512.0f)) {
 			material->SetShininess(shininess);
+		}
+
+		if (ImGui::Button("Save")) {
+			((MaterialLoader*) (GetAssetManager().GetStorage<Material>().loader.get()))->SaveMaterial(*material, "resources/materials/mat1.material");
 		}
 
 		ImGui::End();
