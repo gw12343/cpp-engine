@@ -14,15 +14,15 @@ function Update()
     local rb = gameObject:GetRigidBodyComponent()
 
     local pos = rb:getPosition();
-    print (pos.x .. "  " .. pos.y .. "  " .. pos.z)
+    --print (pos.x .. "  " .. pos.y .. "  " .. pos.z)
 
-    pos.y = pos.y + platformDirection * platformSpeed * deltaTime;
+    pos.x = pos.x + platformDirection * platformSpeed * deltaTime;
 
-    if pos.y >= platformMaxY then
-        pos.y = platformMaxY
+    if pos.x >= platformMaxY then
+        pos.x = platformMaxY
         platformDirection = -1.0
-    elseif pos.y <= platformMinY then
-        pos.y = platformMinY
+    elseif pos.x <= platformMinY then
+        pos.x = platformMinY
         platformDirection = 1.0
     end
 

@@ -8,6 +8,7 @@ namespace Engine {
 	  public:
 		virtual ~Module()                                    = default;
 		virtual void                      onInit()           = 0;
+		virtual void                      onGameStart()      = 0;
 		virtual void                      onUpdate(float dt) = 0;
 		virtual void                      onShutdown()       = 0;
 		virtual void                      setLuaBindings() {}

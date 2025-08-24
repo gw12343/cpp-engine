@@ -18,9 +18,8 @@ namespace Engine {
 
 		// Module overrides
 		void onInit() override;
-
 		void onUpdate(float dt) override;
-
+		void onGameStart() override {}
 		void onShutdown() override;
 
 

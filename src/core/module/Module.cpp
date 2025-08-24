@@ -12,7 +12,8 @@ namespace Engine {
 		void RegisterExternal(std::shared_ptr<T> mod);
 
 		void InitAll();
-		void InitLuaBindings();
+		void StartGame();
+		void InitAllLuaBindings();
 		void UpdateAll(float dt);
 		void ShutdownAll();
 

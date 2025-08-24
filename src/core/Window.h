@@ -18,6 +18,7 @@ namespace Engine {
 
 		[[nodiscard]] std::string name() const override { return "WindowModule"; }
 		void                      onInit() override;
+		void                      onGameStart() override {}
 		void                      onUpdate(float dt) override;
 		void                      onShutdown() override;
 		void                      setLuaBindings() override;

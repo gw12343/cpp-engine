@@ -32,6 +32,8 @@
 #include "ConsoleWindow.h"
 #include "core/Input.h"
 
+#include "core/module/ModuleManager.h"
+
 namespace Engine::UI {
 
 
@@ -198,14 +200,16 @@ namespace Engine::UI {
 				ImGui::PopItemFlag();
 			}
 			if (startPlay) {
-				// todo save scene, load scene
 				if (GetState() != PLAYING) {
 					GetCamera().SaveEditorLocation();
 					if (GetState() == EDITOR) {
 						SCENE_LOADER::SerializeScene(GetSceneManager().GetActiveScene(), "scenes/scene1.json");
 					}
-					SetState(PLAYING); // TODO call start in scripts?
+					SetState(PLAYING);
 				}
+
+
+				Get().manager->StartGame();
 			}
 			ImGui::SameLine();
 

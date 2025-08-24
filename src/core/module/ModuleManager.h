@@ -23,6 +23,8 @@ namespace Engine {
 		void UpdateAll(float dt);
 		void ShutdownAll();
 
+		void StartGame();
+
 	  private:
 		std::vector<std::shared_ptr<Module>> m_modules;
 	};

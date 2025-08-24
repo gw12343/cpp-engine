@@ -11,7 +11,6 @@
 #include "scripting/ScriptManager.h"
 
 #include "SceneManager.h"
-// #include "serialization/SerializationManager.h"
 #include <filesystem>
 #include <string>
 
@@ -32,8 +31,8 @@
 #include "assets/impl/JSONSceneLoader.h"
 #include "rendering/particles/Particle.h"
 #include "assets/impl/ParticleLoader.h"
-#include "assets/impl/JSONSceneLoader.h"
 #include "assets/impl/MaterialLoader.h"
+
 
 namespace fs = std::filesystem;
 
@@ -44,6 +43,7 @@ namespace Engine {
 	GEngine::GEngine(int width, int height, const char* title) : m_deltaTime(0.0f), m_lastFrame(0.0f)
 	{
 		SetState(EDITOR);
+		Get().manager = &manager;
 		// Initialize asset loaders
 		Get().assetManager = std::make_shared<AssetManager>();
 		GetAssetManager().RegisterLoader<Texture>(std::make_unique<TextureLoader>());
@@ -96,6 +96,7 @@ namespace Engine {
 
 		GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>("scenes/scene1.json"));
 		CreateInitialEntities();
+
 
 		return true;
 	}

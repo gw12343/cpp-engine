@@ -111,7 +111,16 @@ FetchContent_Declare(
         GIT_TAG v3.11.3 # or the latest stable version you prefer
 )
 
-FetchContent_MakeAvailable(cereal spdlog jolt ozz imgui effekseer lua sol2 nlohmann_json)
+FetchContent_Declare(
+        efsw
+        GIT_REPOSITORY https://github.com/SpartanJ/efsw.git
+        GIT_TAG master
+)
+set(EFSW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(EFSW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+
+
+FetchContent_MakeAvailable(cereal spdlog jolt ozz imgui effekseer lua sol2 nlohmann_json efsw)
 
 
 if (WIN32)
@@ -285,6 +294,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         Effekseer
         EffekseerRendererGL
         nlohmann_json::nlohmann_json
+        efsw
 )
 
 # ----------------- Debug Info -------------------

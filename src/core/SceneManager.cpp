@@ -7,6 +7,8 @@
 #include <utility>
 #include "physics/PhysicsManager.h"
 #include "scripting/ScriptManager.h"
+#include "components/impl/RigidBodyComponent.h"
+#include "assets/AssetManager.h"
 namespace Engine {
 
 	// Module overrides
@@ -46,35 +48,16 @@ namespace Engine {
 	{
 		m_activeScene = std::move(scene);
 		GetScriptManager().pendingCollisions.clear();
-		GetPhysics().bodyToEntityMap.clear();
-	}
 
-	//	void SceneManager::RemoveScene(const std::string& name)
-	//	{
-	//		if (m_scenes.erase(name) > 0) {
-	//			log->info("Removed scene '{}'", name);
-	//			if (m_activeScene && m_activeScene->GetName() == name) {
-	//				m_activeScene.reset();
-	//			}
-	//		}
-	//	}
-	//
-	//	std::shared_ptr<Scene> SceneManager::GetScene(const std::string& name)
-	//	{
-	//		if (auto it = m_scenes.find(name); it != m_scenes.end()) {
-	//			return it->second;
-	//		}
-	//		return nullptr;
-	//	}
-	//
-	//	void SceneManager::SetActiveScene(const std::string& name)
-	//	{
-	//		if (auto scene = GetScene(name)) {
-	//			m_activeScene = scene;
-	//			log->info("Active scene set to '{}'", name);
-	//		}
-	//		else {
-	//			log->warn("Scene '{}' not found, cannot set active scene.", name);
-	//		}
-	//	}
+		auto& physics = GetPhysics();
+		physics.bodyToEntityMap.clear();
+
+		auto   physicsView = GetCurrentSceneRegistry().view<Components::RigidBodyComponent>();
+		Scene* s           = GetAssetManager().Get(m_activeScene);
+		for (auto [entity, rb] : physicsView.each()) {
+			physics.bodyToEntityMap[rb.bodyID] = Entity(entity, s);
+		}
+	}
 } // namespace Engine
+
+#include "assets/AssetManager.inl"

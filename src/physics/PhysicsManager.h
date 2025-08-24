@@ -56,6 +56,7 @@ namespace Engine {
 
 		void        onInit() override;
 		void        onUpdate(float dt) override;
+		void        onGameStart() override {}
 		void        onShutdown() override;
 		std::string name() const override { return "PhysicsManger"; };
 		void        setLuaBindings() override;

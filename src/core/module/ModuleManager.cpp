@@ -3,13 +3,24 @@
 //
 
 #include "ModuleManager.h"
+#include "core/EngineData.h"
 
 namespace Engine {
+
+
 	void ModuleManager::InitAll()
 	{
 		for (auto& module : m_modules) {
 			module->log->debug("Initializing...");
 			module->onInit();
+		}
+	}
+
+	void ModuleManager::StartGame()
+	{
+		GetDefaultLogger()->info("Starting Game");
+		for (auto& module : m_modules) {
+			module->onGameStart();
 		}
 	}
 

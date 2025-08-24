@@ -33,6 +33,8 @@ namespace Engine {
 	class Scene;
 	class Input;
 
+	class ModuleManager;
+
 	enum EngineState { EDITOR, PAUSED, PLAYING };
 
 	class EngineData {
@@ -51,6 +53,7 @@ namespace Engine {
 		std::shared_ptr<Camera>                  camera;
 		std::shared_ptr<Input>                   input;
 		EngineState                              state;
+		ModuleManager*                           manager;
 	};
 
 	EngineData& Get();

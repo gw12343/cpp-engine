@@ -92,10 +92,6 @@ namespace Engine::Components {
 			start          = env["Start"];
 			update         = env["Update"];
 			collisionEnter = env["CollisionEnter"];
-
-			if (start.valid()) {
-				start(); // TODO move elsewhere to scene start
-			}
 		}
 		catch (const sol::error& err) {
 			GetScriptManager().log->error("[LuaScript] Error in {}: {}", scriptPath, err.what());

@@ -13,6 +13,7 @@ namespace Engine {
 
 		void        onInit() override;
 		void        onUpdate(float dt) override;
+		void        onGameStart() override {}
 		void        onShutdown() override;
 		std::string name() const override { return "InputModule"; };
 		void        setLuaBindings() override;
