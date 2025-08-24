@@ -55,6 +55,16 @@ namespace Engine {
 			lua.set_function("createEntity", [](const std::string& name) { return Engine::Entity::Create(name, GetCurrentScene()); });
 
 
+			lua.set_function("print", [](sol::variadic_args va) {
+				std::string out;
+				for (auto v : va) {
+					out += v.get<std::string>() + " ";
+				}
+				if (!out.empty()) out.pop_back(); // remove trailing space
+
+				Logger::get("script")->debug("[Lua] {}", out);
+			});
+
 			if (lua["EditorInit"].valid()) {
 				lua["EditorInit"]();
 			}

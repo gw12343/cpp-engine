@@ -1,4 +1,5 @@
 #include "Texture.h"
+#include "core/EngineData.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include <iostream>
 #include <spdlog/spdlog.h>
@@ -19,7 +20,6 @@ namespace Engine {
 			return LoadHDRFromFile(path);
 		}
 		m_name = path.substr(path.find_last_of("/\\") + 1);
-		SPDLOG_DEBUG("TRYING TO LOAD: {}", path);
 		if (glGetString(GL_VERSION) == nullptr) {
 			std::cerr << "No valid OpenGL context!" << std::endl;
 		}
@@ -128,7 +128,7 @@ namespace Engine {
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		m_isHDR = true;
-		SPDLOG_INFO("Loaded HDR texture: {} ({}x{}, {} channels)", path, m_width, m_height, m_channels);
+		GetDefaultLogger()->info("Loaded HDR texture: {} ({}x{}, {} channels)", path, m_width, m_height, m_channels);
 		return true;
 	}
 
@@ -157,7 +157,7 @@ namespace Engine {
 			glDeleteTextures(1, &texID);
 		}
 		s_loadedTextures.clear();
-		SPDLOG_INFO("Cleaned up all tracked textures.");
+		GetDefaultLogger()->info("Cleaned up all tracked textures.");
 	}
 
 } // namespace Engine

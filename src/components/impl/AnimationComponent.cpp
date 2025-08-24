@@ -26,7 +26,7 @@ namespace Engine::Components {
 				spdlog::error("Failed to load animation from path: {}", animationPath);
 			}
 			else {
-				SPDLOG_INFO("Loaded animation from path: {}", animationPath);
+				GetDefaultLogger()->info("Loaded animation from path: {}", animationPath);
 			}
 		}
 	}
@@ -47,7 +47,7 @@ namespace Engine::Components {
 				spdlog::error("Failed to load animation from path: {}", animationPath);
 			}
 			else {
-				SPDLOG_INFO("Loaded animation from path: {}", animationPath);
+				GetDefaultLogger()->info("Loaded animation from path: {}", animationPath);
 			}
 		}
 	}

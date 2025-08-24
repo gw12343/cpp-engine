@@ -60,7 +60,7 @@ namespace Engine::Components {
 			source->ConfigureAttenuation(referenceDistance, maxDistance, rolloffFactor);
 
 			// Log the configuration
-			SPDLOG_INFO("Created AudioSource with attenuation: ref={}, max={}, rolloff={}", referenceDistance, maxDistance, rolloffFactor);
+			GetDefaultLogger()->info("Created AudioSource with attenuation: ref={}, max={}, rolloff={}", referenceDistance, maxDistance, rolloffFactor);
 		}
 
 		void Play(Audio::SoundManager& soundManager)

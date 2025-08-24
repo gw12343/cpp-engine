@@ -16,6 +16,7 @@
 #include "Jolt/Physics/Collision/Shape/CapsuleShape.h"
 #include "Jolt/Physics/Collision/Shape/CylinderShape.h"
 #include "Jolt/Physics/Collision/Shape/TriangleShape.h"
+#include "core/EngineData.h"
 
 
 #include <Effekseer.h>
@@ -65,7 +66,7 @@ namespace Engine {
 			virtual void RenderInspector(Entity& entity) {}
 
 
-			static void AddBindings() { SPDLOG_WARN("No bindings specified for a module!"); }
+			static void AddBindings() { GetDefaultLogger()->warn("No bindings specified for a module!"); }
 		};
 
 	} // namespace Components

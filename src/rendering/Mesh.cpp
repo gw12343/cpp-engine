@@ -140,7 +140,7 @@ namespace Engine {
 
 		[[maybe_unused]] void Mesh::CleanAllMeshes()
 		{
-			SPDLOG_INFO("Cleaning up all VAOs, VBOs, and EBOs");
+			GetDefaultLogger()->info("Cleaning up all VAOs, VBOs, and EBOs");
 
 			for (GLuint vao : s_vaos) {
 				glDeleteVertexArrays(1, &vao);

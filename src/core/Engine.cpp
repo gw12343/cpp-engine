@@ -86,7 +86,7 @@ namespace Engine {
 
 	bool GEngine::Initialize()
 	{
-		SPDLOG_INFO("Starting Engine");
+		GetDefaultLogger()->info("Starting Engine");
 
 		Components::RegisterAllComponentBindings();
 		manager.InitAllLuaBindings();
@@ -189,7 +189,7 @@ namespace Engine {
 		Components::SkinnedMeshComponent::CleanSkinnedModels();
 		Texture::CleanAllTextures();
 		Rendering::Mesh::CleanAllMeshes();
-		SPDLOG_INFO("Engine shutdown complete");
+		GetDefaultLogger()->info("Engine shutdown complete");
 	}
 } // namespace Engine
 #include "assets/AssetManager.inl"

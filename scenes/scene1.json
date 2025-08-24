@@ -2,14 +2,14 @@
     "entities": [
         {
             "EntityMetadata": {
-                "name": "Terrain",
+                "name": "Player",
                 "tag": "",
                 "active": true
             },
             "LuaScript": {
                 "nullopt": false,
                 "data": {
-                    "scriptPath": "scripts/bullet.lua"
+                    "scriptPath": "scripts/player.lua"
                 }
             },
             "ShadowCaster": {
@@ -20,9 +20,9 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": 66.49148559570313,
-                        "y": -400.0,
-                        "z": 23.430105209350587
+                        "x": 8.13255500793457,
+                        "y": -1.3127259016036988,
+                        "z": -6.460174560546875
                     },
                     "rotation": {
                         "x": 0.0,
@@ -38,16 +38,22 @@
                 }
             },
             "TerrainRenderer": {
-                "nullopt": false,
-                "data": {
-                    "visible": true,
-                    "terrainTile": {
-                        "guid": "08d79874f4071a0b863432f509a9d70a"
-                    }
-                }
+                "nullopt": true
             },
             "ModelRenderer": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {
+                    "visible": false,
+                    "model": {
+                        "guid": "8f4859e3ac89632544374bc702a531e9"
+                    },
+                    "backfaceCulling": false,
+                    "materialOverrides": [
+                        {
+                            "guid": ""
+                        }
+                    ]
+                }
             },
             "RigidBodyComponent": {
                 "nullopt": true
@@ -71,14 +77,86 @@
                 "nullopt": true
             },
             "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": false,
+                "data": {}
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "AnimatedEntity",
+                "tag": "",
+                "active": true
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
                 "nullopt": false,
                 "data": {
-                    "effect": {
-                        "guid": "0222c99aa2fbe37c7307ffd90a2e44bf"
+                    "position": {
+                        "x": -8.897673606872559,
+                        "y": -2.0509042739868166,
+                        "z": 6.362610340118408
                     },
-                    "autoPlay": true,
-                    "looping": false
+                    "rotation": {
+                        "x": -0.1472925990819931,
+                        "y": 0.4128727614879608,
+                        "z": 0.04863642528653145,
+                        "w": 0.8974828720092773
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 0.9999998807907105
+                    }
                 }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": true
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": false,
+                "data": {
+                    "skeletonPath": "resources/models/ruby_skeleton.ozz"
+                }
+            },
+            "AnimationComponent": {
+                "nullopt": false,
+                "data": {
+                    "animationPath": "resources/models/ruby_animation.ozz"
+                }
+            },
+            "AnimationPoseComponent": {
+                "nullopt": false,
+                "data": {}
+            },
+            "AnimationWorkerComponent": {
+                "nullopt": false,
+                "data": {}
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": false,
+                "data": {
+                    "meshPath": "resources/models/ruby_mesh.ozz"
+                }
+            },
+            "ParticleSystem": {
+                "nullopt": true
             },
             "PlayerControllerComponent": {
                 "nullopt": true
@@ -91,10 +169,7 @@
                 "active": true
             },
             "LuaScript": {
-                "nullopt": false,
-                "data": {
-                    "scriptPath": "scripts/bullet.lua"
-                }
+                "nullopt": true
             },
             "ShadowCaster": {
                 "nullopt": false,
@@ -104,20 +179,20 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": -12.502313613891602,
-                        "y": -3.981179714202881,
-                        "z": -10.725627899169922
+                        "x": 3.8150651454925539,
+                        "y": -1.3573397397994996,
+                        "z": 3.3182413578033449
                     },
                     "rotation": {
-                        "x": 0.0,
-                        "y": 0.32595500349998476,
-                        "z": 0.0,
-                        "w": 0.9453852772712708
+                        "x": -0.013773759827017784,
+                        "y": 0.900297224521637,
+                        "z": -0.006545089650899172,
+                        "w": -0.4350084364414215
                     },
                     "scale": {
-                        "x": 2.0,
+                        "x": 2.000006675720215,
                         "y": 2.0,
-                        "z": 2.0
+                        "z": 1.9999985694885255
                     }
                 }
             },
@@ -129,15 +204,12 @@
                 "data": {
                     "visible": true,
                     "model": {
-                        "guid": "440eeeeb3deb20a70e023d8d0146dfcd"
+                        "guid": "d8c566b1e78d16d132a166e6d990b01b"
                     },
-                    "backfaceCulling": false,
+                    "backfaceCulling": true,
                     "materialOverrides": [
                         {
-                            "guid": "c65e206dfc749371e59f05aa1e2eda9c"
-                        },
-                        {
-                            "guid": "976658d88caf7f7fd4823ad2b7d6c99f"
+                            "guid": "4f843329315c8297e0905d030736e961"
                         }
                     ]
                 }
@@ -145,15 +217,15 @@
             "RigidBodyComponent": {
                 "nullopt": false,
                 "data": {
-                    "motionType": 1,
-                    "mass": 1.0,
+                    "motionType": 2,
+                    "mass": 96.14199829101563,
                     "friction": 0.5,
                     "restitution": 0.0,
                     "gravityFactor": 1.0,
                     "shapeType": "Cylinder",
                     "shapeSize": {
-                        "x": 6.125,
-                        "y": 2.5,
+                        "x": 1.0,
+                        "y": 1.0000001192092896,
                         "z": 0.0
                     }
                 }
@@ -190,10 +262,7 @@
                 "active": true
             },
             "LuaScript": {
-                "nullopt": false,
-                "data": {
-                    "scriptPath": "scripts/bullet.lua"
-                }
+                "nullopt": true
             },
             "ShadowCaster": {
                 "nullopt": false,
@@ -203,20 +272,20 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": -13.360824584960938,
-                        "y": -3.8770875930786135,
-                        "z": 7.262736797332764
+                        "x": -10.829126358032227,
+                        "y": -2.367555618286133,
+                        "z": -5.27822732925415
                     },
                     "rotation": {
-                        "x": 0.09577789902687073,
-                        "y": 0.5158777832984924,
-                        "z": -0.21260984241962434,
-                        "w": 0.8243141174316406
+                        "x": 0.1670130491256714,
+                        "y": -0.5382198691368103,
+                        "z": 0.7923464775085449,
+                        "w": -0.2336944043636322
                     },
                     "scale": {
-                        "x": 5.000004768371582,
-                        "y": 5.000003814697266,
-                        "z": 4.999997138977051
+                        "x": 1.9999988079071046,
+                        "y": 2.0,
+                        "z": 1.9999994039535523
                     }
                 }
             },
@@ -228,12 +297,12 @@
                 "data": {
                     "visible": true,
                     "model": {
-                        "guid": "e319e2b8747bee49f54e67e706d42f67"
+                        "guid": "16ab47c200b25ccb2b9dbcf46297059f"
                     },
                     "backfaceCulling": true,
                     "materialOverrides": [
                         {
-                            "guid": "4f843329315c8297e0905d030736e961"
+                            "guid": "a9dfb812233c1829cad774e7b2670a02"
                         }
                     ]
                 }
@@ -241,16 +310,16 @@
             "RigidBodyComponent": {
                 "nullopt": false,
                 "data": {
-                    "motionType": 1,
-                    "mass": 1.0,
+                    "motionType": 2,
+                    "mass": 221.70899963378907,
                     "friction": 0.5,
                     "restitution": 0.0,
                     "gravityFactor": 1.0,
-                    "shapeType": "Box",
+                    "shapeType": "Sphere",
                     "shapeSize": {
-                        "x": 2.5000009536743166,
-                        "y": 2.500000476837158,
-                        "z": 2.499997615814209
+                        "x": 1.0,
+                        "y": 0.0,
+                        "z": 0.0
                     }
                 }
             },
@@ -286,10 +355,7 @@
                 "active": true
             },
             "LuaScript": {
-                "nullopt": false,
-                "data": {
-                    "scriptPath": "scripts/bullet.lua"
-                }
+                "nullopt": true
             },
             "ShadowCaster": {
                 "nullopt": false,
@@ -382,10 +448,7 @@
                 "active": true
             },
             "LuaScript": {
-                "nullopt": false,
-                "data": {
-                    "scriptPath": "scripts/bullet.lua"
-                }
+                "nullopt": true
             },
             "ShadowCaster": {
                 "nullopt": false,
@@ -395,20 +458,20 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": -10.829126358032227,
-                        "y": -2.367555618286133,
-                        "z": -5.27822732925415
+                        "x": -13.360824584960938,
+                        "y": -3.8770875930786135,
+                        "z": 7.262736797332764
                     },
                     "rotation": {
-                        "x": 0.1670130491256714,
-                        "y": -0.5382198691368103,
-                        "z": 0.7923464775085449,
-                        "w": -0.2336944043636322
+                        "x": 0.09577789902687073,
+                        "y": 0.5158777832984924,
+                        "z": -0.21260984241962434,
+                        "w": 0.8243141174316406
                     },
                     "scale": {
-                        "x": 1.9999988079071046,
-                        "y": 2.0,
-                        "z": 1.9999994039535523
+                        "x": 5.000004768371582,
+                        "y": 5.000003814697266,
+                        "z": 4.999997138977051
                     }
                 }
             },
@@ -420,12 +483,12 @@
                 "data": {
                     "visible": true,
                     "model": {
-                        "guid": "16ab47c200b25ccb2b9dbcf46297059f"
+                        "guid": "e319e2b8747bee49f54e67e706d42f67"
                     },
                     "backfaceCulling": true,
                     "materialOverrides": [
                         {
-                            "guid": "a9dfb812233c1829cad774e7b2670a02"
+                            "guid": "4f843329315c8297e0905d030736e961"
                         }
                     ]
                 }
@@ -433,16 +496,16 @@
             "RigidBodyComponent": {
                 "nullopt": false,
                 "data": {
-                    "motionType": 2,
-                    "mass": 221.70899963378907,
+                    "motionType": 1,
+                    "mass": 1.0,
                     "friction": 0.5,
                     "restitution": 0.0,
                     "gravityFactor": 1.0,
-                    "shapeType": "Sphere",
+                    "shapeType": "Box",
                     "shapeSize": {
-                        "x": 1.0,
-                        "y": 0.0,
-                        "z": 0.0
+                        "x": 2.5000009536743166,
+                        "y": 2.500000476837158,
+                        "z": 2.499997615814209
                     }
                 }
             },
@@ -478,10 +541,7 @@
                 "active": true
             },
             "LuaScript": {
-                "nullopt": false,
-                "data": {
-                    "scriptPath": "scripts/bullet.lua"
-                }
+                "nullopt": true
             },
             "ShadowCaster": {
                 "nullopt": false,
@@ -491,20 +551,20 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": 3.8150651454925539,
-                        "y": -1.3573397397994996,
-                        "z": 3.3182413578033449
+                        "x": -12.502313613891602,
+                        "y": -3.981179714202881,
+                        "z": -10.725627899169922
                     },
                     "rotation": {
-                        "x": -0.013773759827017784,
-                        "y": 0.900297224521637,
-                        "z": -0.006545089650899172,
-                        "w": -0.4350084364414215
+                        "x": 0.0,
+                        "y": 0.32595500349998476,
+                        "z": 0.0,
+                        "w": 0.9453852772712708
                     },
                     "scale": {
-                        "x": 2.000006675720215,
+                        "x": 2.0,
                         "y": 2.0,
-                        "z": 1.9999985694885255
+                        "z": 2.0
                     }
                 }
             },
@@ -516,12 +576,15 @@
                 "data": {
                     "visible": true,
                     "model": {
-                        "guid": "d8c566b1e78d16d132a166e6d990b01b"
+                        "guid": "440eeeeb3deb20a70e023d8d0146dfcd"
                     },
-                    "backfaceCulling": true,
+                    "backfaceCulling": false,
                     "materialOverrides": [
                         {
-                            "guid": "4f843329315c8297e0905d030736e961"
+                            "guid": "c65e206dfc749371e59f05aa1e2eda9c"
+                        },
+                        {
+                            "guid": "976658d88caf7f7fd4823ad2b7d6c99f"
                         }
                     ]
                 }
@@ -529,15 +592,15 @@
             "RigidBodyComponent": {
                 "nullopt": false,
                 "data": {
-                    "motionType": 2,
-                    "mass": 96.14199829101563,
+                    "motionType": 1,
+                    "mass": 1.0,
                     "friction": 0.5,
                     "restitution": 0.0,
                     "gravityFactor": 1.0,
                     "shapeType": "Cylinder",
                     "shapeSize": {
-                        "x": 1.0,
-                        "y": 1.0000001192092896,
+                        "x": 6.125,
+                        "y": 2.5,
                         "z": 0.0
                     }
                 }
@@ -569,93 +632,12 @@
         },
         {
             "EntityMetadata": {
-                "name": "AnimatedEntity",
+                "name": "Terrain",
                 "tag": "",
                 "active": true
             },
             "LuaScript": {
                 "nullopt": true
-            },
-            "ShadowCaster": {
-                "nullopt": true
-            },
-            "Transform": {
-                "nullopt": false,
-                "data": {
-                    "position": {
-                        "x": -8.897673606872559,
-                        "y": -2.0509042739868166,
-                        "z": 6.362610340118408
-                    },
-                    "rotation": {
-                        "x": -0.1472925990819931,
-                        "y": 0.4128727614879608,
-                        "z": 0.04863642528653145,
-                        "w": 0.8974828720092773
-                    },
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 0.9999998807907105
-                    }
-                }
-            },
-            "TerrainRenderer": {
-                "nullopt": true
-            },
-            "ModelRenderer": {
-                "nullopt": true
-            },
-            "RigidBodyComponent": {
-                "nullopt": true
-            },
-            "AudioSource": {
-                "nullopt": true
-            },
-            "SkeletonComponent": {
-                "nullopt": false,
-                "data": {
-                    "skeletonPath": "resources/models/ruby_skeleton.ozz"
-                }
-            },
-            "AnimationComponent": {
-                "nullopt": false,
-                "data": {
-                    "animationPath": "resources/models/ruby_animation.ozz"
-                }
-            },
-            "AnimationPoseComponent": {
-                "nullopt": false,
-                "data": {}
-            },
-            "AnimationWorkerComponent": {
-                "nullopt": false,
-                "data": {}
-            },
-            "SkinnedMeshComponent": {
-                "nullopt": false,
-                "data": {
-                    "meshPath": "resources/models/ruby_mesh.ozz"
-                }
-            },
-            "ParticleSystem": {
-                "nullopt": true
-            },
-            "PlayerControllerComponent": {
-                "nullopt": true
-            }
-        },
-        {
-            "EntityMetadata": {
-                "name": "Player",
-                "tag": "",
-                "active": true
-            },
-            "LuaScript": {
-                "nullopt": false,
-                "data": {
-                    "scriptPath": "scripts/player.lua"
-                }
             },
             "ShadowCaster": {
                 "nullopt": false,
@@ -665,9 +647,9 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": 8.13255500793457,
-                        "y": -1.3127259016036988,
-                        "z": -6.460174560546875
+                        "x": 66.49148559570313,
+                        "y": -400.0,
+                        "z": 23.430105209350587
                     },
                     "rotation": {
                         "x": 0.0,
@@ -683,22 +665,16 @@
                 }
             },
             "TerrainRenderer": {
-                "nullopt": true
-            },
-            "ModelRenderer": {
                 "nullopt": false,
                 "data": {
-                    "visible": false,
-                    "model": {
-                        "guid": "8f4859e3ac89632544374bc702a531e9"
-                    },
-                    "backfaceCulling": false,
-                    "materialOverrides": [
-                        {
-                            "guid": ""
-                        }
-                    ]
+                    "visible": true,
+                    "terrainTile": {
+                        "guid": "08d79874f4071a0b863432f509a9d70a"
+                    }
                 }
+            },
+            "ModelRenderer": {
+                "nullopt": true
             },
             "RigidBodyComponent": {
                 "nullopt": true
@@ -722,11 +698,17 @@
                 "nullopt": true
             },
             "ParticleSystem": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {
+                    "effect": {
+                        "guid": "0222c99aa2fbe37c7307ffd90a2e44bf"
+                    },
+                    "autoPlay": true,
+                    "looping": false
+                }
             },
             "PlayerControllerComponent": {
-                "nullopt": false,
-                "data": {}
+                "nullopt": true
             }
         }
     ]

@@ -29,6 +29,8 @@
 
 #include "components/AllComponents.h"
 #include "physics/PhysicsManager.h"
+#include "ConsoleWindow.h"
+#include "core/Input.h"
 
 namespace Engine::UI {
 
@@ -267,6 +269,8 @@ namespace Engine::UI {
 		ImGui::PopStyleVar(3);
 	}
 
+	bool consoleOpen = true;
+
 	void UIManager::onUpdate(float dt)
 	{
 		GetRenderer().PreRender();
@@ -280,6 +284,7 @@ namespace Engine::UI {
 		m_inspectorRenderer->RenderInspectorWindow(&m_selectedEntity);
 		m_materialEditor->RenderMaterialEditor(selectedMaterial);
 		RenderAnimationWindow();
+		DrawConsoleWindow(Logger::getImGuiSink(), &consoleOpen);
 
 		m_uiAssetRenderer->RenderAssetWindow();
 		// RenderAudioDebugUI();

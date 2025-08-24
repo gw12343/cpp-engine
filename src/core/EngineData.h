@@ -5,8 +5,8 @@
 #pragma once
 #include <memory>
 #include "entt/entt.hpp"
-#include "Input.h"
 #include "assets/AssetHandle.h"
+#include "utils/Logger.h"
 
 // TODO probably use binary on game binaries
 #define SCENE_LOADER JSONSceneLoader
@@ -31,6 +31,7 @@ namespace Engine {
 	class Camera;
 	class AssetManager;
 	class Scene;
+	class Input;
 
 	enum EngineState { EDITOR, PAUSED, PLAYING };
 
@@ -54,6 +55,11 @@ namespace Engine {
 
 	EngineData& Get();
 
+
+	inline auto GetDefaultLogger()
+	{
+		return Logger::get("core");
+	}
 
 	inline EngineState GetState()
 	{

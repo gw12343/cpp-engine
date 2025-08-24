@@ -92,7 +92,7 @@ namespace Engine {
 
 	void PhysicsManager::onShutdown()
 	{
-		SPDLOG_INFO("cleaning up physics");
+		GetDefaultLogger()->info("cleaning up physics");
 
 		auto           physicsView    = GetCurrentSceneRegistry().view<Engine::Components::RigidBodyComponent>();
 		BodyInterface& body_interface = physics->GetBodyInterface();

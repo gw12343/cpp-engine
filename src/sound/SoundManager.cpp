@@ -353,7 +353,7 @@ namespace Engine::Audio {
 		m_device      = nullptr;
 		m_initialized = false;
 
-		SPDLOG_INFO("OpenAL shutdown complete");
+		GetDefaultLogger()->info("OpenAL shutdown complete");
 	}
 
 	// std::unique_ptr<SoundBuffer> SoundManager::LoadSound(const std::string& name, const std::string& filename)

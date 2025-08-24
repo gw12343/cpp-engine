@@ -1,4 +1,6 @@
 #include "Skybox.h"
+#include "core/EngineData.h"
+
 
 #include <spdlog/spdlog.h>
 #include <glad/glad.h>
@@ -21,7 +23,8 @@ namespace Engine {
 		// Create texture for skybox
 		m_texture = std::make_unique<Texture>();
 		if (!m_texture->LoadHDRFromFile(path)) {
-			spdlog::error("Failed to load skybox texture: {}", path);
+			GetDefaultLogger()->error("Failed to load skybox texture: {}", path);
+
 			return false;
 		}
 

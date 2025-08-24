@@ -23,7 +23,7 @@ namespace Engine::Components {
 
 	void SkinnedMeshComponent::OnRemoved(Entity& entity)
 	{
-		SPDLOG_INFO("REMOVING SKINNED MESH COMPONENT");
+		GetDefaultLogger()->info("REMOVING SKINNED MESH COMPONENT");
 		if (skinning_matrices) {
 			s_skin_mats.erase(skinning_matrices);
 			delete skinning_matrices;
@@ -42,10 +42,10 @@ namespace Engine::Components {
 			meshes = AnimationManager::LoadMeshesFromPath(meshPath);
 			s_all_meshes.insert(meshes);
 			if (!meshes) {
-				SPDLOG_ERROR("Failed to load meshes from path: {}", meshPath);
+				GetDefaultLogger()->error("Failed to load meshes from path: {}", meshPath);
 			}
 			else {
-				SPDLOG_INFO("Loaded SKINNED MESHES from path: {}", meshPath);
+				GetDefaultLogger()->info("Loaded SKINNED MESHES from path: {}", meshPath);
 			}
 		}
 

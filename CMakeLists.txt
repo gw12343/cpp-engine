@@ -174,7 +174,10 @@ add_executable(${PROJECT_NAME} ${SOURCES}
         src/assets/impl/MaterialLoader.h
         src/assets/impl/MaterialLoader.cpp
         src/rendering/ui/MaterialEditor.h
-        src/rendering/ui/MaterialEditor.cpp)
+        src/rendering/ui/MaterialEditor.cpp
+        src/utils/ImGuiLogSink.h
+        src/rendering/ui/ConsoleWindow.h
+        src/rendering/ui/ConsoleWindow.cpp)
 
 
 target_include_directories(${PROJECT_NAME} PRIVATE

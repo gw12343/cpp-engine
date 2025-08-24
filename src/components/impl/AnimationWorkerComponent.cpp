@@ -42,7 +42,7 @@ namespace Engine::Components {
 		ENGINE_VERIFY(animationComponent.animation, "AnimationWorkerComponent::OnAdded: AnimationComponent has null animation");
 
 		context->Resize(animationComponent.animation->num_tracks());
-		SPDLOG_INFO("Resized context for {} tracks", animationComponent.animation->num_tracks());
+		GetDefaultLogger()->info("Resized context for {} tracks", animationComponent.animation->num_tracks());
 	}
 
 	void AnimationWorkerComponent::RenderInspector(Entity& entity)

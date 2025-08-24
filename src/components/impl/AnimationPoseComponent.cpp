@@ -20,7 +20,7 @@ namespace Engine::Components {
 
 	void AnimationPoseComponent::OnRemoved(Entity& entity)
 	{
-		SPDLOG_INFO("DELETING ANIMATION POSES");
+		GetDefaultLogger()->info("DELETING ANIMATION POSES");
 		if (local_pose) {
 			delete local_pose;
 			local_pose = nullptr;
@@ -47,7 +47,7 @@ namespace Engine::Components {
 			spdlog::error("Failed to allocate pose data for entity");
 		}
 		else {
-			SPDLOG_INFO("Allocated pose data for entity");
+			GetDefaultLogger()->info("Allocated pose data for entity");
 		}
 	}
 

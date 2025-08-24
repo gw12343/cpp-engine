@@ -1,6 +1,6 @@
 
 function EditorInit()
-    print("[Lua] editor init called!")
+    print("Editor init called!")
 
     --[[local floor = createEntity("Floor")
     local tr = floor:AddTransform()
@@ -36,5 +36,5 @@ end
 
 
 function EditorShutdown()
-    print("[Lua] onShutdown called!")
+    print("onShutdown called!")
 end

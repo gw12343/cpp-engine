@@ -6,6 +6,7 @@
 #include <iostream>
 #include <sstream>
 #include <glad/glad.h>
+#include "core/EngineData.h"
 
 namespace Engine {
 	Shader::Shader() : programID(0)
@@ -77,14 +78,14 @@ namespace Engine {
 		glDeleteShader(fragmentShader);
 		if (geometryPath.has_value()) glDeleteShader(geometryShader);
 
-		SPDLOG_INFO("Linked shader with id {}", programID);
+		GetDefaultLogger()->info("Linked shader with id {}", programID);
 		ENGINE_GLCheckError();
 		return true;
 	}
 
 	bool Shader::LoadFromSource(const std::string& vertexSource, const std::string& fragmentSource)
 	{
-		SPDLOG_INFO("LOADING TERRAIN SHADER FROM SOURCE");
+		GetDefaultLogger()->info("LOADING TERRAIN SHADER FROM SOURCE");
 		if (vertexSource.empty() || fragmentSource.empty()) {
 			spdlog::error("Shader source code is empty");
 			return false;
@@ -109,7 +110,7 @@ namespace Engine {
 
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
-		SPDLOG_INFO("Linked shader from source with id {}", programID);
+		GetDefaultLogger()->info("Linked shader from source with id {}", programID);
 		ENGINE_GLCheckError();
 		return true;
 	}

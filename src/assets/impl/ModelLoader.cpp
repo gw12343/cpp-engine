@@ -2,12 +2,12 @@
 
 #include "rendering/Texture.h"
 #include "utils/Utils.h"
-#include "assets/AssetManager.h"
 #include "core/EngineData.h"
 #include "glm/gtc/type_ptr.hpp"
 
 #include <filesystem>
 #include <iostream>
+#include "assets/AssetManager.h"
 
 namespace Engine {
 	namespace Rendering {
@@ -18,7 +18,7 @@ namespace Engine {
 			const aiScene*   scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace | aiProcess_FlipUVs);
 
 			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-				spdlog::critical("ASSIMP ERROR: {}", importer.GetErrorString());
+				GetDefaultLogger()->critical("ASSIMP ERROR: {}", importer.GetErrorString());
 				return nullptr;
 			}
 
@@ -114,7 +114,7 @@ namespace Engine {
 			for (unsigned int i = 0; i < mat->GetTextureCount(type); ++i) {
 				aiString str;
 				if (mat->GetTexture(type, i, &str) != AI_SUCCESS) {
-					spdlog::warn("Failed to get texture #{} from material", i);
+					GetDefaultLogger()->warn("Failed to get texture #{} from material", i);
 					continue;
 				}
 
@@ -133,7 +133,7 @@ namespace Engine {
 					textures.push_back(handle);
 				}
 				else {
-					spdlog::warn("Failed to load {} texture from path: {}", typeName, fullPathStr);
+					GetDefaultLogger()->warn("Failed to load {} texture from path: {}", typeName, fullPathStr);
 				}
 			}
 

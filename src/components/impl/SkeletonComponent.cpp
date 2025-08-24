@@ -21,14 +21,14 @@ namespace Engine::Components {
 	}
 	void SkeletonComponent::OnAdded(Entity& entity)
 	{
-		SPDLOG_INFO("added!!");
+		GetDefaultLogger()->info("added!!");
 		if (!skeletonPath.empty()) {
 			skeleton = GetAnimationManager().LoadSkeletonFromPath(skeletonPath);
 			if (!skeleton) {
 				spdlog::error("Failed to load skeleton from path: {}", skeletonPath);
 			}
 			else {
-				SPDLOG_INFO("Loaded skeleton from path: {}", skeletonPath);
+				GetDefaultLogger()->info("Loaded skeleton from path: {}", skeletonPath);
 			}
 		}
 	}

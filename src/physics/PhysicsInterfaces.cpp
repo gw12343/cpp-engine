@@ -74,7 +74,7 @@ namespace Engine {
 	// See: ContactListener
 	ValidateResult ContactListenerImpl::OnContactValidate(const Body& inBody1, const Body& inBody2, RVec3Arg inBaseOffset, const CollideShapeResult& inCollisionResult)
 	{
-		// SPDLOG_INFO("Contact validate callback");
+		// GetDefaultLogger()->info("Contact validate callback");
 
 		// Allows you to ignore a contact before it is created (using layers to not make objects collide is cheaper!)
 		return ValidateResult::AcceptAllContactsForThisBodyPair;
@@ -101,22 +101,22 @@ namespace Engine {
 	}
 	void ContactListenerImpl::OnContactPersisted(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings)
 	{
-		// SPDLOG_INFO("A contact was persisted");
+		// GetDefaultLogger()->info("A contact was persisted");
 	}
 
 	void ContactListenerImpl::OnContactRemoved(const SubShapeIDPair& inSubShapePair)
 	{
-		// SPDLOG_INFO("A contact was removed");
+		// GetDefaultLogger()->info("A contact was removed");
 	}
 
 
 	void BodyActivationListenerImpl::OnBodyActivated(const BodyID& inBodyID, uint64 inBodyUserData)
 	{
-		// SPDLOG_INFO("\033[1;34mA body got activated\033[0m");
+		// GetDefaultLogger()->info("\033[1;34mA body got activated\033[0m");
 	}
 
 	void BodyActivationListenerImpl::OnBodyDeactivated(const BodyID& inBodyID, uint64 inBodyUserData)
 	{
-		// SPDLOG_INFO("\033[1;34mA body went to sleep\033[0m");
+		// GetDefaultLogger()->info("\033[1;34mA body went to sleep\033[0m");
 	}
 } // namespace Engine

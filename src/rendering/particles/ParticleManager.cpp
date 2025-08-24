@@ -1,12 +1,10 @@
 #include "ParticleManager.h"
 
 #include "utils/Utils.h"
-#include "components/Components.h"
 #include "core/EngineData.h"
 #include "components/impl/TransformComponent.h"
 #include "components/impl/ParticleSystemComponent.h"
 
-#include <spdlog/spdlog.h>
 #include "physics/PhysicsManager.h"
 namespace Engine {
 	static const int MAX_INSTANCES = 8000;
@@ -19,11 +17,11 @@ namespace Engine {
 		{
 			std::u16string u16Path(path);
 			std::string    pathStr(u16Path.begin(), u16Path.end());
-			spdlog::debug("Effekseer trying to load texture: {}", pathStr);
+			GetParticleManager().log->debug("Effekseer trying to load texture: {}", pathStr);
 
 			auto tex = m_internalLoader->Load(path, type);
 			if (!tex) {
-				spdlog::error("Failed to load texture: {}", pathStr);
+				GetParticleManager().log->error("Failed to load texture: {}", pathStr);
 			}
 			return tex;
 		}
@@ -40,7 +38,7 @@ namespace Engine {
 	{
 		m_renderer = EffekseerRendererGL::Renderer::Create(MAX_INSTANCES, EffekseerRendererGL::OpenGLDeviceType::OpenGL3);
 		if (!m_renderer) {
-			spdlog::critical("Failed to create Effekseer renderer");
+			log->critical("Failed to create Effekseer renderer");
 			return;
 		}
 
@@ -55,11 +53,11 @@ namespace Engine {
 		m_manager->SetTextureLoader(textureLoader);
 
 		if (!m_manager) {
-			spdlog::error("Effekseer Manager not initialized!");
+			log->error("Effekseer Manager not initialized!");
 			return;
 		}
 		else {
-			spdlog::info("Effekseer Manager initialized!");
+			log->info("Effekseer Manager initialized!");
 		}
 	}
 
@@ -115,7 +113,7 @@ namespace Engine {
 	{
 		Effekseer::RefPtr<Effekseer::Effect> effect = Effekseer::Effect::Create(m_manager, path.c_str());
 		if (!effect) {
-			spdlog::critical("Failed to load particle effect: {}", std::string(path.begin(), path.end()));
+			log->critical("Failed to load particle effect: {}", std::string(path.begin(), path.end()));
 			return -1;
 		}
 
