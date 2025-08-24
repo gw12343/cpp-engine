@@ -43,7 +43,7 @@
             "ModelRenderer": {
                 "nullopt": false,
                 "data": {
-                    "visible": true,
+                    "visible": false,
                     "model": {
                         "guid": "8f4859e3ac89632544374bc702a531e9"
                     },

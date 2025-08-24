@@ -76,20 +76,16 @@ namespace Engine::UI {
 	}
 
 
-	void UIManager::BeginDockspace()
+	void UIManager::BeginDockspace(float height)
 	{
-		// 1. Draw top menu bar *before* dockspace
-		// DrawMenuBar();
-
-		// 2. Apply theme colors
 		SetThemeColors(selectedTheme);
 
-		// 3. Setup full-screen window for dockspace
-		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking;
 
 		const ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(viewport->Pos);
-		ImGui::SetNextWindowSize(viewport->Size);
+
+		ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + height));
+		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, viewport->Size.y - height));
 		ImGui::SetNextWindowViewport(viewport->ID);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
@@ -100,12 +96,14 @@ namespace Engine::UI {
 
 		bool dockspaceOpen = true;
 		ImGui::Begin("Dockspace", &dockspaceOpen, windowFlags);
-		ImGui::PopStyleVar(3); // Pop all three style vars
+		ImGui::PopStyleVar(3);
 
-		// 4. Create the dockspace
 		ImGuiID dockspaceID = ImGui::GetID("Dockspace");
 		ImGui::DockSpace(dockspaceID, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
+
+		// ImGui::End();
 	}
+
 
 	void UIManager::EndDockspace()
 	{
@@ -115,14 +113,65 @@ namespace Engine::UI {
 	static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
 	static ImGuizmo::MODE      mCurrentGizmoMode(ImGuizmo::LOCAL);
 
-	void UIManager::RenderTopBar()
+
+	void Play()
+	{
+		if (GetState() != PLAYING) {
+			GetCamera().SaveEditorLocation();
+			if (GetState() == EDITOR) {
+				SCENE_LOADER::SerializeScene(GetSceneManager().GetActiveScene(), "scenes/scene1.json");
+			}
+			SetState(PLAYING);
+		}
+
+
+		Get().manager->StartGame();
+	}
+
+
+	void Pause()
+	{
+		if (GetState() == PLAYING) {
+			GetCamera().LoadEditorLocation();
+			SetState(PAUSED);
+		}
+	}
+
+	void Stop()
+	{
+		// unload scene, load backup
+		if (GetState() != EDITOR) {
+			GetCamera().LoadEditorLocation();
+			GetUI().m_selectedEntity = Entity();
+			GetParticleManager().StopAllEffects();
+			{
+				//  clear scene
+				auto& physics = GetPhysics();
+
+				BodyIDVector outBodies;
+				physics.GetPhysicsSystem()->GetBodies(outBodies);
+
+				for (auto body : outBodies) {
+					if (physics.GetPhysicsSystem()->GetBodyInterface().IsAdded(body)) {
+						physics.GetPhysicsSystem()->GetBodyInterface().RemoveBody(body);
+					}
+				}
+			}
+			GetAssetManager().Unload<Scene>(GetSceneManager().GetActiveScene());
+			GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>("scenes/scene1.json"));
+			SetState(EDITOR);
+		}
+	}
+
+
+	float UIManager::RenderTopBar()
 	{
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
 
-		// Place the top bar exactly at the top of the viewport
 		ImGui::SetNextWindowPos(viewport->Pos);
-		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, 32.0f)); // fixed height
+		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, 32.0f));
 		ImGui::SetNextWindowViewport(viewport->ID);
+
 
 		// Style: no title, no scroll, no resize, no move, no collapse, no docking
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBringToFrontOnFocus |
@@ -200,16 +249,7 @@ namespace Engine::UI {
 				ImGui::PopItemFlag();
 			}
 			if (startPlay) {
-				if (GetState() != PLAYING) {
-					GetCamera().SaveEditorLocation();
-					if (GetState() == EDITOR) {
-						SCENE_LOADER::SerializeScene(GetSceneManager().GetActiveScene(), "scenes/scene1.json");
-					}
-					SetState(PLAYING);
-				}
-
-
-				Get().manager->StartGame();
+				Play();
 			}
 			ImGui::SameLine();
 
@@ -223,10 +263,7 @@ namespace Engine::UI {
 				ImGui::PopItemFlag();
 			}
 			if (startPause) {
-				if (GetState() == PLAYING) {
-					GetCamera().LoadEditorLocation();
-					SetState(PAUSED);
-				}
+				Pause();
 			}
 
 
@@ -243,34 +280,15 @@ namespace Engine::UI {
 				ImGui::PopItemFlag();
 			}
 			if (startStop) {
-				// unload scene, load backup
-				if (GetState() != EDITOR) {
-					GetCamera().LoadEditorLocation();
-					m_selectedEntity = Entity();
-					GetParticleManager().StopAllEffects();
-					{
-						// TODO move to physics manager
-						//  clear scene
-						auto& physics = GetPhysics();
-
-						BodyIDVector outBodies;
-						physics.GetPhysicsSystem()->GetBodies(outBodies);
-
-						for (auto body : outBodies) {
-							if (physics.GetPhysicsSystem()->GetBodyInterface().IsAdded(body)) {
-								physics.GetPhysicsSystem()->GetBodyInterface().RemoveBody(body);
-							}
-						}
-					}
-					GetAssetManager().Unload<Scene>(GetSceneManager().GetActiveScene());
-					GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>("scenes/scene1.json"));
-					SetState(EDITOR);
-				}
+				Stop();
 			}
 		}
-		ImGui::End();
 
+		float barHeight = ImGui::GetWindowHeight();
+		ImGui::End();
 		ImGui::PopStyleVar(3);
+
+		return barHeight;
 	}
 
 	bool consoleOpen = true;
@@ -278,10 +296,8 @@ namespace Engine::UI {
 	void UIManager::onUpdate(float dt)
 	{
 		GetRenderer().PreRender();
-		RenderTopBar();
-
-
-		BeginDockspace();
+		float height = RenderTopBar();
+		BeginDockspace(height);
 
 		RenderSceneView(Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->texture);
 		RenderHierarchyWindow();

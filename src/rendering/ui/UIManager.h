@@ -32,7 +32,7 @@ namespace Engine {
 
 
 			void DrawMenuBar();
-			void BeginDockspace();
+			void BeginDockspace(float ht);
 			void EndDockspace();
 
 
@@ -40,21 +40,22 @@ namespace Engine {
 			std::shared_ptr<Texture> terrainIconTexture;
 			AssetHandle<Material>    selectedMaterial;
 
+			// Selected entity
+			Entity m_selectedEntity;
+
 		  private:
 			// UI rendering methods
-			void RenderHierarchyWindow();
-			void RenderTopBar();
-			void RenderAnimationWindow();
-			void RenderAudioDebugUI();
-			void RenderPauseOverlay();
-			void RenderSceneView(GLuint texId);
+			void  RenderHierarchyWindow();
+			float RenderTopBar();
+			void  RenderAnimationWindow();
+			void  RenderAudioDebugUI();
+			void  RenderPauseOverlay();
+			void  RenderSceneView(GLuint texId);
 
 
 			std::unique_ptr<AssetUIRenderer>   m_uiAssetRenderer;
 			std::unique_ptr<InspectorRenderer> m_inspectorRenderer;
 			std::unique_ptr<MaterialEditor>    m_materialEditor;
-			// Selected entity
-			Entity m_selectedEntity;
 		};
 	} // namespace UI
 } // namespace Engine
