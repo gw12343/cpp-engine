@@ -22,7 +22,7 @@ namespace Engine::Components {
 		lua.new_usertype<ModelRenderer>("ModelRenderer", "setModel", &ModelRenderer::SetModel);
 	}
 
-	void ModelRenderer::Draw(const Shader& shader, const Components::Transform& transform) const
+	void ModelRenderer::Draw(const Shader& shader, const Components::Transform& transform, bool uploadMaterial) const
 	{
 		if (visible && model.IsValid()) {
 			const auto* actualModel = GetAssetManager().Get(model);
@@ -34,7 +34,7 @@ namespace Engine::Components {
 			shader.SetMat4("model", &modelMatrix);
 
 			// Draw the model
-			actualModel->Draw(shader, true, materialOverrides);
+			actualModel->Draw(shader, backfaceCulling, uploadMaterial, materialOverrides);
 		}
 	}
 

@@ -111,7 +111,7 @@ namespace Engine {
 		for (auto [entity, metadata, transform, renderer] : view.each()) {
 			if (!renderer.visible) continue;
 			// Draw model
-			renderer.Draw(GetShader(), transform);
+			renderer.Draw(GetShader(), transform, true);
 		}
 	}
 
@@ -148,7 +148,7 @@ namespace Engine {
 			GetMousePickingShader().SetVec3("entityIDColor", encodedColor);
 			if (!renderer.visible) continue;
 			// Draw model
-			renderer.Draw(GetMousePickingShader(), transform);
+			renderer.Draw(GetMousePickingShader(), transform, false);
 		}
 	}
 

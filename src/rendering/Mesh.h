@@ -26,7 +26,7 @@ namespace Engine::Rendering {
 		Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::shared_ptr<Material>& material);
 		~Mesh() = default;
 
-		void                                           Draw(const Shader& shader, bool uploadMaterial, const AssetHandle<Material>& materialOverride) const;
+		void                                           Draw(const Shader& shader, bool cullBackfaces, bool uploadMaterial, const AssetHandle<Material>& materialOverride) const;
 		[[maybe_unused]] void                          CleanUp();
 		[[maybe_unused]] static void                   CleanAllMeshes();
 		[[nodiscard]] const std::shared_ptr<Material>& GetMaterial() const { return m_material; }

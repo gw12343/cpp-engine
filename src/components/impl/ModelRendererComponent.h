@@ -34,7 +34,7 @@ namespace Engine::Components {
 
 		explicit ModelRenderer(const AssetHandle<Rendering::Model>& handle) : model(handle) {}
 		// Draw the model with the given shader and transform
-		void Draw(const Shader& shader, const Components::Transform& transform) const;
+		void Draw(const Shader& shader, const Components::Transform& transform, bool uploadMaterial) const;
 
 		void SetModel(const std::string& path);
 

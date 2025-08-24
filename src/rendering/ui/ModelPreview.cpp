@@ -68,7 +68,7 @@ namespace Engine {
 		shader.SetMat4("view", &view);
 		shader.SetMat4("model", &modelMat);
 
-		model->Draw(shader, true);
+		model->Draw(shader, false, true);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
