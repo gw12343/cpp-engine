@@ -185,7 +185,7 @@ namespace Engine {
 
 			glm::mat4 modelMatrix = CalculateModelMatrix(transform);
 			m_depthShader.SetMat4("model", &modelMatrix);
-			model->Draw(m_depthShader, AssetHandle<Material>());
+			model->Draw(m_depthShader, false);
 		}
 
 		// Unbind shadow buffer now

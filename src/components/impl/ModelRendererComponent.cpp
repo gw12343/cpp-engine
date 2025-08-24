@@ -34,13 +34,19 @@ namespace Engine::Components {
 			shader.SetMat4("model", &modelMatrix);
 
 			// Draw the model
-			actualModel->Draw(shader, materialOverride);
+			actualModel->Draw(shader, true, materialOverrides);
 		}
 	}
 
 	void ModelRenderer::SetModel(const std::string& path)
 	{
 		model = GetAssetManager().Load<Rendering::Model>(path);
+		if (model.IsValid()) {
+			Rendering::Model* m = GetAssetManager().Get(model);
+			if (m != NULL) {
+				materialOverrides.resize(m->GetMeshes().size());
+			}
+		}
 	}
 
 
@@ -49,6 +55,12 @@ namespace Engine::Components {
 	}
 	void ModelRenderer::OnAdded(Entity& entity)
 	{
+		if (model.IsValid()) {
+			Rendering::Model* m = GetAssetManager().Get(model);
+			if (m != NULL) {
+				materialOverrides.resize(m->GetMeshes().size());
+			}
+		}
 	}
 
 
@@ -82,30 +94,38 @@ namespace Engine::Components {
 			ImGui::EndDragDropTarget();
 		}
 
-		newID = materialOverride.GetID();
-		if (ImGui::InputText("Material", &newID)) {
-			materialOverride = AssetHandle<Material>(newID);
-		}
+		if (model.IsValid()) {
+			Rendering::Model* m = GetAssetManager().Get(model);
+			if (m != NULL) {
+				for (int i = 0; i < m->GetMeshes().size(); i++) {
+					newID = materialOverrides[i].GetID();
+					if (ImGui::InputText(("Material " + std::to_string(i)).c_str(), &newID)) {
+						materialOverrides[i] = AssetHandle<Material>(newID);
+					}
 
-		// Handle drag-and-drop on same item
-		if (ImGui::BeginDragDropTarget()) {
-			struct PayloadData {
-				const char* type;
-				char        id[64];
-			};
+					// Handle drag-and-drop on same item
+					if (ImGui::BeginDragDropTarget()) {
+						struct PayloadData {
+							const char* type;
+							char        id[64];
+						};
 
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_MATERIAL")) {
-				if (payload->DataSize == sizeof(PayloadData)) {
-					const auto* data = static_cast<const PayloadData*>(payload->Data);
-					// Extra safety: check type string
-					if (std::strcmp(data->type, "Material") == 0) {
-						materialOverride = AssetHandle<Material>(data->id);
-						newID            = data->id;
+						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_MATERIAL")) {
+							if (payload->DataSize == sizeof(PayloadData)) {
+								const auto* data = static_cast<const PayloadData*>(payload->Data);
+								// Extra safety: check type string
+								if (std::strcmp(data->type, "Material") == 0) {
+									materialOverrides[i] = AssetHandle<Material>(data->id);
+									newID                = data->id;
+								}
+							}
+						}
+						ImGui::EndDragDropTarget();
 					}
 				}
 			}
-			ImGui::EndDragDropTarget();
 		}
+
 
 		if (model.IsValid()) {
 			ImGui::Text("Model: Loaded");

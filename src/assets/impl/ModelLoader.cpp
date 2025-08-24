@@ -127,7 +127,7 @@ namespace Engine {
 				std::filesystem::path fullPath = std::filesystem::path("resources/textures") / oldPath.filename();
 
 				std::string fullPathStr = fullPath.string();
-				
+
 				auto handle = GetAssetManager().Load<Texture>(fullPathStr);
 				if (handle.IsValid()) {
 					textures.push_back(handle);

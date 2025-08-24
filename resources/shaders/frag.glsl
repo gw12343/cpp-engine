@@ -14,7 +14,9 @@ in VS_OUT {
 layout (binding = 0) uniform sampler2D diffuseTexture;
 layout (binding = 1) uniform sampler2DArray shadowMap;
 
-uniform vec2 texScale;
+// ✅ Unified texture scale for all material textures
+uniform vec2 textureScale;
+
 uniform vec3 lightDir;
 uniform vec3 viewPos;
 uniform float farPlane;
@@ -23,14 +25,19 @@ uniform int debugShadows;
 
 uniform mat4 view;
 
+// ✅ Material properties
+uniform vec3 uDiffuseColor;
+uniform vec3 uSpecularColor;
+uniform vec3 uAmbientColor;
+uniform vec3 uEmissiveColor;
+uniform float uShininess;
+
 layout (std140) uniform LightSpaceMatrices
 {
     mat4 lightSpaceMatrices[16];
 };
 uniform float cascadePlaneDistances[16];
 uniform int cascadeCount;// number of frusta - 1
-
-
 
 int GetCascadeLayer(vec3 fragPosWorldSpace)
 {
@@ -75,26 +82,34 @@ float ShadowCalculation(vec3 fragPosWorldSpace, int layer)
     return shadow;
 }
 
-
 void main()
 {
-    vec4 smp = texture(diffuseTexture, fs_in.TexCoords * texScale);
-    vec3 color = smp.rgb;
+    vec4 smp = texture(diffuseTexture, fs_in.TexCoords * textureScale);
+    vec3 texColor = smp.rgb;
     float alpha = smp.a;
     if (alpha < 0.5f){
         discard;
     }
     vec3 normal = normalize(fs_in.Normal);
 
-    vec3 lightColor = vec3(0.3);
-    vec3 ambient = 0.3 * color;
-    float diff = max(dot(lightDir, normal), 0.0);
-    vec3 diffuse = diff * lightColor;
+    // ✅ Material colors combined with texture
+    vec3 baseColor = texColor * uDiffuseColor;
 
+    // Ambient
+    vec3 ambient = uAmbientColor * baseColor;
+
+    // Diffuse
+    float diff = max(dot(lightDir, normal), 0.0);
+    vec3 diffuse = diff * uDiffuseColor;
+
+    // Specular
     vec3 viewDir = normalize(viewPos - fs_in.FragPos);
-    vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(normal, normalize(lightDir + viewDir)), 0.0), 64.0);
-    vec3 specular = spec * lightColor;
+    vec3 halfDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(normal, halfDir), 0.0), uShininess);
+    vec3 specular = spec * uSpecularColor;
+
+    // Emissive
+    vec3 emissive = uEmissiveColor;
 
     // ✅ Determine cascade layer
     int layer = GetCascadeLayer(fs_in.FragPos);
@@ -102,7 +117,9 @@ void main()
     // ✅ Shadow with layer
     float shadow = ShadowCalculation(fs_in.FragPos, layer);
 
-    vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * color;
+    // ✅ Final lighting
+    vec3 lighting = ambient + emissive + ((1.0 - shadow) * 0.5 + 0.5) * (diffuse + specular);
+    lighting *= baseColor;
 
     // ✅ Debug: overlay cascade layer color
     vec3 cascadeColor;
@@ -112,15 +129,9 @@ void main()
     else if (layer == 3) cascadeColor = vec3(1, 1, 0);// yellow
     else cascadeColor = vec3(1.0);// white or fallback
 
-    // ✅ Blend with lighting (or set directly)
     if (debugShadows == 1){
         FragColor = vec4(mix(lighting, cascadeColor, 0.35), 1.0);
     } else {
         FragColor = vec4(lighting, 1.0);
     }
-
-    //FragColor = vec4(alpha, alpha, alpha, 1.0);
-
-    // Alternatively, to show only debug color:
-    //FragColor = vec4(cascadeColor, 1.0);
 }

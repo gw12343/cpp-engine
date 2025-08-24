@@ -60,8 +60,12 @@ namespace Engine {
 
 		if (j.contains("properties")) {
 			mat->SetShininess(j["properties"].value("shininess", 0.0f));
+			auto arr = j["properties"]["textureScale"];
+			if (arr.is_array() && arr.size() == 2) {
+				mat->SetTextureScale(glm::vec2(arr[0].get<float>(), arr[1].get<float>()));
+			}
 		}
-
+		mat->m_path = path;
 		return mat;
 	}
 
@@ -74,9 +78,7 @@ namespace Engine {
 		                   {"specular", {mat.GetSpecularColor().r, mat.GetSpecularColor().g, mat.GetSpecularColor().b}},
 		                   {"ambient", {mat.GetAmbientColor().r, mat.GetAmbientColor().g, mat.GetAmbientColor().b}},
 		                   {"emissive", {mat.GetEmissiveColor().r, mat.GetEmissiveColor().g, mat.GetEmissiveColor().b}}};
-		j["properties"] = {
-		    {"shininess", mat.GetShininess()},
-		};
+		j["properties"] = {{"shininess", mat.GetShininess()}, {"textureScale", {mat.GetTextureScale().x, mat.GetTextureScale().y}}};
 
 		namespace fs = std::filesystem;
 		fs::path filePath(path);

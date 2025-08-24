@@ -14,7 +14,8 @@ namespace Engine::Rendering {
 		Model()  = default;
 		~Model() = default;
 
-		void Draw(const Shader& shader, const AssetHandle<Material>& materialOverride) const;
+		void Draw(const Shader& shader, bool uploadMaterial) const;
+		void Draw(const Shader& shader, bool uploadMaterial, const std::vector<AssetHandle<Material>> materialOverrides) const;
 
 		[[maybe_unused]] [[nodiscard]] const std::vector<std::shared_ptr<Mesh>>& GetMeshes() const { return m_meshes; }
 

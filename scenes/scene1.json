@@ -43,14 +43,16 @@
             "ModelRenderer": {
                 "nullopt": false,
                 "data": {
-                    "visible": true,
+                    "visible": false,
                     "model": {
                         "guid": "8f4859e3ac89632544374bc702a531e9"
                     },
                     "backfaceCulling": false,
-                    "materialOverride": {
-                        "guid": ""
-                    }
+                    "materialOverrides": [
+                        {
+                            "guid": ""
+                        }
+                    ]
                 }
             },
             "RigidBodyComponent": {
@@ -180,20 +182,20 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": 0.6030628681182861,
-                        "y": -0.9279596209526062,
-                        "z": -0.507676362991333
+                        "x": 3.8150651454925539,
+                        "y": -1.3573397397994996,
+                        "z": 3.3182413578033449
                     },
                     "rotation": {
-                        "x": -0.4126656949520111,
-                        "y": -0.1909879893064499,
-                        "z": 0.889610767364502,
-                        "w": 0.042699918150901797
+                        "x": -0.013773759827017784,
+                        "y": 0.900297224521637,
+                        "z": -0.006545089650899172,
+                        "w": -0.4350084364414215
                     },
                     "scale": {
-                        "x": 2.0000040531158449,
-                        "y": 2.000000476837158,
-                        "z": 1.999999761581421
+                        "x": 2.000006675720215,
+                        "y": 2.0,
+                        "z": 1.9999985694885255
                     }
                 }
             },
@@ -208,9 +210,11 @@
                         "guid": "d8c566b1e78d16d132a166e6d990b01b"
                     },
                     "backfaceCulling": true,
-                    "materialOverride": {
-                        "guid": "c65e206dfc749371e59f05aa1e2eda9c"
-                    }
+                    "materialOverrides": [
+                        {
+                            "guid": "4f843329315c8297e0905d030736e961"
+                        }
+                    ]
                 }
             },
             "RigidBodyComponent": {
@@ -274,20 +278,20 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": -10.442129135131836,
-                        "y": -3.00000262260437,
-                        "z": -7.168938159942627
+                        "x": -10.829126358032227,
+                        "y": -2.367555618286133,
+                        "z": -5.27822732925415
                     },
                     "rotation": {
                         "x": 0.1670130491256714,
-                        "y": -0.5382199287414551,
+                        "y": -0.5382198691368103,
                         "z": 0.7923464775085449,
-                        "w": -0.23369431495666505
+                        "w": -0.2336944043636322
                     },
                     "scale": {
-                        "x": 2.0,
+                        "x": 1.9999988079071046,
                         "y": 2.0,
-                        "z": 2.0
+                        "z": 1.9999994039535523
                     }
                 }
             },
@@ -302,16 +306,18 @@
                         "guid": "16ab47c200b25ccb2b9dbcf46297059f"
                     },
                     "backfaceCulling": true,
-                    "materialOverride": {
-                        "guid": ""
-                    }
+                    "materialOverrides": [
+                        {
+                            "guid": "a9dfb812233c1829cad774e7b2670a02"
+                        }
+                    ]
                 }
             },
             "RigidBodyComponent": {
                 "nullopt": false,
                 "data": {
                     "motionType": 2,
-                    "mass": 1.0,
+                    "mass": 221.70899963378907,
                     "friction": 0.5,
                     "restitution": 0.0,
                     "gravityFactor": 1.0,
@@ -396,9 +402,11 @@
                         "guid": "e319e2b8747bee49f54e67e706d42f67"
                     },
                     "backfaceCulling": true,
-                    "materialOverride": {
-                        "guid": ""
-                    }
+                    "materialOverrides": [
+                        {
+                            "guid": "48ac579eaa8ac969e99c1fca5ab57c90"
+                        }
+                    ]
                 }
             },
             "RigidBodyComponent": {
@@ -462,9 +470,9 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": -15.06658935546875,
-                        "y": -3.197972297668457,
-                        "z": 7.725384712219238
+                        "x": -17.1580867767334,
+                        "y": -3.9886016845703127,
+                        "z": 7.354466915130615
                     },
                     "rotation": {
                         "x": 0.18199478089809419,
@@ -490,9 +498,11 @@
                         "guid": "e319e2b8747bee49f54e67e706d42f67"
                     },
                     "backfaceCulling": true,
-                    "materialOverride": {
-                        "guid": ""
-                    }
+                    "materialOverrides": [
+                        {
+                            "guid": "f474b376ddeab38cc693c76d29e4d3a4"
+                        }
+                    ]
                 }
             },
             "RigidBodyComponent": {
@@ -584,9 +594,14 @@
                         "guid": "440eeeeb3deb20a70e023d8d0146dfcd"
                     },
                     "backfaceCulling": true,
-                    "materialOverride": {
-                        "guid": ""
-                    }
+                    "materialOverrides": [
+                        {
+                            "guid": "c65e206dfc749371e59f05aa1e2eda9c"
+                        },
+                        {
+                            "guid": "976658d88caf7f7fd4823ad2b7d6c99f"
+                        }
+                    ]
                 }
             },
             "RigidBodyComponent": {

@@ -208,6 +208,10 @@ namespace Engine {
 		int   columnCount = static_cast<int>(ImGui::GetContentRegionAvail().x / (iconSize + padding));
 		if (columnCount < 1) columnCount = 1;
 
+		// Start of region
+		ImGui::PushID("MaterialRegion");
+		ImGui::BeginChild("MaterialRegionChild", ImGui::GetContentRegionAvail(), false, ImGuiWindowFlags_NoScrollbar);
+
 		ImGui::Columns(columnCount, nullptr, false);
 
 		for (auto& [id, matPtr] : storage.guidToAsset) {
@@ -224,7 +228,7 @@ namespace Engine {
 				GetUI().selectedMaterial = AssetHandle<Material>(id);
 			}
 
-			ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(tx->GetID())), ImVec2(iconSize, iconSize), ImVec2(0, 1), ImVec2(1, 0));
+			if (tx != NULL) ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(tx->GetID())), ImVec2(iconSize, iconSize), ImVec2(0, 1), ImVec2(1, 0));
 
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.0f);
 			ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + iconSize);
@@ -236,6 +240,18 @@ namespace Engine {
 		}
 
 		ImGui::Columns(1);
+
+		// Right-click context menu for the region
+		if (ImGui::BeginPopupContextWindow("MaterialRegionContext", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems)) {
+			if (ImGui::MenuItem("Create New Material +")) {
+				// Just print something
+				printf("Create New Material clicked!\n");
+			}
+			ImGui::EndPopup();
+		}
+
+		ImGui::EndChild();
+		ImGui::PopID();
 	}
 
 

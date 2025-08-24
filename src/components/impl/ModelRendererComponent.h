@@ -19,16 +19,16 @@ namespace Engine::Components {
 	// Renderer component for 3D models
 	class ModelRenderer : public Component {
 	  public:
-		AssetHandle<Rendering::Model> model;
-		bool                          visible         = true;
-		bool                          backfaceCulling = true;
-		AssetHandle<Material>         materialOverride;
+		AssetHandle<Rendering::Model>      model;
+		bool                               visible         = true;
+		bool                               backfaceCulling = true;
+		std::vector<AssetHandle<Material>> materialOverrides;
 		ModelRenderer() = default;
 
 		template <class Archive>
 		void serialize(Archive& ar)
 		{
-			ar(cereal::make_nvp("visible", visible), cereal::make_nvp("model", model), cereal::make_nvp("backfaceCulling", backfaceCulling), cereal::make_nvp("materialOverride", materialOverride) // only save GUID
+			ar(cereal::make_nvp("visible", visible), cereal::make_nvp("model", model), cereal::make_nvp("backfaceCulling", backfaceCulling), cereal::make_nvp("materialOverrides", materialOverrides) // only save GUID
 			);
 		}
 

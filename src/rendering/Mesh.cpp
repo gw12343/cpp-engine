@@ -60,68 +60,79 @@ namespace Engine {
 		}
 
 
-		void Mesh::Draw(const Shader& shader, const AssetHandle<Material>& materialOverride) const
+		void Mesh::Draw(const Shader& shader, bool uploadMaterial, const AssetHandle<Material>& materialOverride) const
 		{
 			Material* mat = materialOverride.IsValid() ? GetAssetManager().Get(materialOverride) : m_material.get();
+			if (uploadMaterial) {
+				if (mat != NULL) {
+					//			if (mat->GetDiffuseTexture()) {
+					//				glActiveTexture(GL_TEXTURE0);
+					//				shader.SetInt("material.diffuse", 0);
+					//				m_material->GetDiffuseTexture()->Bind(0);
+					//			}
+					ENGINE_GLCheckError();
 
-			if (mat != NULL) {
-				//			if (mat->GetDiffuseTexture()) {
-				//				glActiveTexture(GL_TEXTURE0);
-				//				shader.SetInt("material.diffuse", 0);
-				//				m_material->GetDiffuseTexture()->Bind(0);
-				//			}
-				ENGINE_GLCheckError();
+
+					if (mat->GetDiffuseTexture().IsValid()) {
+						glActiveTexture(GL_TEXTURE0);
+						shader.SetInt("diffuseTexture", 0);
+						GetAssetManager().Get(mat->GetDiffuseTexture())->Bind(0);
+					}
+					ENGINE_GLCheckError();
+
+					shader.SetVec2("textureScale", mat->GetTextureScale());
 
 
-				if (mat->GetDiffuseTexture().IsValid()) {
-					glActiveTexture(GL_TEXTURE0);
-					shader.SetInt("diffuseTexture", 0);
-					GetAssetManager().Get(mat->GetDiffuseTexture())->Bind(0);
+					shader.SetVec3("uDiffuseColor", mat->GetDiffuseColor());
+					shader.SetVec3("uSpecularColor", mat->GetSpecularColor());
+					shader.SetVec3("uAmbientColor", mat->GetAmbientColor());
+					shader.SetVec3("uEmissiveColor", mat->GetEmissiveColor());
+					shader.SetFloat("uShininess", mat->GetShininess());
+
+					//			if (mat->GetSpecularTexture()) {
+					//				glActiveTexture(GL_TEXTURE1);
+					//				shader.SetInt("material.specular", 1);
+					//				mat->GetSpecularTexture()->Bind(1);
+					//			}
+					//
+					//			if (mat->GetNormalTexture()) {
+					//				glActiveTexture(GL_TEXTURE2);
+					//				shader.SetInt("material.normal", 2);
+					//				mat->GetNormalTexture()->Bind(2);
+					//			}
+
+					// shader.SetVec3("diffuseTexture", mat->GetDiffuseColor());
+
+
+					//			shader.SetVec3("material.diffuseColor", mat->GetDiffuseColor());
+					//			shader.SetVec3("material.specularColor", mat->GetSpecularColor());
+					//			shader.SetVec3("material.ambientColor", mat->GetAmbientColor());
+					//			shader.SetVec3("material.emissiveColor", mat->GetEmissiveColor());
+					//			shader.SetFloat("material.shininess", mat->GetShininess());
+					//
 				}
-				ENGINE_GLCheckError();
-
-				//			if (mat->GetSpecularTexture()) {
-				//				glActiveTexture(GL_TEXTURE1);
-				//				shader.SetInt("material.specular", 1);
-				//				mat->GetSpecularTexture()->Bind(1);
-				//			}
-				//
-				//			if (mat->GetNormalTexture()) {
-				//				glActiveTexture(GL_TEXTURE2);
-				//				shader.SetInt("material.normal", 2);
-				//				mat->GetNormalTexture()->Bind(2);
-				//			}
-
-				// shader.SetVec3("diffuseTexture", mat->GetDiffuseColor());
-
-
-				//			shader.SetVec3("material.diffuseColor", mat->GetDiffuseColor());
-				//			shader.SetVec3("material.specularColor", mat->GetSpecularColor());
-				//			shader.SetVec3("material.ambientColor", mat->GetAmbientColor());
-				//			shader.SetVec3("material.emissiveColor", mat->GetEmissiveColor());
-				//			shader.SetFloat("material.shininess", mat->GetShininess());
-				//
+				// glEnable(GL_CULL_FACE);
 			}
-			// glEnable(GL_CULL_FACE);
-
 			glBindVertexArray(m_vao);
 			glDrawElements(GL_TRIANGLES, static_cast<int>(m_indices.size()), GL_UNSIGNED_INT, nullptr);
 			glBindVertexArray(0);
-			// GLCheckError();
-			//			if (mat->GetNormalTexture()) {
-			//				glActiveTexture(GL_TEXTURE2);
-			//				mat->GetNormalTexture()->Unbind();
-			//			}
-			//			if (mat->GetSpecularTexture()) {
-			//				glActiveTexture(GL_TEXTURE1);
-			//				mat->GetSpecularTexture()->Unbind();
-			//			}
-			if (mat != NULL) {
-				if (mat->GetDiffuseTexture().IsValid()) {
+			if (uploadMaterial) {
+				// GLCheckError();
+				//			if (mat->GetNormalTexture()) {
+				//				glActiveTexture(GL_TEXTURE2);
+				//				mat->GetNormalTexture()->Unbind();
+				//			}
+				//			if (mat->GetSpecularTexture()) {
+				//				glActiveTexture(GL_TEXTURE1);
+				//				mat->GetSpecularTexture()->Unbind();
+				//			}
+				if (mat != NULL) {
+					if (mat->GetDiffuseTexture().IsValid()) {
+						glActiveTexture(GL_TEXTURE0);
+						GetAssetManager().Get(mat->GetDiffuseTexture())->Unbind();
+					}
 					glActiveTexture(GL_TEXTURE0);
-					GetAssetManager().Get(mat->GetDiffuseTexture())->Unbind();
 				}
-				glActiveTexture(GL_TEXTURE0);
 			}
 		}
 

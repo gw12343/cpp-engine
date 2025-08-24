@@ -61,4 +61,12 @@ namespace Engine {
 	{
 		m_shininess = shininess;
 	}
+	const glm::vec2& Material::GetTextureScale() const
+	{
+		return m_textureScale;
+	}
+	void Material::SetTextureScale(const glm::vec2& textureScale)
+	{
+		m_textureScale = textureScale;
+	}
 } // namespace Engine
