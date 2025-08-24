@@ -10,7 +10,7 @@
 #include <functional>
 #include <string>
 
-#include "ModelPreview.h"
+#include "rendering/ui/ModelPreview.h"
 
 
 namespace Engine {

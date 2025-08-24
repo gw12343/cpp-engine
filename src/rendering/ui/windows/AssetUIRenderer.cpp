@@ -130,7 +130,7 @@ namespace Engine {
 			ImGui::PushID(("tex" + id).c_str());
 
 
-			ImGui::Image(GetUI().audioIconTexture->GetID(), ImVec2(iconSize, iconSize));
+			ImGui::Image(GetUI().m_audioIconTexture->GetID(), ImVec2(iconSize, iconSize));
 			ImGui::TextWrapped("Sound Buffer %s", id.c_str());
 
 			ImGui::NextColumn();
@@ -155,7 +155,7 @@ namespace Engine {
 			ImGui::PushID(("tex" + id).c_str());
 
 
-			ImGui::Image(GetUI().terrainIconTexture->GetID(), ImVec2(iconSize, iconSize));
+			ImGui::Image(GetUI().m_terrainIconTexture->GetID(), ImVec2(iconSize, iconSize));
 			ImGui::TextWrapped("Terrain %s", terrainPtr->name.c_str());
 
 			ImGui::NextColumn();
@@ -225,7 +225,7 @@ namespace Engine {
 			ImVec2      textSize  = ImGui::CalcTextSize(label.c_str(), nullptr, false, wrapWidth);
 
 			if (SelectableBackground(textSize, id, "Material", "ASSET_MATERIAL")) {
-				GetUI().selectedMaterial = AssetHandle<Material>(id);
+				GetUI().m_selectedMaterial = AssetHandle<Material>(id);
 			}
 
 			if (tx != NULL) ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(tx->GetID())), ImVec2(iconSize, iconSize), ImVec2(0, 1), ImVec2(1, 0));

@@ -4,7 +4,7 @@
 
 #include "MaterialEditor.h"
 #include "imgui.h"
-#include "IconsFontAwesome6.h"
+#include "rendering/ui/IconsFontAwesome6.h"
 #include "rendering/Texture.h"
 #include "rendering/Material.h"
 #include "core/EngineData.h"

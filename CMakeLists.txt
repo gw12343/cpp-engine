@@ -173,8 +173,8 @@ add_executable(${PROJECT_NAME} ${SOURCES}
         src/assets/impl/ParticleLoader.h
         src/assets/impl/ParticleLoader.cpp
         lib/include/imguizmo/ImGuizmo.h
-        src/rendering/ui/InspectorRenderer.cpp
-        src/rendering/ui/InspectorRenderer.h
+        src/rendering/ui/windows/InspectorRenderer.cpp
+        src/rendering/ui/windows/InspectorRenderer.h
         src/physics/PlayerController.h
         src/physics/PlayerController.cpp
         src/physics/PlayerSettings.h
@@ -182,11 +182,17 @@ add_executable(${PROJECT_NAME} ${SOURCES}
         src/components/impl/PlayerControllerComponent.cpp
         src/assets/impl/MaterialLoader.h
         src/assets/impl/MaterialLoader.cpp
-        src/rendering/ui/MaterialEditor.h
-        src/rendering/ui/MaterialEditor.cpp
+        src/rendering/ui/windows/MaterialEditor.h
+        src/rendering/ui/windows/MaterialEditor.cpp
         src/utils/ImGuiLogSink.h
-        src/rendering/ui/ConsoleWindow.h
-        src/rendering/ui/ConsoleWindow.cpp)
+        src/rendering/ui/windows/ConsoleWindow.h
+        src/rendering/ui/windows/ConsoleWindow.cpp
+        src/rendering/ui/windows/AudioDebugWindow.h
+        src/rendering/ui/windows/AudioDebugWindow.cpp
+        src/rendering/ui/windows/SceneViewWindow.h
+        src/rendering/ui/windows/SceneViewWindow.cpp
+        src/rendering/ui/windows/AnimationWindow.h
+        src/rendering/ui/windows/AnimationWindow.cpp)
 
 
 target_include_directories(${PROJECT_NAME} PRIVATE
