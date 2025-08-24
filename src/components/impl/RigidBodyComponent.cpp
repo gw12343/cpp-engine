@@ -300,6 +300,11 @@ namespace Engine::Components {
 		                                     "isKinematic",
 		                                     &RigidBodyComponent::IsKinematic,
 
+
+		                                     "moveKinematic",
+		                                     &RigidBodyComponent::MoveKinematic,
+
+
 		                                     "setCollisionShape",
 		                                     &RigidBodyComponent::SetCollisionShape,
 		                                     "setCollisionShapeRef",
@@ -427,6 +432,10 @@ namespace Engine::Components {
 		return ToGlm(GetPhysics().GetPhysicsSystem()->GetBodyInterface().GetPosition(bodyID));
 	}
 
+	void RigidBodyComponent::MoveKinematic(const glm::vec3& position, const glm::quat& rotation, float dt)
+	{
+		GetPhysics().GetPhysicsSystem()->GetBodyInterface().MoveKinematic(bodyID, ToJolt(position), ToJolt(rotation), dt);
+	}
 	void RigidBodyComponent::SetPosition(const glm::vec3& position)
 	{
 		GetPhysics().GetPhysicsSystem()->GetBodyInterface().SetPosition(bodyID, ToJolt(position), JPH::EActivation::Activate);

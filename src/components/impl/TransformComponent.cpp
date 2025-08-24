@@ -95,17 +95,29 @@ namespace Engine::Components {
 		    "dot",
 		    [](const glm::vec3& a, const glm::vec3& b) { return glm::dot(a, b); });
 
-		
+
 		lua.set_function("vec3", [](float x, float y, float z) { return glm::vec3(x, y, z); });
 
 		lua.new_usertype<glm::vec2>("vec2", sol::constructors<glm::vec2(), glm::vec2(float, float)>(), "x", &glm::vec2::x, "y", &glm::vec2::y);
 		lua.set_function("vec2", [](float x, float y, float z) { return glm::vec2(x, y); });
 
 
-		// Bind glm::quat (if you want to access rotations directly)
-		if (!lua["quat"].valid()) {
-			lua.new_usertype<glm::quat>("quat", sol::constructors<glm::quat(), glm::quat(float, float, float, float)>(), "x", &glm::quat::x, "y", &glm::quat::y, "z", &glm::quat::z, "w", &glm::quat::w);
-		}
+		lua.new_usertype<glm::quat>("quat",
+		                            sol::constructors<glm::quat(),                          // identity
+		                                              glm::quat(float, float, float, float) // (w, x, y, z)
+		                                              >(),
+		                            "w",
+		                            &glm::quat::w,
+		                            "x",
+		                            &glm::quat::x,
+		                            "y",
+		                            &glm::quat::y,
+		                            "z",
+		                            &glm::quat::z);
+
+		// Convenience factory function for Lua
+		lua.set_function("quat", [](float w, float x, float y, float z) { return glm::quat(w, x, y, z); });
+
 
 		lua.new_usertype<Transform>("Transform",
 		                            "position",

@@ -48,6 +48,7 @@ namespace Engine::Components {
 
 		// Useful manipulation methods
 		glm::vec3 GetPosition() const;
+		void      MoveKinematic(const glm::vec3& position, const glm::quat& rotation, float dt);
 		void      SetPosition(const glm::vec3& position);
 
 		void SetRotation(const glm::quat& rotation);

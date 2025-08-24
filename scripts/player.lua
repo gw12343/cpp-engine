@@ -181,7 +181,8 @@ function Update()
     end
 
     -- Move Camera
-    local nextPos = vec3(tr.position.x, tr.position.y + constants.CAMERA_Y_OFFSET, tr.position.z)
+    local crPos = cr:getPosition()
+    local nextPos = vec3(crPos.x, crPos.y + constants.CAMERA_Y_OFFSET, crPos.z)
     camera:setPosition(nextPos)
 
     -- Shoot Balls

@@ -85,7 +85,7 @@ namespace Engine {
 			if (ImGui::ColorEdit3("Emissive Color", &emissive.x)) material->SetEmissiveColor(emissive);
 
 			glm::vec2 scale = material->GetTextureScale();
-			if (ImGui::SliderFloat2("Texture Scale", &scale.x, 0.0, 30.0)) material->SetTextureScale(scale);
+			if (ImGui::DragFloat2("Texture Scale", &scale.x, 0.05, 0.0)) material->SetTextureScale(scale);
 
 
 			float shininess = material->GetShininess();
