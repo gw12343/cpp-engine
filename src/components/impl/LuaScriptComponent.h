@@ -12,6 +12,12 @@
 #include <cereal/cereal.hpp>
 #include <cereal/types/vector.hpp>
 #include <cereal/types/array.hpp>
+#include <cereal/types/variant.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/unordered_map.hpp>
+
+// TODO add asset handles?
+using ScriptVariable = std::variant<float, std::string>;
 
 namespace Engine::Components {
 	class LuaScript : public Component {
@@ -22,8 +28,12 @@ namespace Engine::Components {
 		template <class Archive>
 		void serialize(Archive& ar)
 		{
-			ar(cereal::make_nvp("scriptPath", scriptPath));
+			ar(cereal::make_nvp("scriptPath", scriptPath), cereal::make_nvp("variables", cppVariables));
 		}
+
+
+		void SyncFromLua();
+		void SyncToLua();
 
 		void        OnAdded(Entity& entity) override;
 		void        OnRemoved(Entity& entity) override;
@@ -37,10 +47,12 @@ namespace Engine::Components {
 		std::string      scriptPath;
 		sol::environment env;
 
-		sol::function start;
-		sol::function update;
-		sol::function collisionEnter;
-		sol::function playerCollisionEnter;
+		sol::table                                      variables;
+		sol::function                                   start;
+		sol::function                                   update;
+		sol::function                                   collisionEnter;
+		sol::function                                   playerCollisionEnter;
+		std::unordered_map<std::string, ScriptVariable> cppVariables;
 	};
 } // namespace Engine::Components
 

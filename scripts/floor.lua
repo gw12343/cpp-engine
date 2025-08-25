@@ -1,3 +1,10 @@
+-- Define exposed variables
+variables = {
+    pos_x = 0.0,
+    pos_y = 0.0,
+    pos_z = 0.0
+}
+
 function Start()
     --print("Started script!");
 end
@@ -6,6 +13,8 @@ end
 function Update()
     --local input = getInput()
     --print("hello i am old ")
+
+    --print("hi " .. variables.speed)
 end
 
 
@@ -30,5 +39,5 @@ function PlayerCollisionEnter()
     print("Player Dead! fr gng")
 
 
-    pc:setPosition(vec3(-16.93, 2.634, 8.558))
+    pc:setPosition(vec3(variables.pos_x, variables.pos_y, variables.pos_z))
 end

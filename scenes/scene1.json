@@ -17,101 +17,8 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": -41.18927001953125,
-                        "y": -1.0001220703125,
-                        "z": -34.191715240478519
-                    },
-                    "rotation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0,
-                        "w": 1.0
-                    },
-                    "scale": {
-                        "x": 30.0,
-                        "y": 2.0,
-                        "z": 30.0
-                    }
-                }
-            },
-            "TerrainRenderer": {
-                "nullopt": true
-            },
-            "ModelRenderer": {
-                "nullopt": false,
-                "data": {
-                    "visible": true,
-                    "model": {
-                        "guid": "e319e2b8747bee49f54e67e706d42f67"
-                    },
-                    "backfaceCulling": true,
-                    "materialOverrides": [
-                        {
-                            "guid": "48ac579eaa8ac969e99c1fca5ab57c90"
-                        }
-                    ]
-                }
-            },
-            "RigidBodyComponent": {
-                "nullopt": false,
-                "data": {
-                    "motionType": 1,
-                    "mass": 1.0,
-                    "friction": 0.5,
-                    "restitution": 0.0,
-                    "gravityFactor": 1.0,
-                    "shapeType": "Box",
-                    "shapeSize": {
-                        "x": 15.0,
-                        "y": 1.0,
-                        "z": 15.0
-                    }
-                }
-            },
-            "AudioSource": {
-                "nullopt": true
-            },
-            "SkeletonComponent": {
-                "nullopt": true
-            },
-            "AnimationComponent": {
-                "nullopt": true
-            },
-            "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
-            "SkinnedMeshComponent": {
-                "nullopt": true
-            },
-            "ParticleSystem": {
-                "nullopt": true
-            },
-            "PlayerControllerComponent": {
-                "nullopt": true
-            }
-        },
-        {
-            "EntityMetadata": {
-                "name": "Copy of Floor",
-                "tag": "",
-                "active": true
-            },
-            "LuaScript": {
-                "nullopt": true
-            },
-            "ShadowCaster": {
-                "nullopt": false,
-                "data": {}
-            },
-            "Transform": {
-                "nullopt": false,
-                "data": {
-                    "position": {
                         "x": -41.234676361083987,
-                        "y": -15.340084075927735,
+                        "y": -15.34249210357666,
                         "z": -20.196802139282228
                     },
                     "rotation": {
@@ -121,9 +28,9 @@
                         "w": 0.70710688829422
                     },
                     "scale": {
-                        "x": 1.999961018562317,
+                        "x": 1.9999443292617798,
                         "y": 30.0,
-                        "z": 29.99937629699707
+                        "z": 29.999109268188478
                     }
                 }
             },
@@ -567,7 +474,8 @@
             "LuaScript": {
                 "nullopt": false,
                 "data": {
-                    "scriptPath": "scripts/spinner.lua"
+                    "scriptPath": "scripts/spinner.lua",
+                    "variables": []
                 }
             },
             "ShadowCaster": {
@@ -1028,14 +936,37 @@
         },
         {
             "EntityMetadata": {
-                "name": "KillFloor",
+                "name": "Copy of KillFloor",
                 "tag": "",
                 "active": true
             },
             "LuaScript": {
                 "nullopt": false,
                 "data": {
-                    "scriptPath": "scripts/floor.lua"
+                    "scriptPath": "scripts/floor.lua",
+                    "variables": [
+                        {
+                            "key": "pos_z",
+                            "value": {
+                                "index": 0,
+                                "data": 9.0
+                            }
+                        },
+                        {
+                            "key": "pos_x",
+                            "value": {
+                                "index": 0,
+                                "data": -17.0
+                            }
+                        },
+                        {
+                            "key": "pos_y",
+                            "value": {
+                                "index": 0,
+                                "data": 3.0
+                            }
+                        }
+                    ]
                 }
             },
             "ShadowCaster": {
@@ -1046,7 +977,7 @@
                 "data": {
                     "position": {
                         "x": -34.73812484741211,
-                        "y": -21.084508895874025,
+                        "y": -25.543155670166017,
                         "z": -2.9657161235809328
                     },
                     "rotation": {
@@ -2339,7 +2270,8 @@
             "LuaScript": {
                 "nullopt": false,
                 "data": {
-                    "scriptPath": "scripts/platform.lua"
+                    "scriptPath": "scripts/platform.lua",
+                    "variables": []
                 }
             },
             "ShadowCaster": {
@@ -2690,7 +2622,8 @@
             "LuaScript": {
                 "nullopt": false,
                 "data": {
-                    "scriptPath": "scripts/player.lua"
+                    "scriptPath": "scripts/player.lua",
+                    "variables": []
                 }
             },
             "ShadowCaster": {
@@ -2923,6 +2856,217 @@
                         "x": 1.0,
                         "y": 1.0000001192092896,
                         "z": 0.0
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "AnimationWorkerComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Copy of Floor",
+                "tag": "",
+                "active": true
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": false,
+                "data": {}
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": -41.18927001953125,
+                        "y": -1.0001220703125,
+                        "z": -34.191715240478519
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 30.0,
+                        "y": 2.0,
+                        "z": 30.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "e319e2b8747bee49f54e67e706d42f67"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "48ac579eaa8ac969e99c1fca5ab57c90"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 1,
+                    "mass": 1.0,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 1.0,
+                    "shapeType": "Box",
+                    "shapeSize": {
+                        "x": 15.0,
+                        "y": 1.0,
+                        "z": 15.0
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "AnimationWorkerComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Copy of KillFloor",
+                "tag": "",
+                "active": true
+            },
+            "LuaScript": {
+                "nullopt": false,
+                "data": {
+                    "scriptPath": "scripts/floor.lua",
+                    "variables": [
+                        {
+                            "key": "pos_z",
+                            "value": {
+                                "index": 0,
+                                "data": 9.0
+                            }
+                        },
+                        {
+                            "key": "pos_x",
+                            "value": {
+                                "index": 0,
+                                "data": -7.0
+                            }
+                        },
+                        {
+                            "key": "pos_y",
+                            "value": {
+                                "index": 0,
+                                "data": 3.0
+                            }
+                        }
+                    ]
+                }
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": -34.73812484741211,
+                        "y": -25.543155670166017,
+                        "z": -2.9657161235809328
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 200.0,
+                        "y": 2.0,
+                        "z": 200.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "e319e2b8747bee49f54e67e706d42f67"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "df574252013669b2e022f5e21c711795"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 1,
+                    "mass": 1.0,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 1.0,
+                    "shapeType": "Box",
+                    "shapeSize": {
+                        "x": 100.0,
+                        "y": 1.0,
+                        "z": 100.0
                     }
                 }
             },

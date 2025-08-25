@@ -83,7 +83,6 @@ namespace Engine {
 		manager.RegisterExternal(Get().scene);
 	}
 
-
 	bool GEngine::Initialize()
 	{
 		GetDefaultLogger()->info("Starting Engine");
@@ -93,7 +92,6 @@ namespace Engine {
 		manager.InitAll();
 
 		AssetHandle<Particle> testParticle = GetAssetManager().Load<Particle>("resources/particles/testleaf.efk");
-
 		GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>("scenes/scene1.json"));
 		CreateInitialEntities();
 

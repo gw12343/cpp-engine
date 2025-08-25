@@ -136,7 +136,7 @@ namespace Engine {
 		cereal::JSONInputArchive archive(is);
 
 		std::vector<SerializedEntity> entities;
-		archive(cereal::make_nvp("entities", entities)); // This causes an error
+		archive(cereal::make_nvp("entities", entities));
 		std::vector<Entity> loaded_entities;
 		for (auto& se : entities) {
 			auto e = scene->GetRegistry()->create();

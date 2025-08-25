@@ -9,7 +9,7 @@ namespace Engine {
 
 	Entity Entity::Create(const std::string& name, Scene* scene)
 	{
-		entt::entity entityHandle = GetCurrentSceneRegistry().create();
+		entt::entity entityHandle = scene->GetRegistry()->create();
 		Entity       entity(entityHandle, scene);
 
 		// Add default components
