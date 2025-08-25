@@ -136,7 +136,7 @@ namespace Engine {
 		ImGui::NextColumn();
 
 		ImGui::SetNextItemWidth(-1);
-		bool changed = ImGui::SliderFloat("", v, v_min, v_min, format, flags);
+		bool changed = ImGui::SliderFloat("", v, v_min, v_max, format, flags);
 
 		ImGui::Columns(1);
 		ImGui::PopStyleVar();
@@ -219,103 +219,45 @@ namespace Engine {
 	}
 
 
-	bool LeftLabelModelAsset(const char* label, AssetHandle<Rendering::Model>* modelRef)
-	{
-		bool        used  = false;
-		std::string newID = modelRef->GetID();
-		if (LeftLabelInputText(label, &newID)) {
-			*modelRef = AssetHandle<Rendering::Model>(newID);
-			used      = true;
-		}
-
-		// Handle drag-and-drop on same item
-		if (ImGui::BeginDragDropTarget()) {
-			struct PayloadData {
-				const char* type;
-				char        id[64];
-			};
-
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_MODEL")) {
-				if (payload->DataSize == sizeof(PayloadData)) {
-					const PayloadData* data = static_cast<const PayloadData*>(payload->Data);
-					// Extra safety: check type string
-					if (std::strcmp(data->type, "Rendering::Model") == 0) {
-						*modelRef = AssetHandle<Rendering::Model>(data->id);
-						newID     = data->id;
-						used      = true;
-					}
-				}
-			}
-			ImGui::EndDragDropTarget();
-		}
-		return used;
-	}
-
-	bool LeftLabelTextureAsset(const char* label, AssetHandle<Texture>* modelRef)
-	{
-		bool        used  = false;
-		std::string newID = modelRef->GetID();
-		if (LeftLabelInputText(label, &newID)) {
-			*modelRef = AssetHandle<Texture>(newID);
-			used      = true;
-		}
-
-		// Handle drag-and-drop on same item
-		if (ImGui::BeginDragDropTarget()) {
-			struct PayloadData {
-				const char* type;
-				char        id[64];
-			};
-
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_TEXTURE")) {
-				if (payload->DataSize == sizeof(PayloadData)) {
-					const PayloadData* data = static_cast<const PayloadData*>(payload->Data);
-					// Extra safety: check type string
-					if (std::strcmp(data->type, "Texture") == 0) {
-						*modelRef = AssetHandle<Texture>(data->id);
-						newID     = data->id;
-						used      = true;
-					}
-				}
-			}
-			ImGui::EndDragDropTarget();
-		}
-		return used;
+#define LL_ASSET_DEF(name, atype, an)                                                                                                                                                                                                          \
+	bool LeftLabelAsset##name(const char* label, AssetHandle<atype>* assetRef)                                                                                                                                                                 \
+	{                                                                                                                                                                                                                                          \
+		bool        used  = false;                                                                                                                                                                                                             \
+		std::string newID = assetRef->GetID();                                                                                                                                                                                                 \
+		if (LeftLabelInputText(label, &newID)) {                                                                                                                                                                                               \
+			*assetRef = AssetHandle<atype>(newID);                                                                                                                                                                                             \
+			used      = true;                                                                                                                                                                                                                  \
+		}                                                                                                                                                                                                                                      \
+		if (ImGui::BeginDragDropTarget()) {                                                                                                                                                                                                    \
+			struct PayloadData {                                                                                                                                                                                                               \
+				const char* type;                                                                                                                                                                                                              \
+				char        id[64];                                                                                                                                                                                                            \
+			};                                                                                                                                                                                                                                 \
+                                                                                                                                                                                                                                               \
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(an)) {                                                                                                                                                              \
+				if (payload->DataSize == sizeof(PayloadData)) {                                                                                                                                                                                \
+					const PayloadData* data = static_cast<const PayloadData*>(payload->Data);                                                                                                                                                  \
+                                                                                                                                                                                                                                               \
+					if (std::strcmp(data->type, #name) == 0) {                                                                                                                                                                                 \
+						*assetRef = AssetHandle<atype>(data->id);                                                                                                                                                                              \
+						newID     = data->id;                                                                                                                                                                                                  \
+						used      = true;                                                                                                                                                                                                      \
+					}                                                                                                                                                                                                                          \
+				}                                                                                                                                                                                                                              \
+			}                                                                                                                                                                                                                                  \
+			ImGui::EndDragDropTarget();                                                                                                                                                                                                        \
+		}                                                                                                                                                                                                                                      \
+		return used;                                                                                                                                                                                                                           \
 	}
 
 
-	bool LeftLabelMaterialAsset(const char* label, AssetHandle<Material>* modelRef)
-	{
-		bool        used  = false;
-		std::string newID = modelRef->GetID();
-		if (LeftLabelInputText(label, &newID)) {
-			*modelRef = AssetHandle<Material>(newID);
-			used      = true;
-		}
-
-		// Handle drag-and-drop on same item
-		if (ImGui::BeginDragDropTarget()) {
-			struct PayloadData {
-				const char* type;
-				char        id[64];
-			};
-
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_MATERIAL")) {
-				if (payload->DataSize == sizeof(PayloadData)) {
-					const PayloadData* data = static_cast<const PayloadData*>(payload->Data);
-
-					// Extra safety: check type string
-					if (std::strcmp(data->type, "Material") == 0) {
-						*modelRef = AssetHandle<Material>(data->id);
-						newID     = data->id;
-						used      = true;
-					}
-				}
-			}
-			ImGui::EndDragDropTarget();
-		}
-		return used;
-	}
+	LL_ASSET_DEF(Texture, Texture, "ASSET_TEXTURE")
+	LL_ASSET_DEF(Model, Rendering::Model, "ASSET_MODEL")
+	LL_ASSET_DEF(Terrain, Terrain::TerrainTile, "ASSET_TERRAIN")
+	LL_ASSET_DEF(Sound, Audio::SoundBuffer, "ASSET_SOUND")
+	LL_ASSET_DEF(Scene, Scene, "ASSET_SCENE")
+	LL_ASSET_DEF(Particle, Particle, "ASSET_PARTICLE");
+	LL_ASSET_DEF(Material, Material, "ASSET_MATERIAL");
 
 
 	bool ComponentHeader(const char* name, bool* removeRequested)

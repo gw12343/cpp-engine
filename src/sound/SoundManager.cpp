@@ -356,33 +356,6 @@ namespace Engine::Audio {
 		GetDefaultLogger()->info("OpenAL shutdown complete");
 	}
 
-	// std::unique_ptr<SoundBuffer> SoundManager::LoadSound(const std::string& name, const std::string& filename)
-	//{
-	//		// Check if sound is already loaded
-	//		auto it = m_soundBuffers.find(name);
-	//		if (it != m_soundBuffers.end()) {
-	//			return it->second;
-	//		}
-
-	// Load new sound
-	//		auto buffer = std::make_shared<SoundBuffer>(filename);
-	//		if (!buffer->IsLoaded()) {
-	//			return nullptr;
-	//		}
-
-	// Store and return
-	//		m_soundBuffers[name] = buffer;
-	//		return buffer;
-	//}
-
-	//	std::shared_ptr<SoundBuffer> SoundManager::GetSound(const std::string& name)
-	//	{
-	//		auto it = m_soundBuffers.find(name);
-	//		if (it != m_soundBuffers.end()) {
-	//			return it->second;
-	//		}
-	//		return nullptr;
-	//	}
 
 	void SoundManager::SetListenerPosition(float x, float y, float z)
 	{
@@ -421,6 +394,25 @@ namespace Engine::Audio {
 		ALenum error = alGetError();
 		if (error != AL_NO_ERROR) {
 			GetSoundManager().log->error("OpenAL error after {}: {}", operation, error);
+		}
+	}
+	void SoundManager::onGameStart()
+	{
+		auto audioView = GetCurrentSceneRegistry().view<Components::EntityMetadata, Components::Transform, Components::AudioSource>();
+
+		for (auto [entity, metadata, transform, audio] : audioView.each()) {
+			// Update audio source position based on entity transform
+			GetSoundManager().log->info("Trying to auto play sound");
+			if (audio.source) {
+				GetSoundManager().log->info("Trying to auto play sound111");
+				// Get the world position from the transform
+				glm::vec3 worldPos = transform.position;
+
+				// If autoPlay is enabled, try to play the sound
+				if (audio.autoPlay && audio.buffer.IsValid()) {
+					audio.Play();
+				}
+			}
 		}
 	}
 

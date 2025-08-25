@@ -63,7 +63,7 @@ namespace Engine::Components {
 			GetDefaultLogger()->info("Created AudioSource with attenuation: ref={}, max={}, rolloff={}", referenceDistance, maxDistance, rolloffFactor);
 		}
 
-		void Play(Audio::SoundManager& soundManager)
+		void Play()
 		{
 			if (!source) return;
 
@@ -79,9 +79,13 @@ namespace Engine::Components {
 			}
 		}
 
+		void SetSound(AssetHandle<Audio::SoundBuffer> sound) { buffer = sound; }
+
 		void OnAdded(Entity& entity) override;
 		void OnRemoved(Entity& entity) override;
 		void RenderInspector(Entity& entity) override;
+
+		static void AddBindings();
 	};
 } // namespace Engine::Components
 

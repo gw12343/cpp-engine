@@ -69,7 +69,7 @@ namespace Engine::Components {
 		LeftLabelCheckbox("Visible", &visible);
 		LeftLabelCheckbox("Cull Backface", &backfaceCulling);
 
-		if (LeftLabelModelAsset("Model", &model)) {
+		if (LeftLabelAssetModel("Model", &model)) {
 			Rendering::Model* m = GetAssetManager().Get(model);
 			if (m != nullptr) {
 				materialOverrides.resize(m->GetMeshes().size());
@@ -82,32 +82,7 @@ namespace Engine::Components {
 			Rendering::Model* m = GetAssetManager().Get(model);
 			if (m != nullptr) {
 				for (int i = 0; i < m->GetMeshes().size(); i++) {
-					LeftLabelMaterialAsset(("Material " + std::to_string(i)).c_str(), &materialOverrides[i]);
-
-					//					newID = materialOverrides[i].GetID();
-					//					if (ImGui::InputText(("Material " + std::to_string(i)).c_str(), &newID)) {
-					//						materialOverrides[i] = AssetHandle<Material>(newID);
-					//					}
-					//
-					//					// Handle drag-and-drop on same item
-					//					if (ImGui::BeginDragDropTarget()) {
-					//						struct PayloadData {
-					//							const char* type;
-					//							char        id[64];
-					//						};
-					//
-					//						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_MATERIAL")) {
-					//							if (payload->DataSize == sizeof(PayloadData)) {
-					//								const auto* data = static_cast<const PayloadData*>(payload->Data);
-					//								// Extra safety: check type string
-					//								if (std::strcmp(data->type, "Material") == 0) {
-					//									materialOverrides[i] = AssetHandle<Material>(data->id);
-					//									newID                = data->id;
-					//								}
-					//							}
-					//						}
-					//						ImGui::EndDragDropTarget();
-					//					}
+					LeftLabelAssetMaterial(("Material " + std::to_string(i)).c_str(), &materialOverrides[i]);
 				}
 			}
 		}

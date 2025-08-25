@@ -38,10 +38,10 @@ namespace Engine {
 
 			ImGui::Separator();
 
-			LeftLabelTextureAsset("Diffuse Texture", &material->m_diffuseTexture);
-			LeftLabelTextureAsset("Normal Texture", &material->m_normalTexture);
-			LeftLabelTextureAsset("Specular Texture", &material->m_specularTexture);
-			LeftLabelTextureAsset("Height Texture", &material->m_heightTexture);
+			LeftLabelAssetTexture("Diffuse Texture", &material->m_diffuseTexture);
+			LeftLabelAssetTexture("Normal Texture", &material->m_normalTexture);
+			LeftLabelAssetTexture("Specular Texture", &material->m_specularTexture);
+			LeftLabelAssetTexture("Height Texture", &material->m_heightTexture);
 
 			ImGui::Separator();
 

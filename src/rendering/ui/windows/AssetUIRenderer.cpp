@@ -125,13 +125,23 @@ namespace Engine {
 
 		ImGui::Columns(columnCount, nullptr, false);
 
-		for (auto& [id, soundPtr] : storage.guidToAsset) {
-			if (!soundPtr) continue;
-			ImGui::PushID(("tex" + id).c_str());
+		for (auto& [id, texPtr] : storage.guidToAsset) {
+			if (!texPtr) continue;
+			ImGui::PushID(("snd" + id).c_str());
 
 
-			ImGui::Image(GetUI().m_audioIconTexture->GetID(), ImVec2(iconSize, iconSize));
-			ImGui::TextWrapped("Sound Buffer %s", id.c_str());
+			// --- Measure text to get correct rect size ---
+			std::string label     = id;
+			float       wrapWidth = iconSize; // restrict text to same width as preview
+			ImVec2      textSize  = ImGui::CalcTextSize(label.c_str(), nullptr, false, wrapWidth);
+			SelectableBackground(textSize, id, "Sound", "ASSET_SOUND");
+
+
+			ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_audioIconTexture->GetID())), ImVec2(iconSize, iconSize));
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.0f);
+			ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + iconSize);
+			ImGui::TextWrapped("%s", label.c_str());
+			ImGui::PopTextWrapPos();
 
 			ImGui::NextColumn();
 			ImGui::PopID();

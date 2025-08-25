@@ -11,12 +11,21 @@
 
 namespace Engine {
 
+	class Texture;
+	class Material;
+	class Scene;
+	class Particle;
+	namespace Terrain {
+		class TerrainTile;
+	}
 	namespace Rendering {
 		class Model;
 	}
 
-	class Material;
-	class Texture;
+	namespace Audio {
+		class SoundBuffer;
+	}
+
 
 	// Reusable helpers (unchanged, but included for completeness)
 	bool LeftLabelCheckbox(const char* label, bool* value, float labelWidth = 100.0f);
@@ -36,9 +45,17 @@ namespace Engine {
 	void LeftLabelEndCombo();
 
 
-	bool LeftLabelModelAsset(const char* label, AssetHandle<Rendering::Model>* modelRef);
-	bool LeftLabelTextureAsset(const char* label, AssetHandle<Texture>* modelRef);
-	bool LeftLabelMaterialAsset(const char* label, AssetHandle<Material>* materialRef);
+#define LL_ASSET(name, type) bool LeftLabelAsset##name(const char* label, AssetHandle<type>* assetRef)
+
+
+	LL_ASSET(Texture, Texture);
+	LL_ASSET(Model, Rendering::Model);
+	LL_ASSET(Terrain, Terrain::TerrainTile);
+	LL_ASSET(Sound, Audio::SoundBuffer);
+	LL_ASSET(Scene, Scene);
+	LL_ASSET(Particle, Particle);
+	LL_ASSET(Material, Material);
+
 
 	bool ComponentHeader(const char* name, bool* removeRequested);
 } // namespace Engine

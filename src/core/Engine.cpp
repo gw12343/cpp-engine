@@ -102,10 +102,8 @@ namespace Engine {
 
 	void GEngine::CreateInitialEntities()
 	{
-		AssetHandle<Audio::SoundBuffer> snd = GetAssetManager().Load<Audio::SoundBuffer>("resources/sounds/bird_chirp.wav");
-
 		// TODO store assets to be loaded at the start in scene json
-
+		
 		// Load all textures
 		std::string folder = "resources/textures";
 		for (const auto& entry : fs::directory_iterator(folder)) {
@@ -128,6 +126,15 @@ namespace Engine {
 			if (entry.is_regular_file() && entry.path().extension() == ".obj") {
 				std::string path = entry.path().string();
 				GetAssetManager().Load<Rendering::Model>(path);
+			}
+		}
+
+		// Load all sounds
+		folder = "resources/sounds";
+		for (const auto& entry : fs::directory_iterator(folder)) {
+			if (entry.is_regular_file() && entry.path().extension() == ".wav") {
+				std::string path = entry.path().string();
+				GetAssetManager().Load<Audio::SoundBuffer>(path);
 			}
 		}
 

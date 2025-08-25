@@ -83,39 +83,130 @@ namespace Engine::Components {
 			LoadScript(entity, scriptPath);
 		}
 
-		if (env.valid() && variables.valid()) {
-			for (auto& kv : variables) {
-				std::string key = kv.first.as<std::string>();
+		if (ImGui::TreeNode("Variables")) {
+			if (env.valid() && variables.valid()) {
+				for (auto& kv : variables) {
+					std::string key = kv.first.as<std::string>();
+					sol::object obj = kv.second;
 
-				if (kv.second.is<double>()) {
-					auto value = (float) kv.second.as<double>();
-					if (LeftLabelDragFloat(key.c_str(), &value)) {
-						variables[key] = value;
-						SyncFromLua();
-					}
-				}
-				else if (kv.second.is<std::string>()) {
-					std::string value = kv.second.as<std::string>();
-					if (LeftLabelInputText(key.c_str(), &value)) {
-						variables[key] = value;
-						SyncFromLua();
+					switch (obj.get_type()) {
+						case sol::type::number: {
+							auto value = static_cast<float>(obj.as<double>());
+							if (LeftLabelDragFloat(key.c_str(), &value)) {
+								variables[key]    = value;
+								cppVariables[key] = value;
+								SyncFromLua();
+							}
+							break;
+						}
+						case sol::type::string: {
+							std::string value = obj.as<std::string>();
+							if (LeftLabelInputText(key.c_str(), &value)) {
+								variables[key]    = value;
+								cppVariables[key] = value;
+								SyncFromLua();
+							}
+							break;
+						}
+						case sol::type::boolean: {
+							bool value = obj.as<bool>();
+							if (LeftLabelCheckbox(key.c_str(), &value)) {
+								variables[key]    = value;
+								cppVariables[key] = value;
+								SyncFromLua();
+							}
+							break;
+						}
+						case sol::type::userdata: {
+#define ASSET_CHK(nme, typ)                                                                                                                                                                                                                    \
+	else if (obj.is<AssetHandle<typ>>())                                                                                                                                                                                                       \
+	{                                                                                                                                                                                                                                          \
+		auto handle = obj.as<AssetHandle<typ>>();                                                                                                                                                                                              \
+		if (LeftLabelAsset##nme(key.c_str(), &handle)) {                                                                                                                                                                                       \
+			variables[key]    = handle;                                                                                                                                                                                                        \
+			cppVariables[key] = handle;                                                                                                                                                                                                        \
+			SyncFromLua();                                                                                                                                                                                                                     \
+		}                                                                                                                                                                                                                                      \
+	}
+
+
+							// --- vec3 ---
+							if (obj.is<glm::vec3>()) {
+								glm::vec3 value        = obj.as<glm::vec3>();
+								float     vec_array[3] = {value.x, value.y, value.z};
+								if (LeftLabelDragFloat3(key.c_str(), vec_array)) {
+									value             = {vec_array[0], vec_array[1], vec_array[2]};
+									variables[key]    = value;
+									cppVariables[key] = value;
+									SyncFromLua();
+								}
+							}
+
+							ASSET_CHK(Texture, Texture)
+							ASSET_CHK(Model, Rendering::Model)
+							ASSET_CHK(Material, Material)
+							ASSET_CHK(Scene, Scene)
+							ASSET_CHK(Terrain, Terrain::TerrainTile)
+							ASSET_CHK(Particle, Particle)
+							ASSET_CHK(Sound, Audio::SoundBuffer)
+							break;
+						}
+						default:
+							ImGui::Text("%s (Unsupported Lua type)", key.c_str());
+							break;
 					}
 				}
 			}
+			ImGui::TreePop();
 		}
 	}
+
 
 	void LuaScript::SyncFromLua()
 	{
 		GetScriptManager().log->info("loading var values from lua");
+		if (!variables.valid()) return;
+
 		cppVariables.clear();
-		if (variables.valid()) {
-			for (auto& kv : variables) {
-				auto key = kv.first.as<std::string>();
-				if (kv.second.is<double>())
-					cppVariables[key] = static_cast<float>(kv.second.as<double>());
-				else if (kv.second.is<std::string>())
-					cppVariables[key] = kv.second.as<std::string>();
+
+		for (auto& kv : variables) {
+			std::string key = kv.first.as<std::string>();
+
+			if (kv.second.is<double>()) {
+				cppVariables[key] = static_cast<float>(kv.second.as<double>());
+			}
+			else if (kv.second.is<std::string>()) {
+				cppVariables[key] = kv.second.as<std::string>();
+			}
+			else if (kv.second.is<glm::vec3>()) {
+				cppVariables[key] = kv.second.as<glm::vec3>();
+			}
+			else if (kv.second.is<bool>()) {
+				cppVariables[key] = kv.second.as<bool>();
+			}
+			else if (kv.second.is<int>()) {
+				cppVariables[key] = kv.second.as<int>();
+			}
+			else if (kv.second.is<AssetHandle<Texture>>()) {
+				cppVariables[key] = kv.second.as<AssetHandle<Texture>>();
+			}
+			else if (kv.second.is<AssetHandle<Rendering::Model>>()) {
+				cppVariables[key] = kv.second.as<AssetHandle<Rendering::Model>>();
+			}
+			else if (kv.second.is<AssetHandle<Material>>()) {
+				cppVariables[key] = kv.second.as<AssetHandle<Material>>();
+			}
+			else if (kv.second.is<AssetHandle<Scene>>()) {
+				cppVariables[key] = kv.second.as<AssetHandle<Scene>>();
+			}
+			else if (kv.second.is<AssetHandle<Terrain::TerrainTile>>()) {
+				cppVariables[key] = kv.second.as<AssetHandle<Terrain::TerrainTile>>();
+			}
+			else if (kv.second.is<AssetHandle<Particle>>()) {
+				cppVariables[key] = kv.second.as<AssetHandle<Particle>>();
+			}
+			else if (kv.second.is<AssetHandle<Audio::SoundBuffer>>()) {
+				cppVariables[key] = kv.second.as<AssetHandle<Audio::SoundBuffer>>();
 			}
 		}
 	}
@@ -124,18 +215,18 @@ namespace Engine::Components {
 	{
 		if (!variables.valid()) return;
 
-		for (auto& [key, val] : cppVariables) {
+		for (auto& [key, value] : cppVariables) {
 			sol::object existing = variables[key];
-
-			// Only update if the key already exists in the Lua table
 			if (existing.valid()) {
-				if (std::holds_alternative<float>(val))
-					variables[key] = std::get<float>(val);
-				else if (std::holds_alternative<std::string>(val))
-					variables[key] = std::get<std::string>(val);
+				std::visit(
+				    [&](auto&& arg) {
+					    variables[key] = arg; // only overwrite if Lua already had the key
+				    },
+				    value);
 			}
 		}
 	}
+
 
 	void LuaScript::LoadScript(Engine::Entity& entity, std::string path)
 	{
@@ -201,8 +292,43 @@ namespace Engine::Components {
 			                            }
 			                            auto& script = entity.GetComponent<LuaScript>();
 			                            script.LoadScript(entity, path);
-			                            // TODO give {@code LuaScript} a refrence to its entity??
 		                            });
+
+		// Asset Handle bindings
+		lua.new_usertype<AssetHandle<Texture>>("TextureHandle",
+		                                       "getGuid",
+		                                       &AssetHandle<Texture>::GetID,
+		                                       "isValid",
+		                                       &AssetHandle<Texture>::IsValid,
+		                                       // Add any other methods your AssetHandle has
+		                                       "clear",
+		                                       [](AssetHandle<Texture>& self) { self = AssetHandle<Texture>(); });
+
+		lua.new_usertype<AssetHandle<Rendering::Model>>(
+		    "ModelHandle", "getGuid", &AssetHandle<Rendering::Model>::GetID, "isValid", &AssetHandle<Rendering::Model>::IsValid, "clear", [](AssetHandle<Rendering::Model>& self) { self = AssetHandle<Rendering::Model>(); });
+
+		lua.new_usertype<AssetHandle<Material>>("MaterialHandle", "getGuid", &AssetHandle<Material>::GetID, "isValid", &AssetHandle<Material>::IsValid, "clear", [](AssetHandle<Material>& self) { self = AssetHandle<Material>(); });
+
+		lua.new_usertype<AssetHandle<Scene>>("SceneHandle", "getGuid", &AssetHandle<Scene>::GetID, "isValid", &AssetHandle<Scene>::IsValid, "clear", [](AssetHandle<Scene>& self) { self = AssetHandle<Scene>(); });
+
+		lua.new_usertype<AssetHandle<Terrain::TerrainTile>>(
+		    "TerrainTileHandle", "getGuid", &AssetHandle<Terrain::TerrainTile>::GetID, "isValid", &AssetHandle<Terrain::TerrainTile>::IsValid, "clear", [](AssetHandle<Terrain::TerrainTile>& self) {
+			    self = AssetHandle<Terrain::TerrainTile>();
+		    });
+
+		lua.new_usertype<AssetHandle<Particle>>("ParticleHandle", "getGuid", &AssetHandle<Particle>::GetID, "isValid", &AssetHandle<Particle>::IsValid, "clear", [](AssetHandle<Particle>& self) { self = AssetHandle<Particle>(); });
+
+		lua.new_usertype<AssetHandle<Audio::SoundBuffer>>(
+		    "SoundHandle", "getGuid", &AssetHandle<Audio::SoundBuffer>::GetID, "isValid", &AssetHandle<Audio::SoundBuffer>::IsValid, "clear", [](AssetHandle<Audio::SoundBuffer>& self) { self = AssetHandle<Audio::SoundBuffer>(); });
+
+		// Factory functions for creating asset handles
+		lua.set_function("tex", []() { return AssetHandle<Texture>(); });
+		lua.set_function("model", []() { return AssetHandle<Rendering::Model>(); });
+		lua.set_function("material", []() { return AssetHandle<Material>(); });
+		lua.set_function("scene", []() { return AssetHandle<Scene>(); });
+		lua.set_function("terrainTile", []() { return AssetHandle<Terrain::TerrainTile>(); });
+		lua.set_function("particle", []() { return AssetHandle<Particle>(); });
+		lua.set_function("sound", []() { return AssetHandle<Audio::SoundBuffer>(); });
 	}
 
 

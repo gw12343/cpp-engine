@@ -393,9 +393,9 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": -16.97347068786621,
-                        "y": 2.6335391998291017,
-                        "z": 8.557600975036621
+                        "x": -17.0,
+                        "y": 3.0,
+                        "z": 9.0
                     },
                     "rotation": {
                         "x": 0.0,
@@ -416,7 +416,7 @@
             "ModelRenderer": {
                 "nullopt": false,
                 "data": {
-                    "visible": false,
+                    "visible": true,
                     "model": {
                         "guid": "8f4859e3ac89632544374bc702a531e9"
                     },
@@ -432,7 +432,20 @@
                 "nullopt": true
             },
             "AudioSource": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {
+                    "autoPlay": false,
+                    "looping": false,
+                    "volume": 0.5410000085830689,
+                    "pitch": 1.0,
+                    "isPlaying": false,
+                    "referenceDistance": 1.0,
+                    "maxDistance": 100.0,
+                    "rolloffFactor": 1.0,
+                    "buffer": {
+                        "guid": ""
+                    }
+                }
             },
             "SkeletonComponent": {
                 "nullopt": true
@@ -2030,24 +2043,23 @@
                     "scriptPath": "scripts/floor.lua",
                     "variables": [
                         {
-                            "key": "pos_y",
+                            "key": "hit",
                             "value": {
-                                "index": 0,
-                                "data": 3.0
+                                "index": 11,
+                                "data": {
+                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
+                                }
                             }
                         },
                         {
-                            "key": "pos_x",
+                            "key": "pos2",
                             "value": {
-                                "index": 0,
-                                "data": -17.0
-                            }
-                        },
-                        {
-                            "key": "pos_z",
-                            "value": {
-                                "index": 0,
-                                "data": 9.0
+                                "index": 2,
+                                "data": {
+                                    "x": -17.0,
+                                    "y": 3.0,
+                                    "z": 9.0
+                                }
                             }
                         }
                     ]
@@ -2061,7 +2073,7 @@
                 "data": {
                     "position": {
                         "x": -34.73812484741211,
-                        "y": -25.543155670166017,
+                        "y": -4.638655662536621,
                         "z": -2.9657161235809328
                     },
                     "rotation": {
