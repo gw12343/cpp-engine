@@ -4,9 +4,7 @@
 #include "BinarySceneLoader.h"
 
 #include <cereal/archives/binary.hpp>
-#include <cereal/types/vector.hpp>
 #include <cereal/types/optional.hpp>
-#include <cereal/types/string.hpp>
 #include <cereal/types/common.hpp>
 
 #include <iostream>
@@ -100,7 +98,7 @@ namespace Engine {
 		}
 	};
 
-	void BinarySceneLoader::SerializeScene(AssetHandle<Scene> sceneRef, const std::string& path)
+	[[maybe_unused]] void BinarySceneLoader::SerializeScene(const AssetHandle<Scene>& sceneRef, const std::string& path)
 	{
 		std::ofstream               os(path, std::ios::binary);
 		cereal::BinaryOutputArchive archive(os);

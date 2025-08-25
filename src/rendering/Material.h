@@ -39,8 +39,8 @@ namespace Engine {
 		[[nodiscard]] glm::vec3 GetEmissiveColor() const { return m_emissiveColor; }
 		[[nodiscard]] float     GetShininess() const { return m_shininess; }
 
-		const glm::vec2& GetTextureScale() const;
-		void             SetTextureScale(const glm::vec2& textureScale);
+		[[nodiscard]] const glm::vec2& GetTextureScale() const;
+		void                           SetTextureScale(const glm::vec2& textureScale);
 
 		// Material name
 		void                             SetName(const std::string& name) { m_name = name; }

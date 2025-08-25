@@ -2,6 +2,192 @@
     "entities": [
         {
             "EntityMetadata": {
+                "name": "Copy of Floor",
+                "tag": "",
+                "active": true
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": false,
+                "data": {}
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": -21.02851676940918,
+                        "y": -1.0,
+                        "z": -2.9657161235809328
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 2.0,
+                        "y": 15.0,
+                        "z": 15.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "e319e2b8747bee49f54e67e706d42f67"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "48ac579eaa8ac969e99c1fca5ab57c90"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 1,
+                    "mass": 1.0,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 1.0,
+                    "shapeType": "Box",
+                    "shapeSize": {
+                        "x": 1.0,
+                        "y": 7.5,
+                        "z": 7.5
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "AnimationWorkerComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Cylinder",
+                "tag": "",
+                "active": true
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": false,
+                "data": {}
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 3.630434513092041,
+                        "y": 4.694242477416992,
+                        "z": 3.3194427490234377
+                    },
+                    "rotation": {
+                        "x": -0.16335494816303254,
+                        "y": 0.9366271495819092,
+                        "z": -0.30791428685188296,
+                        "w": -0.03512156754732132
+                    },
+                    "scale": {
+                        "x": 2.000006675720215,
+                        "y": 2.0,
+                        "z": 1.9999985694885255
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "d8c566b1e78d16d132a166e6d990b01b"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "4f843329315c8297e0905d030736e961"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 2,
+                    "mass": 96.14199829101563,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 1.0,
+                    "shapeType": "Cylinder",
+                    "shapeSize": {
+                        "x": 1.0,
+                        "y": 1.0000001192092896,
+                        "z": 0.0
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "AnimationWorkerComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
                 "name": "Player",
                 "tag": "",
                 "active": true
@@ -164,7 +350,7 @@
         },
         {
             "EntityMetadata": {
-                "name": "Cylinder",
+                "name": "Terrain",
                 "tag": "",
                 "active": true
             },
@@ -179,56 +365,37 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": 3.630434513092041,
-                        "y": 4.694242477416992,
-                        "z": 3.3194427490234377
+                        "x": 66.49148559570313,
+                        "y": -400.0,
+                        "z": 23.430105209350587
                     },
                     "rotation": {
-                        "x": -0.16335494816303254,
-                        "y": 0.9366271495819092,
-                        "z": -0.30791428685188296,
-                        "w": -0.03512156754732132
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
                     },
                     "scale": {
-                        "x": 2.000006675720215,
-                        "y": 2.0,
-                        "z": 1.9999985694885255
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
                     }
                 }
             },
             "TerrainRenderer": {
-                "nullopt": true
-            },
-            "ModelRenderer": {
                 "nullopt": false,
                 "data": {
                     "visible": true,
-                    "model": {
-                        "guid": "d8c566b1e78d16d132a166e6d990b01b"
-                    },
-                    "backfaceCulling": true,
-                    "materialOverrides": [
-                        {
-                            "guid": "4f843329315c8297e0905d030736e961"
-                        }
-                    ]
-                }
-            },
-            "RigidBodyComponent": {
-                "nullopt": false,
-                "data": {
-                    "motionType": 2,
-                    "mass": 96.14199829101563,
-                    "friction": 0.5,
-                    "restitution": 0.0,
-                    "gravityFactor": 1.0,
-                    "shapeType": "Cylinder",
-                    "shapeSize": {
-                        "x": 1.0,
-                        "y": 1.0000001192092896,
-                        "z": 0.0
+                    "terrainTile": {
+                        "guid": "08d79874f4071a0b863432f509a9d70a"
                     }
                 }
+            },
+            "ModelRenderer": {
+                "nullopt": true
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
             },
             "AudioSource": {
                 "nullopt": true
@@ -249,7 +416,14 @@
                 "nullopt": true
             },
             "ParticleSystem": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {
+                    "effect": {
+                        "guid": "0222c99aa2fbe37c7307ffd90a2e44bf"
+                    },
+                    "autoPlay": true,
+                    "looping": false
+                }
             },
             "PlayerControllerComponent": {
                 "nullopt": true
@@ -265,120 +439,26 @@
                 "nullopt": true
             },
             "ShadowCaster": {
-                "nullopt": false,
-                "data": {}
+                "nullopt": true
             },
             "Transform": {
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": -10.829126358032227,
-                        "y": 3.6219558715820314,
-                        "z": -5.27822732925415
-                    },
-                    "rotation": {
-                        "x": 0.1670130491256714,
-                        "y": -0.5382198691368103,
-                        "z": 0.7923464775085449,
-                        "w": -0.2336944043636322
-                    },
-                    "scale": {
-                        "x": 1.9999988079071046,
-                        "y": 2.0,
-                        "z": 1.9999994039535523
-                    }
-                }
-            },
-            "TerrainRenderer": {
-                "nullopt": true
-            },
-            "ModelRenderer": {
-                "nullopt": false,
-                "data": {
-                    "visible": true,
-                    "model": {
-                        "guid": "16ab47c200b25ccb2b9dbcf46297059f"
-                    },
-                    "backfaceCulling": true,
-                    "materialOverrides": [
-                        {
-                            "guid": "a9dfb812233c1829cad774e7b2670a02"
-                        }
-                    ]
-                }
-            },
-            "RigidBodyComponent": {
-                "nullopt": false,
-                "data": {
-                    "motionType": 2,
-                    "mass": 221.70899963378907,
-                    "friction": 0.5,
-                    "restitution": 0.0,
-                    "gravityFactor": 1.0,
-                    "shapeType": "Sphere",
-                    "shapeSize": {
-                        "x": 1.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    }
-                }
-            },
-            "AudioSource": {
-                "nullopt": true
-            },
-            "SkeletonComponent": {
-                "nullopt": true
-            },
-            "AnimationComponent": {
-                "nullopt": true
-            },
-            "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
-            "SkinnedMeshComponent": {
-                "nullopt": true
-            },
-            "ParticleSystem": {
-                "nullopt": true
-            },
-            "PlayerControllerComponent": {
-                "nullopt": true
-            }
-        },
-        {
-            "EntityMetadata": {
-                "name": "Floor",
-                "tag": "",
-                "active": true
-            },
-            "LuaScript": {
-                "nullopt": true
-            },
-            "ShadowCaster": {
-                "nullopt": false,
-                "data": {}
-            },
-            "Transform": {
-                "nullopt": false,
-                "data": {
-                    "position": {
-                        "x": -4.75253963470459,
-                        "y": -1.0,
-                        "z": -2.9657161235809328
+                        "x": -12.502313613891602,
+                        "y": 0.33142709732055666,
+                        "z": -10.725627899169922
                     },
                     "rotation": {
                         "x": 0.0,
-                        "y": 0.0,
+                        "y": 0.32595500349998476,
                         "z": 0.0,
-                        "w": 1.0
+                        "w": 0.9453852772712708
                     },
                     "scale": {
-                        "x": 30.0,
+                        "x": 2.0,
                         "y": 2.0,
-                        "z": 30.0
+                        "z": 2.0
                     }
                 }
             },
@@ -390,12 +470,15 @@
                 "data": {
                     "visible": true,
                     "model": {
-                        "guid": "e319e2b8747bee49f54e67e706d42f67"
+                        "guid": "440eeeeb3deb20a70e023d8d0146dfcd"
                     },
-                    "backfaceCulling": true,
+                    "backfaceCulling": false,
                     "materialOverrides": [
                         {
-                            "guid": "48ac579eaa8ac969e99c1fca5ab57c90"
+                            "guid": "c65e206dfc749371e59f05aa1e2eda9c"
+                        },
+                        {
+                            "guid": "976658d88caf7f7fd4823ad2b7d6c99f"
                         }
                     ]
                 }
@@ -408,11 +491,11 @@
                     "friction": 0.5,
                     "restitution": 0.0,
                     "gravityFactor": 1.0,
-                    "shapeType": "Box",
+                    "shapeType": "Cylinder",
                     "shapeSize": {
-                        "x": 15.000000953674317,
-                        "y": 1.0,
-                        "z": 15.0
+                        "x": 6.125,
+                        "y": 2.5,
+                        "z": 0.0
                     }
                 }
             },
@@ -539,7 +622,7 @@
         },
         {
             "EntityMetadata": {
-                "name": "Ball",
+                "name": "Floor",
                 "tag": "",
                 "active": true
             },
@@ -547,26 +630,27 @@
                 "nullopt": true
             },
             "ShadowCaster": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {}
             },
             "Transform": {
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": -12.502313613891602,
-                        "y": 0.33142709732055666,
-                        "z": -10.725627899169922
+                        "x": -4.75253963470459,
+                        "y": -1.0,
+                        "z": -2.9657161235809328
                     },
                     "rotation": {
                         "x": 0.0,
-                        "y": 0.32595500349998476,
+                        "y": 0.0,
                         "z": 0.0,
-                        "w": 0.9453852772712708
+                        "w": 1.0
                     },
                     "scale": {
-                        "x": 2.0,
+                        "x": 30.0,
                         "y": 2.0,
-                        "z": 2.0
+                        "z": 30.0
                     }
                 }
             },
@@ -578,15 +662,12 @@
                 "data": {
                     "visible": true,
                     "model": {
-                        "guid": "440eeeeb3deb20a70e023d8d0146dfcd"
+                        "guid": "e319e2b8747bee49f54e67e706d42f67"
                     },
-                    "backfaceCulling": false,
+                    "backfaceCulling": true,
                     "materialOverrides": [
                         {
-                            "guid": "c65e206dfc749371e59f05aa1e2eda9c"
-                        },
-                        {
-                            "guid": "976658d88caf7f7fd4823ad2b7d6c99f"
+                            "guid": "48ac579eaa8ac969e99c1fca5ab57c90"
                         }
                     ]
                 }
@@ -599,10 +680,103 @@
                     "friction": 0.5,
                     "restitution": 0.0,
                     "gravityFactor": 1.0,
-                    "shapeType": "Cylinder",
+                    "shapeType": "Box",
                     "shapeSize": {
-                        "x": 6.125,
-                        "y": 2.5,
+                        "x": 15.000000953674317,
+                        "y": 1.0,
+                        "z": 15.0
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "AnimationWorkerComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Ball",
+                "tag": "",
+                "active": true
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": false,
+                "data": {}
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": -8.300891876220704,
+                        "y": 5.666773319244385,
+                        "z": -4.512704372406006
+                    },
+                    "rotation": {
+                        "x": 0.1670130491256714,
+                        "y": -0.5382198691368103,
+                        "z": 0.7923464775085449,
+                        "w": -0.2336944043636322
+                    },
+                    "scale": {
+                        "x": 1.9999988079071046,
+                        "y": 2.0,
+                        "z": 1.9999994039535523
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "16ab47c200b25ccb2b9dbcf46297059f"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "a9dfb812233c1829cad774e7b2670a02"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 2,
+                    "mass": 221.70899963378907,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 1.0,
+                    "shapeType": "Sphere",
+                    "shapeSize": {
+                        "x": 1.0,
+                        "y": 0.0,
                         "z": 0.0
                     }
                 }
@@ -634,7 +808,7 @@
         },
         {
             "EntityMetadata": {
-                "name": "Terrain",
+                "name": "Copy of Ball",
                 "tag": "",
                 "active": true
             },
@@ -649,37 +823,56 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": 66.49148559570313,
-                        "y": -400.0,
-                        "z": 23.430105209350587
+                        "x": -6.049778461456299,
+                        "y": 4.9410481452941898,
+                        "z": -0.599054217338562
                     },
                     "rotation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0,
-                        "w": 1.0
+                        "x": 0.1670130491256714,
+                        "y": -0.5382198691368103,
+                        "z": 0.7923464775085449,
+                        "w": -0.2336944043636322
                     },
                     "scale": {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
+                        "x": 1.9999988079071046,
+                        "y": 2.0,
+                        "z": 1.9999994039535523
                     }
                 }
             },
             "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
                 "nullopt": false,
                 "data": {
                     "visible": true,
-                    "terrainTile": {
-                        "guid": "08d79874f4071a0b863432f509a9d70a"
-                    }
+                    "model": {
+                        "guid": "16ab47c200b25ccb2b9dbcf46297059f"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "a9dfb812233c1829cad774e7b2670a02"
+                        }
+                    ]
                 }
             },
-            "ModelRenderer": {
-                "nullopt": true
-            },
             "RigidBodyComponent": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {
+                    "motionType": 2,
+                    "mass": 221.70899963378907,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 1.0,
+                    "shapeType": "Sphere",
+                    "shapeSize": {
+                        "x": 1.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                }
             },
             "AudioSource": {
                 "nullopt": true
@@ -700,14 +893,1030 @@
                 "nullopt": true
             },
             "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Copy of Copy of Ball",
+                "tag": "",
+                "active": true
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": false,
+                "data": {}
+            },
+            "Transform": {
                 "nullopt": false,
                 "data": {
-                    "effect": {
-                        "guid": "0222c99aa2fbe37c7307ffd90a2e44bf"
+                    "position": {
+                        "x": -2.1005332469940187,
+                        "y": 10.228707313537598,
+                        "z": -8.955869674682618
                     },
-                    "autoPlay": true,
-                    "looping": false
+                    "rotation": {
+                        "x": 0.1670130491256714,
+                        "y": -0.5382198691368103,
+                        "z": 0.7923464775085449,
+                        "w": -0.2336944043636322
+                    },
+                    "scale": {
+                        "x": 1.9999988079071046,
+                        "y": 2.0,
+                        "z": 1.9999994039535523
+                    }
                 }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "16ab47c200b25ccb2b9dbcf46297059f"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "a9dfb812233c1829cad774e7b2670a02"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 2,
+                    "mass": 221.70899963378907,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 1.0,
+                    "shapeType": "Sphere",
+                    "shapeSize": {
+                        "x": 1.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "AnimationWorkerComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Copy of Cylinder",
+                "tag": "",
+                "active": true
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": false,
+                "data": {}
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": -0.6472153663635254,
+                        "y": 1.4205931425094605,
+                        "z": -3.158689022064209
+                    },
+                    "rotation": {
+                        "x": -1.888987632980843e-9,
+                        "y": 1.1102230246251566e-16,
+                        "z": 2.0971975633675069e-25,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 2.0000052452087404,
+                        "y": 2.0,
+                        "z": 1.999997854232788
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "d8c566b1e78d16d132a166e6d990b01b"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "4f843329315c8297e0905d030736e961"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 2,
+                    "mass": 96.14199829101563,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 1.0,
+                    "shapeType": "Cylinder",
+                    "shapeSize": {
+                        "x": 1.0,
+                        "y": 1.0000001192092896,
+                        "z": 0.0
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "AnimationWorkerComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Copy of Copy of Cylinder",
+                "tag": "",
+                "active": true
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": false,
+                "data": {}
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 1.6769477128982545,
+                        "y": 1.4205931425094605,
+                        "z": -3.158689022064209
+                    },
+                    "rotation": {
+                        "x": -1.888987632980843e-9,
+                        "y": 1.1102230246251566e-16,
+                        "z": 2.0971975633675069e-25,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 2.0000052452087404,
+                        "y": 2.0,
+                        "z": 1.999997854232788
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "d8c566b1e78d16d132a166e6d990b01b"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "4f843329315c8297e0905d030736e961"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 2,
+                    "mass": 96.14199829101563,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 1.0,
+                    "shapeType": "Cylinder",
+                    "shapeSize": {
+                        "x": 1.0,
+                        "y": 1.0000001192092896,
+                        "z": 0.0
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "AnimationWorkerComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Copy of Copy of Copy of Cylinder",
+                "tag": "",
+                "active": true
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": false,
+                "data": {}
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 4.05979061126709,
+                        "y": 1.4205931425094605,
+                        "z": -3.158689022064209
+                    },
+                    "rotation": {
+                        "x": -1.888987632980843e-9,
+                        "y": 1.1102230246251566e-16,
+                        "z": 2.0971975633675069e-25,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 2.0000052452087404,
+                        "y": 2.0,
+                        "z": 1.999997854232788
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "d8c566b1e78d16d132a166e6d990b01b"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "4f843329315c8297e0905d030736e961"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 2,
+                    "mass": 96.14199829101563,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 1.0,
+                    "shapeType": "Cylinder",
+                    "shapeSize": {
+                        "x": 1.0,
+                        "y": 1.0000001192092896,
+                        "z": 0.0
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "AnimationWorkerComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Copy of Copy of Copy of Copy of Cylinder",
+                "tag": "",
+                "active": true
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": false,
+                "data": {}
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 6.544896125793457,
+                        "y": 1.4205931425094605,
+                        "z": -3.158689022064209
+                    },
+                    "rotation": {
+                        "x": -1.888987632980843e-9,
+                        "y": 1.1102230246251566e-16,
+                        "z": 2.0971975633675069e-25,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 2.0000052452087404,
+                        "y": 2.0,
+                        "z": 1.999997854232788
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "d8c566b1e78d16d132a166e6d990b01b"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "4f843329315c8297e0905d030736e961"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 2,
+                    "mass": 96.14199829101563,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 1.0,
+                    "shapeType": "Cylinder",
+                    "shapeSize": {
+                        "x": 1.0,
+                        "y": 1.0000001192092896,
+                        "z": 0.0
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "AnimationWorkerComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Copy of Copy of Copy of Cylinder",
+                "tag": "",
+                "active": true
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": false,
+                "data": {}
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 0.637031078338623,
+                        "y": 3.9547271728515627,
+                        "z": -3.158689022064209
+                    },
+                    "rotation": {
+                        "x": -1.888987632980843e-9,
+                        "y": 1.1102230246251566e-16,
+                        "z": 2.0971975633675069e-25,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 2.0000052452087404,
+                        "y": 2.0,
+                        "z": 1.999997854232788
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "d8c566b1e78d16d132a166e6d990b01b"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "4f843329315c8297e0905d030736e961"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 2,
+                    "mass": 96.14199829101563,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 1.0,
+                    "shapeType": "Cylinder",
+                    "shapeSize": {
+                        "x": 1.0,
+                        "y": 1.0000001192092896,
+                        "z": 0.0
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "AnimationWorkerComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Copy of Copy of Copy of Copy of Cylinder",
+                "tag": "",
+                "active": true
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": false,
+                "data": {}
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 2.9664218425750734,
+                        "y": 3.9547271728515627,
+                        "z": -3.158689022064209
+                    },
+                    "rotation": {
+                        "x": -1.888987632980843e-9,
+                        "y": 1.1102230246251566e-16,
+                        "z": 2.0971975633675069e-25,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 2.0000052452087404,
+                        "y": 2.0,
+                        "z": 1.999997854232788
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "d8c566b1e78d16d132a166e6d990b01b"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "4f843329315c8297e0905d030736e961"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 2,
+                    "mass": 96.14199829101563,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 1.0,
+                    "shapeType": "Cylinder",
+                    "shapeSize": {
+                        "x": 1.0,
+                        "y": 1.0000001192092896,
+                        "z": 0.0
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "AnimationWorkerComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Copy of Copy of Copy of Copy of Copy of Cylinder",
+                "tag": "",
+                "active": true
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": false,
+                "data": {}
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 5.351370334625244,
+                        "y": 3.9547271728515627,
+                        "z": -3.158689022064209
+                    },
+                    "rotation": {
+                        "x": -1.888987632980843e-9,
+                        "y": 1.1102230246251566e-16,
+                        "z": 2.0971975633675069e-25,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 2.0000052452087404,
+                        "y": 2.0,
+                        "z": 1.999997854232788
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "d8c566b1e78d16d132a166e6d990b01b"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "4f843329315c8297e0905d030736e961"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 2,
+                    "mass": 96.14199829101563,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 1.0,
+                    "shapeType": "Cylinder",
+                    "shapeSize": {
+                        "x": 1.0,
+                        "y": 1.0000001192092896,
+                        "z": 0.0
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "AnimationWorkerComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Copy of Copy of Copy of Copy of Copy of Copy of Cylinder",
+                "tag": "",
+                "active": true
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": false,
+                "data": {}
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 4.078299522399902,
+                        "y": 6.338974475860596,
+                        "z": -3.158689022064209
+                    },
+                    "rotation": {
+                        "x": -1.888987632980843e-9,
+                        "y": 1.1102230246251566e-16,
+                        "z": 2.0971975633675069e-25,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 2.0000052452087404,
+                        "y": 2.0,
+                        "z": 1.999997854232788
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "d8c566b1e78d16d132a166e6d990b01b"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "4f843329315c8297e0905d030736e961"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 2,
+                    "mass": 96.14199829101563,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 1.0,
+                    "shapeType": "Cylinder",
+                    "shapeSize": {
+                        "x": 1.0,
+                        "y": 1.0000001192092896,
+                        "z": 0.0
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "AnimationWorkerComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Copy of Copy of Copy of Copy of Copy of Copy of Copy of Cylinder",
+                "tag": "",
+                "active": true
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": false,
+                "data": {}
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 1.9889137744903565,
+                        "y": 6.338974475860596,
+                        "z": -3.158689022064209
+                    },
+                    "rotation": {
+                        "x": -1.888987632980843e-9,
+                        "y": 1.1102230246251566e-16,
+                        "z": 2.0971975633675069e-25,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 2.0000052452087404,
+                        "y": 2.0,
+                        "z": 1.999997854232788
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "d8c566b1e78d16d132a166e6d990b01b"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "4f843329315c8297e0905d030736e961"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 2,
+                    "mass": 96.14199829101563,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 1.0,
+                    "shapeType": "Cylinder",
+                    "shapeSize": {
+                        "x": 1.0,
+                        "y": 1.0000001192092896,
+                        "z": 0.0
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "AnimationWorkerComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Copy of Copy of Copy of Copy of Copy of Copy of Copy of Copy of Cylinder",
+                "tag": "",
+                "active": true
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": false,
+                "data": {}
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 2.8756628036499025,
+                        "y": 9.000904083251954,
+                        "z": -3.158689022064209
+                    },
+                    "rotation": {
+                        "x": -1.888987632980843e-9,
+                        "y": 1.1102230246251566e-16,
+                        "z": 2.0971975633675069e-25,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 2.0000052452087404,
+                        "y": 2.0,
+                        "z": 1.999997854232788
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "d8c566b1e78d16d132a166e6d990b01b"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "4f843329315c8297e0905d030736e961"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 2,
+                    "mass": 96.14199829101563,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 1.0,
+                    "shapeType": "Cylinder",
+                    "shapeSize": {
+                        "x": 1.0,
+                        "y": 1.0000001192092896,
+                        "z": 0.0
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "AnimationWorkerComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
             },
             "PlayerControllerComponent": {
                 "nullopt": true

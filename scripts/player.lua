@@ -10,7 +10,8 @@ end
 constants = {
     CAMERA_Y_OFFSET =  1.1, --1.45,
     MOUSE_SENSITIVITY = 0.1,
-    MOVE_SPEED = 7.0,
+    WALK_SPEED = 7.0,
+    RUN_SPEED = 12.0,
     JUMP_POWER = 8.0,
     GRAVITY_SCALE = 2.0
 }
@@ -114,11 +115,8 @@ function Update()
     end
 
     inMovementDirection = vec3(mov.x, 0, mov.z)
-    local desiredVelocity = vec3(
-        inMovementDirection.x  * constants.MOVE_SPEED,
-        inMovementDirection.y  * constants.MOVE_SPEED,
-        inMovementDirection.z  * constants.MOVE_SPEED
-    )
+
+
 
     -- Determine new basic velocity
     local current_vertical_velocity_mag = cr:getLinearVelocity():dot(vec3(0, 1, 0))
@@ -127,6 +125,17 @@ function Update()
     local new_velocity = vec3(0, 0, 0)
     local moving_towards_ground = (current_vertical_velocity_mag - ground_velocity.y) < 0.1
     local inJump = input:isKeyPressed(KEY_SPACE)
+
+    local moveSpeed = constants.WALK_SPEED
+    if input:isKeyPressed(KEY_LEFT_SHIFT) and cr:isOnGround() then
+        moveSpeed = constants.RUN_SPEED
+    end
+
+    local desiredVelocity = vec3(
+        inMovementDirection.x * moveSpeed,
+        inMovementDirection.y * moveSpeed,
+        inMovementDirection.z * moveSpeed
+    )
 
     if cr:isOnGround() and moving_towards_ground then
         new_velocity = ground_velocity
@@ -188,6 +197,6 @@ function Update()
     -- Shoot Balls
     if input:isKeyPressedThisFrame(KEY_E) then
         local shape = SphereShape(0.5 / 2)
-        ShootObject("resources/models/sphere.obj", shape, 12, 0.5)
+        ShootObject("resources/models/sphere.obj", shape, 120, 0.5)
     end
 end

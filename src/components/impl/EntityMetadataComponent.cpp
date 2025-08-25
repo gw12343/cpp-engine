@@ -4,7 +4,7 @@
 #include "components/Components.h"
 #include "imgui.h"
 #include "EntityMetadataComponent.h"
-
+#include "core/Entity.h"
 
 namespace Engine::Components {
 	void EntityMetadata::OnRemoved(Entity& entity)
@@ -29,5 +29,6 @@ namespace Engine::Components {
 		}
 
 		ImGui::Checkbox("Active", &active);
+		ImGui::Text("id: %d", entity.GetHandle());
 	}
 } // namespace Engine::Components

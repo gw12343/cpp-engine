@@ -24,13 +24,13 @@ namespace Engine {
 		void ProcessMouseScroll(float yoffset);
 		void ProcessKeyboard(float deltaTime);
 
-		ozz::math::Float4x4 view_proj() const;
-		glm::mat4           GetViewMatrix() const;
-		glm::mat4           GetProjectionMatrix() const;
+		[[nodiscard]] ozz::math::Float4x4 view_proj() const;
+		[[nodiscard]] glm::mat4           GetViewMatrix() const;
+		[[nodiscard]] glm::mat4           GetProjectionMatrix() const;
 
 		// Getters
-		glm::vec3 GetPosition() const { return m_position; }
-		glm::vec3 GetFront() const { return m_front; }
+		[[nodiscard]] glm::vec3 GetPosition() const { return m_position; }
+		[[nodiscard]] glm::vec3 GetFront() const { return m_front; }
 
 		void SetPosition(glm::vec3 position) { m_position = position; }
 		void SaveEditorLocation()

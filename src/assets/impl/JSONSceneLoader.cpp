@@ -4,9 +4,7 @@
 #include "JSONSceneLoader.h"
 
 #include <cereal/archives/json.hpp>
-#include <cereal/types/vector.hpp>
 #include <cereal/types/optional.hpp>
-#include <cereal/types/string.hpp>
 #include <cereal/types/common.hpp>
 
 #include <iostream>
@@ -100,7 +98,7 @@ namespace Engine {
 		}
 	};
 
-	void JSONSceneLoader::SerializeScene(AssetHandle<Scene> sceneRef, const std::string& path)
+	void JSONSceneLoader::SerializeScene(const AssetHandle<Scene>& sceneRef, const std::string& path)
 	{
 		std::ofstream             os(path);
 		cereal::JSONOutputArchive archive(os);

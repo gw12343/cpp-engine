@@ -15,7 +15,9 @@
 
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/matrix_decompose.inl"
-
+#include "components/impl/EntityMetadataComponent.h"
+#include "components/AllComponents.h"
+#include "rendering/ui/IconsFontAwesome6.h"
 namespace Engine {
 
 	void DrawSceneViewWindow()
@@ -30,7 +32,7 @@ namespace Engine {
 		float aspect = (float) sizeOut.y / (float) sizeOut.x;
 
 		float width, height;
-		float offsetX = 0.0f, offsetY = 0.0f;
+		float offsetX, offsetY;
 
 		if (sizeOut.y / sizeOut.x > aspect) {
 			width   = sizeOut.x;
@@ -47,7 +49,7 @@ namespace Engine {
 
 		ImVec2 topLeft = ImGui::GetCursorScreenPos();
 
-		GLuint tex = GetWindow().GetFramebuffer(Window::FramebufferID::GAME_OUT)->texture;
+		GLuint tex = Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->texture;
 
 		ImGui::Image((ImTextureID) tex, ImVec2(width, height), ImVec2(0, 1), ImVec2(1, 0));
 
@@ -80,6 +82,29 @@ namespace Engine {
 						transform.scale    = outScale;
 						transform.SyncWithPhysics(*selectedEntity);
 					}
+				}
+			}
+
+			if (GetInput().IsKeyPressed(GLFW_KEY_LEFT_CONTROL) && GetInput().IsKeyPressedThisFrame(GLFW_KEY_D)) {
+				if (*selectedEntity && GetCurrentScene()->GetRegistry()->valid(selectedEntity->GetHandle())) {
+					GetDefaultLogger()->warn("DUPLICATING");
+
+					std::string newName = selectedEntity->GetComponent<Components::EntityMetadata>().name;
+					if (!newName.rfind("Copy of ", 0) == 0) {
+						newName = "Copy of " + newName;
+					}
+					Entity copy = Entity::Create(newName, selectedEntity->m_scene);
+
+					// TODO COPY CONSTRUCTORS FOR COMPONENTS WITH DYNAMICALLY ALLOCATED MEMORY!!!!!!!
+#define X(type, name, fancy)                                                                                                                                                                                                                   \
+	if (selectedEntity->HasComponent<type>()) {                                                                                                                                                                                                \
+		copy.AddComponent<type>(selectedEntity->GetComponent<type>());                                                                                                                                                                         \
+		GetDefaultLogger()->warn("adding cmp: {}", fancy);                                                                                                                                                                                     \
+	}
+					COMPONENT_LIST
+#undef X
+
+					GetUI().m_selectedEntity = copy;
 				}
 			}
 		}

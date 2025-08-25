@@ -1,5 +1,7 @@
 #include "Material.h"
 
+#include <utility>
+
 namespace Engine {
 	Material::Material()
 	    : m_diffuseColor(0.8f, 0.8f, 0.8f) // Default gray
@@ -18,22 +20,22 @@ namespace Engine {
 
 	void Material::SetDiffuseTexture(AssetHandle<Texture> texture)
 	{
-		m_diffuseTexture = texture;
+		m_diffuseTexture = std::move(texture);
 	}
 
 	void Material::SetSpecularTexture(AssetHandle<Texture> texture)
 	{
-		m_specularTexture = texture;
+		m_specularTexture = std::move(texture);
 	}
 
 	void Material::SetNormalTexture(AssetHandle<Texture> texture)
 	{
-		m_normalTexture = texture;
+		m_normalTexture = std::move(texture);
 	}
 
 	void Material::SetHeightTexture(AssetHandle<Texture> texture)
 	{
-		m_heightTexture = texture;
+		m_heightTexture = std::move(texture);
 	}
 
 

@@ -12,10 +12,10 @@
 namespace Engine {
 
 
-	class BinarySceneLoader : public IAssetLoader<Scene> {
+	class [[maybe_unused]] BinarySceneLoader : public IAssetLoader<Scene> {
 	  public:
-		std::unique_ptr<Scene> LoadFromFile(const std::string& path) override;
-		static void            SerializeScene(AssetHandle<Scene> sceneRef, const std::string& path);
+		std::unique_ptr<Scene>       LoadFromFile(const std::string& path) override;
+		[[maybe_unused]] static void SerializeScene(const AssetHandle<Scene>& sceneRef, const std::string& path);
 	};
 } // namespace Engine
 

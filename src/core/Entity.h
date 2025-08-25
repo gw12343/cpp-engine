@@ -69,8 +69,9 @@ namespace Engine {
 		[[maybe_unused]] void SetActive(bool active);
 
 
+		Scene* m_scene;
+
 	  private:
 		entt::entity m_handle{entt::null};
-		Scene*       m_scene;
 	};
 } // namespace Engine

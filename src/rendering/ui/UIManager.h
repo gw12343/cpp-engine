@@ -24,11 +24,11 @@ namespace Engine {
 
 		class UIManager : public Module {
 		  public:
-			void        onInit() override;
-			void        onUpdate(float dt) override;
-			void        onGameStart() override {}
-			void        onShutdown() override;
-			std::string name() const override { return "UIModule"; };
+			void                      onInit() override;
+			void                      onUpdate(float dt) override;
+			void                      onGameStart() override {}
+			void                      onShutdown() override;
+			[[nodiscard]] std::string name() const override { return "UIModule"; };
 
 			void BeginDockspace(float ht);
 			void EndDockspace();

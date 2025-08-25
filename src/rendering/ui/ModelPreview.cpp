@@ -62,7 +62,7 @@ namespace Engine {
 
 		glm::mat4 proj     = glm::perspective(glm::radians(45.0f), 1.f, 0.1f, radius * 6.0f);
 		glm::mat4 view     = glm::lookAt(camPos, center, glm::vec3(0, 1, 0));
-		glm::mat4 modelMat = glm::mat4(1.0f);
+		auto      modelMat = glm::mat4(1.0f);
 
 		shader.SetMat4("projection", &proj);
 		shader.SetMat4("view", &view);

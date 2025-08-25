@@ -48,7 +48,7 @@ namespace Engine {
 		// Highest joint index used (relies on sorted joint_remaps).
 		[[maybe_unused]] [[nodiscard]] int highest_joint_index() const { return joint_remaps.empty() ? 0 : static_cast<int>(joint_remaps.back()); }
 
-		// A submesh grouping vertices with the same # of influences.
+		// A sub mesh grouping vertices with the same # of influences.
 		struct Part {
 			[[nodiscard]] int vertex_count() const { return static_cast<int>(positions.size()) / kPositionsCpnts; }
 			[[nodiscard]] int influences_count() const

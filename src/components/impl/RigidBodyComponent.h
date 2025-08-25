@@ -29,6 +29,7 @@ namespace Engine::Components {
 		RigidBodyComponent() : bodyID(0) {}
 
 		explicit RigidBodyComponent(const JPH::BodyID& bodyID) : bodyID(bodyID) {}
+		RigidBodyComponent(const RigidBodyComponent& other);
 
 		template <class Archive>
 		void serialize(Archive& ar)

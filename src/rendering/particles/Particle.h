@@ -15,9 +15,9 @@ namespace Engine {
 
 		bool LoadFromFile(const std::string& path);
 
-		[[maybe_unused]] Effekseer::RefPtr<Effekseer::Effect> GetEffect() const { return effect_; }
-		[[maybe_unused]] const std::string&                   GetPath() const { return path_; }
-		[[nodiscard]] bool                                    IsValid() const { return effect_ != nullptr; }
+		[[nodiscard]] [[maybe_unused]] Effekseer::RefPtr<Effekseer::Effect> GetEffect() const { return effect_; }
+		[[nodiscard]] [[maybe_unused]] const std::string&                   GetPath() const { return path_; }
+		[[nodiscard]] bool                                                  IsValid() const { return effect_ != nullptr; }
 
 	  private:
 		Effekseer::RefPtr<Effekseer::Effect> effect_;

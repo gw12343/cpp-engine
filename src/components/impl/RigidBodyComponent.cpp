@@ -74,7 +74,7 @@ namespace Engine::Components {
 
 			bodyID = bodyInterface.CreateAndAddBody(settings, JPH::EActivation::Activate);
 		}
-
+		GetPhysics().GetPhysicsSystem()->GetBodyInterface().SetMotionQuality(bodyID, EMotionQuality::LinearCast);
 		GetPhysics().bodyToEntityMap[bodyID] = entity;
 	}
 
@@ -132,125 +132,127 @@ namespace Engine::Components {
 		}
 
 
-		auto& tr = entity.GetComponent<Transform>();
+		if (entity.HasComponent<Transform>()) {
+			auto& tr = entity.GetComponent<Transform>();
 
-		if (ImGui::TreeNode("Collider Settings")) {
-			// Get currently selected option
-			if (shapeType == "Box") {
-				shape_index = 0;
-			}
-			else if (shapeType == "Sphere") {
-				shape_index = 1;
-			}
-			else if (shapeType == "Capsule") {
-				shape_index = 2;
-			}
-			else if (shapeType == "Cylinder") {
-				shape_index = 3;
-			}
+			if (ImGui::TreeNode("Collider Settings")) {
+				// Get currently selected option
+				if (shapeType == "Box") {
+					shape_index = 0;
+				}
+				else if (shapeType == "Sphere") {
+					shape_index = 1;
+				}
+				else if (shapeType == "Capsule") {
+					shape_index = 2;
+				}
+				else if (shapeType == "Cylinder") {
+					shape_index = 3;
+				}
 
 
-			if (ImGui::BeginCombo("Shape", items[shape_index])) // Label + preview
-			{
-				for (int n = 0; n < IM_ARRAYSIZE(items); n++) {
-					bool is_selected = (shape_index == n);
-					if (ImGui::Selectable(items[n], is_selected)) {
-						if (is_selected) {
-							ImGui::SetItemDefaultFocus();
-							continue;
-						}
+				if (ImGui::BeginCombo("Shape", items[shape_index])) // Label + preview
+				{
+					for (int n = 0; n < IM_ARRAYSIZE(items); n++) {
+						bool is_selected = (shape_index == n);
+						if (ImGui::Selectable(items[n], is_selected)) {
+							if (is_selected) {
+								ImGui::SetItemDefaultFocus();
+								continue;
+							}
 
-						if (n == 0) {
-							Vec3                 size   = Vec3(tr.scale.x / 2.0f, tr.scale.y / 2.0f, tr.scale.z / 2.0f);
-							JPH::Ref<JPH::Shape> newBox = new JPH::BoxShape(size);
-							bodyInterface.SetShape(bodyID, newBox, true, JPH::EActivation::Activate);
-							shapeType = "Box";
-							shapeSize = size;
-						}
-						else if (n == 1) {
-							Vec3 size = Vec3(tr.scale.x / 2.0f, 0.0f, 0.0f);
+							if (n == 0) {
+								Vec3                 size   = Vec3(tr.scale.x / 2.0f, tr.scale.y / 2.0f, tr.scale.z / 2.0f);
+								JPH::Ref<JPH::Shape> newBox = new JPH::BoxShape(size);
+								bodyInterface.SetShape(bodyID, newBox, true, JPH::EActivation::Activate);
+								shapeType = "Box";
+								shapeSize = size;
+							}
+							else if (n == 1) {
+								Vec3 size = Vec3(tr.scale.x / 2.0f, 0.0f, 0.0f);
 
-							JPH::Ref<JPH::Shape> newSphere = new JPH::SphereShape(size.GetX());
-							bodyInterface.SetShape(bodyID, newSphere, true, JPH::EActivation::Activate);
-							shapeType = "Sphere";
-							shapeSize = size;
-						}
-						else if (n == 2) {
-							Vec3 size = Vec3(tr.scale.y / 4.0f, tr.scale.x / 2.0f, 0.0f);
+								JPH::Ref<JPH::Shape> newSphere = new JPH::SphereShape(size.GetX());
+								bodyInterface.SetShape(bodyID, newSphere, true, JPH::EActivation::Activate);
+								shapeType = "Sphere";
+								shapeSize = size;
+							}
+							else if (n == 2) {
+								Vec3 size = Vec3(tr.scale.y / 4.0f, tr.scale.x / 2.0f, 0.0f);
 
-							JPH::Ref<JPH::Shape> newCapsule = new JPH::CapsuleShape(size.GetX(), size.GetY());
-							bodyInterface.SetShape(bodyID, newCapsule, true, JPH::EActivation::Activate);
-							shapeType = "Capsule";
-							shapeSize = size;
-						}
-						else if (n == 3) {
-							Vec3 size = Vec3(tr.scale.y / 4.0f, tr.scale.x / 2.0f, 0.0f);
+								JPH::Ref<JPH::Shape> newCapsule = new JPH::CapsuleShape(size.GetX(), size.GetY());
+								bodyInterface.SetShape(bodyID, newCapsule, true, JPH::EActivation::Activate);
+								shapeType = "Capsule";
+								shapeSize = size;
+							}
+							else if (n == 3) {
+								Vec3 size = Vec3(tr.scale.y / 4.0f, tr.scale.x / 2.0f, 0.0f);
 
-							JPH::Ref<JPH::Shape> newCylinder = new JPH::CylinderShape(size.GetX(), size.GetY());
-							bodyInterface.SetShape(bodyID, newCylinder, true, JPH::EActivation::Activate);
-							shapeType = "Cylinder";
-							shapeSize = size;
+								JPH::Ref<JPH::Shape> newCylinder = new JPH::CylinderShape(size.GetX(), size.GetY());
+								bodyInterface.SetShape(bodyID, newCylinder, true, JPH::EActivation::Activate);
+								shapeType = "Cylinder";
+								shapeSize = size;
+							}
 						}
 					}
+					ImGui::EndCombo();
 				}
-				ImGui::EndCombo();
-			}
 
-			auto shape = bodyInterface.GetShape(bodyID);
+				auto shape = bodyInterface.GetShape(bodyID);
 
-			if (shape.GetPtr()->GetSubType() == EShapeSubType::Box) {
-				const auto* box_shape = static_cast<const BoxShape*>(shape.GetPtr());
+				if (shape.GetPtr()->GetSubType() == EShapeSubType::Box) {
+					const auto* box_shape = static_cast<const BoxShape*>(shape.GetPtr());
 
-				float halfExtents[3] = {box_shape->GetHalfExtent().GetX(), box_shape->GetHalfExtent().GetY(), box_shape->GetHalfExtent().GetZ()};
+					float halfExtents[3] = {box_shape->GetHalfExtent().GetX(), box_shape->GetHalfExtent().GetY(), box_shape->GetHalfExtent().GetZ()};
 
-				if (ImGui::DragFloat3("Half Extents", halfExtents, 0.25f)) {
-					Vec3                 size   = Vec3(halfExtents[0], halfExtents[1], halfExtents[2]);
-					JPH::Ref<JPH::Shape> newBox = new JPH::BoxShape(size);
-					bodyInterface.SetShape(bodyID, newBox, true, JPH::EActivation::Activate);
-					shapeSize = size;
+					if (ImGui::DragFloat3("Half Extents", halfExtents, 0.25f)) {
+						Vec3                 size   = Vec3(halfExtents[0], halfExtents[1], halfExtents[2]);
+						JPH::Ref<JPH::Shape> newBox = new JPH::BoxShape(size);
+						bodyInterface.SetShape(bodyID, newBox, true, JPH::EActivation::Activate);
+						shapeSize = size;
+					}
 				}
-			}
-			else if (shape.GetPtr()->GetSubType() == EShapeSubType::Sphere) {
-				const auto* sphere_shape = static_cast<const SphereShape*>(shape.GetPtr());
+				else if (shape.GetPtr()->GetSubType() == EShapeSubType::Sphere) {
+					const auto* sphere_shape = static_cast<const SphereShape*>(shape.GetPtr());
 
-				float radius = sphere_shape->GetRadius();
-				if (ImGui::DragFloat("Radius", &radius, 0.25f)) {
-					JPH::Ref<JPH::Shape> newSphere = new JPH::SphereShape(radius);
-					bodyInterface.SetShape(bodyID, newSphere, true, JPH::EActivation::Activate);
+					float radius = sphere_shape->GetRadius();
+					if (ImGui::DragFloat("Radius", &radius, 0.25f)) {
+						JPH::Ref<JPH::Shape> newSphere = new JPH::SphereShape(radius);
+						bodyInterface.SetShape(bodyID, newSphere, true, JPH::EActivation::Activate);
 
-					shapeSize = Vec3(radius, 0.0, 0.0);
+						shapeSize = Vec3(radius, 0.0, 0.0);
+					}
 				}
-			}
-			else if (shape.GetPtr()->GetSubType() == EShapeSubType::Cylinder) {
-				const auto* cylinder_shape = static_cast<const CylinderShape*>(shape.GetPtr());
+				else if (shape.GetPtr()->GetSubType() == EShapeSubType::Cylinder) {
+					const auto* cylinder_shape = static_cast<const CylinderShape*>(shape.GetPtr());
 
 
-				float radius     = cylinder_shape->GetRadius();
-				float halfHeight = cylinder_shape->GetHalfHeight();
+					float radius     = cylinder_shape->GetRadius();
+					float halfHeight = cylinder_shape->GetHalfHeight();
 
-				if (ImGui::DragFloat("Radius", &radius, 0.25f) || ImGui::DragFloat("Half Height", &halfHeight, 0.25f)) {
-					JPH::Ref<JPH::Shape> newCylinder = new JPH::CylinderShape(halfHeight, radius);
-					bodyInterface.SetShape(bodyID, newCylinder, true, JPH::EActivation::Activate);
+					if (ImGui::DragFloat("Radius", &radius, 0.25f) || ImGui::DragFloat("Half Height", &halfHeight, 0.25f)) {
+						JPH::Ref<JPH::Shape> newCylinder = new JPH::CylinderShape(halfHeight, radius);
+						bodyInterface.SetShape(bodyID, newCylinder, true, JPH::EActivation::Activate);
 
-					shapeSize = Vec3(halfHeight, radius, 0.0);
+						shapeSize = Vec3(halfHeight, radius, 0.0);
+					}
 				}
-			}
-			else if (shape.GetPtr()->GetSubType() == EShapeSubType::Capsule) {
-				const auto* capsule_shape = static_cast<const CapsuleShape*>(shape.GetPtr());
+				else if (shape.GetPtr()->GetSubType() == EShapeSubType::Capsule) {
+					const auto* capsule_shape = static_cast<const CapsuleShape*>(shape.GetPtr());
 
-				float radius     = capsule_shape->GetRadius();
-				float halfHeight = capsule_shape->GetHalfHeightOfCylinder();
+					float radius     = capsule_shape->GetRadius();
+					float halfHeight = capsule_shape->GetHalfHeightOfCylinder();
 
-				if (ImGui::DragFloat("Radius", &radius, 0.25f) || ImGui::DragFloat("Half Height", &halfHeight, 0.25f)) {
-					JPH::Ref<JPH::Shape> newCapsule = new JPH::CapsuleShape(halfHeight, radius);
-					bodyInterface.SetShape(bodyID, newCapsule, true, JPH::EActivation::Activate);
+					if (ImGui::DragFloat("Radius", &radius, 0.25f) || ImGui::DragFloat("Half Height", &halfHeight, 0.25f)) {
+						JPH::Ref<JPH::Shape> newCapsule = new JPH::CapsuleShape(halfHeight, radius);
+						bodyInterface.SetShape(bodyID, newCapsule, true, JPH::EActivation::Activate);
 
-					shapeSize = Vec3(halfHeight, radius, 0.0);
+						shapeSize = Vec3(halfHeight, radius, 0.0);
+					}
 				}
+
+
+				ImGui::TreePop();
 			}
-
-
-			ImGui::TreePop();
 		}
 	}
 
@@ -526,6 +528,17 @@ namespace Engine::Components {
 	bool RigidBodyComponent::IsKinematic() const
 	{
 		return GetPhysics().GetPhysicsSystem()->GetBodyInterface().GetMotionType(bodyID) == JPH::EMotionType::Kinematic;
+	}
+
+	RigidBodyComponent::RigidBodyComponent(const RigidBodyComponent& other)
+	{
+		motionType    = other.motionType;
+		mass          = other.mass;
+		friction      = other.friction;
+		restitution   = other.restitution;
+		gravityFactor = other.gravityFactor;
+		shapeType     = other.shapeType;
+		shapeSize     = other.shapeSize;
 	}
 
 

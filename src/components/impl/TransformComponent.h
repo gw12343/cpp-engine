@@ -42,6 +42,8 @@ namespace Engine {
 			//				scale    = copy.scale;
 			//			}
 
+			Transform(const Transform& other) : position(other.position), rotation(other.rotation), scale(other.scale) {}
+
 			explicit Transform(const glm::vec3& position) : position(position) {}
 
 			explicit Transform(const glm::vec3& position, const glm::vec3& eulerAngles = glm::vec3(0.0f), const glm::vec3& scale = glm::vec3(1.0f)) : position(position), rotation(glm::quat(glm::radians(eulerAngles))), scale(scale) {}

@@ -41,7 +41,7 @@ namespace Engine {
 				}
 
 				// Calculate linear attenuation for display (matching OpenAL's AL_LINEAR_DISTANCE_CLAMPED)
-				float attenuation = 1.0f;
+				float attenuation;
 
 				if (distance <= audio.referenceDistance) {
 					// Within reference distance - full volume
