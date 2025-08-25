@@ -270,6 +270,15 @@ namespace Engine::Components {
 				// Create an empty table so editor/serialization logic still works
 				variables = GetScriptManager().lua.create_table();
 			}
+
+
+			env.set_function("StartCoroutine", [&](sol::function func) {
+				sol::coroutine co(func);
+				if (co) {
+					// Add to the entity’s script coroutine list
+					coroutines.push_back({co, 0.0f});
+				}
+			});
 		}
 		catch (const sol::error& err) {
 			GetScriptManager().log->error("[LuaScript] Error in {}: {}", scriptPath, err.what());
@@ -279,6 +288,7 @@ namespace Engine::Components {
 	void LuaScript::AddBindings()
 	{
 		auto& lua = GetScriptManager().lua;
+
 
 		lua.new_usertype<LuaScript>("LuaScript",
 		                            "scriptPath",

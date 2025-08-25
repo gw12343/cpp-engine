@@ -15,6 +15,7 @@
 #include <cereal/types/variant.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/types/unordered_map.hpp>
+#include <sol/coroutine.hpp>
 
 #include "assets/AssetHandle.h"
 
@@ -35,8 +36,6 @@ namespace Engine {
 	}
 } // namespace Engine
 
-// TODO add asset handles?
-
 namespace Engine {
 	using ScriptVariable = std::variant<float,
 	                                    std::string,
@@ -55,6 +54,11 @@ namespace Engine {
 
 		class LuaScript : public Component {
 		  public:
+			struct RunningCoroutine {
+				sol::coroutine co;
+				float          waitRemaining = 0.0f;
+			};
+
 			LuaScript() = default;
 			explicit LuaScript(std::string path) : scriptPath(std::move(path)) {}
 
@@ -86,6 +90,8 @@ namespace Engine {
 			sol::function                                   collisionEnter;
 			sol::function                                   playerCollisionEnter;
 			std::unordered_map<std::string, ScriptVariable> cppVariables;
+
+			std::vector<RunningCoroutine> coroutines;
 		};
 	} // namespace Components
 } // namespace Engine
