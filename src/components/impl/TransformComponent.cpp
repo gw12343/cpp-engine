@@ -14,7 +14,7 @@
 #include "TransformComponent.h"
 #include "RigidBodyComponent.h"
 #include "PlayerControllerComponent.h"
-
+#include "rendering/ui/InspectorUI.h"
 
 namespace Engine::Components {
 	void Transform::OnRemoved(Entity& entity)
@@ -46,12 +46,13 @@ namespace Engine::Components {
 	void Transform::RenderInspector(Entity& entity)
 	{
 		bool updatePhysicsPositionManually = false;
-		if (ImGui::DragFloat3("Position", glm::value_ptr(position), 0.1f)) {
+		if (LeftLabelDragFloat3("Position", glm::value_ptr(position), 0.1f)) {
 			updatePhysicsPositionManually = true;
 		}
 
+
 		glm::vec3 eulerAngles = GetEulerAngles();
-		if (ImGui::DragFloat3("Rotation", glm::value_ptr(eulerAngles), 1.0f)) {
+		if (LeftLabelDragFloat3("Rotation", glm::value_ptr(eulerAngles), 1.0f)) {
 			SetRotation(eulerAngles);
 			updatePhysicsPositionManually = true;
 		}
@@ -60,7 +61,7 @@ namespace Engine::Components {
 			SyncWithPhysics(entity);
 		}
 
-		ImGui::DragFloat3("Scale", glm::value_ptr(scale), 0.1f);
+		LeftLabelDragFloat3("Scale", glm::value_ptr(scale), 0.1f);
 	}
 
 	void Transform::AddBindings()

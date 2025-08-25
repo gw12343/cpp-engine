@@ -20,8 +20,8 @@ namespace Engine {
 
 	void Entity::Destroy()
 	{
-		auto& reg = GetCurrentSceneRegistry();
-		if (reg.valid(GetHandle())) {
+		auto reg = m_scene->GetRegistry();
+		if (reg->valid(GetHandle())) {
 			if (HasComponent<Components::EntityMetadata>()) {
 				GetComponent<Components::EntityMetadata>().OnRemoved(*this);
 			}
@@ -33,45 +33,45 @@ namespace Engine {
 			COMPONENT_LIST
 #undef X
 
-			reg.destroy(GetHandle());
+			reg->destroy(GetHandle());
 		}
 	}
 
 	// Implementation of Entity metadata helpers
 	const std::string& Entity::GetName() const
 	{
-		auto& registry = GetCurrentSceneRegistry();
-		return registry.get<Components::EntityMetadata>(m_handle).name;
+		auto registry = m_scene->GetRegistry();
+		return registry->get<Components::EntityMetadata>(m_handle).name;
 	}
 
 	void Entity::SetName(const std::string& name)
 	{
-		auto& registry                                          = GetCurrentSceneRegistry();
-		registry.get<Components::EntityMetadata>(m_handle).name = name;
+		auto registry                                            = m_scene->GetRegistry();
+		registry->get<Components::EntityMetadata>(m_handle).name = name;
 	}
 
 	[[maybe_unused]] const std::string& Entity::GetTag() const
 	{
-		auto& registry = GetCurrentSceneRegistry();
-		return registry.get<Components::EntityMetadata>(m_handle).tag;
+		auto registry = m_scene->GetRegistry();
+		return registry->get<Components::EntityMetadata>(m_handle).tag;
 	}
 
 	[[maybe_unused]] void Entity::SetTag(const std::string& tag)
 	{
-		auto& registry                                         = GetCurrentSceneRegistry();
-		registry.get<Components::EntityMetadata>(m_handle).tag = tag;
+		auto registry                                           = m_scene->GetRegistry();
+		registry->get<Components::EntityMetadata>(m_handle).tag = tag;
 	}
 
 	bool Entity::IsActive() const
 	{
-		auto& registry = GetCurrentSceneRegistry();
-		return registry.get<Components::EntityMetadata>(m_handle).active;
+		auto registry = m_scene->GetRegistry();
+		return registry->get<Components::EntityMetadata>(m_handle).active;
 	}
 
 	[[maybe_unused]] void Entity::SetActive(bool active)
 	{
-		auto& registry                                            = GetCurrentSceneRegistry();
-		registry.get<Components::EntityMetadata>(m_handle).active = active;
+		auto registry                                              = m_scene->GetRegistry();
+		registry->get<Components::EntityMetadata>(m_handle).active = active;
 	}
 
 } // namespace Engine

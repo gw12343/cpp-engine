@@ -49,6 +49,8 @@ namespace Engine {
 		std::string m_path;
 
 	  private:
+		friend class MaterialEditor;
+
 		// Textures
 		AssetHandle<Texture> m_diffuseTexture;
 		AssetHandle<Texture> m_specularTexture;
@@ -64,8 +66,6 @@ namespace Engine {
 
 		glm::vec2 m_textureScale = {1.0f, 1.0f};
 
-
-	  private:
 		// Material name
 		std::string m_name;
 	};

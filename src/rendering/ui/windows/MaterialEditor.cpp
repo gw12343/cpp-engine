@@ -5,6 +5,7 @@
 #include "MaterialEditor.h"
 #include "imgui.h"
 #include "rendering/ui/IconsFontAwesome6.h"
+#include "rendering/ui/InspectorUI.h"
 #include "rendering/Texture.h"
 #include "rendering/Material.h"
 #include "core/EngineData.h"
@@ -30,46 +31,17 @@ namespace Engine {
 			// --- Material name ---
 			{
 				std::string name = material->GetName();
-				if (ImGui::InputText("Name", &name)) {
+				if (LeftLabelInputText("Name", &name)) {
 					material->SetName(name);
 				}
 			}
 
 			ImGui::Separator();
 
-			// --- Textures ---
-			auto textureField = [&](const char* label, AssetHandle<Texture> tex, auto setter) {
-				std::string texID = tex.GetID();
-				if (ImGui::InputText(label, &texID)) {
-					setter(AssetHandle<Texture>(texID));
-				}
-
-				if (ImGui::BeginDragDropTarget()) {
-					struct PayloadData {
-						const char* type;
-						char        id[64];
-					};
-
-					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_TEXTURE")) {
-						if (payload->DataSize == sizeof(PayloadData)) {
-							const PayloadData* data = static_cast<const PayloadData*>(payload->Data);
-							if (std::strcmp(data->type, "Texture") == 0) {
-								setter(AssetHandle<Texture>(data->id));
-								texID = data->id;
-							}
-						}
-					}
-					ImGui::EndDragDropTarget();
-				}
-			};
-
-			textureField("Diffuse Texture", material->GetDiffuseTexture(), [&](AssetHandle<Texture> t) { material->SetDiffuseTexture(t); });
-
-			textureField("Specular Texture", material->GetSpecularTexture(), [&](AssetHandle<Texture> t) { material->SetSpecularTexture(t); });
-
-			textureField("Normal Texture", material->GetNormalTexture(), [&](AssetHandle<Texture> t) { material->SetNormalTexture(t); });
-
-			textureField("Height Texture", material->GetHeightTexture(), [&](AssetHandle<Texture> t) { material->SetHeightTexture(t); });
+			LeftLabelTextureAsset("Diffuse Texture", &material->m_diffuseTexture);
+			LeftLabelTextureAsset("Normal Texture", &material->m_normalTexture);
+			LeftLabelTextureAsset("Specular Texture", &material->m_specularTexture);
+			LeftLabelTextureAsset("Height Texture", &material->m_heightTexture);
 
 			ImGui::Separator();
 
@@ -79,17 +51,17 @@ namespace Engine {
 			glm::vec3 ambient  = material->GetAmbientColor();
 			glm::vec3 emissive = material->GetEmissiveColor();
 
-			if (ImGui::ColorEdit3("Diffuse Color", &diffuse.x)) material->SetDiffuseColor(diffuse);
-			if (ImGui::ColorEdit3("Specular Color", &specular.x)) material->SetSpecularColor(specular);
-			if (ImGui::ColorEdit3("Ambient Color", &ambient.x)) material->SetAmbientColor(ambient);
-			if (ImGui::ColorEdit3("Emissive Color", &emissive.x)) material->SetEmissiveColor(emissive);
+			if (LeftLabelColorEdit3("Diffuse Color", &diffuse.x)) material->SetDiffuseColor(diffuse);
+			if (LeftLabelColorEdit3("Specular Color", &specular.x)) material->SetSpecularColor(specular);
+			if (LeftLabelColorEdit3("Ambient Color", &ambient.x)) material->SetAmbientColor(ambient);
+			if (LeftLabelColorEdit3("Emissive Color", &emissive.x)) material->SetEmissiveColor(emissive);
 
 			glm::vec2 scale = material->GetTextureScale();
-			if (ImGui::DragFloat2("Texture Scale", &scale.x, 0.05, 0.0)) material->SetTextureScale(scale);
+			if (LeftLabelDragFloat2("Texture Scale", &scale.x, 0.05, 0.0)) material->SetTextureScale(scale);
 
 
 			float shininess = material->GetShininess();
-			if (ImGui::SliderFloat("Shininess", &shininess, 0.0f, 512.0f)) {
+			if (LeftLabelSliderFloat("Shininess", &shininess, 0.0f, 512.0f)) {
 				material->SetShininess(shininess);
 			}
 

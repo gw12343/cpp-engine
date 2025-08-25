@@ -6,6 +6,7 @@
 #define CPP_ENGINE_ASSETHANDLE_H
 
 #include <cstdint>
+#include <string>
 namespace Engine {
 	template <typename T>
 	class AssetHandle {

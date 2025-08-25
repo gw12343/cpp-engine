@@ -14,7 +14,7 @@
 #include "scripting/ScriptManager.h"
 #include "physics/PhysicsManager.h"
 #include "RigidBodyComponent.h"
-
+#include "rendering/ui/InspectorUI.h"
 
 namespace Engine::Components {
 
@@ -93,14 +93,14 @@ namespace Engine::Components {
 		const char* motionTypes[] = {"Kinematic", "Dynamic"};
 		int         current       = (motionType == (int) JPH::EMotionType::Kinematic) ? 0 : 1;
 
-		if (ImGui::Combo("Motion Type", &current, motionTypes, IM_ARRAYSIZE(motionTypes))) {
+		if (LeftLabelCombo("Motion Type", &current, motionTypes, IM_ARRAYSIZE(motionTypes))) {
 			// Update when changed
 			motionType = (current == 0) ? (int) JPH::EMotionType::Kinematic : (int) JPH::EMotionType::Dynamic;
 
 			bodyInterface.SetMotionType(bodyID, (JPH::EMotionType) motionType, JPH::EActivation::Activate);
 		}
 
-		if (ImGui::SliderFloat("Mass", &mass, 1.0, 1000.0)) {
+		if (LeftLabelSliderFloat("Mass", &mass, 1.0, 1000.0)) {
 			JPH::BodyLockWrite lock(physics->GetBodyLockInterface(), bodyID);
 			if (lock.Succeeded()) {
 				auto&               body = lock.GetBody();
@@ -111,7 +111,7 @@ namespace Engine::Components {
 			}
 		}
 
-		if (ImGui::SliderFloat("Friction", &friction, 0.00, 1.0)) {
+		if (LeftLabelSliderFloat("Friction", &friction, 0.00, 1.0)) {
 			JPH::BodyLockWrite lock(physics->GetBodyLockInterface(), bodyID);
 			if (lock.Succeeded()) {
 				auto& body = lock.GetBody();
@@ -119,7 +119,7 @@ namespace Engine::Components {
 			}
 		}
 
-		if (ImGui::SliderFloat("Restitution", &restitution, 0.00, 1.0)) {
+		if (LeftLabelSliderFloat("Restitution", &restitution, 0.00, 1.0)) {
 			JPH::BodyLockWrite lock(physics->GetBodyLockInterface(), bodyID);
 			if (lock.Succeeded()) {
 				auto& body = lock.GetBody();
@@ -127,7 +127,7 @@ namespace Engine::Components {
 			}
 		}
 
-		if (ImGui::SliderFloat("Gravity Factor", &gravityFactor, 0.00, 2.0)) {
+		if (LeftLabelSliderFloat("Gravity Factor", &gravityFactor, 0.00, 2.0)) {
 			bodyInterface.SetGravityFactor(bodyID, gravityFactor);
 		}
 
@@ -151,7 +151,7 @@ namespace Engine::Components {
 				}
 
 
-				if (ImGui::BeginCombo("Shape", items[shape_index])) // Label + preview
+				if (LeftLabelBeginCombo("Shape", items[shape_index])) // Label + preview
 				{
 					for (int n = 0; n < IM_ARRAYSIZE(items); n++) {
 						bool is_selected = (shape_index == n);
@@ -194,7 +194,7 @@ namespace Engine::Components {
 							}
 						}
 					}
-					ImGui::EndCombo();
+					LeftLabelEndCombo();
 				}
 
 				auto shape = bodyInterface.GetShape(bodyID);
@@ -204,7 +204,7 @@ namespace Engine::Components {
 
 					float halfExtents[3] = {box_shape->GetHalfExtent().GetX(), box_shape->GetHalfExtent().GetY(), box_shape->GetHalfExtent().GetZ()};
 
-					if (ImGui::DragFloat3("Half Extents", halfExtents, 0.25f)) {
+					if (LeftLabelDragFloat3("Half Extents", halfExtents, 0.25f)) {
 						Vec3                 size   = Vec3(halfExtents[0], halfExtents[1], halfExtents[2]);
 						JPH::Ref<JPH::Shape> newBox = new JPH::BoxShape(size);
 						bodyInterface.SetShape(bodyID, newBox, true, JPH::EActivation::Activate);
@@ -215,7 +215,7 @@ namespace Engine::Components {
 					const auto* sphere_shape = static_cast<const SphereShape*>(shape.GetPtr());
 
 					float radius = sphere_shape->GetRadius();
-					if (ImGui::DragFloat("Radius", &radius, 0.25f)) {
+					if (LeftLabelDragFloat("Radius", &radius, 0.25f)) {
 						JPH::Ref<JPH::Shape> newSphere = new JPH::SphereShape(radius);
 						bodyInterface.SetShape(bodyID, newSphere, true, JPH::EActivation::Activate);
 
@@ -229,7 +229,7 @@ namespace Engine::Components {
 					float radius     = cylinder_shape->GetRadius();
 					float halfHeight = cylinder_shape->GetHalfHeight();
 
-					if (ImGui::DragFloat("Radius", &radius, 0.25f) || ImGui::DragFloat("Half Height", &halfHeight, 0.25f)) {
+					if (LeftLabelDragFloat("Radius", &radius, 0.25f) || LeftLabelDragFloat("Half Height", &halfHeight, 0.25f)) {
 						JPH::Ref<JPH::Shape> newCylinder = new JPH::CylinderShape(halfHeight, radius);
 						bodyInterface.SetShape(bodyID, newCylinder, true, JPH::EActivation::Activate);
 
@@ -242,7 +242,7 @@ namespace Engine::Components {
 					float radius     = capsule_shape->GetRadius();
 					float halfHeight = capsule_shape->GetHalfHeightOfCylinder();
 
-					if (ImGui::DragFloat("Radius", &radius, 0.25f) || ImGui::DragFloat("Half Height", &halfHeight, 0.25f)) {
+					if (LeftLabelDragFloat("Radius", &radius, 0.25f) || LeftLabelDragFloat("Half Height", &halfHeight, 0.25f)) {
 						JPH::Ref<JPH::Shape> newCapsule = new JPH::CapsuleShape(halfHeight, radius);
 						bodyInterface.SetShape(bodyID, newCapsule, true, JPH::EActivation::Activate);
 

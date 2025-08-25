@@ -16,6 +16,8 @@
 #include "scripting/ScriptManager.h"
 
 #include "misc/cpp/imgui_stdlib.h"
+#include "rendering/ui/InspectorUI.h"
+
 
 namespace Engine::Components {
 	void LuaScript::OnRemoved(Entity& entity)
@@ -75,7 +77,7 @@ namespace Engine::Components {
 
 	void LuaScript::RenderInspector(Engine::Entity& entity)
 	{
-		if (ImGui::InputText("Script Path", &scriptPath)) {
+		if (LeftLabelInputText("Script Path", &scriptPath)) {
 			GetScriptManager().log->info("Reloading script.");
 			OnRemoved(entity);
 			LoadScript(entity, scriptPath);
@@ -87,14 +89,14 @@ namespace Engine::Components {
 
 				if (kv.second.is<double>()) {
 					auto value = (float) kv.second.as<double>();
-					if (ImGui::DragFloat(key.c_str(), &value)) {
+					if (LeftLabelDragFloat(key.c_str(), &value)) {
 						variables[key] = value;
 						SyncFromLua();
 					}
 				}
 				else if (kv.second.is<std::string>()) {
 					std::string value = kv.second.as<std::string>();
-					if (ImGui::InputText(key.c_str(), &value)) {
+					if (LeftLabelInputText(key.c_str(), &value)) {
 						variables[key] = value;
 						SyncFromLua();
 					}

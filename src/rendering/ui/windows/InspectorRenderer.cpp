@@ -6,9 +6,13 @@
 #include "imgui.h"
 #include "components/AllComponents.h"
 #include "rendering/ui/IconsFontAwesome6.h"
+#include "imgui_internal.h"
+#include <string>
+#include "misc/cpp/imgui_stdlib.h"
+#include "rendering/ui/InspectorUI.h"
+
 
 namespace Engine {
-
 
 	static char searchBuffer[128] = "";
 	static int  selectedIndex     = 0;
@@ -35,43 +39,51 @@ namespace Engine {
 		if ((*m_selectedEntityP)) {
 			// Display entity name at the top
 			auto& metadata = (*m_selectedEntityP).GetComponent<Components::EntityMetadata>();
-			ImGui::Text("Selected: %s", metadata.name.c_str());
+
+			// Top row: active checkbox + name
+			ImGui::BeginGroup();
+			ImGui::PushID("isActiveTop");
+			ImGui::Checkbox("", &metadata.active);
+			ImGui::PopID();
 			ImGui::SameLine();
-			ImVec4 myColor = ImVec4(1.0f, 0.0f, 0.0f, 1.0f); // bluish
+			ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+			ImGui::InputText("##nameTop", &metadata.name);
+			ImGui::Spacing();
 
-			ImGui::PushStyleColor(ImGuiCol_Button, myColor);
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(myColor.x * 1.1f, myColor.y * 1.1f, myColor.z * 1.1f, 1.0f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(myColor.x * 0.9f, myColor.y * 0.9f, myColor.z * 0.9f, 1.0f));
+			// Tag row with Delete button
+			const char* deleteLabel = "Delete";
+			ImVec2      deleteSize  = ImGui::CalcTextSize(deleteLabel);
+			float       deleteWidth = deleteSize.x + ImGui::GetStyle().FramePadding.x * 2.0f;
+			float       spacing     = ImGui::GetStyle().ItemSpacing.x;
+			float       availWidth  = ImGui::GetContentRegionAvail().x;
+			float       tagWidth    = availWidth - (deleteWidth + spacing);
 
-			if (ImGui::Button(ICON_FA_TRASH_CAN "", ImVec2(100, 40))) {
-				(*m_selectedEntityP).Destroy();
-				if (GetCurrentSceneRegistry().valid((*m_selectedEntityP).GetHandle())) GetCurrentSceneRegistry().destroy((*m_selectedEntityP).GetHandle());
+			ImGui::PushItemWidth(tagWidth);
+			ImGui::InputText("##Taginspector", &metadata.tag);
+			ImGui::PopItemWidth();
+
+			ImGui::SameLine(0.0f, spacing);
+
+			// Red delete button
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.3f, 0.3f, 1.0f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.7f, 0.1f, 0.1f, 1.0f));
+
+			if (ImGui::Button(deleteLabel, ImVec2(deleteWidth, 0))) {
+				GetUI().m_selectedEntity.Destroy();
+				GetUI().m_selectedEntity = Entity();
 				ImGui::PopStyleColor(3);
+				ImGui::EndGroup();
 				ImGui::End();
-				(*m_selectedEntityP) = Entity();
 				return;
 			}
 
-
 			ImGui::PopStyleColor(3);
+			ImGui::EndGroup();
 
+			ImGui::Spacing();
 			ImGui::Separator();
-
-			// Render each component in the inspector
-			if ((*m_selectedEntityP).HasComponent<Components::EntityMetadata>()) {
-				if (ImGui::CollapsingHeader(ICON_FA_ID_CARD " Entity Metadata", ImGuiTreeNodeFlags_DefaultOpen)) {
-					(*m_selectedEntityP).GetComponent<Components::EntityMetadata>().RenderInspector((*m_selectedEntityP));
-				}
-			}
-
-			//#define X(type, name, fancy)                                                                                                                                                                                                                   \
-//	if ((*m_selectedEntityP).HasComponent<type>()) {                                                                                                                                                                                           \
-//		if (ImGui::CollapsingHeader(fancy)) {                                                                                                                                                                                                  \
-//			(*m_selectedEntityP).GetComponent<type>().RenderInspector((*m_selectedEntityP));                                                                                                                                                   \
-//		}                                                                                                                                                                                                                                      \
-//	}
-			//			COMPONENT_LIST
-			// #undef X
+			ImGui::Spacing();
 
 
 			std::vector<std::function<void()>> pendingRemovals;
@@ -80,28 +92,19 @@ namespace Engine {
 #define X(type, name, fancy)                                                                                                                                                                                                                   \
 	if ((*m_selectedEntityP).HasComponent<type>()) {                                                                                                                                                                                           \
 		ImGui::PushID(#type);                                                                                                                                                                                                                  \
-                                                                                                                                                                                                                                               \
-		if (ImGui::BeginTable("compHeader", 2, ImGuiTableFlags_SizingStretchSame)) {                                                                                                                                                           \
-			ImGui::TableNextRow();                                                                                                                                                                                                             \
-                                                                                                                                                                                                                                               \
-			/* Header cell */                                                                                                                                                                                                                  \
-			ImGui::TableSetColumnIndex(0);                                                                                                                                                                                                     \
-			bool open = ImGui::CollapsingHeader(fancy, ImGuiTreeNodeFlags_DefaultOpen);                                                                                                                                                        \
-                                                                                                                                                                                                                                               \
-			/* Trashcan cell */                                                                                                                                                                                                                \
-			ImGui::TableSetColumnIndex(1);                                                                                                                                                                                                     \
-			float buttonSize = ImGui::GetFrameHeight();                                                                                                                                                                                        \
-			if (ImGui::Button(ICON_FA_TRASH_CAN, ImVec2(buttonSize, buttonSize))) {                                                                                                                                                            \
-				auto entityPtr = m_selectedEntityP;                                                                                                                                                                                            \
-				pendingRemovals.push_back([entityPtr]() { (*entityPtr).RemoveComponent<type>(); });                                                                                                                                            \
-			}                                                                                                                                                                                                                                  \
-                                                                                                                                                                                                                                               \
-			ImGui::EndTable();                                                                                                                                                                                                                 \
-                                                                                                                                                                                                                                               \
-			if (open) {                                                                                                                                                                                                                        \
-				(*m_selectedEntityP).GetComponent<type>().RenderInspector((*m_selectedEntityP));                                                                                                                                               \
-			}                                                                                                                                                                                                                                  \
+		bool trash = false;                                                                                                                                                                                                                    \
+		bool open  = ComponentHeader(fancy, &trash);                                                                                                                                                                                           \
+		if (trash) {                                                                                                                                                                                                                           \
+			auto entityPtr = m_selectedEntityP;                                                                                                                                                                                                \
+			pendingRemovals.emplace_back([entityPtr]() { (*entityPtr).RemoveComponent<type>(); });                                                                                                                                             \
 		}                                                                                                                                                                                                                                      \
+		if (open) {                                                                                                                                                                                                                            \
+			ImGui::Indent();                                                                                                                                                                                                                   \
+			(*m_selectedEntityP).GetComponent<type>().RenderInspector((*m_selectedEntityP));                                                                                                                                                   \
+			ImGui::Unindent();                                                                                                                                                                                                                 \
+			ImGui::Spacing();                                                                                                                                                                                                                  \
+		}                                                                                                                                                                                                                                      \
+                                                                                                                                                                                                                                               \
                                                                                                                                                                                                                                                \
 		ImGui::PopID();                                                                                                                                                                                                                        \
 	}
@@ -117,10 +120,18 @@ namespace Engine {
 
 			ImGui::Separator();
 			ImGui::Spacing();
-			if (ImGui::Button("Add Component " ICON_FA_PLUS, ImVec2(-FLT_MIN, 0))) {
+
+
+			ImGui::Dummy(ImVec2(0.0f, 6.0f));
+
+			float avail = ImGui::GetContentRegionAvail().x;
+			float btn_w = avail * 0.9f;
+			ImGui::SetCursorPosX((avail - btn_w) * 0.5f);
+			if (ImGui::Button("Add Component", ImVec2(btn_w, 0))) {
 				m_openPopup = true;
 				ImGui::OpenPopup("Components");
 			}
+
 
 			// Popup definition
 			if (ImGui::BeginPopupModal("Components", &m_openPopup, ImGuiWindowFlags_NoMove)) {

@@ -85,7 +85,7 @@ namespace Engine {
 				}
 			}
 
-			if (GetInput().IsKeyPressed(GLFW_KEY_LEFT_CONTROL) && GetInput().IsKeyPressedThisFrame(GLFW_KEY_D)) {
+			if (GetInput().IsKeyPressed(GLFW_KEY_LEFT_CONTROL) && GetInput().IsKeyPressedThisFrame(GLFW_KEY_D) && !GetInput().IsMousePressed(GLFW_MOUSE_BUTTON_RIGHT)) {
 				if (*selectedEntity && GetCurrentScene()->GetRegistry()->valid(selectedEntity->GetHandle())) {
 					GetDefaultLogger()->warn("DUPLICATING");
 

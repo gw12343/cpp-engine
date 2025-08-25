@@ -6,13 +6,13 @@
 
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"
-#include "ozz/animation/runtime/track.h"
 #include "rendering/particles/ParticleManager.h"
 #include "animation/AnimationManager.h"
 #include "scripting/ScriptManager.h"
 #include "assets/impl/ModelLoader.h"
 #include "ModelRendererComponent.h"
-
+#include "rendering/ui/InspectorUI.h"
+#include "core/EngineData.h"
 namespace Engine::Components {
 
 	void ModelRenderer::AddBindings()
@@ -57,7 +57,7 @@ namespace Engine::Components {
 	{
 		if (model.IsValid()) {
 			Rendering::Model* m = GetAssetManager().Get(model);
-			if (m != NULL) {
+			if (m != nullptr) {
 				materialOverrides.resize(m->GetMeshes().size());
 			}
 		}
@@ -66,62 +66,48 @@ namespace Engine::Components {
 
 	void ModelRenderer::RenderInspector(Entity& entity)
 	{
-		ImGui::Checkbox("Visible", &visible);
-		ImGui::Checkbox("Cull Backface", &backfaceCulling);
+		LeftLabelCheckbox("Visible", &visible);
+		LeftLabelCheckbox("Cull Backface", &backfaceCulling);
 
-		std::string newID = model.GetID();
-		if (ImGui::InputText("Model", &newID)) {
-			model = AssetHandle<Rendering::Model>(newID);
-		}
-
-		// Handle drag-and-drop on same item
-		if (ImGui::BeginDragDropTarget()) {
-			struct PayloadData {
-				const char* type;
-				char        id[64];
-			};
-
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_MODEL")) {
-				if (payload->DataSize == sizeof(PayloadData)) {
-					const PayloadData* data = static_cast<const PayloadData*>(payload->Data);
-					// Extra safety: check type string
-					if (std::strcmp(data->type, "Rendering::Model") == 0) {
-						model = AssetHandle<Rendering::Model>(data->id);
-						newID = data->id;
-					}
-				}
+		if (LeftLabelModelAsset("Model", &model)) {
+			Rendering::Model* m = GetAssetManager().Get(model);
+			if (m != nullptr) {
+				materialOverrides.resize(m->GetMeshes().size());
 			}
-			ImGui::EndDragDropTarget();
 		}
+
+		std::string newID;
 
 		if (model.IsValid()) {
 			Rendering::Model* m = GetAssetManager().Get(model);
-			if (m != NULL) {
+			if (m != nullptr) {
 				for (int i = 0; i < m->GetMeshes().size(); i++) {
-					newID = materialOverrides[i].GetID();
-					if (ImGui::InputText(("Material " + std::to_string(i)).c_str(), &newID)) {
-						materialOverrides[i] = AssetHandle<Material>(newID);
-					}
+					LeftLabelMaterialAsset(("Material " + std::to_string(i)).c_str(), &materialOverrides[i]);
 
-					// Handle drag-and-drop on same item
-					if (ImGui::BeginDragDropTarget()) {
-						struct PayloadData {
-							const char* type;
-							char        id[64];
-						};
-
-						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_MATERIAL")) {
-							if (payload->DataSize == sizeof(PayloadData)) {
-								const auto* data = static_cast<const PayloadData*>(payload->Data);
-								// Extra safety: check type string
-								if (std::strcmp(data->type, "Material") == 0) {
-									materialOverrides[i] = AssetHandle<Material>(data->id);
-									newID                = data->id;
-								}
-							}
-						}
-						ImGui::EndDragDropTarget();
-					}
+					//					newID = materialOverrides[i].GetID();
+					//					if (ImGui::InputText(("Material " + std::to_string(i)).c_str(), &newID)) {
+					//						materialOverrides[i] = AssetHandle<Material>(newID);
+					//					}
+					//
+					//					// Handle drag-and-drop on same item
+					//					if (ImGui::BeginDragDropTarget()) {
+					//						struct PayloadData {
+					//							const char* type;
+					//							char        id[64];
+					//						};
+					//
+					//						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_MATERIAL")) {
+					//							if (payload->DataSize == sizeof(PayloadData)) {
+					//								const auto* data = static_cast<const PayloadData*>(payload->Data);
+					//								// Extra safety: check type string
+					//								if (std::strcmp(data->type, "Material") == 0) {
+					//									materialOverrides[i] = AssetHandle<Material>(data->id);
+					//									newID                = data->id;
+					//								}
+					//							}
+					//						}
+					//						ImGui::EndDragDropTarget();
+					//					}
 				}
 			}
 		}
