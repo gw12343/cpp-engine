@@ -26,6 +26,7 @@ namespace Engine {
 		};
 
 		std::vector<CollisionEvent> pendingCollisions;
+		std::vector<Entity>         pendingCharacterCollisions;
 		std::mutex                  collisionMutex; // optional for future threading safety
 
 		sol::state    lua;

@@ -35,6 +35,7 @@ namespace Engine {
 		void handleFileAction(efsw::WatchID watchid, const std::string& dir, const std::string& filename, efsw::Action action, std::string oldFilename) override
 		{
 			if (filename.size() > 4 && filename.substr(filename.size() - 4) == ".lua") {
+				// TODO editor script folder? not hard code random file ... tsk tsk
 				if (filename != "init.lua") return;
 				GetScriptManager().ReloadEditorScript();
 			}
@@ -66,6 +67,23 @@ namespace Engine {
 			// create_entity(name)
 			lua.set_function("createEntity", [](const std::string& name) { return Engine::Entity::Create(name, GetCurrentScene()); });
 
+			lua.set_function("getPlayerEntity", []() -> Engine::Entity* {
+				auto scene    = GetCurrentScene();
+				auto registry = scene->GetRegistry();
+
+				// Create a view of all entities with both components
+				auto view = registry->view<Components::EntityMetadata, Components::PlayerControllerComponent>();
+
+				for (auto entityID : view) {
+					// Wrap entt entity ID in your Engine::Entity wrapper
+					static Engine::Entity playerEntity;
+					playerEntity = Entity(entityID, scene);
+
+					return &playerEntity; // return pointer for Lua, nil if none
+				}
+
+				return nullptr; // no player found
+			});
 
 			lua.set_function("print", [](sol::variadic_args va) {
 				std::string out;
@@ -150,6 +168,19 @@ namespace Engine {
 				pendingCollisions.clear();
 			}
 
+			{
+				std::lock_guard<std::mutex> lock(collisionMutex);
+
+				for (auto& entity : pendingCharacterCollisions) {
+					if (entity.HasComponent<Components::LuaScript>()) {
+						auto& sc = entity.GetComponent<Components::LuaScript>();
+						sc.OnPlayerCollisionEnter();
+					}
+				}
+
+				pendingCharacterCollisions.clear();
+			}
+
 
 			// User scripts
 			GetCurrentSceneRegistry().view<Components::LuaScript>().each([this](entt::entity entity, Components::LuaScript& script) {
@@ -186,6 +217,7 @@ namespace Engine {
 		GetCurrentSceneRegistry().view<Components::LuaScript>().each([](entt::entity entity, Components::LuaScript& script) {
 			if (script.env) {
 				Entity ent(entity, GetCurrentScene());
+
 				script.LoadScript(ent, script.scriptPath);
 
 				if (script.start.valid()) {

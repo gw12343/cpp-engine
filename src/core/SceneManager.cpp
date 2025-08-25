@@ -48,6 +48,7 @@ namespace Engine {
 	{
 		m_activeScene = std::move(scene);
 		GetScriptManager().pendingCollisions.clear();
+		GetScriptManager().pendingCharacterCollisions.clear();
 
 		auto& physics = GetPhysics();
 		physics.bodyToEntityMap.clear();

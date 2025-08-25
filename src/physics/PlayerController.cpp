@@ -3,16 +3,65 @@
 //
 
 #include "PlayerController.h"
+#include "PhysicsManager.h"
 #include "PlayerSettings.h"
 #include "PhysicsInterfaces.h"
 #include "imgui.h"
 
 #include "core/EngineData.h"
 #include "Camera.h"
+#include "utils/Utils.h"
+#include "components/impl/LuaScriptComponent.h"
+#include "scripting/ScriptManager.h"
 
 namespace Engine {
 
-	std::shared_ptr<CharacterVirtual> PlayerController::InitPlayer(std::shared_ptr<PhysicsSystem> physics, std::shared_ptr<TempAllocatorImpl> allocater)
+	class PlayerContactListener : public CharacterContactListener {
+	  public:
+		// Called whenever the character touches another body
+		virtual bool OnContactValidate(const CharacterVirtual* inCharacter, const BodyID& inBodyID, const SubShapeID& inSubShapeID) override
+		{
+			// Decide whether this contact should be valid or ignored
+			// e.g., ignore triggers, or prevent standing on certain objects
+			// Return true to accept the contact, false to reject it.
+			return true;
+		}
+
+		// Called whenever a contact is added
+		virtual void OnContactAdded(const CharacterVirtual* inCharacter, const BodyID& inBodyID, const SubShapeID& inSubShapeID, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
+		{
+			auto& physics       = GetPhysics();
+			auto& scriptManager = GetScriptManager();
+
+
+			Entity& entity1 = physics.bodyToEntityMap[inBodyID];
+
+			if (!entity1) {
+				ENGINE_WARN("SHOULD NOT BE NULL");
+				return;
+			}
+
+			if (entity1.HasComponent<Components::LuaScript>()) {
+				std::lock_guard<std::mutex> lock(scriptManager.collisionMutex);
+				scriptManager.pendingCharacterCollisions.push_back(entity1);
+			}
+		}
+
+		// Called whenever a contact is persisted
+		virtual void OnContactPersisted(const CharacterVirtual* inCharacter, const BodyID& inBodyID, const SubShapeID& inSubShapeID, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
+		{
+			// You can modify ongoing contact behavior here
+		}
+
+		// Called whenever a contact is removed
+		virtual void OnContactRemoved(const CharacterVirtual* inCharacter, const BodyID& inBodyID, const SubShapeID& inSubShapeID) override
+		{
+			// Cleanup or state updates when a contact ends
+		}
+	};
+
+	std::shared_ptr<CharacterContactListener> contactListener;
+	std::shared_ptr<CharacterVirtual>         PlayerController::InitPlayer(std::shared_ptr<PhysicsSystem> physics, std::shared_ptr<TempAllocatorImpl> allocater)
 	{
 		RefConst<Shape>               mStandingShape = new CapsuleShape(cCharacterHalfHeight, cCharacterRadius);
 		Ref<CharacterVirtualSettings> settings       = new CharacterVirtualSettings();
@@ -29,8 +78,8 @@ namespace Engine {
 		mCharacter = std::make_shared<CharacterVirtual>(settings, RVec3(0, 0, 0), Quat::sIdentity(), 0, physics.get());
 		// TODO implement contact listener
 
-		// CharacterContactListener listener = PlayerContactListener();
-		// mCharacter->SetListener(&listener);
+		contactListener = std::make_shared<PlayerContactListener>();
+		mCharacter->SetListener(contactListener.get());
 		return mCharacter;
 	}
 

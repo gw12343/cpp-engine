@@ -30,6 +30,7 @@ namespace Engine::Components {
 		void        RenderInspector(Entity& entity) override;
 		void        LoadScript(Engine::Entity& entity, std::string path);
 		void        OnCollisionEnter(Entity& other);
+		void        OnPlayerCollisionEnter();
 		static void AddBindings();
 
 
@@ -39,6 +40,7 @@ namespace Engine::Components {
 		sol::function start;
 		sol::function update;
 		sol::function collisionEnter;
+		sol::function playerCollisionEnter;
 	};
 } // namespace Engine::Components
 

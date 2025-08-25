@@ -176,16 +176,14 @@ namespace Engine {
 		auto view = GetCurrentSceneRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer, Engine::Components::ShadowCaster>();
 
 		for (auto [entity, metadata, transform, renderer, shadowCaster] : view.each()) {
-			if (!renderer.visible) continue;
-			// TODO, not allow invisible but shadow casting?
-			// if (!renderer.model.IsValid()) continue;
+			if (!renderer.model.IsValid()) continue;
 
 			auto* model = GetAssetManager().Get(renderer.model);
 			if (!model) continue;
 
 			glm::mat4 modelMatrix = CalculateModelMatrix(transform);
 			m_depthShader.SetMat4("model", &modelMatrix);
-			model->Draw(m_depthShader, true, false);
+			model->Draw(m_depthShader, true, true);
 		}
 
 		// Unbind shadow buffer now

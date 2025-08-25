@@ -259,7 +259,7 @@ namespace Engine::UI {
 
 	void UIManager::onUpdate(float dt)
 	{
-		m_selectedTheme = GetState() == EDITOR ? 0 : 2;
+		m_selectedTheme = GetState() == EDITOR ? 2 : 0;
 		GetRenderer().PreRender();
 		float height = RenderTopBar();
 		BeginDockspace(height);

@@ -29,6 +29,9 @@ namespace Engine::Components {
 		if (collisionEnter.valid()) {
 			collisionEnter = sol::lua_nil;
 		}
+		if (playerCollisionEnter.valid()) {
+			playerCollisionEnter = sol::lua_nil;
+		}
 
 		if (env.valid()) {
 			env.clear();
@@ -57,6 +60,18 @@ namespace Engine::Components {
 		}
 	}
 
+	void LuaScript::OnPlayerCollisionEnter()
+	{
+		if (playerCollisionEnter.valid()) {
+			try {
+				playerCollisionEnter();
+			}
+			catch (const sol::error& err) {
+				GetScriptManager().log->error("[LuaScript] PlayerCollisionEnter error in {}: {}", scriptPath, err.what());
+			}
+		}
+	}
+
 	void LuaScript::RenderInspector(Engine::Entity& entity)
 	{
 		if (ImGui::InputText("Script Path", &scriptPath)) {
@@ -71,10 +86,11 @@ namespace Engine::Components {
 		this->scriptPath = std::move(path);
 
 		// Clear old Lua environment and bound functions in case we're reloading
-		env            = sol::environment();
-		start          = sol::function();
-		update         = sol::function();
-		collisionEnter = sol::function(); // NEW
+		env                  = sol::environment();
+		start                = sol::function();
+		update               = sol::function();
+		collisionEnter       = sol::function();
+		playerCollisionEnter = sol::function(); // NEW
 
 		if (scriptPath.empty()) return;
 
@@ -89,9 +105,10 @@ namespace Engine::Components {
 			GetScriptManager().lua.script_file(scriptPath, env);
 
 			// Bind lifecycle functions
-			start          = env["Start"];
-			update         = env["Update"];
-			collisionEnter = env["CollisionEnter"];
+			start                = env["Start"];
+			update               = env["Update"];
+			collisionEnter       = env["CollisionEnter"];
+			playerCollisionEnter = env["PlayerCollisionEnter"];
 		}
 		catch (const sol::error& err) {
 			GetScriptManager().log->error("[LuaScript] Error in {}: {}", scriptPath, err.what());

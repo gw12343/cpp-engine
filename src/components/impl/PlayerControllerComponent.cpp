@@ -62,7 +62,9 @@ namespace Engine::Components {
 		                                            "getGroundVelocity",
 		                                            &PlayerControllerComponent::GetGroundVelocity,
 		                                            "getPosition",
-		                                            &PlayerControllerComponent::GetPosition);
+		                                            &PlayerControllerComponent::GetPosition,
+		                                            "setPosition",
+		                                            &PlayerControllerComponent::SetPosition);
 	}
 
 	void PlayerControllerComponent::SetLinearVelocity(glm::vec3 vel)
