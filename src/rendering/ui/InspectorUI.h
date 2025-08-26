@@ -7,6 +7,7 @@
 
 #include "imgui.h"
 #include "assets/AssetHandle.h"
+#include "core/EntityHandle.h"
 #include <string>
 
 namespace Engine {
@@ -55,6 +56,8 @@ namespace Engine {
 	LL_ASSET(Scene, Scene);
 	LL_ASSET(Particle, Particle);
 	LL_ASSET(Material, Material);
+
+	bool LeftLabelEntity(const char* label, EntityHandle* assetRef);
 
 
 	bool ComponentHeader(const char* name, bool* removeRequested);

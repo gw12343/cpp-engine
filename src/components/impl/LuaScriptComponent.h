@@ -17,6 +17,7 @@
 #include <cereal/types/unordered_map.hpp>
 
 #include "assets/AssetHandle.h"
+#include "core/EntityHandle.h"
 
 namespace Engine {
 	class Texture;
@@ -47,7 +48,8 @@ namespace Engine {
 	                                    AssetHandle<Scene>,
 	                                    AssetHandle<Terrain ::TerrainTile>,
 	                                    AssetHandle<Particle>,
-	                                    AssetHandle<Audio::SoundBuffer>>;
+	                                    AssetHandle<Audio::SoundBuffer>,
+	                                    EntityHandle>;
 
 	namespace Components {
 

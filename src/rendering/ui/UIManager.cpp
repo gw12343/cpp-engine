@@ -303,6 +303,22 @@ namespace Engine::UI {
 			if (ImGui::Selectable(title.c_str(), isSelected)) {
 				m_selectedEntity = e;
 			}
+			std::string guid = e.GetComponent<Components::EntityMetadata>().guid;
+			if (ImGui::BeginDragDropSource()) {
+				struct PayloadData {
+					const char* type;
+					char        id[64];
+				};
+				PayloadData payload;
+				payload.type = "EntityHandle";
+				strncpy(payload.id, guid.c_str(), sizeof(payload.id));
+				payload.id[sizeof(payload.id) - 1] = '\0';
+
+				ImGui::SetDragDropPayload("ENTITY_HANDLE", &payload, sizeof(payload));
+				ImGui::Text("Entity: %s", guid.c_str());
+
+				ImGui::EndDragDropSource();
+			}
 		}
 		if (ImGui::BeginPopupContextWindow()) {
 			if (ImGui::MenuItem("Create Entity")) {

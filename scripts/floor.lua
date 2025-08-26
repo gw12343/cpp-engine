@@ -1,24 +1,22 @@
 -- Define exposed variables
 variables = {
     pos2 = vec3(1, 2, 3),
-    hit = sound()
+    hit = sound(),
+    playerEnt = ehandle()
 }
 
 function PlayerCollisionEnter()
-    local playerEntity = getPlayerEntity()
-    local playerName = playerEntity:getName()
-    local pc = playerEntity:GetPlayerControllerComponent()
-    local ac = playerEntity:GetAudioSource()
-    local sc = playerEntity:GetLuaScript()
+    local playerEntity = getEntityFromHandle(variables.playerEnt)
 
+    if playerEntity and playerEntity:isValid() then
+        local pc = playerEntity:GetPlayerControllerComponent()
+        local ac = playerEntity:GetAudioSource()
 
-    ac:setSound(variables.hit);
-    ac:play();
+        ac:setSound(variables.hit);
+        ac:play();
 
-    print("height: " .. sc:getVariable("CAMERA_Y_OFFSET"))
-    sc:setVariable("CAMERA_Y_OFFSET", vec3(1, 2, 3))
-
-    pc:setPosition(variables.pos2)
+        pc:setPosition(variables.pos2)
+    end
 end
 
 

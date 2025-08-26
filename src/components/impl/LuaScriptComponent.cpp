@@ -149,6 +149,15 @@ namespace Engine::Components {
 							ASSET_CHK(Terrain, Terrain::TerrainTile)
 							ASSET_CHK(Particle, Particle)
 							ASSET_CHK(Sound, Audio::SoundBuffer)
+							else if (obj.is<EntityHandle>())
+							{
+								auto handle = obj.as<EntityHandle>();
+								if (LeftLabelEntity(key.c_str(), &handle)) {
+									variables[key]    = handle;
+									cppVariables[key] = handle;
+									SyncFromLua();
+								}
+							}
 							break;
 						}
 						default:
@@ -208,6 +217,9 @@ namespace Engine::Components {
 			else if (kv.second.is<AssetHandle<Audio::SoundBuffer>>()) {
 				cppVariables[key] = kv.second.as<AssetHandle<Audio::SoundBuffer>>();
 			}
+			else if (kv.second.is<EntityHandle>()) {
+				cppVariables[key] = kv.second.as<EntityHandle>();
+			}
 		}
 	}
 
@@ -224,6 +236,18 @@ namespace Engine::Components {
 				    },
 				    value);
 			}
+		}
+	}
+
+	Entity GetEntityFromHandle(EntityHandle handle)
+	{
+		Scene* s = GetCurrentScene();
+		if (s->m_entityMap.count(handle)) {
+			return s->m_entityMap[handle];
+		}
+		else {
+			GetScriptManager().log->warn("senin script null entity");
+			return Entity();
 		}
 	}
 
@@ -247,6 +271,7 @@ namespace Engine::Components {
 		// Inject gameObject
 		env["gameObject"] = entity;
 
+
 		try {
 			// Load the script into the environment
 			GetScriptManager().lua.script_file(scriptPath, env);
@@ -269,6 +294,8 @@ namespace Engine::Components {
 				// Create an empty table so editor/serialization logic still works
 				variables = GetScriptManager().lua.create_table();
 			}
+
+			env.set_function("getEntityFromHandle", GetEntityFromHandle);
 		}
 		catch (const sol::error& err) {
 			GetScriptManager().log->error("[LuaScript] Error in {}: {}", scriptPath, err.what());
@@ -357,6 +384,10 @@ namespace Engine::Components {
 		lua.set_function("terrainTile", []() { return AssetHandle<Terrain::TerrainTile>(); });
 		lua.set_function("particle", []() { return AssetHandle<Particle>(); });
 		lua.set_function("sound", []() { return AssetHandle<Audio::SoundBuffer>(); });
+
+		// Factory for entity handle
+		lua.new_usertype<EntityHandle>("EntityHandle", "getGuid", &EntityHandle::GetID, "isValid", &EntityHandle::IsValid, "clear", [](EntityHandle& self) { self = EntityHandle(); });
+		lua.set_function("ehandle", []() { return EntityHandle(); });
 	}
 
 

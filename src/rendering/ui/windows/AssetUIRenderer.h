@@ -11,6 +11,7 @@
 #include <string>
 
 #include "rendering/ui/ModelPreview.h"
+#include "imgui.h"
 
 
 namespace Engine {
@@ -26,6 +27,9 @@ namespace Engine {
 		void DrawTextureAssets();
 		void DrawModelAssets();
 		void DrawMaterialAssets();
+
+
+		static bool SelectableBackground(ImVec2 textSize, std::string id, const char* type, const char* typeName);
 
 	  private:
 		std::unordered_map<std::type_index, std::function<void()>> drawFuncs;

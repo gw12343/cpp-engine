@@ -286,6 +286,63 @@ namespace Engine {
 	LL_ASSET_DEF(Material, Material, "ASSET_MATERIAL", assetPtr->GetName().c_str())
 
 
+	bool LeftLabelEntity(const char* label, EntityHandle* assetRef)
+	{
+		bool        used  = false;
+		std::string newID = assetRef->GetID();
+		if (LeftLabelInputText(label, &newID)) {
+			*assetRef = EntityHandle(newID);
+			used      = true;
+		}
+
+
+		ImGui::Indent(120);
+		bool drawDefault = false;
+		if (assetRef->IsValid()) {
+			Entity assetPtr = GetCurrentScene()->Get(*assetRef);
+			if (assetPtr.IsValid()) {
+				ImGui::PushStyleColor(ImGuiCol_Text, (((ImU32) (255) << 24) | ((ImU32) (0) << 16) | ((ImU32) (255) << 8) | ((ImU32) (0) << 0)));
+				ImGui::Text("^^^ Entity: %s", assetPtr.GetName().c_str());
+				ImGui::PopStyleColor();
+			}
+			else {
+				drawDefault = true;
+			}
+		}
+		else {
+			drawDefault = true;
+		}
+		if (drawDefault) {
+			ImGui::PushStyleColor(ImGuiCol_Text, (((ImU32) (255) << 24) | ((ImU32) (0) << 16) | ((ImU32) (255) << 8) | ((ImU32) (255) << 0)));
+			ImGui::Text("^^^ Invalid Entity");
+			ImGui::PopStyleColor();
+		}
+		ImGui::Unindent(120);
+
+
+		if (ImGui::BeginDragDropTarget()) {
+			struct PayloadData {
+				const char* type;
+				char        id[64];
+			};
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_HANDLE")) {
+				if (payload->DataSize == sizeof(PayloadData)) {
+					const PayloadData* data = static_cast<const PayloadData*>(payload->Data);
+					if (std::strcmp(data->type, "EntityHandle") == 0) {
+						*assetRef = EntityHandle(data->id);
+						newID     = data->id;
+						used      = true;
+					}
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+
+		return used;
+	}
+
+
 	bool ComponentHeader(const char* name, bool* removeRequested)
 	{
 		ImGuiStyle&  style  = ImGui::GetStyle();

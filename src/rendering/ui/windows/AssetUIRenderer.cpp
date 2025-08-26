@@ -30,44 +30,6 @@ namespace Engine {
 		};
 	}
 
-	bool SelectableBackground(ImVec2 textSize, std::string id, const char* type, const char* typeName)
-	{
-		ImVec2 startPos = ImGui::GetCursorScreenPos();
-
-		ImVec2 itemSize(iconSize, iconSize + textSize.y + 7.0f);
-		bool   clicked = false;
-		// Unique ID for button: use asset id
-		std::string btnId = "drag_area_" + id;
-		if (ImGui::InvisibleButton(btnId.c_str(), itemSize)) {
-			clicked = true;
-		}
-		// Drag-drop source must come immediately after button
-		if (ImGui::BeginDragDropSource()) {
-			struct PayloadData {
-				const char* type;
-				char        id[64];
-			};
-			PayloadData payload;
-			payload.type = type;
-			strncpy(payload.id, id.c_str(), sizeof(payload.id));
-			payload.id[sizeof(payload.id) - 1] = '\0';
-
-			ImGui::SetDragDropPayload(typeName, &payload, sizeof(payload));
-			ImGui::Text("Model: %s", id.c_str());
-
-			ImGui::EndDragDropSource();
-		}
-
-		// Hover highlight
-		if (ImGui::IsItemHovered()) {
-			ImU32 col = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
-			ImGui::GetWindowDrawList()->AddRectFilled(startPos, ImVec2(startPos.x + itemSize.x, startPos.y + itemSize.y), col, 4.0f);
-		}
-
-		// --- Draw content inside rect ---
-		ImGui::SetCursorScreenPos(startPos);
-		return clicked;
-	}
 
 	void AssetUIRenderer::RenderAssetWindow()
 	{
@@ -304,5 +266,44 @@ namespace Engine {
 
 
 		ImGui::Columns(1);
+	}
+
+	bool AssetUIRenderer::SelectableBackground(ImVec2 textSize, std::string id, const char* type, const char* typeName)
+	{
+		ImVec2 startPos = ImGui::GetCursorScreenPos();
+
+		ImVec2 itemSize(iconSize, iconSize + textSize.y + 7.0f);
+		bool   clicked = false;
+		// Unique ID for button: use asset id
+		std::string btnId = "drag_area_" + id;
+		if (ImGui::InvisibleButton(btnId.c_str(), itemSize)) {
+			clicked = true;
+		}
+		// Drag-drop source must come immediately after button
+		if (ImGui::BeginDragDropSource()) {
+			struct PayloadData {
+				const char* type;
+				char        id[64];
+			};
+			PayloadData payload;
+			payload.type = type;
+			strncpy(payload.id, id.c_str(), sizeof(payload.id));
+			payload.id[sizeof(payload.id) - 1] = '\0';
+
+			ImGui::SetDragDropPayload(typeName, &payload, sizeof(payload));
+			ImGui::Text("Model: %s", id.c_str());
+
+			ImGui::EndDragDropSource();
+		}
+
+		// Hover highlight
+		if (ImGui::IsItemHovered()) {
+			ImU32 col = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+			ImGui::GetWindowDrawList()->AddRectFilled(startPos, ImVec2(startPos.x + itemSize.x, startPos.y + itemSize.y), col, 4.0f);
+		}
+
+		// --- Draw content inside rect ---
+		ImGui::SetCursorScreenPos(startPos);
+		return clicked;
 	}
 } // namespace Engine

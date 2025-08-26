@@ -54,15 +54,17 @@ namespace Engine {
 		try {
 #define X(type, name, fancy) COMPONENT_METHODS(type, name),
 			// Bind Entity
-			lua.new_usertype<Engine::Entity>("Entity",
-			                                 "getName",
-			                                 &Engine::Entity::GetName,
-			                                 "setName",
-			                                 &Engine::Entity::SetName,
-			                                 "destroy",
-			                                 &Engine::Entity::MarkForDestruction,
-
-			                                 COMPONENT_LIST COMPONENT_METHODS(Components::EntityMetadata, EntityMetadata));
+			lua.new_usertype<Engine::Entity>(
+			    "Entity",
+			    "isValid",
+			    [](const Engine::Entity& e) { return static_cast<bool>(e); },
+			    "getName",
+			    &Engine::Entity::GetName,
+			    "setName",
+			    &Engine::Entity::SetName,
+			    "destroy",
+			    &Engine::Entity::MarkForDestruction,
+			    COMPONENT_LIST COMPONENT_METHODS(Components::EntityMetadata, EntityMetadata));
 #undef X
 
 
@@ -72,7 +74,7 @@ namespace Engine {
 			lua.set_function("getPlayerEntity", []() -> Engine::Entity* {
 				auto scene    = GetCurrentScene();
 				auto registry = scene->GetRegistry();
-				
+
 				auto view = registry->view<Components::EntityMetadata, Components::PlayerControllerComponent>();
 
 				for (auto entityID : view) {

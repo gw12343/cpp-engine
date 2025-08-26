@@ -74,6 +74,19 @@ namespace Engine {
 		}
 	}
 
+	template <class Archive>
+	void serialize(Archive& ar, EntityHandle& handle)
+	{
+		// Serialize the internal GUID string
+		std::string guid = handle.GetID();
+
+		ar(cereal::make_nvp("guid", guid));
+
+		if constexpr (Archive::is_loading::value) {
+			handle = EntityHandle(guid);
+		}
+	}
+
 
 	struct SerializedEntity {
 		Engine::Components::EntityMetadata meta;
