@@ -112,7 +112,6 @@ namespace Engine {
 		registry->view<Components::EntityMetadata>().each([&](auto entity, auto meta) {
 			SerializedEntity se;
 			se.meta = meta;
-
 			// Now loop over all the components in the list
 #define X(type, name, fancy)                                                                                                                                                                                                                   \
 	if (registry->all_of<type>(entity)) se.name = registry->get<type>(entity);
@@ -127,7 +126,6 @@ namespace Engine {
 		archive(cereal::make_nvp("entities", entities));
 	}
 
-
 	std::unique_ptr<Scene> JSONSceneLoader::LoadFromFile(const std::string& path)
 	{
 		std::unique_ptr<Scene> scene = GetSceneManager().CreateScene(path);
@@ -137,13 +135,15 @@ namespace Engine {
 
 		std::vector<SerializedEntity> entities;
 		archive(cereal::make_nvp("entities", entities));
-		std::vector<Entity> loaded_entities;
+		std::vector<Entity>            loaded_entities;
+		std::map<EntityHandle, Entity> loaded_entities_map;
+
 		for (auto& se : entities) {
 			auto e = scene->GetRegistry()->create();
 			scene->GetRegistry()->emplace<Engine::Components::EntityMetadata>(e, se.meta);
 			Entity entity(e, scene.get());
 			loaded_entities.push_back(entity);
-
+			loaded_entities_map[EntityHandle(se.meta.guid)] = entity;
 
 #define X(type, name, fancy)                                                                                                                                                                                                                   \
 	if (se.name.has_value()) entity.AddComponent<type>(se.name.value());
@@ -152,7 +152,7 @@ namespace Engine {
 		}
 
 		scene->m_entityList = loaded_entities;
-
+		scene->m_entityMap  = loaded_entities_map;
 		return scene;
 	}
 

@@ -11,6 +11,7 @@
 #include <spdlog/spdlog.h>
 #include <vector>
 #include "core/Entity.h"
+#include "EntityHandle.h"
 
 namespace Engine {
 	// A single scene, essentially just a wrapper for entt::registry
@@ -22,8 +23,12 @@ namespace Engine {
 
 		std::shared_ptr<entt::registry> GetRegistry() { return m_registry; }
 
-		const std::string&  GetName() const { return m_name; }
-		std::vector<Entity> m_entityList;
+		const std::string& GetName() const { return m_name; }
+
+		Entity Get(const EntityHandle& handle);
+
+		std::vector<Entity>            m_entityList;
+		std::map<EntityHandle, Entity> m_entityMap;
 
 	  private:
 		std::string                     m_name;

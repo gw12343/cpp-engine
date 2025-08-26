@@ -16,4 +16,10 @@ namespace Engine {
 		m_registry   = std::make_shared<entt::registry>();
 		m_entityList = entities;
 	}
+
+	Entity Scene::Get(const EntityHandle& handle)
+	{
+		return m_entityMap[handle];
+	}
+
 } // namespace Engine

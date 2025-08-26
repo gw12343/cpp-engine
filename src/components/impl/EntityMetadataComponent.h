@@ -17,16 +17,17 @@ namespace Engine::Components {
 		std::string tag;
 		bool        active                  = true;
 		bool        toBeDestroyedNextUpdate = false;
+		std::string guid;
 
 		template <class Archive>
 		void serialize(Archive& ar)
 		{
-			ar(cereal::make_nvp("name", name), cereal::make_nvp("tag", tag), cereal::make_nvp("active", active));
+			ar(CEREAL_NVP(name), CEREAL_NVP(tag), CEREAL_NVP(active), CEREAL_NVP(guid));
 		}
 
-		EntityMetadata() = default;
-		explicit EntityMetadata(std::string name) : name(std::move(name)) {}
-		explicit EntityMetadata(std::string name, std::string tag) : name(std::move(name)), tag(std::move(tag)) {}
+		EntityMetadata();
+		explicit EntityMetadata(std::string name);
+		explicit EntityMetadata(std::string name, std::string tag);
 
 		void OnAdded(Entity& entity) override;
 		void OnRemoved(Entity& entity) override;

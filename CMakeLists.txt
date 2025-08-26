@@ -194,7 +194,8 @@ add_executable(${PROJECT_NAME} ${SOURCES}
         src/rendering/ui/windows/AnimationWindow.h
         src/rendering/ui/windows/AnimationWindow.cpp
         src/rendering/ui/InspectorUI.h
-        src/rendering/ui/InspectorUI.cpp)
+        src/rendering/ui/InspectorUI.cpp
+        src/core/EntityHandle.h)
 
 
 target_include_directories(${PROJECT_NAME} PRIVATE

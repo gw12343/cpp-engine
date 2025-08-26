@@ -40,6 +40,8 @@ namespace Engine {
 			// Display entity name at the top
 			auto& metadata = (*m_selectedEntityP).GetComponent<Components::EntityMetadata>();
 
+			ImGui::Text("guid: %s", metadata.guid.c_str());
+
 			// Top row: active checkbox + name
 			ImGui::BeginGroup();
 			ImGui::PushID("isActiveTop");

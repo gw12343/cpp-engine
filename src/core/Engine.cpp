@@ -103,7 +103,7 @@ namespace Engine {
 	void GEngine::CreateInitialEntities()
 	{
 		// TODO store assets to be loaded at the start in scene json
-		
+
 		// Load all textures
 		std::string folder = "resources/textures";
 		for (const auto& entry : fs::directory_iterator(folder)) {
@@ -137,7 +137,6 @@ namespace Engine {
 				GetAssetManager().Load<Audio::SoundBuffer>(path);
 			}
 		}
-
 
 		// TODO terrain instanced detail rendereing
 		// TODO terrain mesh shape?? maybe component

@@ -2,9 +2,104 @@
     "entities": [
         {
             "EntityMetadata": {
+                "name": "Copy of Barrel123",
+                "tag": "",
+                "active": true,
+                "guid": "688d9eb6700db7e413d96e63ad7e4256"
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": false,
+                "data": {}
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": -0.6472160220146179,
+                        "y": 10.567418098449707,
+                        "z": 2.856550693511963
+                    },
+                    "rotation": {
+                        "x": -1.888987632980843e-9,
+                        "y": 1.1102230246251566e-16,
+                        "z": 2.0971975633675069e-25,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 2.0000052452087404,
+                        "y": 2.0,
+                        "z": 1.999997854232788
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "d8c566b1e78d16d132a166e6d990b01b"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "4f843329315c8297e0905d030736e961"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 2,
+                    "mass": 96.14199829101563,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 1.0,
+                    "shapeType": "Cylinder",
+                    "shapeSize": {
+                        "x": 1.0,
+                        "y": 1.0000001192092896,
+                        "z": 0.0
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "AnimationWorkerComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
                 "name": "Copy of Platform",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "b5f4908cc9457be440a1e7943dda6761"
             },
             "LuaScript": {
                 "nullopt": false,
@@ -109,7 +204,8 @@
             "EntityMetadata": {
                 "name": "Copy of Floor",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "f1bbf96e39f39318dcd3c3cbd8c79804"
             },
             "LuaScript": {
                 "nullopt": true
@@ -202,7 +298,8 @@
             "EntityMetadata": {
                 "name": "Copy of Floor",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "226f1e8d7961a49f7348faf903975f49"
             },
             "LuaScript": {
                 "nullopt": true
@@ -295,7 +392,8 @@
             "EntityMetadata": {
                 "name": "Barrel",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "437f88406ae8bac5b5a17492b803deb6"
             },
             "LuaScript": {
                 "nullopt": true
@@ -388,7 +486,8 @@
             "EntityMetadata": {
                 "name": "Cylinder",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "0011818fd3635236f93c58ae3b81fe9e"
             },
             "LuaScript": {
                 "nullopt": true
@@ -481,7 +580,8 @@
             "EntityMetadata": {
                 "name": "Player",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "eceb7a1979a7c1a4fab790e5875c2fde"
             },
             "LuaScript": {
                 "nullopt": false,
@@ -489,38 +589,10 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
-                            "key": "GRAVITY_SCALE",
-                            "value": {
-                                "index": 0,
-                                "data": 2.0
-                            }
-                        },
-                        {
                             "key": "WALK_SPEED",
                             "value": {
                                 "index": 0,
                                 "data": 7.0
-                            }
-                        },
-                        {
-                            "key": "CAMERA_Y_OFFSET",
-                            "value": {
-                                "index": 0,
-                                "data": 1.100000023841858
-                            }
-                        },
-                        {
-                            "key": "RUN_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 12.0
-                            }
-                        },
-                        {
-                            "key": "SHOOT_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 111.0
                             }
                         },
                         {
@@ -535,6 +607,34 @@
                             "value": {
                                 "index": 0,
                                 "data": 8.0
+                            }
+                        },
+                        {
+                            "key": "RUN_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 12.0
+                            }
+                        },
+                        {
+                            "key": "CAMERA_Y_OFFSET",
+                            "value": {
+                                "index": 0,
+                                "data": 1.100000023841858
+                            }
+                        },
+                        {
+                            "key": "GRAVITY_SCALE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
+                            }
+                        },
+                        {
+                            "key": "SHOOT_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 111.0
                             }
                         }
                     ]
@@ -629,7 +729,8 @@
             "EntityMetadata": {
                 "name": "AnimatedEntity",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "779dda52eabb1b4f46743d9336647bd8"
             },
             "LuaScript": {
                 "nullopt": true
@@ -707,7 +808,8 @@
             "EntityMetadata": {
                 "name": "Terrain",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "4d8523b2447652448058d5a4e528693a"
             },
             "LuaScript": {
                 "nullopt": true
@@ -788,7 +890,8 @@
             "EntityMetadata": {
                 "name": "Ball",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "c6bcb70b8429f04c2cbd635a83640827"
             },
             "LuaScript": {
                 "nullopt": true
@@ -884,7 +987,8 @@
             "EntityMetadata": {
                 "name": "Platform",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "cce0d1aa44c767f1541ee6bc48f58889"
             },
             "LuaScript": {
                 "nullopt": false,
@@ -981,7 +1085,8 @@
             "EntityMetadata": {
                 "name": "Floor",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "a563438b0aa7326da736c99f6d408a14"
             },
             "LuaScript": {
                 "nullopt": true
@@ -1074,7 +1179,8 @@
             "EntityMetadata": {
                 "name": "Ball",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "5a5a2a950c0a509c802e70df59d4c184"
             },
             "LuaScript": {
                 "nullopt": true
@@ -1167,7 +1273,8 @@
             "EntityMetadata": {
                 "name": "Copy of Ball",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "44548307e360e87b8bb71d976dece6b7"
             },
             "LuaScript": {
                 "nullopt": true
@@ -1260,7 +1367,8 @@
             "EntityMetadata": {
                 "name": "Copy of Copy of Ball",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "5da43a29eda8e8f9d347946851b2c9f4"
             },
             "LuaScript": {
                 "nullopt": true
@@ -1353,7 +1461,8 @@
             "EntityMetadata": {
                 "name": "Barrel",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "c98156d6873a24d3b38ef10d63d0f1c2"
             },
             "LuaScript": {
                 "nullopt": true
@@ -1446,7 +1555,8 @@
             "EntityMetadata": {
                 "name": "Barrel",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "09e90c5f7dd5825df1570711b0e24a40"
             },
             "LuaScript": {
                 "nullopt": true
@@ -1539,7 +1649,8 @@
             "EntityMetadata": {
                 "name": "Barrel",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "9eea222d5b15dc867714cde635fb5aba"
             },
             "LuaScript": {
                 "nullopt": true
@@ -1632,7 +1743,8 @@
             "EntityMetadata": {
                 "name": "Barrel",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "5bd80e98f34e9bf28adf71e88619c271"
             },
             "LuaScript": {
                 "nullopt": true
@@ -1725,7 +1837,8 @@
             "EntityMetadata": {
                 "name": "Barrel",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "ea1c2d32172869830650f3e425618980"
             },
             "LuaScript": {
                 "nullopt": true
@@ -1818,7 +1931,8 @@
             "EntityMetadata": {
                 "name": "Barrel",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "6d0d4669edafb0a31a3984dfb6a8488c"
             },
             "LuaScript": {
                 "nullopt": true
@@ -1911,7 +2025,8 @@
             "EntityMetadata": {
                 "name": "Barrel",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "bda8dcab32f700a1992590c6142e676b"
             },
             "LuaScript": {
                 "nullopt": true
@@ -2004,7 +2119,8 @@
             "EntityMetadata": {
                 "name": "Barrel",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "5878b8015c5b4c3d3c37439211767117"
             },
             "LuaScript": {
                 "nullopt": true
@@ -2097,7 +2213,8 @@
             "EntityMetadata": {
                 "name": "Barrel",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "fdb6d78cf2e42801b37f9f261658d7f1"
             },
             "LuaScript": {
                 "nullopt": true
@@ -2190,13 +2307,23 @@
             "EntityMetadata": {
                 "name": "Copy of KillFloor",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "ead1cf213ab430ca9930b9af271bbffd"
             },
             "LuaScript": {
                 "nullopt": false,
                 "data": {
                     "scriptPath": "scripts/floor.lua",
                     "variables": [
+                        {
+                            "key": "hit",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
+                                }
+                            }
+                        },
                         {
                             "key": "pos2",
                             "value": {
@@ -2205,15 +2332,6 @@
                                     "x": -13.5,
                                     "y": 3.4000000953674318,
                                     "z": 3.5999999046325685
-                                }
-                            }
-                        },
-                        {
-                            "key": "hit",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
                                 }
                             }
                         }
@@ -2307,7 +2425,8 @@
             "EntityMetadata": {
                 "name": "Copy of Floor",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "039f40221ae7e9c8e9e809c481f6d54b"
             },
             "LuaScript": {
                 "nullopt": true
@@ -2400,7 +2519,8 @@
             "EntityMetadata": {
                 "name": "Copy of Platform",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "d201e3ea9eab7bf1d5b35663d809d6c2"
             },
             "LuaScript": {
                 "nullopt": true
@@ -2493,7 +2613,8 @@
             "EntityMetadata": {
                 "name": "Copy of Platform",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "96e551454010f82b0aeeed642a6f5950"
             },
             "LuaScript": {
                 "nullopt": true
@@ -2586,7 +2707,8 @@
             "EntityMetadata": {
                 "name": "Copy of Platform",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "3a1847842f1030308e3948cf88cc95e2"
             },
             "LuaScript": {
                 "nullopt": true
@@ -2679,7 +2801,8 @@
             "EntityMetadata": {
                 "name": "Copy of Platform",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "1829384fa38c8da5920985b3dd6b9d9b"
             },
             "LuaScript": {
                 "nullopt": false,
@@ -2784,7 +2907,8 @@
             "EntityMetadata": {
                 "name": "Copy of Platform",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "7db44aa244722ef2ddd630d6dd6bbb21"
             },
             "LuaScript": {
                 "nullopt": true
@@ -2877,7 +3001,8 @@
             "EntityMetadata": {
                 "name": "Copy of Platform",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "3b584cd50a1cf08444a2ef11e689b0ac"
             },
             "LuaScript": {
                 "nullopt": true
@@ -2970,7 +3095,8 @@
             "EntityMetadata": {
                 "name": "Copy of Platform",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "944d31aab4af6653afea616ae0787448"
             },
             "LuaScript": {
                 "nullopt": true
@@ -3063,7 +3189,8 @@
             "EntityMetadata": {
                 "name": "Copy of Platform",
                 "tag": "",
-                "active": true
+                "active": true,
+                "guid": "8b37759042918e953e866bf50ed8858a"
             },
             "LuaScript": {
                 "nullopt": true
