@@ -57,12 +57,7 @@ namespace Engine::Components {
 				startRot      = ToJolt(tr.rotation);
 			}
 
-			JPH::BodyCreationSettings settings(shape,
-			                                   startPos,
-			                                   startRot,
-			                                   (JPH::EMotionType) motionType,
-			                                   Layers::MOVING // replace with your layer definition
-			);
+			JPH::BodyCreationSettings settings(shape, startPos, startRot, (JPH::EMotionType) motionType, Layers::MOVING);
 
 			auto                physics       = GetPhysics().GetPhysicsSystem();
 			JPH::BodyInterface& bodyInterface = physics->GetBodyInterface();

@@ -9,10 +9,14 @@ function PlayerCollisionEnter()
     local playerName = playerEntity:getName()
     local pc = playerEntity:GetPlayerControllerComponent()
     local ac = playerEntity:GetAudioSource()
+    local sc = playerEntity:GetLuaScript()
 
 
     ac:setSound(variables.hit);
     ac:play();
+
+    print("height: " .. sc:getVariable("CAMERA_Y_OFFSET"))
+    sc:setVariable("CAMERA_Y_OFFSET", vec3(1, 2, 3))
 
     pc:setPosition(variables.pos2)
 end

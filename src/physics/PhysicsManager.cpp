@@ -39,7 +39,8 @@ namespace Engine {
 		// Print to the TTY
 		spdlog::error("Trace: {0}", buffer);
 	}
-	// Callback for asserts, connect this to your own assert handler if you have one
+
+	// TODO connect to assert manager?
 	bool PhysicsManager::AssertFailedImpl(const char* inExpression, const char* inMessage, const char* inFile, uint inLine)
 	{
 		spdlog::error("{0}:{1}: (got: {2}) {3}", inFile, inLine, inExpression, (inMessage != nullptr ? inMessage : ""));
@@ -117,8 +118,6 @@ namespace Engine {
 		                                                    // getGravity lambda
 		                                                    "getGravity",
 		                                                    [](PhysicsManager& self) {
-			                                                    // Replace this with however your engine stores gravity
-			                                                    // Example: assume PhysicsManager has a glm::vec3 member `m_gravity`
 			                                                    auto g = physics->GetGravity();
 			                                                    return glm::vec3(g.GetX(), g.GetY(), g.GetZ());
 		                                                    });

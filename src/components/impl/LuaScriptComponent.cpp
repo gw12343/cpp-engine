@@ -280,29 +280,57 @@ namespace Engine::Components {
 		auto& lua = GetScriptManager().lua;
 
 
-		lua.new_usertype<LuaScript>("LuaScript",
-		                            "scriptPath",
-		                            &LuaScript::scriptPath,
+		lua.new_usertype<LuaScript>(
+		    "LuaScript",
+		    "scriptPath",
+		    &LuaScript::scriptPath,
 
-		                            "setScript",
-		                            [](LuaScript& self, Entity entity, const std::string& path) {
-			                            if (!entity.HasComponent<LuaScript>()) {
-				                            GetScriptManager().log->error("Entity doesn't have a LuaScript component!");
-				                            return;
-			                            }
-			                            auto& script = entity.GetComponent<LuaScript>();
-			                            script.LoadScript(entity, path);
-		                            });
+		    "setScript",
+		    [](LuaScript& self, Entity entity, const std::string& path) {
+			    if (!entity.HasComponent<LuaScript>()) {
+				    GetScriptManager().log->error("Entity doesn't have a LuaScript component!");
+				    return;
+			    }
+			    auto& script = entity.GetComponent<LuaScript>();
+			    script.LoadScript(entity, path);
+		    },
+
+		    // safe setter: only overwrites if already present
+		    "setVariable",
+		    [](LuaScript& self, const std::string& name, sol::object value) {
+			    if (!self.variables.valid()) {
+				    GetScriptManager().log->error("LuaScript has no variable table to set into!");
+				    return;
+			    }
+
+			    sol::optional<sol::object> existing = self.variables[name];
+			    if (!existing) {
+				    GetScriptManager().log->warn("Variable '{}' does not exist in LuaScript, ignoring setVariable.", name);
+				    return;
+			    }
+
+			    self.variables[name] = value;
+		    },
+
+		    // getter
+		    "getVariable",
+		    [](LuaScript& self, const std::string& name) -> sol::object {
+			    if (!self.variables.valid()) {
+				    GetScriptManager().log->error("LuaScript has no variable table to get from!");
+				    return sol::nil;
+			    }
+
+			    sol::optional<sol::object> existing = self.variables[name];
+			    if (!existing) {
+				    GetScriptManager().log->warn("Variable '{}' does not exist in LuaScript.", name);
+				    return sol::nil;
+			    }
+
+			    return self.variables[name];
+		    });
 
 		// Asset Handle bindings
-		lua.new_usertype<AssetHandle<Texture>>("TextureHandle",
-		                                       "getGuid",
-		                                       &AssetHandle<Texture>::GetID,
-		                                       "isValid",
-		                                       &AssetHandle<Texture>::IsValid,
-		                                       // Add any other methods your AssetHandle has
-		                                       "clear",
-		                                       [](AssetHandle<Texture>& self) { self = AssetHandle<Texture>(); });
+		lua.new_usertype<AssetHandle<Texture>>("TextureHandle", "getGuid", &AssetHandle<Texture>::GetID, "isValid", &AssetHandle<Texture>::IsValid, "clear", [](AssetHandle<Texture>& self) { self = AssetHandle<Texture>(); });
 
 		lua.new_usertype<AssetHandle<Rendering::Model>>(
 		    "ModelHandle", "getGuid", &AssetHandle<Rendering::Model>::GetID, "isValid", &AssetHandle<Rendering::Model>::IsValid, "clear", [](AssetHandle<Rendering::Model>& self) { self = AssetHandle<Rendering::Model>(); });

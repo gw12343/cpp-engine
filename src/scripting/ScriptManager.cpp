@@ -72,16 +72,14 @@ namespace Engine {
 			lua.set_function("getPlayerEntity", []() -> Engine::Entity* {
 				auto scene    = GetCurrentScene();
 				auto registry = scene->GetRegistry();
-
-				// Create a view of all entities with both components
+				
 				auto view = registry->view<Components::EntityMetadata, Components::PlayerControllerComponent>();
 
 				for (auto entityID : view) {
-					// Wrap entt entity ID in your Engine::Entity wrapper
 					static Engine::Entity playerEntity;
 					playerEntity = Entity(entityID, scene);
 
-					return &playerEntity; // return pointer for Lua, nil if none
+					return &playerEntity;
 				}
 
 				return nullptr; // no player found
