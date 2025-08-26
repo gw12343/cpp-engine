@@ -122,8 +122,8 @@ namespace Engine::UI {
 				}
 			}
 			GetAssetManager().Unload<Scene>(GetSceneManager().GetActiveScene());
-			GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>("scenes/scene1.json"));
 			SetState(EDITOR);
+			GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>("scenes/scene1.json"));
 		}
 	}
 

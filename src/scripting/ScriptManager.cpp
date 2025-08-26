@@ -48,7 +48,7 @@ namespace Engine {
 	void ScriptManager::onInit()
 	{
 		log->info("Initializing Lua scripting...");
-		lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::table, sol::lib::os, sol::lib::coroutine);
+		lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::table, sol::lib::os);
 
 
 		try {
@@ -60,7 +60,7 @@ namespace Engine {
 			                                 "setName",
 			                                 &Engine::Entity::SetName,
 			                                 "destroy",
-			                                 &Engine::Entity::Destroy,
+			                                 &Engine::Entity::MarkForDestruction,
 
 			                                 COMPONENT_LIST COMPONENT_METHODS(Components::EntityMetadata, EntityMetadata));
 #undef X
@@ -132,6 +132,7 @@ namespace Engine {
 
 	float scriptDeltaTime = 0.0;
 
+
 	void ScriptManager::onUpdate(float dt)
 	{
 		scriptDeltaTime = dt;
@@ -189,53 +190,27 @@ namespace Engine {
 				if (script.env) {
 					script.env["deltaTime"] = scriptDeltaTime;
 				}
-				if (script.update.valid()) {
-					sol::protected_function_result result = script.update();
-					if (!result.valid()) {
-						sol::error err = result;
-						log->error("Lua Update() error for entity {}: {}", static_cast<int>(entity), err.what());
-					}
+
+				// Sync instantiated script Start to loop
+				if (GetCurrentSceneRegistry().get<Components::EntityMetadata>(entity).toBeDestroyedNextUpdate) {
+					Entity(entity, GetCurrentScene()).Destroy();
 				}
-
-				for (auto it = script.coroutines.begin(); it != script.coroutines.end();) {
-					if (it->waitRemaining > 0.0f) {
-						it->waitRemaining -= dt;
-						++it;
-						continue;
-					}
-
-					// Coroutine can be resumed
-					sol::protected_function_result result = it->co();
-
-					if (!result.valid()) {
-						sol::error err = result;
-						std::cerr << "Coroutine error: " << err.what() << "\n";
-						it = script.coroutines.erase(it);
-						continue;
-					}
-
-					// A coroutine returns a result when it yields a value
-					// or finishes entirely. If it's a coroutine_result, it's still running.
-					// We check if the result is valid and not empty.
-					if (result.return_count() > 0) {
-						sol::object ret = result[0];
-						if (ret.is<float>()) {
-							it->waitRemaining = ret.as<float>();
+				else {
+					if (!script.hasStarted) {
+						if (script.start) {
+							script.start();
 						}
+						script.hasStarted = true;
 					}
-
-					// After calling the coroutine, we must check if it's still resumable.
-					// sol::coroutine operator bool() checks this.
-					if (!it->co.valid()) {
-						// Coroutine has finished its execution
-						it = script.coroutines.erase(it);
-						continue;
-					}
-
-					// We only increment the iterator if a wait wasn't returned,
-					// otherwise the same coroutine will be checked next frame for `waitRemaining`.
-					if (it->waitRemaining <= 0.0f) {
-						++it;
+					else {
+						// Just update
+						if (script.update.valid()) {
+							sol::protected_function_result result = script.update();
+							if (!result.valid()) {
+								sol::error err = result;
+								log->error("Lua Update() error for entity {}: {}", static_cast<int>(entity), err.what());
+							}
+						}
 					}
 				}
 			});
@@ -264,9 +239,10 @@ namespace Engine {
 
 				script.LoadScript(ent, script.scriptPath);
 
-				if (script.start.valid()) {
+				if (script.start.valid() && !script.hasStarted) {
 					script.start();
 				}
+				script.hasStarted = true;
 			}
 		});
 	}

@@ -18,6 +18,10 @@ namespace Engine {
 		return entity;
 	}
 
+	void Entity::MarkForDestruction()
+	{
+		GetComponent<Components::EntityMetadata>().toBeDestroyedNextUpdate = true;
+	}
 	void Entity::Destroy()
 	{
 		auto reg = m_scene->GetRegistry();

@@ -15,7 +15,6 @@
 #include <cereal/types/variant.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/types/unordered_map.hpp>
-#include <sol/coroutine.hpp>
 
 #include "assets/AssetHandle.h"
 
@@ -54,11 +53,6 @@ namespace Engine {
 
 		class LuaScript : public Component {
 		  public:
-			struct RunningCoroutine {
-				sol::coroutine co;
-				float          waitRemaining = 0.0f;
-			};
-
 			LuaScript() = default;
 			explicit LuaScript(std::string path) : scriptPath(std::move(path)) {}
 
@@ -80,7 +74,7 @@ namespace Engine {
 			void        OnPlayerCollisionEnter();
 			static void AddBindings();
 
-
+			bool             hasStarted = false;
 			std::string      scriptPath;
 			sol::environment env;
 
@@ -90,8 +84,6 @@ namespace Engine {
 			sol::function                                   collisionEnter;
 			sol::function                                   playerCollisionEnter;
 			std::unordered_map<std::string, ScriptVariable> cppVariables;
-
-			std::vector<RunningCoroutine> coroutines;
 		};
 	} // namespace Components
 } // namespace Engine

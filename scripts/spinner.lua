@@ -1,3 +1,9 @@
+
+variables = {
+    turnSpeed = 1.25
+}
+
+
 function Start()
     print("Started script platform!");
 end
@@ -10,7 +16,6 @@ function rotationAroundY(time, speed)
 end
 
 
-local turnSpeed = 1.25
 
 local r = 0
 
@@ -19,6 +24,6 @@ function Update()
     r = r + deltaTime
 
     local pos = rb:getPosition();
-    local rot = rotationAroundY(r, turnSpeed)
+    local rot = rotationAroundY(r, variables.turnSpeed)
     rb:moveKinematic(pos, rot, deltaTime)
 end

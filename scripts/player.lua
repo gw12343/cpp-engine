@@ -7,15 +7,16 @@ function protect(tbl)
         end
     })
 end
-constants = {
+variables = {
     CAMERA_Y_OFFSET =  1.1, --1.45,
     MOUSE_SENSITIVITY = 0.1,
     WALK_SPEED = 7.0,
     RUN_SPEED = 12.0,
     JUMP_POWER = 8.0,
-    GRAVITY_SCALE = 2.0
+    GRAVITY_SCALE = 2.0,
+    SHOOT_POWER = 15
 }
-constants = protect(constants)
+
 
 
 
@@ -126,9 +127,9 @@ function Update()
     local moving_towards_ground = (current_vertical_velocity_mag - ground_velocity.y) < 0.1
     local inJump = input:isKeyPressed(KEY_SPACE)
 
-    local moveSpeed = constants.WALK_SPEED
+    local moveSpeed = variables.WALK_SPEED
     if input:isKeyPressed(KEY_LEFT_SHIFT) and cr:isOnGround() then
-        moveSpeed = constants.RUN_SPEED
+        moveSpeed = variables.RUN_SPEED
     end
 
     local desiredVelocity = vec3(
@@ -143,9 +144,9 @@ function Update()
         if inJump and moving_towards_ground then
             -- Jump along up
             new_velocity = vec3(
-                new_velocity.x + 0 * constants.JUMP_POWER,
-                new_velocity.y + 1 * constants.JUMP_POWER,
-                new_velocity.z + 0 * constants.JUMP_POWER
+                new_velocity.x + 0 * variables.JUMP_POWER,
+                new_velocity.y + 1 * variables.JUMP_POWER,
+                new_velocity.z + 0 * variables.JUMP_POWER
             )
         end
     else
@@ -157,7 +158,7 @@ function Update()
     local g = getPhysics():getGravity()
     new_velocity = vec3(
         new_velocity.x + g.x * deltaTime,
-        new_velocity.y + g.y * deltaTime * constants.GRAVITY_SCALE,
+        new_velocity.y + g.y * deltaTime * variables.GRAVITY_SCALE,
         new_velocity.z + g.z * deltaTime
     )
 
@@ -177,8 +178,8 @@ function Update()
     local mouseDelta = input:getMouseDelta()
     local xoffset = mouseDelta.x;
     local yoffset = mouseDelta.y;
-    xoffset = xoffset * constants.MOUSE_SENSITIVITY
-    yoffset = yoffset * constants.MOUSE_SENSITIVITY
+    xoffset = xoffset * variables.MOUSE_SENSITIVITY
+    yoffset = yoffset * variables.MOUSE_SENSITIVITY
     camera.yaw = camera.yaw + xoffset
     camera.pitch = camera.pitch + yoffset
 
@@ -191,12 +192,12 @@ function Update()
 
     -- Move Camera
     local crPos = cr:getPosition()
-    local nextPos = vec3(crPos.x, crPos.y + constants.CAMERA_Y_OFFSET, crPos.z)
+    local nextPos = vec3(crPos.x, crPos.y + variables.CAMERA_Y_OFFSET, crPos.z)
     camera:setPosition(nextPos)
 
     -- Shoot Balls
     if input:isKeyPressedThisFrame(KEY_E) then
         local shape = SphereShape(0.5 / 2)
-        ShootObject("resources/models/sphere.obj", shape, 120, 0.5)
+        ShootObject("resources/models/sphere.obj", shape, variables.SHOOT_POWER, 0.5)
     end
 end

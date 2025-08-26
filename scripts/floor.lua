@@ -19,17 +19,7 @@ end
 
 
 function Start()
-    StartCoroutine(function()
-        print("Start waiting")
-        coroutine.yield(2.0)
-        print("2 seconds passed")
-        coroutine.yield(2.0)
-        print("5 seconds total, now destroy")
-        local rb = gameObject:GetRigidBodyComponent()
-        local up = rb:getPosition()
-        up.y = 5
-        rb:setPosition(up)
-    end)
+
 end
 
 

@@ -9,7 +9,6 @@
 
 namespace Engine {
 
-
 	class ScriptManager : public Module {
 	  public:
 		void                      onInit() override;

@@ -15,7 +15,8 @@ namespace Engine::Components {
 	  public:
 		std::string name;
 		std::string tag;
-		bool        active = true;
+		bool        active                  = true;
+		bool        toBeDestroyedNextUpdate = false;
 
 		template <class Archive>
 		void serialize(Archive& ar)
