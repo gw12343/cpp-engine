@@ -19,6 +19,8 @@ namespace Engine {
 		[[nodiscard]] [[maybe_unused]] const std::string&                   GetPath() const { return path_; }
 		[[nodiscard]] bool                                                  IsValid() const { return effect_ != nullptr; }
 
+		std::string name;
+
 	  private:
 		Effekseer::RefPtr<Effekseer::Effect> effect_;
 		std::string                          path_;

@@ -8,7 +8,9 @@
 #include "assets/AssetManager.h"
 #include "string"
 #include "imgui_internal.h"
+#include "rendering/particles/Particle.h"
 #include "IconsFontAwesome6.h"
+
 
 namespace Engine {
 	// Reusable helpers (unchanged, but included for completeness)
@@ -219,7 +221,7 @@ namespace Engine {
 	}
 
 
-#define LL_ASSET_DEF(name, atype, an)                                                                                                                                                                                                          \
+#define LL_ASSET_DEF(name, atype, an, nameA)                                                                                                                                                                                                   \
 	bool LeftLabelAsset##name(const char* label, AssetHandle<atype>* assetRef)                                                                                                                                                                 \
 	{                                                                                                                                                                                                                                          \
 		bool        used  = false;                                                                                                                                                                                                             \
@@ -228,6 +230,30 @@ namespace Engine {
 			*assetRef = AssetHandle<atype>(newID);                                                                                                                                                                                             \
 			used      = true;                                                                                                                                                                                                                  \
 		}                                                                                                                                                                                                                                      \
+		ImGui::Indent(120);                                                                                                                                                                                                                    \
+		bool drawDefault = false;                                                                                                                                                                                                              \
+		if (assetRef->IsValid()) {                                                                                                                                                                                                             \
+			atype* assetPtr = GetAssetManager().Get(*assetRef);                                                                                                                                                                                \
+			if (assetPtr != nullptr) {                                                                                                                                                                                                         \
+				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));                                                                                                                                                                \
+				ImGui::Text("^^^ %s: %s", #name, nameA);                                                                                                                                                                                       \
+				ImGui::PopStyleColor();                                                                                                                                                                                                        \
+			}                                                                                                                                                                                                                                  \
+			else {                                                                                                                                                                                                                             \
+				drawDefault = true;                                                                                                                                                                                                            \
+			}                                                                                                                                                                                                                                  \
+		}                                                                                                                                                                                                                                      \
+		else {                                                                                                                                                                                                                                 \
+			drawDefault = true;                                                                                                                                                                                                                \
+		}                                                                                                                                                                                                                                      \
+		if (drawDefault) {                                                                                                                                                                                                                     \
+			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 0, 255));                                                                                                                                                                  \
+			ImGui::Text("^^^ Invalid %s", #name);                                                                                                                                                                                              \
+			ImGui::PopStyleColor();                                                                                                                                                                                                            \
+		}                                                                                                                                                                                                                                      \
+		ImGui::Unindent(120);                                                                                                                                                                                                                  \
+                                                                                                                                                                                                                                               \
+                                                                                                                                                                                                                                               \
 		if (ImGui::BeginDragDropTarget()) {                                                                                                                                                                                                    \
 			struct PayloadData {                                                                                                                                                                                                               \
 				const char* type;                                                                                                                                                                                                              \
@@ -251,13 +277,13 @@ namespace Engine {
 	}
 
 
-	LL_ASSET_DEF(Texture, Texture, "ASSET_TEXTURE")
-	LL_ASSET_DEF(Model, Rendering::Model, "ASSET_MODEL")
-	LL_ASSET_DEF(Terrain, Terrain::TerrainTile, "ASSET_TERRAIN")
-	LL_ASSET_DEF(Sound, Audio::SoundBuffer, "ASSET_SOUND")
-	LL_ASSET_DEF(Scene, Scene, "ASSET_SCENE")
-	LL_ASSET_DEF(Particle, Particle, "ASSET_PARTICLE");
-	LL_ASSET_DEF(Material, Material, "ASSET_MATERIAL");
+	LL_ASSET_DEF(Texture, Texture, "ASSET_TEXTURE", assetPtr->GetName().c_str())
+	LL_ASSET_DEF(Model, Rendering::Model, "ASSET_MODEL", assetPtr->m_name.c_str())
+	LL_ASSET_DEF(Terrain, Terrain::TerrainTile, "ASSET_TERRAIN", assetRef->GetID().c_str())
+	LL_ASSET_DEF(Sound, Audio::SoundBuffer, "ASSET_SOUND", assetPtr->name.c_str())
+	LL_ASSET_DEF(Scene, Scene, "ASSET_SCENE", assetPtr->GetName().c_str())
+	LL_ASSET_DEF(Particle, Particle, "ASSET_PARTICLE", assetPtr->name.c_str())
+	LL_ASSET_DEF(Material, Material, "ASSET_MATERIAL", assetPtr->GetName().c_str())
 
 
 	bool ComponentHeader(const char* name, bool* removeRequested)

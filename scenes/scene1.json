@@ -489,10 +489,31 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
+                            "key": "WALK_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 7.0
+                            }
+                        },
+                        {
+                            "key": "JUMP_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 8.0
+                            }
+                        },
+                        {
                             "key": "RUN_SPEED",
                             "value": {
                                 "index": 0,
                                 "data": 12.0
+                            }
+                        },
+                        {
+                            "key": "CAMERA_Y_OFFSET",
+                            "value": {
+                                "index": 0,
+                                "data": 1.100000023841858
                             }
                         },
                         {
@@ -506,28 +527,7 @@
                             "key": "SHOOT_POWER",
                             "value": {
                                 "index": 0,
-                                "data": 15.0
-                            }
-                        },
-                        {
-                            "key": "WALK_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 7.0
-                            }
-                        },
-                        {
-                            "key": "CAMERA_Y_OFFSET",
-                            "value": {
-                                "index": 0,
-                                "data": 1.100000023841858
-                            }
-                        },
-                        {
-                            "key": "JUMP_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 8.0
+                                "data": 111.0
                             }
                         },
                         {
@@ -1046,20 +1046,7 @@
                 }
             },
             "AudioSource": {
-                "nullopt": false,
-                "data": {
-                    "autoPlay": true,
-                    "looping": true,
-                    "volume": 0.6320000290870667,
-                    "pitch": 1.0,
-                    "isPlaying": false,
-                    "referenceDistance": 20.0,
-                    "maxDistance": 200.0,
-                    "rolloffFactor": 0.10000000149011612,
-                    "buffer": {
-                        "guid": "a974db1b6552d57b0799b03f250089bb"
-                    }
-                }
+                "nullopt": true
             },
             "SkeletonComponent": {
                 "nullopt": true

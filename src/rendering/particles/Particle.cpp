@@ -22,6 +22,7 @@ namespace Engine {
 		}
 
 		path_ = path;
+		name  = GetFileName(path);
 		return true;
 	}
 } // namespace Engine
