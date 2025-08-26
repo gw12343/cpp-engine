@@ -7,6 +7,7 @@
 #include "components/impl/TransformComponent.h"
 
 #include "assets/AssetManager.h"
+#include "utils/Utils.h"
 
 #include <cstring>
 #include <sndfile.h>
@@ -18,6 +19,7 @@ namespace Engine::Audio {
 	// SoundBuffer implementation
 	SoundBuffer::SoundBuffer(const std::string& filename) : m_loaded(false)
 	{
+		name = GetFileName(filename);
 		// Generate buffer
 		alGenBuffers(1, &m_bufferID);
 

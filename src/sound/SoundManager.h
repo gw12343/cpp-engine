@@ -22,6 +22,8 @@ namespace Engine::Audio {
 		[[nodiscard]] ALuint GetBufferID() const { return m_bufferID; }
 		[[nodiscard]] bool   IsLoaded() const { return m_loaded; }
 
+		std::string name;
+
 	  private:
 		ALuint m_bufferID{};
 		bool   m_loaded;

@@ -125,13 +125,13 @@ namespace Engine {
 
 		ImGui::Columns(columnCount, nullptr, false);
 
-		for (auto& [id, texPtr] : storage.guidToAsset) {
-			if (!texPtr) continue;
+		for (auto& [id, sndPtr] : storage.guidToAsset) {
+			if (!sndPtr) continue;
 			ImGui::PushID(("snd" + id).c_str());
 
 
 			// --- Measure text to get correct rect size ---
-			std::string label     = id;
+			std::string label     = sndPtr->name;
 			float       wrapWidth = iconSize; // restrict text to same width as preview
 			ImVec2      textSize  = ImGui::CalcTextSize(label.c_str(), nullptr, false, wrapWidth);
 			SelectableBackground(textSize, id, "Sound", "ASSET_SOUND");
@@ -285,7 +285,7 @@ namespace Engine {
 			preview.Render(model.get(), GetRenderer().GetModelPreviewShader());
 
 			// --- Measure text to get correct rect size ---
-			std::string label     = "Model #" + id;
+			std::string label     = model->m_name;
 			float       wrapWidth = iconSize; // restrict text to same width as preview
 			ImVec2      textSize  = ImGui::CalcTextSize(label.c_str(), nullptr, false, wrapWidth);
 

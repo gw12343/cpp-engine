@@ -23,6 +23,8 @@ namespace Engine::Rendering {
 
 		glm::vec3 m_boundsMax{};
 
+		std::string m_name;
+
 	  private:
 		friend class ModelLoader;
 

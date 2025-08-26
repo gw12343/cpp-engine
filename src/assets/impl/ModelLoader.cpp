@@ -24,6 +24,7 @@ namespace Engine {
 
 			std::vector<std::shared_ptr<Mesh>> meshes;
 			std::string                        directory = std::filesystem::path(path).parent_path().string();
+			std::string                        modelName = GetFileName(path);
 			glm::vec3                          boundsMin(std::numeric_limits<float>::max());
 			glm::vec3                          boundsMax(std::numeric_limits<float>::lowest());
 
@@ -34,6 +35,7 @@ namespace Engine {
 			model->m_meshes    = std::move(meshes);
 			model->m_boundsMin = boundsMin;
 			model->m_boundsMax = boundsMax;
+			model->m_name      = modelName;
 			return model;
 		}
 

@@ -123,7 +123,7 @@
                 "data": {
                     "position": {
                         "x": -41.234676361083987,
-                        "y": -15.34249210357666,
+                        "y": -15.156100273132325,
                         "z": -20.196802139282228
                     },
                     "rotation": {
@@ -133,9 +133,9 @@
                         "w": 0.70710688829422
                     },
                     "scale": {
-                        "x": 1.9999443292617798,
+                        "x": 1.9999289512634278,
                         "y": 30.0,
-                        "z": 29.999109268188478
+                        "z": 29.998863220214845
                     }
                 }
             },
@@ -489,17 +489,17 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
+                            "key": "RUN_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 12.0
+                            }
+                        },
+                        {
                             "key": "GRAVITY_SCALE",
                             "value": {
                                 "index": 0,
                                 "data": 2.0
-                            }
-                        },
-                        {
-                            "key": "WALK_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 7.0
                             }
                         },
                         {
@@ -510,24 +510,10 @@
                             }
                         },
                         {
-                            "key": "JUMP_POWER",
+                            "key": "WALK_SPEED",
                             "value": {
                                 "index": 0,
-                                "data": 8.0
-                            }
-                        },
-                        {
-                            "key": "RUN_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 12.0
-                            }
-                        },
-                        {
-                            "key": "MOUSE_SENSITIVITY",
-                            "value": {
-                                "index": 0,
-                                "data": 0.10000000149011612
+                                "data": 7.0
                             }
                         },
                         {
@@ -535,6 +521,20 @@
                             "value": {
                                 "index": 0,
                                 "data": 1.100000023841858
+                            }
+                        },
+                        {
+                            "key": "JUMP_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 8.0
+                            }
+                        },
+                        {
+                            "key": "MOUSE_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.10000000149011612
                             }
                         }
                     ]
@@ -591,7 +591,7 @@
                 "data": {
                     "autoPlay": false,
                     "looping": false,
-                    "volume": 0.5410000085830689,
+                    "volume": 0.26100000739097597,
                     "pitch": 1.0,
                     "isPlaying": false,
                     "referenceDistance": 1.0,
@@ -1046,7 +1046,20 @@
                 }
             },
             "AudioSource": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {
+                    "autoPlay": true,
+                    "looping": true,
+                    "volume": 0.6320000290870667,
+                    "pitch": 1.0,
+                    "isPlaying": false,
+                    "referenceDistance": 20.0,
+                    "maxDistance": 200.0,
+                    "rolloffFactor": 0.10000000149011612,
+                    "buffer": {
+                        "guid": "a974db1b6552d57b0799b03f250089bb"
+                    }
+                }
             },
             "SkeletonComponent": {
                 "nullopt": true
@@ -2198,15 +2211,6 @@
                     "scriptPath": "scripts/floor.lua",
                     "variables": [
                         {
-                            "key": "hit",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
-                                }
-                            }
-                        },
-                        {
                             "key": "pos2",
                             "value": {
                                 "index": 2,
@@ -2214,6 +2218,15 @@
                                     "x": -13.5,
                                     "y": 3.4000000953674318,
                                     "z": 3.5999999046325685
+                                }
+                            }
+                        },
+                        {
+                            "key": "hit",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
                                 }
                             }
                         }

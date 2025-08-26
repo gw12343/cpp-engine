@@ -7,6 +7,9 @@
 #include <ozz/base/containers/vector.h>
 #include <ozz/base/maths/simd_math.h>
 #include <ozz/base/maths/soa_transform.h>
+#include <filesystem>
+#include <string>
+
 
 namespace Engine {
 	ozz::math::Float4x4   FromMatrix(const glm::mat4& glmMatrix);
@@ -14,7 +17,7 @@ namespace Engine {
 
 	void _GLCheckError(const char* file, int line);
 
-
+	std::string GetFileName(std::string path);
 #define ENGINE_GLCheckError() _GLCheckError(__FILE__, __LINE__)
 
 	// Platform-specific debug break

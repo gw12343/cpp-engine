@@ -20,6 +20,12 @@ namespace Engine {
 		}
 		return effekseerMatrix;
 	}
+
+	std::string GetFileName(std::string path)
+	{
+		return std::filesystem::path(path).filename().string();
+	}
+
 	void _GLCheckError(const char* file, int line)
 	{
 		GLenum err;
