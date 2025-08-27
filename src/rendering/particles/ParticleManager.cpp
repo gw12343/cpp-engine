@@ -5,6 +5,9 @@
 #include "components/impl/TransformComponent.h"
 #include "components/impl/ParticleSystemComponent.h"
 
+#ifdef AddJob
+#undef AddJob
+#endif
 #include "physics/PhysicsManager.h"
 namespace Engine {
 	static const int MAX_INSTANCES = 8000;

@@ -1,5 +1,8 @@
 #pragma once
 
+#ifdef AddJob
+#undef AddJob
+#endif
 #include <Jolt/Jolt.h>
 
 // Jolt includes
@@ -14,6 +17,7 @@
 #include "core/module/Module.h"
 
 #include <Jolt/Core/Factory.h>
+
 #include <Jolt/Core/JobSystemThreadPool.h>
 #include <Jolt/Core/TempAllocator.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>

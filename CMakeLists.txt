@@ -57,6 +57,8 @@ if (USE_ASSIMP_FROM_SOURCE)
     endif ()
 endif ()
 
+# Skip cereal performance tests (avoid Boost)
+set(SKIP_PERFORMANCE_COMPARISON ON CACHE BOOL "" FORCE)
 FetchContent_Declare(
         cereal
         GIT_REPOSITORY https://github.com/USCiLab/cereal.git
@@ -68,6 +70,7 @@ FetchContent_Declare(
         GIT_REPOSITORY https://github.com/gabime/spdlog.git
         GIT_TAG v1.12.0
 )
+
 
 FetchContent_Declare(
         jolt
@@ -169,35 +172,7 @@ file(GLOB_RECURSE SOURCES "lib/src/*.cpp" "lib/src/*.c" "src/*.cpp" "src/*.inl")
 
 #add_compile_definitions(GAME_BUILD)
 
-add_executable(${PROJECT_NAME} ${SOURCES}
-        src/rendering/particles/Particle.h
-        src/rendering/particles/Particle.cpp
-        src/assets/impl/ParticleLoader.h
-        src/assets/impl/ParticleLoader.cpp
-        lib/include/imguizmo/ImGuizmo.h
-        src/rendering/ui/windows/InspectorRenderer.cpp
-        src/rendering/ui/windows/InspectorRenderer.h
-        src/physics/PlayerController.h
-        src/physics/PlayerController.cpp
-        src/physics/PlayerSettings.h
-        src/components/impl/PlayerControllerComponent.h
-        src/components/impl/PlayerControllerComponent.cpp
-        src/assets/impl/MaterialLoader.h
-        src/assets/impl/MaterialLoader.cpp
-        src/rendering/ui/windows/MaterialEditor.h
-        src/rendering/ui/windows/MaterialEditor.cpp
-        src/utils/ImGuiLogSink.h
-        src/rendering/ui/windows/ConsoleWindow.h
-        src/rendering/ui/windows/ConsoleWindow.cpp
-        src/rendering/ui/windows/AudioDebugWindow.h
-        src/rendering/ui/windows/AudioDebugWindow.cpp
-        src/rendering/ui/windows/SceneViewWindow.h
-        src/rendering/ui/windows/SceneViewWindow.cpp
-        src/rendering/ui/windows/AnimationWindow.h
-        src/rendering/ui/windows/AnimationWindow.cpp
-        src/rendering/ui/InspectorUI.h
-        src/rendering/ui/InspectorUI.cpp
-        src/core/EntityHandle.h)
+add_executable(${PROJECT_NAME} ${SOURCES})
 
 
 target_include_directories(${PROJECT_NAME} PRIVATE

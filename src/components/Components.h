@@ -3,6 +3,10 @@
 #include <memory>
 #include <string>
 #define GLM_ENABLE_EXPERIMENTAL
+
+#ifdef AddJob
+#undef AddJob
+#endif
 #include "Jolt/Jolt.h"
 #include "Jolt/Physics/Body/BodyActivationListener.h"
 #include "Jolt/Physics/Body/BodyManager.h"
