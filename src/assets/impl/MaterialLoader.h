@@ -7,7 +7,7 @@
 
 #include "assets/IAssetLoader.h"
 #include "rendering/Material.h"
-
+#include <string>
 namespace Engine {
 
 
