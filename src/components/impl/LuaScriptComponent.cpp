@@ -246,7 +246,7 @@ namespace Engine::Components {
 			return s->m_entityMap[handle];
 		}
 		else {
-			GetScriptManager().log->warn("senin script null entity");
+			GetScriptManager().log->warn("Script requested an invalid entity");
 			return Entity();
 		}
 	}
@@ -260,8 +260,8 @@ namespace Engine::Components {
 		start                = sol::function();
 		update               = sol::function();
 		collisionEnter       = sol::function();
-		playerCollisionEnter = sol::function(); // NEW
-		variables            = sol::table();    // NEW
+		playerCollisionEnter = sol::function();
+		variables            = sol::table();
 
 		if (scriptPath.empty()) return;
 
