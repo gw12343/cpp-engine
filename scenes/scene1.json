@@ -875,7 +875,7 @@
                             "value": {
                                 "index": 12,
                                 "data": {
-                                    "guid": "eceb7a1979a7c1a4fab790e5875c2fd"
+                                    "guid": "eceb7a1979a7c1a4fab790e5875c2fde"
                                 }
                             }
                         },
@@ -2576,10 +2576,17 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
-                            "key": "RUN_SPEED",
+                            "key": "WALK_SPEED",
                             "value": {
                                 "index": 0,
-                                "data": 12.0
+                                "data": 7.0
+                            }
+                        },
+                        {
+                            "key": "SHOOT_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 111.0
                             }
                         },
                         {
@@ -2604,13 +2611,6 @@
                             }
                         },
                         {
-                            "key": "WALK_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 7.0
-                            }
-                        },
-                        {
                             "key": "MOUSE_SENSITIVITY",
                             "value": {
                                 "index": 0,
@@ -2618,10 +2618,10 @@
                             }
                         },
                         {
-                            "key": "SHOOT_POWER",
+                            "key": "RUN_SPEED",
                             "value": {
                                 "index": 0,
-                                "data": 111.0
+                                "data": 12.0
                             }
                         }
                     ]

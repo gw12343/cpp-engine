@@ -74,7 +74,9 @@ namespace Engine {
 		manager.RegisterExternal(Get().camera);
 		manager.RegisterExternal(Get().physics);
 		manager.RegisterExternal(Get().sound);
+#ifndef GAME_BUILD
 		manager.RegisterExternal(Get().ui);
+#endif
 		manager.RegisterExternal(Get().animation);
 		manager.RegisterExternal(Get().particle);
 		manager.RegisterExternal(Get().terrain);
@@ -86,7 +88,6 @@ namespace Engine {
 	bool GEngine::Initialize()
 	{
 		GetDefaultLogger()->info("Starting Engine");
-
 		Components::RegisterAllComponentBindings();
 		manager.InitAllLuaBindings();
 		manager.InitAll();
@@ -95,6 +96,10 @@ namespace Engine {
 		GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>("scenes/scene1.json"));
 		CreateInitialEntities();
 
+#ifdef GAME_BUILD
+		SetState(PLAYING);
+		Get().manager->StartGame();
+#endif
 
 		return true;
 	}

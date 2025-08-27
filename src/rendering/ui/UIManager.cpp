@@ -43,8 +43,10 @@ namespace Engine::UI {
 
 		m_audioIconTexture   = std::make_shared<Texture>();
 		m_terrainIconTexture = std::make_shared<Texture>();
+#ifndef GAME_BUILD
 		m_audioIconTexture->LoadFromFile("resources/engine/speaker.png");
 		m_terrainIconTexture->LoadFromFile("resources/engine/mountain.png");
+#endif
 	}
 
 

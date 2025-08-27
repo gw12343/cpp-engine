@@ -85,15 +85,19 @@ namespace Engine {
 	{
 		PreRender();
 		RenderShadowMaps();
+#ifndef GAME_BUILD
 		Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->Bind();
+#endif
 		PreRender();
 		GetAnimationManager().Render();
 		RenderEntities();
 		GetTerrainManager().Render();
 		RenderSkybox();
 		GetParticleManager().Render();
+#ifndef GAME_BUILD
 		Engine::Window::GetFramebuffer(Window::FramebufferID::MOUSE_PICKING)->Bind();
 		RenderEntitiesMousePicking();
+#endif
 		Engine::Framebuffer::Unbind();
 		PostRender();
 	}

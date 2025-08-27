@@ -230,6 +230,27 @@ namespace Engine {
 			*assetRef = AssetHandle<atype>(newID);                                                                                                                                                                                             \
 			used      = true;                                                                                                                                                                                                                  \
 		}                                                                                                                                                                                                                                      \
+                                                                                                                                                                                                                                               \
+                                                                                                                                                                                                                                               \
+		if (ImGui::BeginDragDropTarget()) {                                                                                                                                                                                                    \
+			struct PayloadData {                                                                                                                                                                                                               \
+				const char* type;                                                                                                                                                                                                              \
+				char        id[64];                                                                                                                                                                                                            \
+			};                                                                                                                                                                                                                                 \
+                                                                                                                                                                                                                                               \
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(an)) {                                                                                                                                                              \
+				if (payload->DataSize == sizeof(PayloadData)) {                                                                                                                                                                                \
+					const PayloadData* data = static_cast<const PayloadData*>(payload->Data);                                                                                                                                                  \
+                                                                                                                                                                                                                                               \
+					if (std::strcmp(data->type, #name) == 0) {                                                                                                                                                                                 \
+						*assetRef = AssetHandle<atype>(data->id);                                                                                                                                                                              \
+						newID     = data->id;                                                                                                                                                                                                  \
+						used      = true;                                                                                                                                                                                                      \
+					}                                                                                                                                                                                                                          \
+				}                                                                                                                                                                                                                              \
+			}                                                                                                                                                                                                                                  \
+			ImGui::EndDragDropTarget();                                                                                                                                                                                                        \
+		}                                                                                                                                                                                                                                      \
 		ImGui::Indent(120);                                                                                                                                                                                                                    \
 		bool drawDefault = false;                                                                                                                                                                                                              \
 		if (assetRef->IsValid()) {                                                                                                                                                                                                             \
@@ -252,27 +273,6 @@ namespace Engine {
 			ImGui::PopStyleColor();                                                                                                                                                                                                            \
 		}                                                                                                                                                                                                                                      \
 		ImGui::Unindent(120);                                                                                                                                                                                                                  \
-                                                                                                                                                                                                                                               \
-                                                                                                                                                                                                                                               \
-		if (ImGui::BeginDragDropTarget()) {                                                                                                                                                                                                    \
-			struct PayloadData {                                                                                                                                                                                                               \
-				const char* type;                                                                                                                                                                                                              \
-				char        id[64];                                                                                                                                                                                                            \
-			};                                                                                                                                                                                                                                 \
-                                                                                                                                                                                                                                               \
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(an)) {                                                                                                                                                              \
-				if (payload->DataSize == sizeof(PayloadData)) {                                                                                                                                                                                \
-					const PayloadData* data = static_cast<const PayloadData*>(payload->Data);                                                                                                                                                  \
-                                                                                                                                                                                                                                               \
-					if (std::strcmp(data->type, #name) == 0) {                                                                                                                                                                                 \
-						*assetRef = AssetHandle<atype>(data->id);                                                                                                                                                                              \
-						newID     = data->id;                                                                                                                                                                                                  \
-						used      = true;                                                                                                                                                                                                      \
-					}                                                                                                                                                                                                                          \
-				}                                                                                                                                                                                                                              \
-			}                                                                                                                                                                                                                                  \
-			ImGui::EndDragDropTarget();                                                                                                                                                                                                        \
-		}                                                                                                                                                                                                                                      \
 		return used;                                                                                                                                                                                                                           \
 	}
 
@@ -296,6 +296,24 @@ namespace Engine {
 		}
 
 
+		if (ImGui::BeginDragDropTarget()) {
+			struct PayloadData {
+				const char* type;
+				char        id[64];
+			};
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_HANDLE")) {
+				if (payload->DataSize == sizeof(PayloadData)) {
+					const auto* data = static_cast<const PayloadData*>(payload->Data);
+					if (std::strcmp(data->type, "EntityHandle") == 0) {
+						*assetRef = EntityHandle(data->id);
+						newID     = data->id;
+						used      = true;
+					}
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
+
 		ImGui::Indent(120);
 		bool drawDefault = false;
 		if (assetRef->IsValid()) {
@@ -318,26 +336,6 @@ namespace Engine {
 			ImGui::PopStyleColor();
 		}
 		ImGui::Unindent(120);
-
-
-		if (ImGui::BeginDragDropTarget()) {
-			struct PayloadData {
-				const char* type;
-				char        id[64];
-			};
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_HANDLE")) {
-				if (payload->DataSize == sizeof(PayloadData)) {
-					const PayloadData* data = static_cast<const PayloadData*>(payload->Data);
-					if (std::strcmp(data->type, "EntityHandle") == 0) {
-						*assetRef = EntityHandle(data->id);
-						newID     = data->id;
-						used      = true;
-					}
-				}
-			}
-			ImGui::EndDragDropTarget();
-		}
-
 
 		return used;
 	}

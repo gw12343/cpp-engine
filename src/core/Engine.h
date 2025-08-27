@@ -31,7 +31,7 @@ namespace Engine {
 		 * @brief Initializes subsystems and resources.
 		 * @return True if initialization was successful, false otherwise.
 		 */
-		static bool Initialize();
+		bool Initialize();
 
 		/**
 		 * @brief Starts and runs the main engine loop.

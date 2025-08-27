@@ -78,6 +78,10 @@ namespace Engine {
 	{
 		// Collision Steps to simulate. Should be around 1 per 16ms
 		int cCollisionSteps = static_cast<int>(glm::ceil(dt * 60.0f));
+		// Retrieve the maximum number of jobs the job system can handle
+		int maxJobs = jobs->GetMaxConcurrency();
+		// Limit the number of collision steps to the maximum number of available jobs
+		cCollisionSteps = std::min(cCollisionSteps, maxJobs);
 		// Step the world
 		if (GetState() == PLAYING) {
 			// Update Character controller

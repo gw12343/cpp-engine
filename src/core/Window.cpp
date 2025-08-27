@@ -121,6 +121,13 @@ namespace Engine {
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 		ImGuizmo::BeginFrame();
+
+#ifdef GAME_BUILD
+		targetX      = 0;
+		targetY      = 0;
+		targetWidth  = GetWidth();
+		targetHeight = GetHeight();
+#endif
 	}
 
 	bool Window::ShouldClose() const
