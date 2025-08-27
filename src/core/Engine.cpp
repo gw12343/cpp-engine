@@ -32,6 +32,7 @@
 #include "rendering/particles/Particle.h"
 #include "assets/impl/ParticleLoader.h"
 #include "assets/impl/MaterialLoader.h"
+#include "assets/impl/BinarySceneLoader.h"
 
 
 namespace fs = std::filesystem;
@@ -93,8 +94,10 @@ namespace Engine {
 		manager.InitAll();
 
 		AssetHandle<Particle> testParticle = GetAssetManager().Load<Particle>("resources/particles/testleaf.efk");
-		GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>("scenes/scene1.json"));
+		GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>(SCENE1));
 		CreateInitialEntities();
+
+
 
 #ifdef GAME_BUILD
 		SetState(PLAYING);
@@ -192,7 +195,9 @@ namespace Engine {
 
 	void GEngine::Shutdown()
 	{
-		// SCENE_LOADER::SerializeScene(GetSceneManager().GetActiveScene(), "scenes/scene1.json");
+        #ifndef GAME_BUILD
+		 BinarySceneLoader::SerializeScene(GetSceneManager().GetActiveScene(), "scenes/scene1.bin");
+        #endif
 		manager.ShutdownAll();
 
 		Components::AnimationWorkerComponent::CleanAnimationContexts();

@@ -147,7 +147,7 @@ namespace Engine {
 		std::vector<Entity>    loaded_entities;
 
 		if (std::filesystem::exists(path)) {
-			std::ifstream              is(path);
+			std::ifstream              is(path, std::ios::binary);
 			cereal::BinaryInputArchive archive(is);
 
 

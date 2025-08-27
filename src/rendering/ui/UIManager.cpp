@@ -85,6 +85,7 @@ namespace Engine::UI {
 
 	void Play()
 	{
+#ifndef GAME_BUILD
 		if (GetState() != PLAYING) {
 			GetCamera().SaveEditorLocation();
 			if (GetState() == EDITOR) {
@@ -93,19 +94,24 @@ namespace Engine::UI {
 			SetState(PLAYING);
 			Get().manager->StartGame();
 		}
+#endif
 	}
 
 	void Pause()
 	{
+#ifndef GAME_BUILD
 		if (GetState() == PLAYING) {
 			GetCamera().LoadEditorLocation();
 			SetState(PAUSED);
 		}
+#endif
 	}
 
 	void Stop()
 	{
-		// unload scene, load backup
+#ifndef GAME_BUILD
+
+        // unload scene, load backup
 		if (GetState() != EDITOR) {
 			GetCamera().LoadEditorLocation();
 			GetUI().m_selectedEntity = Entity();
@@ -127,6 +133,7 @@ namespace Engine::UI {
 			SetState(EDITOR);
 			GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>("scenes/scene1.json"));
 		}
+#endif
 	}
 
 

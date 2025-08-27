@@ -8,8 +8,13 @@
 #include "assets/AssetHandle.h"
 #include "utils/Logger.h"
 
-// TODO probably use binary on game binaries
+#ifndef GAME_BUILD
 #define SCENE_LOADER JSONSceneLoader
+#define SCENE1 "scenes/scene1.json"
+#else
+#define SCENE_LOADER BinarySceneLoader
+#define SCENE1 "scenes/scene1.bin"
+#endif
 
 namespace Engine {
 	class Window;

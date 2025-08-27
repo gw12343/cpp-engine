@@ -103,14 +103,16 @@ namespace Engine {
 			log->error("Lua error during init: {}", e.what());
 		}
 
+#ifndef GAME_BUILD
 		// Watch the scripts folder recursively
 		efsw::WatchID id = fw.addWatch("scripts", &listener, true);
-
+#endif
 		fw.watch();
 	}
 
 	void ScriptManager::ReloadEditorScript()
 	{
+#ifndef GAME_BUILD
 		try {
 			lua.script_file("scripts/init.lua");
 			if (lua["EditorInit"].valid()) {
@@ -127,6 +129,7 @@ namespace Engine {
 		catch (const sol::error& e) {
 			log->error("Lua error during init: {}", e.what());
 		}
+#endif
 	}
 
 
@@ -138,6 +141,7 @@ namespace Engine {
 		scriptDeltaTime = dt;
 
 		if (GetState() == EDITOR) {
+            #ifndef GAME_BUILD
 			// Editor script
 			if (luaUpdate.valid()) {
 				try {
@@ -147,6 +151,7 @@ namespace Engine {
 					log->error("Lua error in onUpdate: {}", e.what());
 				}
 			}
+            #endif
 		}
 		else if (GetState() == PLAYING) {
 			{
@@ -220,6 +225,8 @@ namespace Engine {
 	void ScriptManager::onShutdown()
 	{
 		log->info("Shutting down Lua scripting...");
+
+#ifndef GAME_BUILD
 		if (lua["EditorShutdown"].valid()) {
 			try {
 				lua["EditorShutdown"]();
@@ -228,6 +235,7 @@ namespace Engine {
 				log->error("Lua error in onShutdown: {}", e.what());
 			}
 		}
+#endif
 	}
 	void ScriptManager::onGameStart()
 	{

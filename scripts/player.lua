@@ -129,7 +129,13 @@ function Update()
 
     local moveSpeed = variables.WALK_SPEED
     if input:isKeyPressed(KEY_LEFT_SHIFT) and cr:isOnGround() then
-        moveSpeed = variables.RUN_SPEED
+        if yAxis > 0 then
+            if xAxis == 0 then
+                moveSpeed = variables.RUN_SPEED
+            else
+                moveSpeed = variables.WALK_SPEED + (variables.RUN_SPEED - variables.WALK_SPEED) / 2
+            end
+        end
     end
 
     local desiredVelocity = vec3(
