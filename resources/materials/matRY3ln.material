@@ -1,0 +1,38 @@
+{
+    "colors": {
+        "ambient": [
+            0.20000000298023224,
+            0.20000000298023224,
+            0.20000000298023224
+        ],
+        "diffuse": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929
+        ],
+        "emissive": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "specular": [
+            0.5,
+            0.5,
+            0.5
+        ]
+    },
+    "name": "matRY3ln",
+    "properties": {
+        "shininess": 32.0,
+        "textureScale": [
+            200.0,
+            200.0
+        ]
+    },
+    "textures": {
+        "diffuse": "cbaaeb48a2ce07cc7adcede17356eba3",
+        "height": "",
+        "normal": "",
+        "specular": ""
+    }
+}
