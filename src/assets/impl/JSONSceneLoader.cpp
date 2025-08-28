@@ -157,7 +157,6 @@ namespace Engine {
 			Entity entity(e, scene.get());
 			loaded_entities.push_back(entity);
 			loaded_entities_map[EntityHandle(se.meta.guid)] = entity;
-
 #define X(type, name, fancy)                                                                                                                                                                                                                   \
 	if (se.name.has_value()) entity.AddComponent<type>(se.name.value());
 			COMPONENT_LIST

@@ -113,6 +113,7 @@ namespace Engine {
 
 	[[maybe_unused]] void BinarySceneLoader::SerializeScene(const AssetHandle<Scene>& sceneRef, const std::string& path)
 	{
+		GetDefaultLogger()->info("Saving binary scene: {}", path);
 		std::ofstream               os(path, std::ios::binary);
 		cereal::BinaryOutputArchive archive(os);
 
@@ -143,8 +144,9 @@ namespace Engine {
 
 	std::unique_ptr<Scene> BinarySceneLoader::LoadFromFile(const std::string& path)
 	{
-		std::unique_ptr<Scene> scene = GetSceneManager().CreateScene(path);
-		std::vector<Entity>    loaded_entities;
+		std::unique_ptr<Scene>         scene = GetSceneManager().CreateScene(path);
+		std::vector<Entity>            loaded_entities;
+		std::map<EntityHandle, Entity> loaded_entities_map;
 
 		if (std::filesystem::exists(path)) {
 			std::ifstream              is(path, std::ios::binary);
@@ -158,7 +160,7 @@ namespace Engine {
 				scene->GetRegistry()->emplace<Engine::Components::EntityMetadata>(e, se.meta);
 				Entity entity(e, scene.get());
 				loaded_entities.push_back(entity);
-
+				loaded_entities_map[EntityHandle(se.meta.guid)] = entity;
 
 #define X(type, name, fancy)                                                                                                                                                                                                                   \
 	if (se.name.has_value()) entity.AddComponent<type>(se.name.value());
@@ -168,6 +170,7 @@ namespace Engine {
 		}
 
 		scene->m_entityList = loaded_entities;
+		scene->m_entityMap  = loaded_entities_map;
 
 		return scene;
 	}

@@ -24,6 +24,31 @@
 #include "windows/AudioDebugWindow.h"
 #include "windows/SceneViewWindow.h"
 #include "windows/AnimationWindow.h"
+#include "utils/Builder.h"
+
+#include <nfd.h>
+#include <string>
+#include <iostream>
+
+std::string SelectFolder()
+{
+	nfdchar_t*  folder = nullptr;
+	nfdresult_t result = NFD_PickFolder(nullptr, &folder);
+
+	if (result == NFD_OKAY) {
+		std::string path(folder);
+		free(folder);
+		return path;
+	}
+	else if (result == NFD_CANCEL) {
+		return ""; // user cancelled
+	}
+	else {
+		std::cerr << "NFD Error: " << NFD_GetError() << std::endl;
+		return "";
+	}
+}
+
 
 namespace Engine::UI {
 
@@ -62,17 +87,19 @@ namespace Engine::UI {
 		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, viewport->Size.y - height));
 		ImGui::SetNextWindowViewport(viewport->ID);
 
+
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 
-		windowFlags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+		windowFlags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground;
 
 		bool dockspaceOpen = true;
 		ImGui::Begin("Dockspace", &dockspaceOpen, windowFlags);
 		ImGui::PopStyleVar(3);
 
 		ImGuiID dockspaceID = ImGui::GetID("Dockspace");
+
 		ImGui::DockSpace(dockspaceID, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
 	}
 
@@ -111,7 +138,7 @@ namespace Engine::UI {
 	{
 #ifndef GAME_BUILD
 
-        // unload scene, load backup
+		// unload scene, load backup
 		if (GetState() != EDITOR) {
 			GetCamera().LoadEditorLocation();
 			GetUI().m_selectedEntity = Entity();
@@ -137,11 +164,49 @@ namespace Engine::UI {
 	}
 
 
-	float UIManager::RenderTopBar()
+	float UIManager::RenderMainMenuBar()
+	{
+		float height = 0.0f;
+		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4(0, 0, 0, 0));
+		if (ImGui::BeginMainMenuBar()) {
+			if (ImGui::BeginMenu("File")) {
+				if (ImGui::MenuItem("Build Game")) {
+					std::string path = SelectFolder();
+					BuildGame(path);
+				}
+
+				ImGui::Separator();
+				if (ImGui::MenuItem("Exit")) {
+					glfwSetWindowShouldClose(GetWindow().GetNativeWindow(), GLFW_TRUE);
+				}
+				ImGui::EndMenu();
+			}
+
+
+			if (ImGui::BeginMenu("View")) {
+				static bool showDemo = false;
+				if (ImGui::MenuItem("ImGui Demo", nullptr, showDemo)) showDemo = !showDemo;
+				if (showDemo) ImGui::ShowDemoWindow(&showDemo);
+				ImGui::EndMenu();
+			}
+
+			ImGui::EndMainMenuBar();
+
+			height = ImGui::GetFrameHeight(); // main menu bar height
+		}
+		ImGui::PopStyleColor();
+
+
+		return height;
+	}
+
+
+	float UIManager::RenderTopBar(float top)
 	{
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
 
-		ImGui::SetNextWindowPos(viewport->Pos);
+		ImVec2 np = ImVec2(viewport->Pos.x, viewport->Pos.y + top);
+		ImGui::SetNextWindowPos(np);
 		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, 32.0f));
 		ImGui::SetNextWindowViewport(viewport->ID);
 
@@ -270,7 +335,8 @@ namespace Engine::UI {
 	{
 		m_selectedTheme = GetState() == EDITOR ? 2 : 0;
 		GetRenderer().PreRender();
-		float height = RenderTopBar();
+		float h      = RenderMainMenuBar();
+		float height = RenderTopBar(h) + h;
 		BeginDockspace(height);
 
 		DrawSceneViewWindow();

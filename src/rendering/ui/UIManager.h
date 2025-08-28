@@ -33,7 +33,6 @@ namespace Engine {
 			void BeginDockspace(float ht);
 			void EndDockspace();
 
-
 			std::shared_ptr<Texture> m_audioIconTexture;
 			std::shared_ptr<Texture> m_terrainIconTexture;
 			AssetHandle<Material>    m_selectedMaterial;
@@ -46,7 +45,8 @@ namespace Engine {
 		  private:
 			// UI rendering methods
 			void  RenderHierarchyWindow();
-			float RenderTopBar();
+			float RenderTopBar(float top);
+			float RenderMainMenuBar();
 			void  RenderPauseOverlay();
 
 

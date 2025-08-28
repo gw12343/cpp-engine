@@ -1,6 +1,17 @@
 cmake_minimum_required(VERSION 3.24)
 project(cpp-engine VERSION 0.1.0 LANGUAGES C CXX)
 
+# ----------------- Build Options -----------------
+option(GAME_BUILD "Compile engine as game build (stripped for game)" OFF)
+
+if (GAME_BUILD)
+    message(STATUS "Configuring GAME_BUILD")
+    add_compile_definitions(GAME_BUILD)
+    set(TARGET_NAME "${PROJECT_NAME}_game")
+else ()
+    set(TARGET_NAME "${PROJECT_NAME}")
+endif ()
+
 # Compiler settings
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -72,6 +83,12 @@ FetchContent_Declare(
         GIT_TAG v1.12.0
 )
 
+FetchContent_Declare(
+        nativefiledialog
+        GIT_REPOSITORY https://github.com/mlabbe/nativefiledialog.git
+        GIT_TAG release_116
+)
+
 
 FetchContent_Declare(
         jolt
@@ -124,7 +141,7 @@ set(EFSW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(EFSW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
 
-FetchContent_MakeAvailable(cereal spdlog jolt ozz imgui effekseer lua sol2 nlohmann_json efsw)
+FetchContent_MakeAvailable(cereal spdlog nativefiledialog jolt ozz imgui effekseer lua sol2 nlohmann_json efsw)
 
 
 if (WIN32)
@@ -141,6 +158,26 @@ if (WIN32)
     FetchContent_MakeAvailable(sndfile)
 endif ()
 
+##################################
+
+add_library(nfd STATIC
+        ${nativefiledialog_SOURCE_DIR}/src/nfd_common.c
+)
+
+if (WIN32)
+    target_sources(nfd PRIVATE ${nativefiledialog_SOURCE_DIR}/src/nfd_win.cpp)
+else () # Linux
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
+    include_directories(${GTK3_INCLUDE_DIRS})
+    link_directories(${GTK3_LIBRARY_DIRS})
+    add_definitions(${GTK3_CFLAGS_OTHER})
+
+    target_sources(nfd PRIVATE ${nativefiledialog_SOURCE_DIR}/src/nfd_gtk.c)
+    target_link_libraries(nfd PRIVATE ${GTK3_LIBRARIES})
+endif ()
+
+target_include_directories(nfd PUBLIC ${nativefiledialog_SOURCE_DIR}/src/include)
 
 # ----------------- IMGUI -------------------
 add_library(imgui STATIC
@@ -173,7 +210,8 @@ file(GLOB_RECURSE SOURCES "lib/src/*.cpp" "lib/src/*.c" "src/*.cpp" "src/*.inl")
 
 #add_compile_definitions(GAME_BUILD)
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES}
+        src/utils/Builder.cpp)
 
 
 target_include_directories(${PROJECT_NAME} PRIVATE
@@ -282,6 +320,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         EffekseerRendererGL
         nlohmann_json::nlohmann_json
         efsw
+        nfd
 )
 
 # ----------------- Debug Info -------------------

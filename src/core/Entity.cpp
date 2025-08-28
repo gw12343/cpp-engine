@@ -1,7 +1,6 @@
 #include "Entity.h"
 
 #include "Engine.h"
-#include "EngineData.h"
 #include "components/impl/EntityMetadataComponent.h"
 #include "components/AllComponents.h"
 
@@ -13,7 +12,10 @@ namespace Engine {
 		Entity       entity(entityHandle, scene);
 
 		// Add default components
-		entity.AddComponent<Components::EntityMetadata>(name);
+		auto& meta = entity.AddComponent<Components::EntityMetadata>(name);
+
+		scene->m_entityList.push_back(entity);
+		scene->m_entityMap[EntityHandle(meta.guid)] = entity;
 
 		return entity;
 	}

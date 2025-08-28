@@ -98,7 +98,6 @@ namespace Engine {
 		CreateInitialEntities();
 
 
-
 #ifdef GAME_BUILD
 		SetState(PLAYING);
 		Get().manager->StartGame();
@@ -195,9 +194,6 @@ namespace Engine {
 
 	void GEngine::Shutdown()
 	{
-        #ifndef GAME_BUILD
-		 BinarySceneLoader::SerializeScene(GetSceneManager().GetActiveScene(), "scenes/scene1.bin");
-        #endif
 		manager.ShutdownAll();
 
 		Components::AnimationWorkerComponent::CleanAnimationContexts();

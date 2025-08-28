@@ -246,7 +246,7 @@ namespace Engine::Components {
 			return s->m_entityMap[handle];
 		}
 		else {
-			GetScriptManager().log->warn("Script requested an invalid entity");
+			GetScriptManager().log->warn("Script requested an invalid entity: {}", handle.GetID());
 			return Entity();
 		}
 	}
