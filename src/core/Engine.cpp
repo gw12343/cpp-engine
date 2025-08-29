@@ -5,7 +5,6 @@
 #include "Jolt/Physics/Collision/Shape/MeshShape.h"
 #include "core/module/ModuleManager.h"
 #include <memory>
-#include <spdlog/sinks/stdout_color_sinks.h>
 #include "EngineData.h"
 #include "Input.h"
 #include "scripting/ScriptManager.h"
@@ -32,8 +31,7 @@
 #include "rendering/particles/Particle.h"
 #include "assets/impl/ParticleLoader.h"
 #include "assets/impl/MaterialLoader.h"
-#include "assets/impl/BinarySceneLoader.h"
-
+#include "navigation/NavigationManager.h"
 
 namespace fs = std::filesystem;
 
@@ -67,6 +65,7 @@ namespace Engine {
 		Get().ui        = std::make_shared<UI::UIManager>();
 		Get().terrain   = std::make_shared<Terrain::TerrainManager>();
 		Get().script    = std::make_shared<ScriptManager>();
+		Get().nav       = std::make_shared<NavigationModule>();
 		Get().scene     = std::make_shared<SceneManager>();
 
 		// Register Modules to handle lifecycle
@@ -75,6 +74,7 @@ namespace Engine {
 		manager.RegisterExternal(Get().camera);
 		manager.RegisterExternal(Get().physics);
 		manager.RegisterExternal(Get().sound);
+		manager.RegisterExternal(Get().nav);
 #ifndef GAME_BUILD
 		manager.RegisterExternal(Get().ui);
 #endif
@@ -96,7 +96,7 @@ namespace Engine {
 		AssetHandle<Particle> testParticle = GetAssetManager().Load<Particle>("resources/particles/testleaf.efk");
 		GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>(SCENE1));
 		CreateInitialEntities();
-
+		GetNav().m_currentScene = GetCurrentScene();
 
 #ifdef GAME_BUILD
 		SetState(PLAYING);

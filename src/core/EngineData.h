@@ -10,10 +10,10 @@
 
 #ifndef GAME_BUILD
 #define SCENE_LOADER JSONSceneLoader
-#define SCENE1 "scenes/scene1.json"
+#define SCENE1       "scenes/scene1.json"
 #else
 #define SCENE_LOADER BinarySceneLoader
-#define SCENE1 "scenes/scene1.bin"
+#define SCENE1       "scenes/scene1.bin"
 #endif
 
 namespace Engine {
@@ -37,6 +37,7 @@ namespace Engine {
 	class AssetManager;
 	class Scene;
 	class Input;
+	class NavigationModule;
 
 	class ModuleManager;
 
@@ -57,6 +58,7 @@ namespace Engine {
 		std::shared_ptr<PhysicsManager>          physics;
 		std::shared_ptr<Camera>                  camera;
 		std::shared_ptr<Input>                   input;
+		std::shared_ptr<NavigationModule>        nav;
 		EngineState                              state;
 		ModuleManager*                           manager;
 	};
@@ -83,6 +85,11 @@ namespace Engine {
 	inline auto& GetAssetManager()
 	{
 		return *Get().assetManager;
+	}
+
+	inline auto& GetNav()
+	{
+		return *Get().nav;
 	}
 
 	inline auto& GetSceneManager()

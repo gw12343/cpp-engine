@@ -47,7 +47,8 @@ namespace Engine {
 		// Set window hints to allow resizing
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-
+		glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
+		
 		m_window = glfwCreateWindow(m_width, m_height, m_title.c_str(), nullptr, nullptr);
 		if (!m_window) {
 			spdlog::error("Failed to create GLFW window");

@@ -18,3 +18,5 @@ imgui.ini
 .vs
 .clang-format
 debug
+cmake-build-gamerelease/
+build_game/

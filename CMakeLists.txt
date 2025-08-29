@@ -4,6 +4,7 @@ project(cpp-engine VERSION 0.1.0 LANGUAGES C CXX)
 # ----------------- Build Options -----------------
 option(GAME_BUILD "Compile engine as game build (stripped for game)" OFF)
 
+
 if (GAME_BUILD)
     message(STATUS "Configuring GAME_BUILD")
     add_compile_definitions(GAME_BUILD)
@@ -89,6 +90,13 @@ FetchContent_Declare(
         GIT_TAG release_116
 )
 
+# --- RecastNavigation ---
+FetchContent_Declare(
+        recastnavigation
+        GIT_REPOSITORY https://github.com/recastnavigation/recastnavigation.git
+        GIT_TAG v1.6.0
+)
+
 
 FetchContent_Declare(
         jolt
@@ -141,7 +149,7 @@ set(EFSW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(EFSW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
 
-FetchContent_MakeAvailable(cereal spdlog nativefiledialog jolt ozz imgui effekseer lua sol2 nlohmann_json efsw)
+FetchContent_MakeAvailable(cereal spdlog recastnavigation nativefiledialog jolt ozz imgui effekseer lua sol2 nlohmann_json efsw)
 
 
 if (WIN32)
@@ -211,7 +219,11 @@ file(GLOB_RECURSE SOURCES "lib/src/*.cpp" "lib/src/*.c" "src/*.cpp" "src/*.inl")
 #add_compile_definitions(GAME_BUILD)
 
 add_executable(${PROJECT_NAME} ${SOURCES}
-        src/utils/Builder.cpp)
+        src/utils/Builder.cpp
+        src/navigation/NavigationManager.h
+        src/navigation/NavigationManager.cpp
+        src/components/impl/NavigationComponents.h
+        src/components/impl/NavigationComponents.cpp)
 
 
 target_include_directories(${PROJECT_NAME} PRIVATE
@@ -307,6 +319,15 @@ else ()
     target_link_libraries(${PROJECT_NAME} PRIVATE ${SNDFILE_LIBRARIES})
 endif ()
 
+# Include Recast headers
+target_include_directories(cpp-engine PRIVATE
+        ${recastnavigation_SOURCE_DIR}/Recast
+        ${recastnavigation_SOURCE_DIR}/Detour
+        ${recastnavigation_SOURCE_DIR}/DetourNavMesh
+        ${recastnavigation_SOURCE_DIR}/DetourCrowd
+        ${recastnavigation_SOURCE_DIR}/DetourTileCache
+)
+
 # ----------------- Link Everything Else -------------------
 target_link_libraries(${PROJECT_NAME} PRIVATE
         lua
@@ -321,6 +342,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         nlohmann_json::nlohmann_json
         efsw
         nfd
+        Recast
+        Detour
+        DetourCrowd
+        DetourTileCache
 )
 
 # ----------------- Debug Info -------------------
