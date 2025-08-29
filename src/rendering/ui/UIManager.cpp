@@ -5,6 +5,7 @@
 
 #include "rendering/Renderer.h"
 #include "rendering/ui/IconsFontAwesome6.h"
+#include "rendering/ui/windows/SceneViewWindow.h"
 
 #include "components/impl/EntityMetadataComponent.h"
 #include "components/impl/TerrainRendererComponent.h"
@@ -221,17 +222,17 @@ namespace Engine::UI {
 
 		if (ImGui::Begin("##TopBar", nullptr, window_flags)) {
 #define TOOLBUTTON(name, type)                                                                                                                                                                                                                 \
-	if (mCurrentGizmoOperation == ImGuizmo::type) {                                                                                                                                                                                            \
+	if (SceneViewWindow::mCurrentGizmoOperation == ImGuizmo::type) {                                                                                                                                                                           \
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.25, 0.25, 0.75, 1.0));                                                                                                                                                                 \
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.35, 0.35, 0.85, 1.0));                                                                                                                                                          \
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.45, 0.45, 0.95, 1.0));                                                                                                                                                           \
 	}                                                                                                                                                                                                                                          \
 	bool Tool##type = ImGui::Button(name);                                                                                                                                                                                                     \
-	if (mCurrentGizmoOperation == ImGuizmo::type) {                                                                                                                                                                                            \
+	if (SceneViewWindow::mCurrentGizmoOperation == ImGuizmo::type) {                                                                                                                                                                           \
 		ImGui::PopStyleColor(3);                                                                                                                                                                                                               \
 	}                                                                                                                                                                                                                                          \
 	if (Tool##type) {                                                                                                                                                                                                                          \
-		mCurrentGizmoOperation = ImGuizmo::type;                                                                                                                                                                                               \
+		SceneViewWindow::mCurrentGizmoOperation = ImGuizmo::type;                                                                                                                                                                              \
 	}
 
 
@@ -250,7 +251,7 @@ namespace Engine::UI {
 
 
 			const char* modeNames[] = {"Local", "World"};
-			int         current     = (mCurrentGizmoMode == ImGuizmo::MODE::LOCAL ? 0 : 1);
+			int         current     = (SceneViewWindow::mCurrentGizmoMode == ImGuizmo::MODE::LOCAL ? 0 : 1);
 			ImGui::SetNextItemWidth(80);
 			if (ImGui::BeginCombo("##WorldMode", modeNames[current])) {
 				for (int i = 0; i < 2; i++) {
@@ -262,7 +263,7 @@ namespace Engine::UI {
 				ImGui::EndCombo();
 			}
 
-			mCurrentGizmoMode = (current == 0 ? ImGuizmo::MODE::LOCAL : ImGuizmo::MODE::WORLD);
+			SceneViewWindow::mCurrentGizmoMode = (current == 0 ? ImGuizmo::MODE::LOCAL : ImGuizmo::MODE::WORLD);
 
 
 			// --- Center Play Controls ---
@@ -339,7 +340,7 @@ namespace Engine::UI {
 		float height = RenderTopBar(h) + h;
 		BeginDockspace(height);
 
-		DrawSceneViewWindow();
+		SceneViewWindow::DrawSceneViewWindow();
 
 		RenderHierarchyWindow();
 		m_inspectorRenderer->RenderInspectorWindow(&m_selectedEntity);

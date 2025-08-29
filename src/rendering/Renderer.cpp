@@ -108,7 +108,7 @@ namespace Engine {
 		glDisable(GL_CULL_FACE);
 		ENGINE_GLCheckError();
 		glm::mat4 V = GetCamera().GetViewMatrix();
-		m_shadowRenderer->UploadShadowMatrices(m_shader, V);
+		m_shadowRenderer->UploadShadowMatrices(m_shader, V, 3);
 		ENGINE_GLCheckError();
 		// Create a view for entities with Transform and ModelRenderer components
 		auto view = GetCurrentSceneRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer>();

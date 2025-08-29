@@ -96,7 +96,7 @@ namespace Engine {
 			std::string label     = sndPtr->name;
 			float       wrapWidth = iconSize; // restrict text to same width as preview
 			ImVec2      textSize  = ImGui::CalcTextSize(label.c_str(), nullptr, false, wrapWidth);
-			SelectableBackground(textSize, id, "Sound", "ASSET_SOUND");
+			SelectableBackground(textSize, id, "Audio::SoundBuffer", "ASSET_SOUND");
 
 
 			ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_audioIconTexture->GetID())), ImVec2(iconSize, iconSize));

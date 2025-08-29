@@ -20,7 +20,10 @@
 #include "rendering/ui/IconsFontAwesome6.h"
 namespace Engine {
 
-	void DrawSceneViewWindow()
+	ImGuizmo::OPERATION SceneViewWindow::mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+	ImGuizmo::MODE      SceneViewWindow::mCurrentGizmoMode      = ImGuizmo::LOCAL;
+
+	void SceneViewWindow::DrawSceneViewWindow()
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 
