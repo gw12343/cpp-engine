@@ -502,17 +502,10 @@
                             }
                         },
                         {
-                            "key": "MOUSE_SENSITIVITY",
+                            "key": "SHOOT_POWER",
                             "value": {
                                 "index": 0,
-                                "data": 0.10000000149011612
-                            }
-                        },
-                        {
-                            "key": "GRAVITY_SCALE",
-                            "value": {
-                                "index": 0,
-                                "data": 2.0
+                                "data": 111.0
                             }
                         },
                         {
@@ -530,17 +523,24 @@
                             }
                         },
                         {
-                            "key": "SHOOT_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 111.0
-                            }
-                        },
-                        {
                             "key": "JUMP_POWER",
                             "value": {
                                 "index": 0,
                                 "data": 8.0
+                            }
+                        },
+                        {
+                            "key": "GRAVITY_SCALE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
+                            }
+                        },
+                        {
+                            "key": "MOUSE_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.10000000149011612
                             }
                         }
                     ]
@@ -916,15 +916,15 @@
                         "z": 6.556613922119141
                     },
                     "rotation": {
-                        "x": 0.0,
-                        "y": 0.4922146201133728,
-                        "z": 0.0,
-                        "w": 0.8704738616943359
+                        "x": 0.12429144978523255,
+                        "y": 0.42099127173423769,
+                        "z": -0.03588531166315079,
+                        "w": 0.897791862487793
                     },
                     "scale": {
-                        "x": 5.000005722045898,
-                        "y": 5.000003814697266,
-                        "z": 5.00000524520874
+                        "x": 5.0000762939453129,
+                        "y": 5.000079154968262,
+                        "z": 5.000147819519043
                     }
                 }
             },
@@ -2222,6 +2222,15 @@
                     "scriptPath": "scripts/floor.lua",
                     "variables": [
                         {
+                            "key": "playerEnt",
+                            "value": {
+                                "index": 12,
+                                "data": {
+                                    "guid": "eceb7a1979a7c1a4fab790e5875c2fde"
+                                }
+                            }
+                        },
+                        {
                             "key": "pos2",
                             "value": {
                                 "index": 2,
@@ -2238,15 +2247,6 @@
                                 "index": 11,
                                 "data": {
                                     "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
-                                }
-                            }
-                        },
-                        {
-                            "key": "playerEnt",
-                            "value": {
-                                "index": 12,
-                                "data": {
-                                    "guid": "eceb7a1979a7c1a4fab790e5875c2fde"
                                 }
                             }
                         }

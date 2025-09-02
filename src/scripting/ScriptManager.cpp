@@ -106,8 +106,8 @@ namespace Engine {
 #ifndef GAME_BUILD
 		// Watch the scripts folder recursively
 		efsw::WatchID id = fw.addWatch("scripts", &listener, true);
-#endif
 		fw.watch();
+#endif
 	}
 
 	void ScriptManager::ReloadEditorScript()
@@ -141,7 +141,7 @@ namespace Engine {
 		scriptDeltaTime = dt;
 
 		if (GetState() == EDITOR) {
-            #ifndef GAME_BUILD
+#ifndef GAME_BUILD
 			// Editor script
 			if (luaUpdate.valid()) {
 				try {
@@ -151,7 +151,7 @@ namespace Engine {
 					log->error("Lua error in onUpdate: {}", e.what());
 				}
 			}
-            #endif
+#endif
 		}
 		else if (GetState() == PLAYING) {
 			{

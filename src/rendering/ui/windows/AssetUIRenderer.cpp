@@ -5,18 +5,70 @@
 #include "AssetUIRenderer.h"
 #include "imgui.h"
 #include "imgui_internal.h"
-#include <unordered_map>
-#include "typeindex"
 #include "functional"
 #include "terrain/TerrainTile.h"
 #include "rendering/Renderer.h"
+#include "efsw/efsw.hpp"
+#include "utils/Utils.h"
+#include "rendering/particles/Particle.h"
+#include <filesystem>
+#include <functional>
 
 #define DEFAULT_ICON_SIZE 128.0f
-
+namespace fs = std::filesystem;
 
 namespace Engine {
 
 	float iconSize = DEFAULT_ICON_SIZE;
+
+#define DELETE_IF(name, type, extt, fp)                                                                                                                                                                                                        \
+	void DeleteAssetIf_##name(std::string filePath, std::string metaPath, std::string ext, std::string dir)                                                                                                                                    \
+	{                                                                                                                                                                                                                                          \
+		if (dir == fp && ext == extt) {                                                                                                                                                                                                        \
+			AssetHandle<type> handle = GetAssetManager().Load<type>(filePath);                                                                                                                                                                 \
+			GetAssetManager().Unload(handle);                                                                                                                                                                                                  \
+                                                                                                                                                                                                                                               \
+			if (fs::exists(metaPath)) {                                                                                                                                                                                                        \
+				std::error_code ec;                                                                                                                                                                                                            \
+				GetUI().log->info("path: {}", metaPath);                                                                                                                                                                                       \
+				std::filesystem::remove(metaPath, ec);                                                                                                                                                                                         \
+                                                                                                                                                                                                                                               \
+				GetUI().log->info("deleted {} metafile: {}", #name, metaPath);                                                                                                                                                                 \
+			}                                                                                                                                                                                                                                  \
+		}                                                                                                                                                                                                                                      \
+	}
+
+	DELETE_IF(Material, Material, ".material", "resources/materials/")
+	DELETE_IF(Model, Rendering::Model, ".obj", "resources/models/")
+	DELETE_IF(Particle, Particle, ".efk", "resources/particles/")
+	DELETE_IF(Sound, Audio::SoundBuffer, ".wav", "resources/sounds/")
+	DELETE_IF(Terrain, Terrain::TerrainTile, ".bin", "resources/terrain/")
+	DELETE_IF(Texture, Texture, ".png", "resources/textures/")
+
+
+	void AssetWatcher::handleFileAction(efsw::WatchID watchid, const std::string& dir, const std::string& filename, efsw::Action action, std::string oldFilename)
+	{
+		fs::path    filePath = dir + filename;
+		fs::path    metaPath = dir + filename + ".meta";
+		std::string ext      = filePath.extension();
+
+
+		// TODO add loading
+		switch (action) {
+			case efsw::Actions::Delete:
+				GetUI().log->debug("Detected deleted file: {}", filePath.c_str());
+
+				DeleteAssetIf_Material(filePath, metaPath, ext, dir);
+				DeleteAssetIf_Model(filePath, metaPath, ext, dir);
+				DeleteAssetIf_Particle(filePath, metaPath, ext, dir);
+				DeleteAssetIf_Sound(filePath, metaPath, ext, dir);
+				DeleteAssetIf_Terrain(filePath, metaPath, ext, dir);
+				DeleteAssetIf_Texture(filePath, metaPath, ext, dir);
+
+
+				break;
+		}
+	}
 
 
 	AssetUIRenderer::AssetUIRenderer()
@@ -307,3 +359,5 @@ namespace Engine {
 		return clicked;
 	}
 } // namespace Engine
+
+#include "assets/AssetManager.inl"

@@ -72,6 +72,9 @@ namespace Engine::UI {
 #ifndef GAME_BUILD
 		m_audioIconTexture->LoadFromFile("resources/engine/speaker.png");
 		m_terrainIconTexture->LoadFromFile("resources/engine/mountain.png");
+
+		efsw::WatchID id = m_uiAssetRenderer->fw.addWatch("resources", &m_uiAssetRenderer->listener, true);
+		m_uiAssetRenderer->fw.watch();
 #endif
 	}
 
