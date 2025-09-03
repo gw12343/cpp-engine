@@ -3,17 +3,26 @@ out vec4 FragColor;
 
 in vec3 TexCoords;
 
-uniform sampler2D skybox;
+uniform sampler2D skybox;// <-- equirectangular HDR map
+
+vec2 SampleSphericalMap(vec3 v)
+{
+    vec2 uv = vec2(atan(v.z, v.x), asin(v.y));
+    uv *= vec2(0.1591, 0.3183);// (1/2PI, 1/PI)
+    uv += 0.5;
+    return uv;
+}
 
 void main()
-{    
-    // Convert cube coordinates to spherical coordinates for EXR mapping
+{
     vec3 dir = normalize(TexCoords);
-    float phi = atan(dir.z, dir.x);
-    float theta = asin(dir.y);
-    
-    // Map to UV coordinates
-    vec2 uv = vec2(phi / (2.0 * 3.14159) + 0.5, theta / 3.14159 + 0.5);
-    
-    FragColor = texture(skybox, uv);
+    vec2 uv = SampleSphericalMap(dir);
+
+    vec3 color = texture(skybox, uv).rgb;
+
+    // Optional tonemap + gamma
+    color = color / (color + vec3(1.0));
+    color = pow(color, vec3(1.0/2.2));
+
+    FragColor = vec4(color, 1.0);
 }

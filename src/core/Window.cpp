@@ -19,8 +19,9 @@ namespace Engine {
 
 	Window::Window(int width, int height, std::string title) : m_window(nullptr), m_width(width), m_height(height), m_title(std::move(title))
 	{
-		m_frameBuffers[Window::FramebufferID::GAME_OUT]      = std::make_shared<Framebuffer>(GL_LINEAR, GL_LINEAR);
-		m_frameBuffers[Window::FramebufferID::MOUSE_PICKING] = std::make_shared<Framebuffer>(GL_NEAREST, GL_NEAREST);
+		m_frameBuffers[Window::FramebufferID::GAME_OUT]      = std::make_shared<Framebuffer>(FramebufferType::Standard, GL_LINEAR, GL_LINEAR);
+		m_frameBuffers[Window::FramebufferID::MOUSE_PICKING] = std::make_shared<Framebuffer>(FramebufferType::Standard, GL_NEAREST, GL_NEAREST);
+		m_frameBuffers[Window::FramebufferID::GBUFFER]       = std::make_shared<Framebuffer>(FramebufferType::GBuffer, GL_NEAREST, GL_NEAREST);
 	}
 
 
@@ -46,6 +47,7 @@ namespace Engine {
 
 		// Set window hints to allow resizing
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+		glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 
 		m_window = glfwCreateWindow(m_width, m_height, m_title.c_str(), nullptr, nullptr);

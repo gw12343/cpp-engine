@@ -52,7 +52,7 @@ namespace Engine {
 
 		ImVec2 topLeft = ImGui::GetCursorScreenPos();
 
-		GLuint tex = Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->texture;
+		GLuint tex = Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->GetColorAttachment(0);
 
 		ImGui::Image((ImTextureID) tex, ImVec2(width, height), ImVec2(0, 1), ImVec2(1, 0));
 

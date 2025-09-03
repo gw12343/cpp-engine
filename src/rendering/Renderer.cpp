@@ -13,12 +13,43 @@
 
 namespace Engine {
 
+	unsigned int quadVAO = 0;
+	unsigned int quadVBO;
+
+	void InitQuad()
+	{
+		float quadVertices[] = {// positions   // texCoords
+		                        -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 1.0f, 0.0f,
+
+		                        -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  1.0f, 1.0f};
+		glGenVertexArrays(1, &quadVAO);
+		glGenBuffers(1, &quadVBO);
+		glBindVertexArray(quadVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*) 0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*) (2 * sizeof(float)));
+	}
+
+
 	void Renderer::onInit()
 	{
 		m_shadowRenderer = std::make_shared<ShadowMapRenderer>();
 
-		if (!m_shader.LoadFromFiles("resources/shaders/vert.glsl", "resources/shaders/frag.glsl", std::nullopt)) {
-			log->error("Failed to load default shader");
+		//		if (!m_shader.LoadFromFiles("resources/shaders/vert.glsl", "resources/shaders/frag.glsl", std::nullopt)) {
+		//			log->error("Failed to load default shader");
+		//			return;
+		//		}
+
+		if (!m_gbufferShader.LoadFromFiles("resources/shaders/gbuffer_model.vert", "resources/shaders/gbuffer_model.frag", std::nullopt)) {
+			log->error("Failed to load gbuffer shader");
+			return;
+		}
+
+		if (!m_lightingPassShader.LoadFromFiles("resources/shaders/lighting_pass.vert", "resources/shaders/lighting_pass.frag", std::nullopt)) {
+			log->error("Failed to load lighting pass shader");
 			return;
 		}
 
@@ -53,6 +84,7 @@ namespace Engine {
 		glCullFace(GL_BACK);
 
 		m_shadowRenderer->Initalize();
+		InitQuad();
 	}
 
 	void Renderer::PreRender()
@@ -62,14 +94,14 @@ namespace Engine {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Bind our shader
-		m_shader.Bind();
+		m_gbufferShader.Bind();
 
 		// Set up view and projection matrices
 		glm::mat4 view       = GetCamera().GetViewMatrix();
 		glm::mat4 projection = GetCamera().GetProjectionMatrix();
 
-		m_shader.SetMat4("view", &view);
-		m_shader.SetMat4("projection", &projection);
+		m_gbufferShader.SetMat4("view", &view);
+		m_gbufferShader.SetMat4("projection", &projection);
 	}
 
 	void Renderer::PostRender()
@@ -81,24 +113,84 @@ namespace Engine {
 	{
 	}
 
+
+	void Renderer::RenderLightingPass()
+	{
+		// Use the deferred lighting shader
+		m_lightingPassShader.Bind();
+
+		// Set uniforms
+		m_lightingPassShader.SetVec3("viewPos", GetCamera().GetPosition());
+		m_lightingPassShader.SetVec3("lightDir", glm::vec3(-0.2f, -1.0f, -0.3f));
+		m_lightingPassShader.SetVec3("lightColor", glm::vec3(1.0f));
+
+		m_lightingPassShader.SetInt("gPosition", 0);
+		m_lightingPassShader.SetInt("gNormal", 1);
+		m_lightingPassShader.SetInt("gAlbedoSpec", 2);
+
+		// Draw quad
+		glBindVertexArray(quadVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindVertexArray(0);
+	}
+
 	void Renderer::onUpdate(float dt)
 	{
 		PreRender();
-		RenderShadowMaps();
-#ifndef GAME_BUILD
-		Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->Bind();
-#endif
-		PreRender();
-		GetAnimationManager().Render();
-		RenderEntities();
-		GetTerrainManager().Render();
-		RenderSkybox();
-		GetParticleManager().Render();
-#ifndef GAME_BUILD
-		Engine::Window::GetFramebuffer(Window::FramebufferID::MOUSE_PICKING)->Bind();
-		RenderEntitiesMousePicking();
-#endif
+
+		// --------------------
+		// 1️⃣ GEOMETRY PASS -> G-BUFFER
+		// --------------------
+		auto gbuffer = Engine::Window::GetFramebuffer(Window::FramebufferID::GBUFFER);
+		gbuffer->Bind();
+
+
+		glClearColor(0.0, 0.0, 0.0, 1.0); // keep it black so it doesn't leak into g-buffer
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		m_gbufferShader.Bind();
+
+		RenderEntities(); // writes geometry to G-buffer
 		Engine::Framebuffer::Unbind();
+
+
+		// --------------------
+		// 2️⃣ SKYBOX PASS -> GAME_OUT
+		// --------------------
+		auto gameOut = Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT);
+		gameOut->Bind();
+
+		// Clear color buffer; depth will be used for skybox
+		// glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+		// --------------------
+		// 3️⃣ LIGHTING PASS -> GAME_OUT
+		// --------------------
+		// Bind G-buffer textures for lighting shader
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, gbuffer->GetColorAttachment(0)); // gPosition
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, gbuffer->GetColorAttachment(1)); // gNormal
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, gbuffer->GetColorAttachment(2)); // gAlbedoSpec
+
+		RenderLightingPass(); // fullscreen quad; skips empty pixels
+
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer->GetFBO());
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gameOut->GetFBO()); // write to default framebuffer
+		glBlitFramebuffer(0, 0, GetWindow().GetWidth(), GetWindow().GetHeight(), 0, 0, GetWindow().GetWidth(), GetWindow().GetHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+
+		RenderSkybox();
+
+		Engine::Framebuffer::Unbind();
+
+
+		// --------------------
+		// 4️⃣ POST-PROCESS
+		// --------------------
 		PostRender();
 	}
 
@@ -108,14 +200,14 @@ namespace Engine {
 		glDisable(GL_CULL_FACE);
 		ENGINE_GLCheckError();
 		glm::mat4 V = GetCamera().GetViewMatrix();
-		m_shadowRenderer->UploadShadowMatrices(m_shader, V, 3);
+		// m_shadowRenderer->UploadShadowMatrices(m_gbufferShader, V, 3);
 		ENGINE_GLCheckError();
 		// Create a view for entities with Transform and ModelRenderer components
 		auto view = GetCurrentSceneRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer>();
 		for (auto [entity, metadata, transform, renderer] : view.each()) {
 			if (!renderer.visible) continue;
 			// Draw model
-			renderer.Draw(GetShader(), transform, true);
+			renderer.Draw(m_gbufferShader, transform, true);
 		}
 	}
 

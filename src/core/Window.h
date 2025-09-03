@@ -11,7 +11,7 @@ namespace Engine {
 
 	class Window : public Module {
 	  public:
-		enum class FramebufferID { GAME_OUT, MOUSE_PICKING };
+		enum class FramebufferID { GAME_OUT, MOUSE_PICKING, GBUFFER };
 
 		Window(int width, int height, std::string title);
 

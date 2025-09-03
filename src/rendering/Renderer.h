@@ -29,8 +29,9 @@ namespace Engine {
 		void RenderEntities();
 		void RenderShadowMaps();
 		void RenderSkybox();
+		void RenderLightingPass();
 
-		Shader& GetShader() { return m_shader; }
+		// Shader& GetShader() { return m_shader; }
 		Shader& GetMousePickingShader() { return m_mousePickingShader; }
 		Shader& GetModelPreviewShader() { return m_modelPreviewShader; }
 		Shader& GetTerrainShader() { return m_terrainShader; }
@@ -40,8 +41,10 @@ namespace Engine {
 	  private:
 		std::shared_ptr<ShadowMapRenderer> m_shadowRenderer;
 
-		Engine::Shader          m_shader;
+		// Engine::Shader          m_shader;
 		Engine::Shader          m_mousePickingShader;
+		Engine::Shader          m_gbufferShader;
+		Engine::Shader          m_lightingPassShader;
 		Engine::Shader          m_modelPreviewShader;
 		Engine::Shader          m_terrainShader;
 		Engine::Shader          m_skyboxShader;
