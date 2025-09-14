@@ -33,6 +33,7 @@
 #include <sol/function.hpp>
 
 #include "components/Components.h"
+#include "animation/Animation.h"
 
 #include <cereal/cereal.hpp>
 #include <cereal/types/vector.hpp>
@@ -41,21 +42,26 @@
 namespace Engine::Components {
 	class AnimationComponent : public Component {
 	  public:
-		ozz::animation::Animation* animation = nullptr;
-		std::string                animationPath;
+		AssetHandle<Animation>                animation;
+		ozz::animation::SamplingJob::Context* context   = nullptr;
+		float                                 timescale = 0.0;
 
 		template <class Archive>
 		void serialize(Archive& ar)
 		{
-			ar(cereal::make_nvp("animationPath", animationPath));
+			ar(CEREAL_NVP(animation));
 		}
 
 		AnimationComponent() = default;
-		explicit AnimationComponent(ozz::animation::Animation* animation) : animation(animation) {}
-		explicit AnimationComponent(std::string animationPath) : animationPath(std::move(animationPath)) {}
 		void OnAdded(Entity& entity) override;
 		void OnRemoved(Entity& entity) override;
 		void RenderInspector(Entity& entity) override;
+
+		void SetAnimation(AssetHandle<Animation> animation);
+
+		static void CleanAnimationContexts();
+
+		static std::unordered_set<ozz::animation::SamplingJob::Context*> s_contexts;
 	};
 } // namespace Engine::Components
 

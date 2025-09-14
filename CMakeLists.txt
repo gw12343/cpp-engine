@@ -211,7 +211,9 @@ file(GLOB_RECURSE SOURCES "lib/src/*.cpp" "lib/src/*.c" "src/*.cpp" "src/*.inl")
 #add_compile_definitions(GAME_BUILD)
 
 add_executable(${PROJECT_NAME} ${SOURCES}
-        src/utils/Builder.cpp)
+        src/utils/Builder.cpp
+        src/animation/Animation.h
+        src/animation/Animation.cpp)
 
 
 target_include_directories(${PROJECT_NAME} PRIVATE

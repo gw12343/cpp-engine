@@ -13,6 +13,10 @@
 #include "ozz/base/containers/vector.h"
 #include "ozz/base/log.h"
 #include "ozz/base/memory/unique_ptr.h"
+#include "rendering/Material.h"
+
+#include "entt/entt.hpp"
+#include "rendering/Shader.h"
 
 
 // Provides helper macro to test for glGetError on a gl call.
@@ -62,57 +66,65 @@ typedef int          GLsizei;
 class RendererImpl : public AnimatedRenderer {
   public:
 	RendererImpl();
-	virtual ~RendererImpl();
+	~RendererImpl() override;
 
 	// See Renderer for all the details about the API.
-	virtual bool Initialize();
+	bool Initialize() override;
 
-	virtual bool DrawAxes(const ozz::math::Float4x4& _transform);
+	bool DrawAxes(const ozz::math::Float4x4& _transform) override;
 
-	virtual bool DrawGrid(int _cell_count, float _cell_size);
+	bool DrawGrid(int _cell_count, float _cell_size) override;
 
-	virtual bool DrawSkeleton(const ozz::animation::Skeleton& _skeleton, const ozz::math::Float4x4& _transform, bool _draw_joints);
+	bool DrawSkeleton(const ozz::animation::Skeleton& _skeleton, const ozz::math::Float4x4& _transform, bool _draw_joints) override;
 
-	virtual bool DrawPosture(const ozz::animation::Skeleton& _skeleton, ozz::span<const ozz::math::Float4x4> _matrices, const ozz::math::Float4x4& _transform, bool _draw_joints);
+	bool DrawPosture(const ozz::animation::Skeleton& _skeleton, ozz::span<const ozz::math::Float4x4> _matrices, const ozz::math::Float4x4& _transform, bool _draw_joints) override;
 
-	virtual bool DrawPoints(const ozz::span<const float>& _positions, const ozz::span<const float>& _sizes, const ozz::span<const Engine::Color>& _colors, const ozz::math::Float4x4& _transform, bool _screen_space);
+	bool DrawPoints(const ozz::span<const float>& _positions, const ozz::span<const float>& _sizes, const ozz::span<const Engine::Color>& _colors, const ozz::math::Float4x4& _transform, bool _screen_space) override;
 
-	virtual bool DrawBoxIm(const ozz::math::Box& _box, const ozz::math::Float4x4& _transform, const Engine::Color& _color);
+	bool DrawBoxIm(const ozz::math::Box& _box, const ozz::math::Float4x4& _transform, const Engine::Color& _color) override;
 
-	virtual bool DrawBoxIm(const ozz::math::Box& _box, const ozz::math::Float4x4& _transform, const Engine::Color _colors[2]);
+	bool DrawBoxIm(const ozz::math::Box& _box, const ozz::math::Float4x4& _transform, const Engine::Color _colors[2]) override;
 
-	virtual bool DrawBoxShaded(const ozz::math::Box& _box, ozz::span<const ozz::math::Float4x4> _transforms, const Engine::Color& _color);
+	bool DrawBoxShaded(const ozz::math::Box& _box, ozz::span<const ozz::math::Float4x4> _transforms, const Engine::Color& _color) override;
 
-	virtual bool DrawSphereIm(float _radius, const ozz::math::Float4x4& _transform, const Engine::Color& _color);
+	bool DrawSphereIm(float _radius, const ozz::math::Float4x4& _transform, const Engine::Color& _color) override;
 
-	virtual bool DrawSphereShaded(float _radius, ozz::span<const ozz::math::Float4x4> _transforms, const Engine::Color& _color);
+	bool DrawSphereShaded(float _radius, ozz::span<const ozz::math::Float4x4> _transforms, const Engine::Color& _color) override;
 
-	virtual bool DrawSkinnedMesh(const Engine::Mesh& _mesh, const ozz::span<ozz::math::Float4x4> _skinning_matrices, const ozz::math::Float4x4& _transform, const Options& _options = Options());
+	virtual bool DrawSkinnedMesh(const Engine::Mesh& _mesh, ozz::span<ozz::math::Float4x4> _skinning_matrices, const ozz::math::Float4x4& _transform, AssetHandle<Material> _material, const Options& _options = Options());
+	bool         DrawSkinnedMeshMousePicking(glm::vec3 entityColor, const Engine::Mesh& _mesh, ozz::span<ozz::math::Float4x4> _skinning_matrices, const ozz::math::Float4x4& _transform);
+	bool         DrawSkinnedMeshShadows(Engine::Shader* shadowShader, const Engine::Mesh& _mesh, ozz::span<ozz::math::Float4x4> _skinning_matrices, const ozz::math::Float4x4& _transform);
 
-	virtual bool DrawMesh(const Engine::Mesh& _mesh, const ozz::math::Float4x4& _transform, const Options& _options = Options());
+	virtual bool DrawMesh(const Engine::Mesh& _mesh, const ozz::math::Float4x4& _transform, AssetHandle<Material> _material, const Options& _options = Options());
 
-	virtual bool DrawLines(ozz::span<const ozz::math::Float3> _vertices, const Engine::Color& _color, const ozz::math::Float4x4& _transform);
+	bool DrawLines(ozz::span<const ozz::math::Float3> _vertices, const Engine::Color& _color, const ozz::math::Float4x4& _transform) override;
 
-	virtual bool DrawLineStrip(ozz::span<const ozz::math::Float3> _vertices, const Engine::Color& _color, const ozz::math::Float4x4& _transform);
+	bool DrawLineStrip(ozz::span<const ozz::math::Float3> _vertices, const Engine::Color& _color, const ozz::math::Float4x4& _transform) override;
 
-	virtual bool DrawVectors(
-	    ozz::span<const float> _positions, size_t _positions_stride, ozz::span<const float> _directions, size_t _directions_stride, int _num_vectors, float _vector_length, const Engine::Color& _color, const ozz::math::Float4x4& _transform);
+	bool DrawVectors(ozz::span<const float>     _positions,
+	                 size_t                     _positions_stride,
+	                 ozz::span<const float>     _directions,
+	                 size_t                     _directions_stride,
+	                 int                        _num_vectors,
+	                 float                      _vector_length,
+	                 const Engine::Color&       _color,
+	                 const ozz::math::Float4x4& _transform) override;
 
-	virtual bool DrawBinormals(ozz::span<const float>     _positions,
-	                           size_t                     _positions_stride,
-	                           ozz::span<const float>     _normals,
-	                           size_t                     _normals_stride,
-	                           ozz::span<const float>     _tangents,
-	                           size_t                     _tangents_stride,
-	                           ozz::span<const float>     _handenesses,
-	                           size_t                     _handenesses_stride,
-	                           int                        _num_vectors,
-	                           float                      _vector_length,
-	                           const Engine::Color&       _color,
-	                           const ozz::math::Float4x4& _transform);
+	bool DrawBinormals(ozz::span<const float>     _positions,
+	                   size_t                     _positions_stride,
+	                   ozz::span<const float>     _normals,
+	                   size_t                     _normals_stride,
+	                   ozz::span<const float>     _tangents,
+	                   size_t                     _tangents_stride,
+	                   ozz::span<const float>     _handenesses,
+	                   size_t                     _handenesses_stride,
+	                   int                        _num_vectors,
+	                   float                      _vector_length,
+	                   const Engine::Color&       _color,
+	                   const ozz::math::Float4x4& _transform) override;
 
 	// Get GL immediate renderer implementation;
-	GlImmediateRenderer* immediate_renderer() const { return immediate_.get(); }
+	[[nodiscard]] GlImmediateRenderer* immediate_renderer() const { return immediate_.get(); }
 
   private:
 	// Defines the internal structure used to define a model.
@@ -136,7 +148,7 @@ class RendererImpl : public AnimatedRenderer {
 
 	// Initializes the checkered texture.
 	// Return true if initialization succeeded.
-	bool InitCheckeredTexture();
+	// bool InitCheckeredTexture();
 
 	// Draw posture internal non-instanced rendering fall back implementation.
 	void DrawPosture_Impl(const ozz::math::Float4x4& _transform, const float* _uniforms, int _instance_count, bool _draw_joints);
@@ -187,7 +199,8 @@ class RendererImpl : public AnimatedRenderer {
 	ozz::unique_ptr<AmbientTexturedShader>  ambient_textured_shader;
 	ozz::unique_ptr<AmbientShaderInstanced> ambient_shader_instanced;
 	ozz::unique_ptr<PointsShader>           points_shader;
+	Engine::Shader                          m_animation_mouse_picking_shader;
 
 	// Checkered texture
-	GLuint checkered_texture_ = 0;
+	// GLuint checkered_texture_ = 0;
 };

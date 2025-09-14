@@ -67,11 +67,13 @@ namespace Engine::UI {
 		m_materialEditor    = std::make_unique<MaterialEditor>();
 		m_inspectorRenderer = std::make_unique<InspectorRenderer>();
 
-		m_audioIconTexture   = std::make_shared<Texture>();
-		m_terrainIconTexture = std::make_shared<Texture>();
+		m_audioIconTexture     = std::make_shared<Texture>();
+		m_terrainIconTexture   = std::make_shared<Texture>();
+		m_animationIconTexture = std::make_shared<Texture>();
 #ifndef GAME_BUILD
 		m_audioIconTexture->LoadFromFile("resources/engine/speaker.png");
 		m_terrainIconTexture->LoadFromFile("resources/engine/mountain.png");
+		m_animationIconTexture->LoadFromFile("resources/engine/animation.png");
 
 		efsw::WatchID id = m_uiAssetRenderer->fw.addWatch("resources", &m_uiAssetRenderer->listener, true);
 		m_uiAssetRenderer->fw.watch();

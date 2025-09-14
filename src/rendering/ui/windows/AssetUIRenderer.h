@@ -31,6 +31,7 @@ namespace Engine {
 		void DrawTextureAssets();
 		void DrawModelAssets();
 		void DrawMaterialAssets();
+		void DrawAnimationAssets();
 
 
 		static bool SelectableBackground(ImVec2 textSize, std::string id, const char* type, const char* typeName);

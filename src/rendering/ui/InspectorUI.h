@@ -8,6 +8,8 @@
 #include "imgui.h"
 #include "assets/AssetHandle.h"
 #include "core/EntityHandle.h"
+#include "ozz/animation/runtime/animation.h"
+#include "animation/Animation.h"
 #include <string>
 
 namespace Engine {
@@ -56,6 +58,7 @@ namespace Engine {
 	LL_ASSET(Scene, Scene);
 	LL_ASSET(Particle, Particle);
 	LL_ASSET(Material, Material);
+	LL_ASSET(Animation, Animation);
 
 	bool LeftLabelEntity(const char* label, EntityHandle* assetRef);
 

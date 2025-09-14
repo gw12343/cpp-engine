@@ -12,7 +12,10 @@
 #include "components/impl/EntityMetadataComponent.h"
 #include "components/impl/ModelRendererComponent.h"
 #include "components/impl/ShadowCasterComponent.h"
+#include "components/impl/SkinnedMeshComponent.h"
+#include "components/impl/AnimationPoseComponent.h"
 #include <glad/glad.h>
+#include "animation/AnimationManager.h"
 
 namespace Engine {
 
@@ -116,6 +119,10 @@ namespace Engine {
 			GetDefaultLogger()->error("Failed to load depth shader");
 		}
 
+		if (!m_animationDepthShader.LoadFromFiles("resources/shaders/depth_anim.vert", "resources/shaders/depth_anim.frag", "resources/shaders/depth_anim.geom")) {
+			GetDefaultLogger()->error("Failed to load animation depth shader");
+		}
+
 
 		glGenFramebuffers(1, &lightFBO);
 
@@ -185,6 +192,41 @@ namespace Engine {
 			m_depthShader.SetMat4("model", &modelMatrix);
 			model->Draw(m_depthShader, true, true);
 		}
+
+		m_animationDepthShader.Bind();
+
+		glBindBuffer(GL_UNIFORM_BUFFER, matricesUBO);
+		for (size_t i = 0; i < lightMatrices.size(); ++i) {
+			glBufferSubData(GL_UNIFORM_BUFFER, static_cast<GLintptr>(i * sizeof(glm::mat4x4)), sizeof(glm::mat4x4), glm::value_ptr(lightMatrices[i]));
+		}
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+
+		auto viewAnim = GetCurrentSceneRegistry().view<Engine::Components::EntityMetadata, Components::SkinnedMeshComponent, Components::Transform, Components::ShadowCaster>();
+		for (auto entity : viewAnim) {
+			Entity e(entity, GetCurrentScene());
+			auto&  skinnedMeshComponent   = e.GetComponent<Components::SkinnedMeshComponent>();
+			auto&  animationPoseComponent = e.GetComponent<Components::AnimationPoseComponent>();
+
+			const ozz::math::Float4x4 model = FromMatrix(e.GetComponent<Components::Transform>().GetMatrix());
+
+
+			// Render each mesh
+			for (const Engine::Mesh& mesh : *skinnedMeshComponent.meshes) {
+				// Render the mesh
+
+				// Builds skinning matrices, based on the output of the animation stage
+				// The mesh might not use (aka be skinned by) all skeleton joints. We
+				// use the joint remapping table (available from the mesh object) to
+				// reorder model-space matrices and build skinning ones
+				for (size_t i = 0; i < mesh.joint_remaps.size(); ++i) {
+					(*skinnedMeshComponent.skinning_matrices)[i] = (*animationPoseComponent.model_pose)[mesh.joint_remaps[i]] * mesh.inverse_bind_poses[i];
+				}
+
+				GetAnimationManager().renderer_->DrawSkinnedMeshShadows(&m_animationDepthShader, mesh, ozz::make_span(*skinnedMeshComponent.skinning_matrices), model);
+			}
+		}
+
 
 		// Unbind shadow buffer now
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);

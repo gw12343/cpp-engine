@@ -10,6 +10,7 @@
 #include "imgui_internal.h"
 #include "rendering/particles/Particle.h"
 #include "IconsFontAwesome6.h"
+#include "animation/Animation.h"
 
 
 namespace Engine {
@@ -284,6 +285,7 @@ namespace Engine {
 	LL_ASSET_DEF(Scene, Scene, "ASSET_SCENE", assetPtr->GetName().c_str())
 	LL_ASSET_DEF(Particle, Particle, "ASSET_PARTICLE", assetPtr->name.c_str())
 	LL_ASSET_DEF(Material, Material, "ASSET_MATERIAL", assetPtr->GetName().c_str())
+	LL_ASSET_DEF(Animation, Animation, "ASSET_ANIMATION", assetPtr->name.c_str())
 
 
 	bool LeftLabelEntity(const char* label, EntityHandle* assetRef)

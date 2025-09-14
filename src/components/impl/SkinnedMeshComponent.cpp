@@ -12,10 +12,8 @@
 #include "ozz/base/containers/vector.h"
 #include "ozz/base/maths/simd_math.h"
 #include <string>
-#include "rendering/particles/ParticleManager.h"
 #include "animation/AnimationManager.h"
-#include "scripting/ScriptManager.h"
-
+#include "rendering/ui/InspectorUI.h"
 namespace Engine::Components {
 	std::unordered_set<std::vector<ozz::math::Float4x4>*> SkinnedMeshComponent::s_skin_mats;
 	std::unordered_set<ozz::vector<Engine::Mesh>*>        SkinnedMeshComponent::s_all_meshes;
@@ -72,6 +70,7 @@ namespace Engine::Components {
 	{
 		ImGui::Text("Meshes: %s", meshes ? std::to_string(meshes->size()).c_str() : "Null");
 		ImGui::Text("Skinning Matrices: %s", skinning_matrices ? std::to_string(skinning_matrices->size()).c_str() : "Null");
+		LeftLabelAssetMaterial("Material", &meshMaterial);
 	}
 
 

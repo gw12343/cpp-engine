@@ -35,6 +35,7 @@ namespace Engine {
 
 			std::shared_ptr<Texture> m_audioIconTexture;
 			std::shared_ptr<Texture> m_terrainIconTexture;
+			std::shared_ptr<Texture> m_animationIconTexture;
 			AssetHandle<Material>    m_selectedMaterial;
 
 			// Selected entity

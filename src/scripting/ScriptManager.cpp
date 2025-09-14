@@ -15,7 +15,7 @@
 #include "components/impl/AudioSourceComponent.h"
 #include "components/impl/SkeletonComponent.h"
 #include "components/impl/AnimationPoseComponent.h"
-#include "components/impl/AnimationWorkerComponent.h"
+
 #include "components/impl/SkinnedMeshComponent.h"
 #include "components/impl/ParticleSystemComponent.h"
 #include "components/AllComponents.h"

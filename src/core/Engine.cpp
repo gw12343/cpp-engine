@@ -22,7 +22,6 @@
 #include "rendering/particles/ParticleManager.h"
 #include "rendering/ui/UIManager.h"
 #include "terrain/TerrainManager.h"
-#include "components/impl/AnimationWorkerComponent.h"
 #include "components/impl/SkinnedMeshComponent.h"
 #include "assets/AssetManager.h"
 #include "assets/impl/TextureLoader.h"
@@ -33,6 +32,8 @@
 #include "assets/impl/ParticleLoader.h"
 #include "assets/impl/MaterialLoader.h"
 #include "assets/impl/BinarySceneLoader.h"
+#include "assets/impl/AnimationLoader.h"
+#include "components/impl/AnimationComponent.h"
 
 
 namespace fs = std::filesystem;
@@ -54,6 +55,7 @@ namespace Engine {
 		GetAssetManager().RegisterLoader<Scene>(std::make_unique<SCENE_LOADER>());
 		GetAssetManager().RegisterLoader<Particle>(std::make_unique<ParticleLoader>());
 		GetAssetManager().RegisterLoader<Material>(std::make_unique<MaterialLoader>());
+		GetAssetManager().RegisterLoader<Animation>(std::make_unique<AnimationLoader>());
 
 		// Initialize Modules
 		Get().window    = std::make_shared<Window>(width, height, title);
@@ -94,8 +96,8 @@ namespace Engine {
 		manager.InitAll();
 
 		AssetHandle<Particle> testParticle = GetAssetManager().Load<Particle>("resources/particles/testleaf.efk");
+		LoadGameAssets();
 		GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>(SCENE1));
-		CreateInitialEntities();
 
 
 #ifdef GAME_BUILD
@@ -107,7 +109,7 @@ namespace Engine {
 	}
 
 
-	void GEngine::CreateInitialEntities()
+	void GEngine::LoadGameAssets()
 	{
 		// TODO store assets to be loaded at the start in scene json
 
@@ -142,6 +144,15 @@ namespace Engine {
 			if (entry.is_regular_file() && entry.path().extension() == ".wav") {
 				std::string path = entry.path().string();
 				GetAssetManager().Load<Audio::SoundBuffer>(path);
+			}
+		}
+
+		// Load all animations
+		folder = "resources/animations";
+		for (const auto& entry : fs::directory_iterator(folder)) {
+			if (entry.path().extension() == ".anim") { // entry.is_regular_file() &&
+				std::string path = entry.path().string();
+				GetAssetManager().Load<Animation>(path);
 			}
 		}
 
@@ -196,7 +207,7 @@ namespace Engine {
 	{
 		manager.ShutdownAll();
 
-		Components::AnimationWorkerComponent::CleanAnimationContexts();
+		Components::AnimationComponent::CleanAnimationContexts();
 		Components::SkinnedMeshComponent::CleanSkinnedModels();
 		Texture::CleanAllTextures();
 		Rendering::Mesh::CleanAllMeshes();

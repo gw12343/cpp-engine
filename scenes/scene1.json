@@ -93,9 +93,6 @@
             "AnimationPoseComponent": {
                 "nullopt": true
             },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
             "SkinnedMeshComponent": {
                 "nullopt": true
             },
@@ -185,9 +182,6 @@
                 "nullopt": true
             },
             "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
                 "nullopt": true
             },
             "SkinnedMeshComponent": {
@@ -281,9 +275,6 @@
             "AnimationPoseComponent": {
                 "nullopt": true
             },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
             "SkinnedMeshComponent": {
                 "nullopt": true
             },
@@ -373,9 +364,6 @@
                 "nullopt": true
             },
             "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
                 "nullopt": true
             },
             "SkinnedMeshComponent": {
@@ -469,9 +457,6 @@
             "AnimationPoseComponent": {
                 "nullopt": true
             },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
             "SkinnedMeshComponent": {
                 "nullopt": true
             },
@@ -502,17 +487,17 @@
                             }
                         },
                         {
-                            "key": "SHOOT_POWER",
+                            "key": "JUMP_POWER",
                             "value": {
                                 "index": 0,
-                                "data": 111.0
+                                "data": 8.0
                             }
                         },
                         {
-                            "key": "WALK_SPEED",
+                            "key": "SHOOT_POWER",
                             "value": {
                                 "index": 0,
-                                "data": 7.0
+                                "data": 16.299999237060548
                             }
                         },
                         {
@@ -520,13 +505,6 @@
                             "value": {
                                 "index": 0,
                                 "data": 1.100000023841858
-                            }
-                        },
-                        {
-                            "key": "JUMP_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 8.0
                             }
                         },
                         {
@@ -541,6 +519,13 @@
                             "value": {
                                 "index": 0,
                                 "data": 0.10000000149011612
+                            }
+                        },
+                        {
+                            "key": "WALK_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 7.0
                             }
                         }
                     ]
@@ -617,9 +602,6 @@
             "AnimationPoseComponent": {
                 "nullopt": true
             },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
             "SkinnedMeshComponent": {
                 "nullopt": true
             },
@@ -642,15 +624,16 @@
                 "nullopt": true
             },
             "ShadowCaster": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {}
             },
             "Transform": {
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": 4.140687942504883,
-                        "y": 0.8060288429260254,
-                        "z": -13.835820198059082
+                        "x": 4.319856643676758,
+                        "y": 0.8060293793678284,
+                        "z": -9.731695175170899
                     },
                     "rotation": {
                         "x": 0.0,
@@ -659,9 +642,9 @@
                         "w": 0.8155502676963806
                     },
                     "scale": {
-                        "x": 3.9299979209899904,
-                        "y": 3.929999828338623,
-                        "z": 3.9299979209899904
+                        "x": 3.000000238418579,
+                        "y": 3.0,
+                        "z": 3.000000238418579
                     }
                 }
             },
@@ -680,27 +663,28 @@
             "SkeletonComponent": {
                 "nullopt": false,
                 "data": {
-                    "skeletonPath": "resources/models/ruby_skeleton.ozz"
+                    "skeletonPath": "resources/animations/skeleton.ozz"
                 }
             },
             "AnimationComponent": {
                 "nullopt": false,
                 "data": {
-                    "animationPath": "resources/models/ruby_animation.ozz"
+                    "animation": {
+                        "guid": "743da2e1d4419eca4173b635ae99cf2c"
+                    }
                 }
             },
             "AnimationPoseComponent": {
                 "nullopt": false,
                 "data": {}
             },
-            "AnimationWorkerComponent": {
-                "nullopt": false,
-                "data": {}
-            },
             "SkinnedMeshComponent": {
                 "nullopt": false,
                 "data": {
-                    "meshPath": "resources/models/ruby_mesh.ozz"
+                    "meshPath": "resources/animations/s.ozz",
+                    "meshMaterial": {
+                        "guid": "4f843329315c8297e0905d030736e961"
+                    }
                 }
             },
             "ParticleSystem": {
@@ -770,9 +754,6 @@
                 "nullopt": true
             },
             "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
                 "nullopt": true
             },
             "SkinnedMeshComponent": {
@@ -876,9 +857,6 @@
             "AnimationPoseComponent": {
                 "nullopt": true
             },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
             "SkinnedMeshComponent": {
                 "nullopt": true
             },
@@ -916,9 +894,9 @@
                         "z": 6.556613922119141
                     },
                     "rotation": {
-                        "x": 0.12429144978523255,
+                        "x": 0.1242915466427803,
                         "y": 0.42099127173423769,
-                        "z": -0.03588531166315079,
+                        "z": -0.03588535264134407,
                         "w": 0.897791862487793
                     },
                     "scale": {
@@ -972,9 +950,6 @@
                 "nullopt": true
             },
             "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
                 "nullopt": true
             },
             "SkinnedMeshComponent": {
@@ -1068,9 +1043,6 @@
             "AnimationPoseComponent": {
                 "nullopt": true
             },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
             "SkinnedMeshComponent": {
                 "nullopt": true
             },
@@ -1160,9 +1132,6 @@
                 "nullopt": true
             },
             "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
                 "nullopt": true
             },
             "SkinnedMeshComponent": {
@@ -1256,9 +1225,6 @@
             "AnimationPoseComponent": {
                 "nullopt": true
             },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
             "SkinnedMeshComponent": {
                 "nullopt": true
             },
@@ -1348,9 +1314,6 @@
                 "nullopt": true
             },
             "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
                 "nullopt": true
             },
             "SkinnedMeshComponent": {
@@ -1444,9 +1407,6 @@
             "AnimationPoseComponent": {
                 "nullopt": true
             },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
             "SkinnedMeshComponent": {
                 "nullopt": true
             },
@@ -1536,9 +1496,6 @@
                 "nullopt": true
             },
             "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
                 "nullopt": true
             },
             "SkinnedMeshComponent": {
@@ -1632,9 +1589,6 @@
             "AnimationPoseComponent": {
                 "nullopt": true
             },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
             "SkinnedMeshComponent": {
                 "nullopt": true
             },
@@ -1724,9 +1678,6 @@
                 "nullopt": true
             },
             "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
                 "nullopt": true
             },
             "SkinnedMeshComponent": {
@@ -1820,9 +1771,6 @@
             "AnimationPoseComponent": {
                 "nullopt": true
             },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
             "SkinnedMeshComponent": {
                 "nullopt": true
             },
@@ -1912,9 +1860,6 @@
                 "nullopt": true
             },
             "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
                 "nullopt": true
             },
             "SkinnedMeshComponent": {
@@ -2008,9 +1953,6 @@
             "AnimationPoseComponent": {
                 "nullopt": true
             },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
             "SkinnedMeshComponent": {
                 "nullopt": true
             },
@@ -2102,9 +2044,6 @@
             "AnimationPoseComponent": {
                 "nullopt": true
             },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
             "SkinnedMeshComponent": {
                 "nullopt": true
             },
@@ -2194,9 +2133,6 @@
                 "nullopt": true
             },
             "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
                 "nullopt": true
             },
             "SkinnedMeshComponent": {
@@ -2323,9 +2259,6 @@
             "AnimationPoseComponent": {
                 "nullopt": true
             },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
             "SkinnedMeshComponent": {
                 "nullopt": true
             },
@@ -2415,9 +2348,6 @@
                 "nullopt": true
             },
             "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
                 "nullopt": true
             },
             "SkinnedMeshComponent": {
@@ -2511,9 +2441,6 @@
             "AnimationPoseComponent": {
                 "nullopt": true
             },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
             "SkinnedMeshComponent": {
                 "nullopt": true
             },
@@ -2605,9 +2532,6 @@
             "AnimationPoseComponent": {
                 "nullopt": true
             },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
             "SkinnedMeshComponent": {
                 "nullopt": true
             },
@@ -2697,9 +2621,6 @@
                 "nullopt": true
             },
             "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
                 "nullopt": true
             },
             "SkinnedMeshComponent": {
@@ -2805,9 +2726,6 @@
             "AnimationPoseComponent": {
                 "nullopt": true
             },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
             "SkinnedMeshComponent": {
                 "nullopt": true
             },
@@ -2897,9 +2815,6 @@
                 "nullopt": true
             },
             "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
                 "nullopt": true
             },
             "SkinnedMeshComponent": {
@@ -2993,9 +2908,6 @@
             "AnimationPoseComponent": {
                 "nullopt": true
             },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
             "SkinnedMeshComponent": {
                 "nullopt": true
             },
@@ -3087,9 +2999,6 @@
             "AnimationPoseComponent": {
                 "nullopt": true
             },
-            "AnimationWorkerComponent": {
-                "nullopt": true
-            },
             "SkinnedMeshComponent": {
                 "nullopt": true
             },
@@ -3179,9 +3088,6 @@
                 "nullopt": true
             },
             "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "AnimationWorkerComponent": {
                 "nullopt": true
             },
             "SkinnedMeshComponent": {

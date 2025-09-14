@@ -9,6 +9,8 @@
 #include "components/impl/EntityMetadataComponent.h"
 #include "components/impl/TransformComponent.h"
 #include "components/impl/ModelRendererComponent.h"
+#include "components/impl/SkinnedMeshComponent.h"
+#include "components/impl/AnimationPoseComponent.h"
 #include <spdlog/spdlog.h>
 
 namespace Engine {
@@ -145,14 +147,40 @@ namespace Engine {
 
 
 		ENGINE_GLCheckError();
-		// Create a view for entities with Transform and ModelRenderer components
-		auto view = GetCurrentSceneRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer>();
-		for (auto [entity, metadata, transform, renderer] : view.each()) {
+		{
+			// Create a view for entities with Transform and ModelRenderer components
+			auto view = GetCurrentSceneRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer>();
+			for (auto [entity, metadata, transform, renderer] : view.each()) {
+				glm::vec3 encodedColor = EncodeEntityID(entity);
+				GetMousePickingShader().SetVec3("entityIDColor", encodedColor);
+				if (!renderer.visible) continue;
+				// Draw model
+				renderer.Draw(GetMousePickingShader(), transform, false);
+			}
+		}
+
+		auto view = GetCurrentSceneRegistry().view<Components::SkinnedMeshComponent, Components::Transform>();
+		for (auto entity : view) {
+			Entity                    e(entity, GetCurrentScene());
+			auto&                     skinnedMeshComponent   = e.GetComponent<Components::SkinnedMeshComponent>();
+			auto&                     animationPoseComponent = e.GetComponent<Components::AnimationPoseComponent>();
+			const ozz::math::Float4x4 transform              = FromMatrix(e.GetComponent<Components::Transform>().GetMatrix());
+
 			glm::vec3 encodedColor = EncodeEntityID(entity);
-			GetMousePickingShader().SetVec3("entityIDColor", encodedColor);
-			if (!renderer.visible) continue;
-			// Draw model
-			renderer.Draw(GetMousePickingShader(), transform, false);
+
+			// Render each mesh
+			for (const Engine::Mesh& mesh : *skinnedMeshComponent.meshes) {
+				// Render the mesh
+
+				// Builds skinning matrices, based on the output of the animation stage
+				// The mesh might not use (aka be skinned by) all skeleton joints. We
+				// use the joint remapping table (available from the mesh object) to
+				// reorder model-space matrices and build skinning ones
+				for (size_t i = 0; i < mesh.joint_remaps.size(); ++i) {
+					(*skinnedMeshComponent.skinning_matrices)[i] = (*animationPoseComponent.model_pose)[mesh.joint_remaps[i]] * mesh.inverse_bind_poses[i];
+				}
+				GetAnimationManager().renderer_->DrawSkinnedMeshMousePicking(encodedColor, mesh, ozz::make_span(*skinnedMeshComponent.skinning_matrices), transform);
+			}
 		}
 	}
 
