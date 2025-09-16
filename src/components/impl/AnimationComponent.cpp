@@ -65,43 +65,6 @@ namespace Engine::Components {
 	}
 
 
-	template <typename T, typename EditorFunc>
-	void EditVector(const char* label, std::vector<T>& vec, EditorFunc editor)
-	{
-		if (ImGui::CollapsingHeader(label, ImGuiTreeNodeFlags_DefaultOpen)) {
-			// Begin scrollable frame
-			ImGui::BeginChild((std::string("##") + label).c_str(), ImVec2(0, 200), true);
-
-			for (size_t i = 0; i < vec.size(); ++i) {
-				ImGui::PushID(static_cast<int>(i)); // ensure unique IDs
-
-				ImGui::Separator();
-
-				// Element label + inline remove button
-				ImGui::Text("Element %zu", i);
-				ImGui::SameLine();
-				if (ImGui::Button("-")) {
-					vec.erase(vec.begin() + i);
-					ImGui::PopID();
-					break; // exit loop after modifying container
-				}
-
-				// Call user-supplied editor for this element
-				editor(vec[i]);
-
-				ImGui::PopID();
-			}
-
-			ImGui::EndChild();
-
-			// Add new element
-			if (ImGui::Button("+")) {
-				vec.push_back(T{}); // default-construct new element
-			}
-		}
-	}
-	std::vector<AssetHandle<Animation>> myAnimations;
-
 	void AnimationComponent::RenderInspector(Entity& entity)
 	{
 		{
@@ -112,10 +75,7 @@ namespace Engine::Components {
 			ImGui::Text("Duration: %.2f", anim->source ? anim->source->duration() : 0.0f);
 			ImGui::Separator();
 		}
-		EditVector<AssetHandle<Animation>>("My Animations", myAnimations, [](AssetHandle<Animation>& val) {
-			ImGui::SameLine();
-			LeftLabelAssetAnimation("", &val);
-		});
+
 
 		if (LeftLabelSliderFloat("Time scale", &timescale, 0.0, 1.0)) {
 			if (entity.HasComponent<Components::AnimationPoseComponent>() && entity.HasComponent<Components::SkeletonComponent>()) {

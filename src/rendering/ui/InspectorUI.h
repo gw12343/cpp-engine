@@ -11,6 +11,7 @@
 #include "ozz/animation/runtime/animation.h"
 #include "animation/Animation.h"
 #include <string>
+#include <vector>
 
 namespace Engine {
 
@@ -46,9 +47,12 @@ namespace Engine {
 	bool LeftLabelCombo(const char* label, int* currentItem, const char* const items[], int itemsCount, float labelWidth = 100.0f);
 	bool LeftLabelBeginCombo(const char* label, const char* preview_value, ImGuiComboFlags flags = 0, float labelWidth = 100.0f);
 	void LeftLabelEndCombo();
+	template <typename T, typename EditorFunc>
+	void LeftLabelEditVector(const char* label, std::vector<T>& vec, EditorFunc editor);
 
-
-#define LL_ASSET(name, type) bool LeftLabelAsset##name(const char* label, AssetHandle<type>* assetRef)
+#define LL_ASSET(name, type)                                                                                                                                                                                                                   \
+	bool LeftLabelAsset##name(const char* label, AssetHandle<type>* assetRef);                                                                                                                                                                 \
+	bool LeftLabelAssetVector##name(const char* label, std::vector<AssetHandle<type>>& assetRef)
 
 
 	LL_ASSET(Texture, Texture);
@@ -61,6 +65,7 @@ namespace Engine {
 	LL_ASSET(Animation, Animation);
 
 	bool LeftLabelEntity(const char* label, EntityHandle* assetRef);
+	bool LeftLabelEntityVector(const char* label, std::vector<EntityHandle>& assetRef);
 
 
 	bool ComponentHeader(const char* name, bool* removeRequested);

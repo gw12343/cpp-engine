@@ -221,6 +221,42 @@ namespace Engine {
 		ImGui::PopID();
 	}
 
+	template <typename T, typename EditorFunc>
+	void LeftLabelEditVector(const char* label, std::vector<T>& vec, EditorFunc editor)
+	{
+		if (ImGui::CollapsingHeader(label, ImGuiTreeNodeFlags_DefaultOpen)) {
+			// Begin scrollable frame
+			ImGui::BeginChild((std::string("##") + label).c_str(), ImVec2(0, 200), true);
+
+			for (size_t i = 0; i < vec.size(); ++i) {
+				ImGui::PushID(static_cast<int>(i)); // ensure unique IDs
+
+				ImGui::Separator();
+
+				// Element label + inline remove button
+				ImGui::Text("Element %zu", i);
+				ImGui::SameLine();
+				if (ImGui::Button(("-##VECTORDELETEBUTTON" + std::string(label)).c_str())) {
+					vec.erase(vec.begin() + i);
+					ImGui::PopID();
+					break; // exit loop after modifying container
+				}
+
+				// Call user-supplied editor for this element
+				editor(vec[i]);
+
+				ImGui::PopID();
+			}
+
+			ImGui::EndChild();
+
+			// Add new element
+			if (ImGui::Button(("+##VECTORADDBUTTON" + std::string(label)).c_str())) {
+				vec.push_back(T{}); // default-construct new element
+			}
+		}
+	}
+
 
 #define LL_ASSET_DEF(name, atype, an, nameA)                                                                                                                                                                                                   \
 	bool LeftLabelAsset##name(const char* label, AssetHandle<atype>* assetRef)                                                                                                                                                                 \
@@ -275,8 +311,14 @@ namespace Engine {
 		}                                                                                                                                                                                                                                      \
 		ImGui::Unindent(120);                                                                                                                                                                                                                  \
 		return used;                                                                                                                                                                                                                           \
+	}                                                                                                                                                                                                                                          \
+	bool LeftLabelAssetVector##name(const char* label, std::vector<AssetHandle<atype>>& assetRef)                                                                                                                                              \
+	{                                                                                                                                                                                                                                          \
+		LeftLabelEditVector<AssetHandle<atype>>(label, assetRef, [](AssetHandle<atype>& val) {                                                                                                                                                 \
+			ImGui::SameLine();                                                                                                                                                                                                                 \
+			LeftLabelAsset##name("", &val);                                                                                                                                                                                                    \
+		});                                                                                                                                                                                                                                    \
 	}
-
 
 	LL_ASSET_DEF(Texture, Texture, "ASSET_TEXTURE", assetPtr->GetName().c_str())
 	LL_ASSET_DEF(Model, Rendering::Model, "ASSET_MODEL", assetPtr->m_name.c_str())
@@ -340,6 +382,14 @@ namespace Engine {
 		ImGui::Unindent(120);
 
 		return used;
+	}
+
+	bool LeftLabelEntityVector(const char* label, std::vector<EntityHandle>& assetRef)
+	{
+		LeftLabelEditVector<EntityHandle>(label, assetRef, [](EntityHandle& val) {
+			ImGui::SameLine();
+			LeftLabelEntity("", &val);
+		});
 	}
 
 
