@@ -48,7 +48,7 @@ namespace Engine {
 	bool LeftLabelBeginCombo(const char* label, const char* preview_value, ImGuiComboFlags flags = 0, float labelWidth = 100.0f);
 	void LeftLabelEndCombo();
 	template <typename T, typename EditorFunc>
-	void LeftLabelEditVector(const char* label, std::vector<T>& vec, EditorFunc editor);
+	bool LeftLabelEditVector(const char* label, std::vector<T>& vec, EditorFunc editor);
 
 #define LL_ASSET(name, type)                                                                                                                                                                                                                   \
 	bool LeftLabelAsset##name(const char* label, AssetHandle<type>* assetRef);                                                                                                                                                                 \

@@ -404,9 +404,7 @@ namespace Engine::Audio {
 
 		for (auto [entity, metadata, transform, audio] : audioView.each()) {
 			// Update audio source position based on entity transform
-			GetSoundManager().log->info("Trying to auto play sound");
 			if (audio.source) {
-				GetSoundManager().log->info("Trying to auto play sound111");
 				// Get the world position from the transform
 				glm::vec3 worldPos = transform.position;
 

@@ -19,6 +19,7 @@
 #include "impl/TerrainRendererComponent.h"
 #include "impl/TransformComponent.h"
 #include "impl/PlayerControllerComponent.h"
+#include "impl/GizmoComponent.h"
 
 #define COMPONENT_LIST                                                                                                                                                                                                                         \
 	X(Components::LuaScript, LuaScript, ICON_FA_SCROLL " Script")                                                                                                                                                                              \
@@ -32,7 +33,8 @@
 	X(Components::AnimationComponent, AnimationComponent, "Animation")                                                                                                                                                                         \
 	X(Components::AnimationPoseComponent, AnimationPoseComponent, "Animation Pose")                                                                                                                                                            \
 	X(Components::SkinnedMeshComponent, SkinnedMeshComponent, "Skinned Mesh")                                                                                                                                                                  \
-	X(Components::ParticleSystem, ParticleSystem, ICON_FA_STAR_HALF_STROKE "Particle System")                                                                                                                                                  \
-	X(Components::PlayerControllerComponent, PlayerControllerComponent, "Player Controller")
+	X(Components::ParticleSystem, ParticleSystem, ICON_FA_STAR_HALF_STROKE " Particle System")                                                                                                                                                 \
+	X(Components::PlayerControllerComponent, PlayerControllerComponent, "Player Controller")                                                                                                                                                   \
+	X(Components::GizmoComponent, GizmoComponent, ICON_FA_GLOBE " Gizmo")
 
 #endif // CPP_ENGINE_ALLCOMPONENTS_H

@@ -92,7 +92,7 @@ namespace Engine {
 				for (auto v : va) {
 					out += v.get<std::string>() + " ";
 				}
-				if (!out.empty()) out.pop_back(); // remove trailing space
+				if (!out.empty()) out.pop_back(); //  remove trailing space
 
 				Logger::get("script")->debug("[Lua] {}", out);
 			});

@@ -174,7 +174,6 @@ namespace Engine {
 		auto local_pose = new std::vector<ozz::math::SoaTransform>();
 		local_pose->resize(skeleton->num_soa_joints());
 
-		GetAnimationManager().log->info("Allocated local pose with {} SoA joints", skeleton->num_soa_joints());
 		return local_pose;
 	}
 
@@ -188,8 +187,6 @@ namespace Engine {
 		// Create a new vector of Float4x4 matrices with the correct size
 		auto model_pose = new std::vector<ozz::math::Float4x4>();
 		model_pose->resize(skeleton->num_joints());
-
-		GetAnimationManager().log->info("Allocated model pose with {} joints", skeleton->num_joints());
 		return model_pose;
 	}
 
@@ -205,7 +202,6 @@ namespace Engine {
 			return nullptr;
 		}
 
-		GetAnimationManager().log->info("Loaded {} meshes from path: {}", meshes->size(), path);
 		return meshes;
 	}
 

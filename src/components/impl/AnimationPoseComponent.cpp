@@ -46,9 +46,6 @@ namespace Engine::Components {
 		if (!local_pose || !model_pose) {
 			spdlog::error("Failed to allocate pose data for entity");
 		}
-		else {
-			GetDefaultLogger()->info("Allocated pose data for entity");
-		}
 	}
 
 	void AnimationPoseComponent::RenderInspector(Entity& entity)

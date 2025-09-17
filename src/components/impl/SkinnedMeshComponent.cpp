@@ -42,9 +42,6 @@ namespace Engine::Components {
 			if (!meshes) {
 				GetDefaultLogger()->error("Failed to load meshes from path: {}", meshPath);
 			}
-			else {
-				GetDefaultLogger()->info("Loaded SKINNED MESHES from path: {}", meshPath);
-			}
 		}
 
 		ENGINE_VERIFY(meshes, "SkinnedMeshComponent::OnAdded: Failed to load meshes");

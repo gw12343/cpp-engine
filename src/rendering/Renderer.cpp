@@ -11,6 +11,7 @@
 #include "components/impl/ModelRendererComponent.h"
 #include "components/impl/SkinnedMeshComponent.h"
 #include "components/impl/AnimationPoseComponent.h"
+#include "components/impl/GizmoComponent.h"
 #include <spdlog/spdlog.h>
 
 namespace Engine {
@@ -97,6 +98,9 @@ namespace Engine {
 		RenderSkybox();
 		GetParticleManager().Render();
 #ifndef GAME_BUILD
+		if (GetState() == EDITOR || GetState() == PAUSED) {
+			RenderGizmos(false);
+		}
 		Engine::Window::GetFramebuffer(Window::FramebufferID::MOUSE_PICKING)->Bind();
 		RenderEntitiesMousePicking();
 #endif
@@ -159,6 +163,7 @@ namespace Engine {
 			}
 		}
 
+
 		auto view = GetCurrentSceneRegistry().view<Components::SkinnedMeshComponent, Components::Transform>();
 		for (auto entity : view) {
 			Entity                    e(entity, GetCurrentScene());
@@ -182,6 +187,8 @@ namespace Engine {
 				GetAnimationManager().renderer_->DrawSkinnedMeshMousePicking(encodedColor, mesh, ozz::make_span(*skinnedMeshComponent.skinning_matrices), transform);
 			}
 		}
+
+		RenderGizmos(true);
 	}
 
 	void Renderer::RenderSkybox()
@@ -205,6 +212,28 @@ namespace Engine {
 	std::shared_ptr<ShadowMapRenderer> Renderer::GetShadowRenderer()
 	{
 		return m_shadowRenderer;
+	}
+	void Renderer::RenderGizmos(bool mousePicking)
+	{
+		auto view = GetCurrentSceneRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::GizmoComponent>();
+		for (auto [entity, metadata, transform, gizmo] : view.each()) {
+			const ozz::math::Float4x4 t = FromMatrix(transform.GetMatrix());
+			// Draw gizmo
+
+			Color color = kBlack;
+			if (mousePicking) {
+				glm::vec3 encodedColor = EncodeEntityID(entity);
+				color.r                = encodedColor.r;
+				color.g                = encodedColor.g;
+				color.b                = encodedColor.b;
+			}
+			else {
+				color.r = gizmo.color.r;
+				color.g = gizmo.color.g;
+				color.b = gizmo.color.b;
+			}
+			GetAnimationManager().renderer_->DrawSphereIm(gizmo.radius, t, color);
+		}
 	}
 
 
