@@ -59,6 +59,8 @@ namespace Engine {
 		// Load meshes from a file path
 		static ozz::vector<Engine::Mesh>* LoadMeshesFromPath(const std::string& path);
 
+		ozz::unique_ptr<RendererImpl> renderer_;
+
 	  private:
 		// Map to store loaded skeletons
 		std::unordered_map<std::string, std::unique_ptr<ozz::animation::Skeleton>> loaded_skeletons_;
@@ -86,7 +88,6 @@ namespace Engine {
 		AnimatedRenderer::Options render_options_;
 
 		// Renderer
-		ozz::unique_ptr<RendererImpl> renderer_;
 	};
 
 } // namespace Engine

@@ -6,7 +6,10 @@
 #include "components/impl/NavigationComponents.h"
 #include "components/impl/TransformComponent.h"
 #include "components/impl/ModelRendererComponent.h"
+#include "glad/glad.h"
 
+#include "animation/AnimationManager.h"
+#include "utils/Utils.h"
 // Recast/Detour includes
 #include <Recast.h>
 #include <DetourNavMesh.h>
@@ -103,6 +106,75 @@ namespace Engine {
 		m_filter = nullptr;
 	}
 
+	rcPolyMesh* polyMesh;
+	bool        drawM = false;
+
+	void NavigationModule::Render()
+	{
+		// glDepthMask(GL_FALSE);
+
+		if (!polyMesh || !drawM) return;
+
+		const int    nvp  = polyMesh->nvp;
+		const float  cs   = polyMesh->cs;
+		const float  ch   = polyMesh->ch;
+		const float* orig = polyMesh->bmin;
+
+		auto& dd = GetAnimationManager().renderer_;
+
+
+		// ozz::vector<ozz::math::Float3> lineVerts;
+
+
+		//  Draw boundary edges
+		//		for (int i = 0; i < polyMesh->npolys; ++i) {
+		//			const unsigned short* p = &polyMesh->polys[i * nvp * 2];
+		//			for (int j = 0; j < nvp; ++j) {
+		//				if (p[j] == RC_MESH_NULL_IDX) break;
+		//				if ((p[nvp + j] & 0x8000) == 0) continue;
+		//				const int nj    = (j + 1 >= nvp || p[j + 1] == RC_MESH_NULL_IDX) ? 0 : j + 1;
+		//				const int vi[2] = {p[j], p[nj]};
+		//
+		//				if ((p[nvp + j] & 0xf) != 0xf)
+		//					for (int k = 0; k < 2; ++k) {
+		//						const unsigned short* v = &polyMesh->verts[vi[k] * 3];
+		//						const float           x = orig[0] + v[0] * cs;
+		//						const float           y = orig[1] + (v[1] + 1) * ch + 0.1f;
+		//						const float           z = orig[2] + v[2] * cs;
+		//
+		//						lineVerts.push_back({x, y, z});
+		//						auto matrix = glm::mat4(1.0f);
+		//						matrix      = glm::translate(matrix, {x, y, z});
+		//						auto a      = FromMatrix(matrix);
+		//						dd->DrawSphereIm(0.05, a, kBlue);
+		//						// dd->vertex(x, y, z, col);
+		//					}
+		//			}
+		//		}
+
+		//				SPDLOG_INFO("VERTS1: {}", lineVerts.size());
+		//				auto s = ozz::make_span(lineVerts);
+		//				SPDLOG_INFO("VERTS: {}", s.size());
+		//				dd->DrawLineStrip(s, kYellow, FromMatrix(glm::mat4(1.0)));
+
+
+		for (int i = 0; i < polyMesh->nverts; ++i) {
+			Engine::Color         colv = {(float) (i * 45 % 255) / 255.0f, (float) (i * 15 % 255) / 255.0f, (float) (i * 82 % 255) / 255.0f, 1};
+			const unsigned short* v    = &polyMesh->verts[i * 3];
+			const float           x    = orig[0] + v[0] * cs;
+			const float           y    = orig[1] + (v[1] + 1) * ch + 0.1f;
+			const float           z    = orig[2] + v[2] * cs;
+
+
+			auto matrix = glm::mat4(1.0f);
+			matrix      = glm::translate(matrix, {x, y, z});
+
+
+			auto a = FromMatrix(matrix);
+			dd->DrawSphereIm(0.05, a, colv);
+		}
+	}
+
 	bool NavigationModule::BuildNavMesh(Scene* scene)
 	{
 		if (!scene) {
@@ -118,6 +190,9 @@ namespace Engine {
 		// Collect geometry from scene
 		GeometryData geometry;
 		CollectGeometry(scene, geometry);
+
+		log->info("Collected geometry: {} vertices, {} indices", geometry.vertices.size(), geometry.indices.size());
+
 
 		if (geometry.vertices.empty()) {
 			log->warn("geometry empty");
@@ -137,6 +212,9 @@ namespace Engine {
 			bmax[2] = std::max(bmax[2], geometry.vertices[i + 2]);
 		}
 
+		log->info("Bounding box: min({}, {}, {}), max({}, {}, {})", bmin[0], bmin[1], bmin[2], bmax[0], bmax[1], bmax[2]);
+
+
 		// Build heightfield
 		rcHeightfield* heightfield = rcAllocHeightfield();
 		if (!rcCreateHeightfield(m_context.get(), *heightfield, int((bmax[0] - bmin[0]) / m_config.cellSize) + 1, int((bmax[2] - bmin[2]) / m_config.cellSize) + 1, bmin, bmax, m_config.cellSize, m_config.cellHeight)) {
@@ -144,6 +222,7 @@ namespace Engine {
 			log->warn("failed to create heightfield");
 			return false;
 		}
+		log->info("Heightfield created: {}x{}", int((bmax[0] - bmin[0]) / m_config.cellSize) + 1, int((bmax[2] - bmin[2]) / m_config.cellSize) + 1);
 
 		// Rasterize triangles
 		std::vector<unsigned char> triangleAreas(geometry.indices.size() / 3);
@@ -163,6 +242,14 @@ namespace Engine {
 			return false;
 		}
 
+		// After triangle rasterization
+		int walkableTriangles = 0;
+		for (size_t i = 0; i < triangleAreas.size(); ++i) {
+			if (triangleAreas[i] != RC_NULL_AREA) walkableTriangles++;
+		}
+		log->info("Walkable triangles: {}/{}", walkableTriangles, triangleAreas.size());
+
+
 		// Filter walkable surfaces
 		rcFilterLowHangingWalkableObstacles(m_context.get(), m_config.agentMaxClimb, *heightfield);
 		rcFilterLedgeSpans(m_context.get(), m_config.agentHeight, m_config.agentMaxClimb, *heightfield);
@@ -176,6 +263,9 @@ namespace Engine {
 			log->warn("failed to compact heightfield");
 			return false;
 		}
+
+		log->info("Compact heightfield: {}x{}, {} spans", compactHeightfield->width, compactHeightfield->height, compactHeightfield->spanCount);
+
 
 		rcFreeHeightField(heightfield);
 
@@ -192,6 +282,13 @@ namespace Engine {
 			return false;
 		}
 
+		// After building regions
+		int regionCount = 0;
+		for (int i = 0; i < compactHeightfield->spanCount; ++i) {
+			if (compactHeightfield->spans[i].reg != 0) regionCount++;
+		}
+		log->info("Regions built, spans with regions: {}", regionCount);
+
 		// Build contours
 		rcContourSet* contours = rcAllocContourSet();
 		if (!rcBuildContours(m_context.get(), *compactHeightfield, m_config.maxSimplificationError, m_config.maxEdgeLength, *contours)) {
@@ -201,8 +298,12 @@ namespace Engine {
 			return false;
 		}
 
+		// After building contours
+		log->info("Contours built: {} contours", contours->nconts);
+
+
 		// Build polygon mesh
-		rcPolyMesh* polyMesh = rcAllocPolyMesh();
+		polyMesh = rcAllocPolyMesh();
 		if (!rcBuildPolyMesh(m_context.get(), *contours, m_config.minVertsPerPoly, *polyMesh)) {
 			rcFreeCompactHeightfield(compactHeightfield);
 			rcFreeContourSet(contours);
@@ -210,6 +311,9 @@ namespace Engine {
 			log->warn("failed to build poly mesh");
 			return false;
 		}
+
+		// After building poly mesh - THIS IS KEY
+		log->info("PolyMesh: {} vertices, {} polygons", polyMesh->nverts, polyMesh->npolys);
 
 		// Build detail mesh for more accurate height queries
 		rcPolyMeshDetail* detailMesh = rcAllocPolyMeshDetail();
@@ -245,21 +349,47 @@ namespace Engine {
 		params.walkableClimb    = m_config.agentMaxClimb;
 		rcVcopy(params.bmin, polyMesh->bmin);
 		rcVcopy(params.bmax, polyMesh->bmax);
+
+		// After rcVcopy calls, add validation:
+		if (params.bmin[0] >= params.bmax[0] || params.bmin[1] >= params.bmax[1] || params.bmin[2] >= params.bmax[2]) {
+			log->warn("Invalid bounding box in nav mesh params");
+			return false;
+		}
+
+
 		params.cs          = m_config.cellSize;
 		params.ch          = m_config.cellHeight;
 		params.buildBvTree = true;
 
+
 		unsigned char* navData     = nullptr;
 		int            navDataSize = 0;
 
-		// Assign flags based on area
 		for (int i = 0; i < polyMesh->npolys; ++i) {
 			if (polyMesh->areas[i] == RC_WALKABLE_AREA)
 				polyMesh->flags[i] = 1; // walkable
-			else
-				polyMesh->flags[i] = 0; // not walkable
+				                        // Remove the else clause - let non-walkable keep their original flags
 		}
-		
+
+		// Validate poly mesh data
+		if (!polyMesh->verts || polyMesh->nverts <= 0) {
+			log->warn("Invalid poly mesh vertices");
+			return false;
+		}
+
+		if (!polyMesh->polys || polyMesh->npolys <= 0) {
+			log->warn("Invalid poly mesh polygons");
+			return false;
+		}
+
+		if (!detailMesh->verts || detailMesh->nverts <= 0) {
+			log->warn("Invalid detail mesh vertices");
+			return false;
+		}
+
+		log->info("PolyMesh: {} verts, {} polys", polyMesh->nverts, polyMesh->npolys);
+		log->info("DetailMesh: {} verts, {} tris", detailMesh->nverts, detailMesh->ntris);
+
 
 		if (!dtCreateNavMeshData(&params, &navData, &navDataSize)) {
 			rcFreePolyMesh(polyMesh);
@@ -268,8 +398,9 @@ namespace Engine {
 			return false;
 		}
 
-		rcFreePolyMesh(polyMesh);
-		rcFreePolyMeshDetail(detailMesh);
+		// TODO move
+		// rcFreePolyMesh(polyMesh);
+		// rcFreePolyMeshDetail(detailMesh);
 
 		// Initialize Detour navmesh
 		m_navMesh = dtAllocNavMesh();
@@ -293,6 +424,7 @@ namespace Engine {
 			return false;
 		}
 		m_crowdInitialized = true;
+		drawM              = true;
 		return true;
 	}
 
@@ -334,7 +466,7 @@ namespace Engine {
 			// Simple quad vertices (you'll replace this with actual mesh data)
 			std::vector<glm::vec3> localVertices = {glm::vec3(-1.0f, 0.0f, -1.0f), glm::vec3(1.0f, 0.0f, -1.0f), glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(-1.0f, 0.0f, 1.0f)};
 
-			std::vector<uint32_t> localIndices = {0, 1, 2, 0, 2, 3};
+			std::vector<uint32_t> localIndices = {0, 2, 1, 0, 3, 2};
 
 			// Transform vertices to world space
 			glm::mat4 worldMatrix = transform.GetMatrix();
@@ -561,5 +693,6 @@ namespace Engine {
 		}
 		ImGui::End();
 	}
+
 
 } // namespace Engine

@@ -30,7 +30,7 @@ namespace Engine {
 		int   regionMergeSize        = 20;
 		int   maxEdgeLength          = 12;
 		float maxSimplificationError = 1.3f;
-		int   minVertsPerPoly        = 6;
+		int   minVertsPerPoly        = 3;
 		float detailSampleDist       = 6.0f;
 		float detailSampleMaxError   = 1.0f;
 	};
@@ -69,6 +69,10 @@ namespace Engine {
 		// Scene reference
 		Scene* m_currentScene;
 
+		dtNavMesh* m_navMesh;
+
+		void Render();
+
 	  private:
 		bool m_crowdInitialized;
 		struct GeometryData {
@@ -79,7 +83,6 @@ namespace Engine {
 
 		// Recast/Detour objects
 		std::unique_ptr<rcContext> m_context;
-		dtNavMesh*                 m_navMesh;
 		dtNavMeshQuery*            m_navQuery;
 		dtQueryFilter*             m_filter;
 		dtCrowd*                   m_crowd;

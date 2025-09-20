@@ -10,7 +10,7 @@
 #include "components/impl/TransformComponent.h"
 #include "components/impl/ModelRendererComponent.h"
 #include <spdlog/spdlog.h>
-
+#include "navigation/NavigationManager.h"
 namespace Engine {
 
 	void Renderer::onInit()
@@ -90,6 +90,7 @@ namespace Engine {
 #endif
 		PreRender();
 		GetAnimationManager().Render();
+		GetNav().Render();
 		RenderEntities();
 		GetTerrainManager().Render();
 		RenderSkybox();
