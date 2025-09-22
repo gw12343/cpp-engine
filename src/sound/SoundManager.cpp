@@ -13,6 +13,7 @@
 #include <sndfile.h>
 #include <spdlog/spdlog.h>
 #include <vector>
+#include <tracy/Tracy.hpp>
 
 
 namespace Engine::Audio {
@@ -251,6 +252,7 @@ namespace Engine::Audio {
 
 	void SoundManager::onUpdate(float dt)
 	{
+		ZoneScoped;
 		// Clear any previous errors
 		alGetError();
 

@@ -2,6 +2,7 @@
 // Created by gabe on 6/22/25.
 //
 
+#include <tracy/Tracy.hpp>
 #include "ModuleManager.h"
 #include "core/EngineData.h"
 

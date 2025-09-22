@@ -30,6 +30,7 @@
 #include <nfd.h>
 #include <string>
 #include <iostream>
+#include <tracy/Tracy.hpp>
 
 std::string SelectFolder()
 {
@@ -339,6 +340,7 @@ namespace Engine::UI {
 
 	void UIManager::onUpdate(float dt)
 	{
+		ZoneScoped;
 		m_selectedTheme = GetState() == EDITOR ? 2 : 0;
 		GetRenderer().PreRender();
 		float h      = RenderMainMenuBar();

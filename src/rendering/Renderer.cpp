@@ -13,6 +13,7 @@
 #include "components/impl/AnimationPoseComponent.h"
 #include "components/impl/GizmoComponent.h"
 #include <spdlog/spdlog.h>
+#include <tracy/Tracy.hpp>
 
 namespace Engine {
 
@@ -86,26 +87,54 @@ namespace Engine {
 
 	void Renderer::onUpdate(float dt)
 	{
+		ZoneScopedN("Render");
 		PreRender();
-		RenderShadowMaps();
+		{
+			ZoneScopedN("Render Shadow Maps");
+			RenderShadowMaps();
+		}
 #ifndef GAME_BUILD
 		Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->Bind();
 #endif
 		PreRender();
-		GetAnimationManager().Render();
-		RenderEntities();
-		GetTerrainManager().Render();
-		RenderSkybox();
-		GetParticleManager().Render();
-#ifndef GAME_BUILD
-		if (GetState() == EDITOR || GetState() == PAUSED) {
-			RenderGizmos(false);
+		{
+			ZoneScopedN("Render Animations");
+			GetAnimationManager().Render();
 		}
-		Engine::Window::GetFramebuffer(Window::FramebufferID::MOUSE_PICKING)->Bind();
-		RenderEntitiesMousePicking();
+		{
+			ZoneScopedN("Render Entities");
+			RenderEntities();
+		}
+		{
+			ZoneScopedN("Render Terrains");
+			GetTerrainManager().Render();
+		}
+		{
+			ZoneScopedN("Render Skybox");
+			RenderSkybox();
+		}
+		{
+			ZoneScopedN("Render Particles");
+			GetParticleManager().Render();
+		}
+#ifndef GAME_BUILD
+		{
+			ZoneScopedN("Render Gizmos");
+			if (GetState() == EDITOR || GetState() == PAUSED) {
+				RenderGizmos(false);
+			}
+		}
+		{
+			ZoneScopedN("Render Mouse Picking");
+			Engine::Window::GetFramebuffer(Window::FramebufferID::MOUSE_PICKING)->Bind();
+			RenderEntitiesMousePicking();
+		}
 #endif
 		Engine::Framebuffer::Unbind();
-		PostRender();
+		{
+			ZoneScopedN("Post Render");
+			PostRender();
+		}
 	}
 
 
@@ -152,7 +181,9 @@ namespace Engine {
 
 		ENGINE_GLCheckError();
 		{
+			ZoneScopedN("Model Renderer Mouse Picking");
 			// Create a view for entities with Transform and ModelRenderer components
+
 			auto view = GetCurrentSceneRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer>();
 			for (auto [entity, metadata, transform, renderer] : view.each()) {
 				glm::vec3 encodedColor = EncodeEntityID(entity);
@@ -163,32 +194,36 @@ namespace Engine {
 			}
 		}
 
+		{
+			ZoneScopedN("Skinned Mesh Mouse Picking");
+			auto view = GetCurrentSceneRegistry().view<Components::SkinnedMeshComponent, Components::Transform>();
+			for (auto entity : view) {
+				Entity                    e(entity, GetCurrentScene());
+				auto&                     skinnedMeshComponent   = e.GetComponent<Components::SkinnedMeshComponent>();
+				auto&                     animationPoseComponent = e.GetComponent<Components::AnimationPoseComponent>();
+				const ozz::math::Float4x4 transform              = FromMatrix(e.GetComponent<Components::Transform>().GetMatrix());
 
-		auto view = GetCurrentSceneRegistry().view<Components::SkinnedMeshComponent, Components::Transform>();
-		for (auto entity : view) {
-			Entity                    e(entity, GetCurrentScene());
-			auto&                     skinnedMeshComponent   = e.GetComponent<Components::SkinnedMeshComponent>();
-			auto&                     animationPoseComponent = e.GetComponent<Components::AnimationPoseComponent>();
-			const ozz::math::Float4x4 transform              = FromMatrix(e.GetComponent<Components::Transform>().GetMatrix());
+				glm::vec3 encodedColor = EncodeEntityID(entity);
 
-			glm::vec3 encodedColor = EncodeEntityID(entity);
+				// Render each mesh
+				for (const Engine::Mesh& mesh : *skinnedMeshComponent.meshes) {
+					// Render the mesh
 
-			// Render each mesh
-			for (const Engine::Mesh& mesh : *skinnedMeshComponent.meshes) {
-				// Render the mesh
-
-				// Builds skinning matrices, based on the output of the animation stage
-				// The mesh might not use (aka be skinned by) all skeleton joints. We
-				// use the joint remapping table (available from the mesh object) to
-				// reorder model-space matrices and build skinning ones
-				for (size_t i = 0; i < mesh.joint_remaps.size(); ++i) {
-					(*skinnedMeshComponent.skinning_matrices)[i] = (*animationPoseComponent.model_pose)[mesh.joint_remaps[i]] * mesh.inverse_bind_poses[i];
+					// Builds skinning matrices, based on the output of the animation stage
+					// The mesh might not use (aka be skinned by) all skeleton joints. We
+					// use the joint remapping table (available from the mesh object) to
+					// reorder model-space matrices and build skinning ones
+					for (size_t i = 0; i < mesh.joint_remaps.size(); ++i) {
+						(*skinnedMeshComponent.skinning_matrices)[i] = (*animationPoseComponent.model_pose)[mesh.joint_remaps[i]] * mesh.inverse_bind_poses[i];
+					}
+					GetAnimationManager().renderer_->DrawSkinnedMeshMousePicking(encodedColor, mesh, ozz::make_span(*skinnedMeshComponent.skinning_matrices), transform);
 				}
-				GetAnimationManager().renderer_->DrawSkinnedMeshMousePicking(encodedColor, mesh, ozz::make_span(*skinnedMeshComponent.skinning_matrices), transform);
 			}
 		}
-
-		RenderGizmos(true);
+		{
+			ZoneScopedN("Gizmo Mouse Picking");
+			RenderGizmos(true);
+		}
 	}
 
 	void Renderer::RenderSkybox()

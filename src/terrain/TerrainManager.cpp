@@ -1,3 +1,4 @@
+#include <tracy/Tracy.hpp>
 #include "TerrainManager.h"
 #include "core/EngineData.h"
 #include "glad/glad.h"
@@ -16,6 +17,7 @@ namespace Engine::Terrain {
 
 	void TerrainManager::onUpdate(float dt)
 	{
+		ZoneScoped;
 		for (auto& terrPairs : GetAssetManager().GetStorage<TerrainTile>().guidToAsset) {
 			auto& tile = terrPairs.second;
 

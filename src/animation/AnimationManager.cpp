@@ -11,6 +11,7 @@
 
 #include <spdlog/spdlog.h>
 #include <utils/Utils.h>
+#include <tracy/Tracy.hpp>
 #include "core/SceneManager.h"
 #include "assets/AssetManager.h"
 #include "physics/PhysicsManager.h"
@@ -58,39 +59,50 @@ namespace Engine {
 
 	void AnimationManager::onUpdate(float deltaTime)
 	{
+		ZoneScopedN("Animation Update");
 		// Get all entities with  and AnimationComponent
-		auto view = GetCurrentSceneRegistry().view<Components::AnimationComponent>();
-		for (auto entity : view) {
-			Entity e(entity, GetCurrentScene());
-			auto&  animationComponent     = e.GetComponent<Components::AnimationComponent>();
-			auto&  animationPoseComponent = e.GetComponent<Components::AnimationPoseComponent>();
-			auto&  skeletonComponent      = e.GetComponent<Components::SkeletonComponent>();
 
-			// Update animation time
-			if (GetState() == PLAYING) {
-				animationComponent.timescale += deltaTime;
-				animationComponent.timescale = fmod(animationComponent.timescale, 1.0f);
-			}
+		entt::view<entt::get_t<Components::AnimationComponent>> animationView;
 
-			// Samples optimized animation at t = animation_time_
-			ozz::animation::SamplingJob sampling_job;
-			sampling_job.animation = GetAssetManager().Get(animationComponent.animation)->source;
 
-			sampling_job.context = animationComponent.context; // animationWorkerComponent.context;
-			sampling_job.ratio   = animationComponent.timescale;
-			sampling_job.output  = ozz::make_span(*animationPoseComponent.local_pose);
-			if (!sampling_job.Run()) {
-				log->error("Failed to sample animation");
-				return;
-			}
+		{
+			ZoneScopedN("Get animation view");
+			animationView = GetCurrentSceneRegistry().view<Components::AnimationComponent>();
+		}
+		{
+			ZoneScopedN("Sample animations");
+			for (auto entity : animationView) {
+				Entity e(entity, GetCurrentScene());
+				auto&  animationComponent     = e.GetComponent<Components::AnimationComponent>();
+				auto&  animationPoseComponent = e.GetComponent<Components::AnimationPoseComponent>();
+				auto&  skeletonComponent      = e.GetComponent<Components::SkeletonComponent>();
 
-			ozz::animation::LocalToModelJob ltm_job;
-			ltm_job.skeleton = skeletonComponent.skeleton;
-			ltm_job.input    = ozz::make_span(*animationPoseComponent.local_pose);
-			ltm_job.output   = ozz::make_span(*animationPoseComponent.model_pose);
-			if (!ltm_job.Run()) {
-				log->error("Failed to convert to model space");
-				return;
+				// Update animation time
+				if (GetState() == PLAYING) {
+					animationComponent.timescale += deltaTime;
+					animationComponent.timescale = fmod(animationComponent.timescale, 1.0f);
+				}
+
+				// Samples optimized animation at t = animation_time_
+				ozz::animation::SamplingJob sampling_job;
+				sampling_job.animation = GetAssetManager().Get(animationComponent.animation)->source;
+
+				sampling_job.context = animationComponent.context; // animationWorkerComponent.context;
+				sampling_job.ratio   = animationComponent.timescale;
+				sampling_job.output  = ozz::make_span(*animationPoseComponent.local_pose);
+				if (!sampling_job.Run()) {
+					log->error("Failed to sample animation");
+					return;
+				}
+
+				ozz::animation::LocalToModelJob ltm_job;
+				ltm_job.skeleton = skeletonComponent.skeleton;
+				ltm_job.input    = ozz::make_span(*animationPoseComponent.local_pose);
+				ltm_job.output   = ozz::make_span(*animationPoseComponent.model_pose);
+				if (!ltm_job.Run()) {
+					log->error("Failed to convert to model space");
+					return;
+				}
 			}
 		}
 	}

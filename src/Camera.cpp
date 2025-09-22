@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <utils/Utils.h>
+#include <tracy/Tracy.hpp>
 #include "core/Window.h"
 
 #include "scripting/ScriptManager.h"
@@ -27,6 +28,7 @@ namespace Engine {
 	}
 	void Camera::onUpdate(float dt)
 	{
+		ZoneScoped;
 		if (GetState() != PLAYING) {
 			// Handle camera movement based on right mouse button state
 			if (GetInput().IsMousePressed(GLFW_MOUSE_BUTTON_RIGHT)) {

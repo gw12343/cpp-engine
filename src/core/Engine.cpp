@@ -35,6 +35,19 @@
 #include "assets/impl/AnimationLoader.h"
 #include "components/impl/AnimationComponent.h"
 
+#if defined(__clang__) || defined(__GNUC__)
+#define TracyFunction __PRETTY_FUNCTION__
+#elif defined(_MSC_VER)
+#define TracyFunction __FUNCSIG__
+#endif
+
+#ifndef GAME_BUILD
+#define TRACY_ENABLE
+#endif
+
+#include <tracy/Tracy.hpp>
+#include "TracyClient.cpp"
+
 
 namespace fs = std::filesystem;
 
@@ -194,11 +207,13 @@ namespace Engine {
 	void GEngine::Run()
 	{
 		while (!GetWindow().ShouldClose()) {
+			FrameMarkStart("main");
 			auto currentFrame = static_cast<float>(glfwGetTime());
 			m_deltaTime       = currentFrame - m_lastFrame;
 			m_lastFrame       = currentFrame;
 
 			manager.UpdateAll(m_deltaTime);
+			FrameMarkEnd("main");
 		}
 	}
 

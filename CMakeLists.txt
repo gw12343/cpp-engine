@@ -89,6 +89,13 @@ FetchContent_Declare(
         GIT_TAG release_116
 )
 
+FetchContent_Declare(
+        tracy
+        GIT_REPOSITORY https://github.com/wolfpld/tracy.git
+        GIT_TAG v0.12.2
+        GIT_SHALLOW TRUE
+        GIT_PROGRESS TRUE
+)
 
 FetchContent_Declare(
         jolt
@@ -141,7 +148,7 @@ set(EFSW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(EFSW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
 
-FetchContent_MakeAvailable(cereal spdlog nativefiledialog jolt ozz imgui effekseer lua sol2 nlohmann_json efsw)
+FetchContent_MakeAvailable(cereal spdlog nativefiledialog jolt ozz imgui effekseer lua sol2 nlohmann_json efsw tracy)
 
 
 if (WIN32)
@@ -325,6 +332,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         nlohmann_json::nlohmann_json
         efsw
         nfd
+        Tracy::TracyClient
 )
 
 # ----------------- Debug Info -------------------

@@ -1195,20 +1195,20 @@
                             }
                         },
                         {
-                            "key": "playerEnt",
-                            "value": {
-                                "index": 12,
-                                "data": {
-                                    "guid": "eceb7a1979a7c1a4fab790e5875c2fde"
-                                }
-                            }
-                        },
-                        {
                             "key": "hit",
                             "value": {
                                 "index": 11,
                                 "data": {
                                     "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
+                                }
+                            }
+                        },
+                        {
+                            "key": "playerEnt",
+                            "value": {
+                                "index": 12,
+                                "data": {
+                                    "guid": "eceb7a1979a7c1a4fab790e5875c2fde"
                                 }
                             }
                         }
@@ -2901,10 +2901,10 @@
                             }
                         },
                         {
-                            "key": "JUMP_POWER",
+                            "key": "RUN_SPEED",
                             "value": {
                                 "index": 0,
-                                "data": 8.0
+                                "data": 12.0
                             }
                         },
                         {
@@ -2922,17 +2922,17 @@
                             }
                         },
                         {
-                            "key": "RUN_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 12.0
-                            }
-                        },
-                        {
                             "key": "CAMERA_Y_OFFSET",
                             "value": {
                                 "index": 0,
                                 "data": 1.100000023841858
+                            }
+                        },
+                        {
+                            "key": "JUMP_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 8.0
                             }
                         },
                         {

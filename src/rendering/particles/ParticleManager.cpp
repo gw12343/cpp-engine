@@ -1,3 +1,4 @@
+#include <tracy/Tracy.hpp>
 #include "ParticleManager.h"
 
 #include "utils/Utils.h"
@@ -67,6 +68,7 @@ namespace Engine {
 
 	void ParticleManager::onUpdate(float dt)
 	{
+		ZoneScoped;
 		if (GetState() != PLAYING) return;
 
 		if (m_manager) {

@@ -3,6 +3,7 @@
 
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
+#include <tracy/Tracy.hpp>
 #include "Window.h"
 
 #include "scripting/ScriptManager.h"
@@ -31,6 +32,7 @@ namespace Engine {
 
 	void Input::onUpdate(float dt)
 	{
+		ZoneScoped;
 		if (GetState() == PLAYING) {
 			if (IsKeyPressed(GLFW_KEY_ESCAPE)) {
 				m_gameCursorMode = GLFW_CURSOR_NORMAL;
