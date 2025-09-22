@@ -85,23 +85,27 @@ namespace Engine {
 
 				// Samples optimized animation at t = animation_time_
 				ozz::animation::SamplingJob sampling_job;
-				sampling_job.animation = GetAssetManager().Get(animationComponent.animation)->source;
+				auto                        anim = GetAssetManager().Get(animationComponent.animation);
 
-				sampling_job.context = animationComponent.context; // animationWorkerComponent.context;
-				sampling_job.ratio   = animationComponent.timescale;
-				sampling_job.output  = ozz::make_span(*animationPoseComponent.local_pose);
-				if (!sampling_job.Run()) {
-					log->error("Failed to sample animation");
-					return;
-				}
+				if (anim != nullptr) {
+					sampling_job.animation = anim->source;
 
-				ozz::animation::LocalToModelJob ltm_job;
-				ltm_job.skeleton = skeletonComponent.skeleton;
-				ltm_job.input    = ozz::make_span(*animationPoseComponent.local_pose);
-				ltm_job.output   = ozz::make_span(*animationPoseComponent.model_pose);
-				if (!ltm_job.Run()) {
-					log->error("Failed to convert to model space");
-					return;
+					sampling_job.context = animationComponent.context; // animationWorkerComponent.context;
+					sampling_job.ratio   = animationComponent.timescale;
+					sampling_job.output  = ozz::make_span(*animationPoseComponent.local_pose);
+					if (!sampling_job.Run()) {
+						log->error("Failed to sample animation");
+						return;
+					}
+
+					ozz::animation::LocalToModelJob ltm_job;
+					ltm_job.skeleton = skeletonComponent.skeleton;
+					ltm_job.input    = ozz::make_span(*animationPoseComponent.local_pose);
+					ltm_job.output   = ozz::make_span(*animationPoseComponent.model_pose);
+					if (!ltm_job.Run()) {
+						log->error("Failed to convert to model space");
+						return;
+					}
 				}
 			}
 		}

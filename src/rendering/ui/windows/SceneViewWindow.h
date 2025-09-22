@@ -13,7 +13,7 @@
 namespace Engine {
 	class SceneViewWindow {
 	  public:
-		static void                DrawSceneViewWindow();
+		static bool                DrawSceneViewWindow();
 		static ImGuizmo::OPERATION mCurrentGizmoOperation;
 		static ImGuizmo::MODE      mCurrentGizmoMode;
 	};

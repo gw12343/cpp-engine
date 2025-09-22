@@ -26,6 +26,9 @@
 #include "windows/SceneViewWindow.h"
 #include "windows/AnimationWindow.h"
 #include "utils/Builder.h"
+#include "components/impl/ModelRendererComponent.h"
+#include "rendering/particles/Particle.h"
+#include "components/impl/ParticleSystemComponent.h"
 
 #include <nfd.h>
 #include <string>
@@ -149,7 +152,7 @@ namespace Engine::UI {
 		if (GetState() != EDITOR) {
 			GetCamera().LoadEditorLocation();
 			GetUI().m_selectedEntity = Entity();
-			GetParticleManager().StopAllEffects();
+			GetParticleManager().ResetInternalManager();
 			{
 				//  clear scene
 				auto& physics = GetPhysics();
@@ -347,8 +350,7 @@ namespace Engine::UI {
 		float height = RenderTopBar(h) + h;
 		BeginDockspace(height);
 
-		SceneViewWindow::DrawSceneViewWindow();
-
+		m_overSceneView = SceneViewWindow::DrawSceneViewWindow();
 		RenderHierarchyWindow();
 		m_inspectorRenderer->RenderInspectorWindow(&m_selectedEntity);
 		m_materialEditor->RenderMaterialEditor(m_selectedMaterial);
@@ -403,10 +405,46 @@ namespace Engine::UI {
 				ImGui::EndDragDropSource();
 			}
 		}
-		if (ImGui::BeginPopupContextWindow()) {
-			if (ImGui::MenuItem("Create Entity")) {
-				// Action for menu item
+
+
+		if (ImGui::BeginPopupContextWindow("HierarchyContext", ImGuiPopupFlags_NoOpenOverItems | ImGuiPopupFlags_MouseButtonRight)) {
+			ImGui::Text("Add Entity");
+			ImGui::Separator();
+			if (ImGui::MenuItem("Empty Entity")) {
 				Entity entity    = Entity::Create("New Entity", GetCurrentScene());
+				m_selectedEntity = entity;
+			}
+
+			// Get position in front of camera
+			glm::vec3 position = GetCamera().GetPosition();
+			glm::vec3 forward  = GetCamera().GetFront();
+			glm::vec3 spawnPos = position + glm::vec3(forward.x * 3, forward.y * 3, forward.z * 3);
+
+			if (ImGui::MenuItem("Add Model")) {
+				Entity                        entity = Entity::Create("New Model", GetCurrentScene());
+				AssetHandle<Rendering::Model> model;
+
+				if (!GetAssetManager().GetStorage<Rendering::Model>().guidToAsset.empty()) {
+					model = AssetHandle<Rendering::Model>(GetAssetManager().GetStorage<Rendering::Model>().guidToAsset.begin()->first);
+				}
+
+
+				entity.AddComponent<Components::Transform>(spawnPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+				entity.AddComponent<Components::ModelRenderer>(model);
+				m_selectedEntity = entity;
+			}
+			if (ImGui::MenuItem("Add Particle System")) {
+				Entity                entity = Entity::Create("New Particle System", GetCurrentScene());
+				AssetHandle<Particle> particle;
+
+				if (!GetAssetManager().GetStorage<Particle>().guidToAsset.empty()) {
+					particle = AssetHandle<Particle>(GetAssetManager().GetStorage<Particle>().guidToAsset.begin()->first);
+				}
+
+
+				entity.AddComponent<Components::Transform>(spawnPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+				entity.AddComponent<Components::ParticleSystem>(particle);
+
 				m_selectedEntity = entity;
 			}
 
@@ -426,6 +464,11 @@ namespace Engine::UI {
 		ImGui::Text("GAME PAUSED");
 		ImGui::Text("Press PLAY to resume");
 		ImGui::End();
+	}
+
+	bool UIManager::isOverSceneView() const
+	{
+		return m_overSceneView;
 	}
 
 
