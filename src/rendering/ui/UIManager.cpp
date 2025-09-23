@@ -30,13 +30,19 @@
 #include "rendering/particles/Particle.h"
 #include "components/impl/ParticleSystemComponent.h"
 
+#ifndef EMSCRIPTEN
 #include <nfd.h>
+#endif // EMSCRIPTEN
+
+
 #include <string>
 #include <iostream>
 #include <tracy/Tracy.hpp>
 
 std::string SelectFolder()
 {
+#ifndef EMSCRIPTEN
+
 	nfdchar_t*  folder = nullptr;
 	nfdresult_t result = NFD_PickFolder(nullptr, &folder);
 
@@ -52,6 +58,9 @@ std::string SelectFolder()
 		std::cerr << "NFD Error: " << NFD_GetError() << std::endl;
 		return "";
 	}
+#else
+	return "todo";
+#endif // EMSCRIPTEN
 }
 
 

@@ -49,14 +49,22 @@
 #include "TracyClient.cpp"
 
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#endif
+
+
 namespace fs = std::filesystem;
 
 namespace Engine {
+	GEngine*      GEngine::s_instance = nullptr;
 	ModuleManager manager;
 
 
 	GEngine::GEngine(int width, int height, const char* title) : m_deltaTime(0.0f), m_lastFrame(0.0f)
 	{
+		std::cout << "Hello World!" << std::endl;
+		s_instance = this;
 		SetState(EDITOR);
 		Get().manager = &manager;
 		// Initialize asset loaders
@@ -111,13 +119,10 @@ namespace Engine {
 		AssetHandle<Particle> testParticle = GetAssetManager().Load<Particle>("resources/particles/testleaf.efk");
 		LoadGameAssets();
 		GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>(SCENE1));
-
-
 #ifdef GAME_BUILD
 		SetState(PLAYING);
 		Get().manager->StartGame();
 #endif
-
 		return true;
 	}
 
@@ -204,17 +209,30 @@ namespace Engine {
 	}
 
 
+	void GEngine::Tick()
+	{
+		FrameMarkStart("main");
+		auto currentFrame = static_cast<float>(glfwGetTime());
+		m_deltaTime       = currentFrame - m_lastFrame;
+		m_lastFrame       = currentFrame;
+
+		manager.UpdateAll(m_deltaTime);
+		FrameMarkEnd("main");
+	}
 	void GEngine::Run()
 	{
+#ifdef EMSCRIPTEN
+		emscripten_set_main_loop(
+		    []() {
+			    s_instance->Tick(); // call Tick() on the singleton instance
+		    },
+		    0,
+		    1);
+#else
 		while (!GetWindow().ShouldClose()) {
-			FrameMarkStart("main");
-			auto currentFrame = static_cast<float>(glfwGetTime());
-			m_deltaTime       = currentFrame - m_lastFrame;
-			m_lastFrame       = currentFrame;
-
-			manager.UpdateAll(m_deltaTime);
-			FrameMarkEnd("main");
+			Tick();
 		}
+#endif
 	}
 
 

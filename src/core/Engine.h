@@ -43,8 +43,13 @@ namespace Engine {
 		 */
 		void Shutdown();
 
+		void Tick();
+
+		/** Static accessor for the engine instance */
+		static GEngine& GetInstance() { return *s_instance; }
 
 	  private:
+		static GEngine* s_instance; // <--- Add this
 		/**
 		 * @brief Creates initial entities used in the game world.
 		 */

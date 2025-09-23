@@ -11,6 +11,7 @@
 #include "rendering/particles/Particle.h"
 #include "IconsFontAwesome6.h"
 #include "animation/Animation.h"
+#include "terrain/TerrainTile.h"
 
 
 namespace Engine {
@@ -485,3 +486,5 @@ namespace Engine {
 		return open;
 	}
 } // namespace Engine
+
+#include "assets/AssetManager.inl"

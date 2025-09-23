@@ -45,3 +45,5 @@ namespace Engine {
 	{
 	}
 } // namespace Engine
+
+#include "assets/AssetManager.inl"

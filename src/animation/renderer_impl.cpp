@@ -53,10 +53,12 @@ RendererImpl::RendererImpl() = default;
 
 RendererImpl::~RendererImpl()
 {
+#ifndef EMSCRIPTEN
 	if (vertex_array_o_) {
 		GL(DeleteVertexArrays(1, &vertex_array_o_));
 		vertex_array_o_ = 0;
 	}
+#endif // EMSCRIPTEN
 
 	if (dynamic_array_bo_) {
 		GL(DeleteBuffers(1, &dynamic_array_bo_));
@@ -81,8 +83,11 @@ bool RendererImpl::Initialize()
 		return false;
 	}
 
+// Build and bind vertex array once for all
+#ifndef EMSCRIPTEN
 	GL(GenVertexArrays(1, &vertex_array_o_));
 	GL(BindVertexArray(vertex_array_o_));
+#endif // EMSCRIPTEN
 
 	// Builds the dynamic vbo
 	GL(GenBuffers(1, &dynamic_array_bo_));
@@ -998,7 +1003,7 @@ bool RendererImpl::DrawMesh(const Mesh& _mesh, const ozz::math::Float4x4& _trans
 		if (_options.texture) {
 			ambient_textured_shader->Bind(_transform, GetCamera().view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false, uvs_stride, uvs_offset);
 			shader = ambient_textured_shader.get();
-			
+
 			if (valid_material) {
 				// Binds default texture
 				if (GetAssetManager().Get(material->GetDiffuseTexture())) {
@@ -1971,3 +1976,6 @@ bool GL_ARB_instanced_arrays_supported = false;
 // OZZ_DECL_GL_EXT(glVertexAttribDivisor, PFNGLVERTEXATTRIBDIVISORPROC);
 // OZZ_DECL_GL_EXT(glDrawArraysInstanced_, PFNGLDRAWARRAYSINSTANCEDPROC);
 // OZZ_DECL_GL_EXT(glDrawElementsInstanced_, PFNGLDRAWELEMENTSINSTANCEDPROC);
+
+
+#include "assets/AssetManager.inl"

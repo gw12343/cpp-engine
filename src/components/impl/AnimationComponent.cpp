@@ -120,3 +120,5 @@ namespace Engine::Components {
 
 
 } // namespace Engine::Components
+
+#include "assets/AssetManager.inl"

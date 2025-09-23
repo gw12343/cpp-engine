@@ -10,7 +10,12 @@
 #include "utils/Utils.h"
 
 #include <cstring>
+
+#ifndef EMSCRIPTEN
 #include <sndfile.h>
+#endif // EMSCRIPTEN
+
+
 #include <spdlog/spdlog.h>
 #include <vector>
 #include <tracy/Tracy.hpp>
@@ -21,6 +26,10 @@ namespace Engine::Audio {
 	SoundBuffer::SoundBuffer(const std::string& filename) : m_loaded(false)
 	{
 		name = GetFileName(filename);
+
+#ifndef EMSCRIPTEN
+
+
 		// Generate buffer
 		alGenBuffers(1, &m_bufferID);
 
@@ -62,6 +71,9 @@ namespace Engine::Audio {
 		}
 
 		m_loaded = true;
+
+
+#endif // EMSCRIPTEN
 	}
 
 	SoundBuffer::~SoundBuffer()

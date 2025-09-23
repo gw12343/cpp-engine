@@ -2,38 +2,29 @@
 
 #include "components/Components.h"
 #include "EngineData.h"
-#include "Scene.h"
+#include "Scene.h" // full definition needed here
 
 #include <entt/entt.hpp>
 #include <string>
 
 namespace Engine {
-
-
-	// Entity wrapper class for easier entity manipulation
 	class Entity {
 	  public:
 		Entity() = default;
 		Entity(entt::entity handle, Scene* scene) : m_handle(handle), m_scene(scene) {}
 
-		// Static methods for entity creation and destruction
 		static Entity Create(const std::string& name, Scene* scene);
 		void          Destroy();
 		void          MarkForDestruction();
 
-		// Check if entity is valid
 		explicit operator bool() const { return m_handle != entt::null; }
-
 		bool IsValid();
 
-		// Comparison operators
 		bool operator==(const Entity& other) const { return m_handle == other.m_handle; }
 		bool operator!=(const Entity& other) const { return !(*this == other); }
 
-		// Get the underlying entt handle
 		[[nodiscard]] entt::entity GetHandle() const { return m_handle; }
 
-		// Template method declarations
 		template <typename T, typename... Args>
 		T& AddComponent(Args&&... args)
 		{
@@ -41,7 +32,6 @@ namespace Engine {
 			component.OnAdded(*this);
 			return component;
 		}
-
 
 		template <typename T>
 		T& GetComponent()
@@ -61,7 +51,6 @@ namespace Engine {
 			m_scene->GetRegistry()->template remove<T>(m_handle);
 		}
 
-		// Entity metadata helpers
 		[[nodiscard]] const std::string& GetName() const;
 		void                             SetName(const std::string& name);
 
@@ -71,8 +60,7 @@ namespace Engine {
 		[[nodiscard]] bool    IsActive() const;
 		[[maybe_unused]] void SetActive(bool active);
 
-
-		Scene* m_scene;
+		Scene* m_scene{};
 
 	  private:
 		entt::entity m_handle{entt::null};

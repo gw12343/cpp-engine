@@ -40,6 +40,8 @@ namespace Engine {
 
 	void ParticleManager::onInit()
 	{
+#ifndef EMSCRIPTEN
+
 		m_renderer = EffekseerRendererGL::Renderer::Create(MAX_INSTANCES, EffekseerRendererGL::OpenGLDeviceType::OpenGL3);
 		if (!m_renderer) {
 			log->critical("Failed to create Effekseer renderer");
@@ -47,11 +49,14 @@ namespace Engine {
 		}
 
 		ResetInternalManager();
+#endif // EMSCRIPTEN
 	}
 
 
 	void ParticleManager::onUpdate(float dt)
 	{
+#ifndef EMSCRIPTEN
+
 		ZoneScoped;
 		if (GetState() != PLAYING) return;
 
@@ -64,16 +69,22 @@ namespace Engine {
 		for (auto [entity, transform, particleSystem] : view.each()) {
 			m_manager->SetLocation(particleSystem.handle, transform.position.x, transform.position.y, transform.position.z); // particleSystem.UpdateTransform(transform);
 		}
+#endif // EMSCRIPTEN
 	}
 	void ParticleManager::onShutdown()
 	{
+#ifndef EMSCRIPTEN
+
 		m_manager.Reset();
 		m_renderer.Reset();
+#endif // EMSCRIPTEN
 	}
 
 
 	void ParticleManager::Render()
 	{
+#ifndef EMSCRIPTEN
+
 		// Set up OpenGL state for Effekseer
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -95,11 +106,14 @@ namespace Engine {
 			m_renderer->EndRendering();
 		}
 		glDepthMask(GL_TRUE);
+#endif // EMSCRIPTEN
 	}
 
 
 	Effekseer::Handle ParticleManager::PlayEffect(const std::u16string& path, float x, float y, float z)
 	{
+#ifndef EMSCRIPTEN
+
 		Effekseer::RefPtr<Effekseer::Effect> effect = Effekseer::Effect::Create(m_manager, path.c_str());
 		if (!effect) {
 			log->critical("Failed to load particle effect: {}", std::string(path.begin(), path.end()));
@@ -107,9 +121,12 @@ namespace Engine {
 		}
 
 		return m_manager->Play(effect, x, y, z);
+#endif // EMSCRIPTEN
 	}
 	void ParticleManager::ResetInternalManager()
 	{
+#ifndef EMSCRIPTEN
+
 		m_manager = Effekseer::Manager::Create(MAX_INSTANCES);
 		m_manager->SetSpriteRenderer(m_renderer->CreateSpriteRenderer());
 		m_manager->SetRibbonRenderer(m_renderer->CreateRibbonRenderer());
@@ -128,6 +145,7 @@ namespace Engine {
 		else {
 			log->info("Effekseer Manager initialized!");
 		}
+#endif // EMSCRIPTEN
 	}
 
 

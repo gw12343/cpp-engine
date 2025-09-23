@@ -7,6 +7,7 @@
 
 #include "assets/IAssetLoader.h"
 #include "core/Scene.h"
+#include "assets/AssetHandle.h"
 
 
 namespace Engine {

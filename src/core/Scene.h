@@ -1,24 +1,19 @@
-//
-// Created by gabe on 8/16/25.
-//
-
 #pragma once
 
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <entt/entt.hpp>
-#include <spdlog/spdlog.h>
+#include <map>
 #include <vector>
-#include "core/Entity.h"
 #include "EntityHandle.h"
 
 namespace Engine {
-	// A single scene, essentially just a wrapper for entt::registry
+	class Entity; // forward declaration
+
 	class Scene {
 	  public:
 		Scene(std::string name);
-
 		Scene(std::string name, std::vector<Entity> entities);
 
 		std::shared_ptr<entt::registry> GetRegistry() { return m_registry; }
