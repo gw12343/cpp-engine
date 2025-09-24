@@ -88,8 +88,10 @@ namespace Engine::UI {
 		m_terrainIconTexture->LoadFromFile("resources/engine/mountain.png");
 		m_animationIconTexture->LoadFromFile("resources/engine/animation.png");
 
+#ifndef EMSCRIPTEN
 		efsw::WatchID id = m_uiAssetRenderer->fw.addWatch("resources", &m_uiAssetRenderer->listener, true);
 		m_uiAssetRenderer->fw.watch();
+#endif
 #endif
 	}
 

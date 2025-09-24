@@ -21,7 +21,9 @@
 #include "components/impl/ParticleSystemComponent.h"
 #include "components/AllComponents.h"
 
+#ifndef EMSCRIPTEN
 #include "efsw/efsw.hpp"
+#endif
 
 #define COMPONENT_METHODS(COMPONENT_TYPE, COMPONENT_NAME)                                                                                                                                                                                      \
 	"Add" #COMPONENT_NAME, [](Entity& e) -> COMPONENT_TYPE& { return e.AddComponent<COMPONENT_TYPE>(); }, "Get" #COMPONENT_NAME, [](Entity& e) -> COMPONENT_TYPE& { return e.GetComponent<COMPONENT_TYPE>(); }, "Has" #COMPONENT_NAME,         \
@@ -30,7 +32,7 @@
 
 namespace Engine {
 
-
+#ifndef EMSCRIPTEN
 	class LuaWatcher : public efsw::FileWatchListener {
 	  public:
 		void handleFileAction(efsw::WatchID watchid, const std::string& dir, const std::string& filename, efsw::Action action, std::string oldFilename) override
@@ -45,6 +47,7 @@ namespace Engine {
 
 	efsw::FileWatcher fw;
 	LuaWatcher        listener;
+#endif
 
 	void ScriptManager::onInit()
 	{
@@ -105,9 +108,13 @@ namespace Engine {
 		}
 
 #ifndef GAME_BUILD
+#ifndef EMSCRIPTEN
+
+
 		// Watch the scripts folder recursively
 		efsw::WatchID id = fw.addWatch("scripts", &listener, true);
 		fw.watch();
+#endif
 #endif
 	}
 

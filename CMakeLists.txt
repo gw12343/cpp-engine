@@ -1,5 +1,6 @@
 # ----------------- Build Options -----------------
 cmake_minimum_required(VERSION 3.24)
+project(cpp-engine VERSION 0.1.0 LANGUAGES C CXX)
 
 
 option(GAME_BUILD "Compile engine as game build (stripped for game)" OFF)
@@ -26,9 +27,14 @@ if (BUILD_FOR_WEB)
         -sALLOW_MEMORY_GROWTH=1 \
         -sINITIAL_MEMORY=64MB \
         -sMAXIMUM_MEMORY=1024MB \
+        -sSTACK_SIZE=5MB \
+        -g4 \
         -sUSE_WEBGL2=1 \
         -sFULL_ES3=1 \
-        -sASSERTIONS=1")
+        -sSAFE_HEAP=1 \
+        -sUSE_PTHREADS=0 \
+        -sASSERTIONS=2 \
+        -sSTACK_OVERFLOW_CHECK=1")
 
     # preload folders only if they exist
     if (EXISTS "${CMAKE_SOURCE_DIR}/resources")
@@ -55,6 +61,8 @@ if (WIN32)
     add_compile_definitions(NOMINMAX)
 endif ()
 
+option(USE_ASSIMP_FROM_SOURCE "Build and use Assimp 6.0.2 from source" ON)
+
 # ----------------- Global dependency flags -----------------
 set(SPDLOG_BUILD_WARNINGS OFF CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
@@ -67,6 +75,10 @@ set(ozz_build_tools OFF CACHE BOOL "" FORCE)
 set(ozz_build_howtos OFF CACHE BOOL "" FORCE)
 set(ozz_build_gltf OFF CACHE BOOL "" FORCE)
 set(ozz_build_postfix OFF CACHE BOOL "" FORCE)
+set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(SKIP_PERFORMANCE_COMPARISON ON CACHE BOOL "" FORCE)
+set(BUILD_SANDBOX OFF CACHE BOOL "" FORCE)
+set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
 # ----------------- Fetch external libraries -----------------
 include(FetchContent)
@@ -78,7 +90,6 @@ if (USE_ASSIMP_FROM_SOURCE)
             GIT_REPOSITORY https://github.com/assimp/assimp.git
             GIT_TAG v6.0.2
     )
-    FetchContent_MakeAvailable(assimp_src)
 
     set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
@@ -87,6 +98,9 @@ if (USE_ASSIMP_FROM_SOURCE)
     else ()
         set(ASSIMP_BUILD_ZLIB OFF CACHE BOOL "" FORCE)
     endif ()
+
+
+    FetchContent_MakeAvailable(assimp_src)
 endif ()
 
 # Core dependencies (safe everywhere)
@@ -102,11 +116,42 @@ FetchContent_Declare(sol2 GIT_REPOSITORY https://github.com/ThePhD/sol2.git GIT_
 FetchContent_Declare(nlohmann_json GIT_REPOSITORY https://github.com/nlohmann/json.git GIT_TAG v3.11.3)
 FetchContent_Declare(efsw GIT_REPOSITORY https://github.com/SpartanJ/efsw.git GIT_TAG master)
 
+if (NOT BUILD_FOR_WEB)
+    FetchContent_Declare(
+            nativefiledialog
+            GIT_REPOSITORY https://github.com/mlabbe/nativefiledialog.git
+            GIT_TAG release_116
+    )
+endif ()
+
 set(EFSW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(EFSW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(SKIP_PERFORMANCE_COMPARISON ON CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(cereal spdlog jolt ozz imgui effekseer lua sol2 nlohmann_json efsw tracy)
+if (NOT BUILD_FOR_WEB)
+    FetchContent_MakeAvailable(nativefiledialog)
+
+
+    add_library(nfd STATIC
+            ${nativefiledialog_SOURCE_DIR}/src/nfd_common.c
+    )
+
+    if (WIN32)
+        target_sources(nfd PRIVATE ${nativefiledialog_SOURCE_DIR}/src/nfd_win.cpp)
+    else () # Linux
+        find_package(PkgConfig REQUIRED)
+        pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
+        include_directories(${GTK3_INCLUDE_DIRS})
+        link_directories(${GTK3_LIBRARY_DIRS})
+        add_definitions(${GTK3_CFLAGS_OTHER})
+
+        target_sources(nfd PRIVATE ${nativefiledialog_SOURCE_DIR}/src/nfd_gtk.c)
+        target_link_libraries(nfd PRIVATE ${GTK3_LIBRARIES})
+    endif ()
+
+    target_include_directories(nfd PUBLIC ${nativefiledialog_SOURCE_DIR}/src/include)
+endif ()
 
 # ----------------- IMGUI -------------------
 add_library(imgui STATIC
@@ -164,6 +209,26 @@ endif ()
 # Skip desktop-only libs on web
 if (NOT BUILD_FOR_WEB)
     target_link_libraries(${PROJECT_NAME} PRIVATE nfd EffekseerRendererGL)
+endif ()
+
+if (WIN32)
+    # Use built-in or bundled .lib
+    set(ASSIMP_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/assimp.lib")
+    if (EXISTS "${ASSIMP_LIB}")
+        message(STATUS "Using bundled Assimp on Windows: ${ASSIMP_LIB}")
+        target_link_libraries(${PROJECT_NAME} PRIVATE "${ASSIMP_LIB}")
+    else ()
+        find_package(ASSIMP REQUIRED)
+        target_link_libraries(${PROJECT_NAME} PRIVATE assimp::assimp)
+    endif ()
+else ()
+    if (USE_ASSIMP_FROM_SOURCE)
+        # Use the built-in CMake target from our fetch/build
+        target_link_libraries(${PROJECT_NAME} PRIVATE assimp)
+    else ()
+        find_package(ASSIMP 6.0.2 REQUIRED)
+        target_link_libraries(${PROJECT_NAME} PRIVATE assimp::assimp)
+    endif ()
 endif ()
 
 # ----------------- Link Everything Else -------------------

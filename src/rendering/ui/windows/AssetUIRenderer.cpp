@@ -47,7 +47,7 @@ namespace Engine {
 	DELETE_IF(Texture, Texture, ".png", "resources/textures/")
 	DELETE_IF(Animation, Animation, ".anim", "resources/animations/")
 
-
+#ifndef EMSCRIPTEN
 	void AssetWatcher::handleFileAction(efsw::WatchID watchid, const std::string& dir, const std::string& filename, efsw::Action action, std::string oldFilename)
 	{
 		fs::path    filePath = dir + filename;
@@ -71,7 +71,7 @@ namespace Engine {
 				break;
 		}
 	}
-
+#endif
 
 	AssetUIRenderer::AssetUIRenderer()
 	{
