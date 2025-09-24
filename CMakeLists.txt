@@ -37,17 +37,17 @@ if (BUILD_FOR_WEB)
         -sSTACK_OVERFLOW_CHECK=1")
 
     # preload folders only if they exist
-    if (EXISTS "${CMAKE_SOURCE_DIR}/resources")
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file ${CMAKE_SOURCE_DIR}/resources@/resources")
-    endif ()
-
-    if (EXISTS "${CMAKE_SOURCE_DIR}/scenes")
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file ${CMAKE_SOURCE_DIR}/scenes@/scenes")
-    endif ()
-
-    if (EXISTS "${CMAKE_SOURCE_DIR}/scripts")
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file ${CMAKE_SOURCE_DIR}/scripts@/scripts")
-    endif ()
+    #    if (EXISTS "${CMAKE_SOURCE_DIR}/resources")
+    #        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file ${CMAKE_SOURCE_DIR}/resources@/resources")
+    #    endif ()
+    #
+    #    if (EXISTS "${CMAKE_SOURCE_DIR}/scenes")
+    #        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file ${CMAKE_SOURCE_DIR}/scenes@/scenes")
+    #    endif ()
+    #
+    #    if (EXISTS "${CMAKE_SOURCE_DIR}/scripts")
+    #        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file ${CMAKE_SOURCE_DIR}/scripts@/scripts")
+    #    endif ()
 endif ()
 
 # ----------------- Compiler settings -----------------
@@ -174,8 +174,20 @@ target_compile_definitions(imgui PUBLIC IMGUI_HAS_DOCK)
 
 # ----------------- LUA -------------------
 file(GLOB LUA_SOURCES ${lua_SOURCE_DIR}/src/*.c)
+list(REMOVE_ITEM LUA_SOURCES
+        ${lua_SOURCE_DIR}/src/lua.c    # the standalone interpreter (has its own main)
+        ${lua_SOURCE_DIR}/src/luac.c   # the bytecode compiler
+        ${lua_SOURCE_DIR}/src/liolib.c # io.* library (uses open, fcntl, etc.)
+        ${lua_SOURCE_DIR}/src/loslib.c # os.* library (uses system, time, etc.)
+)
+
 add_library(lua STATIC ${LUA_SOURCES})
 target_include_directories(lua PUBLIC ${lua_SOURCE_DIR}/src)
+
+target_link_options(lua PUBLIC
+        "-sFORCE_FILESYSTEM=1"
+        "-sALLOW_MEMORY_GROWTH=1"
+)
 
 # ----------------- Sources -------------------
 file(GLOB_RECURSE SOURCES
@@ -247,6 +259,12 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 )
 
 # Effekseer includes
+target_include_directories(${PROJECT_NAME} PRIVATE
+        ${effekseer_SOURCE_DIR}/Dev/Cpp
+        ${effekseer_SOURCE_DIR}/Dev/Cpp/Effekseer
+        ${effekseer_SOURCE_DIR}/Dev/Cpp/EffekseerRendererCommon
+)
+
 target_include_directories(${PROJECT_NAME} PRIVATE
         ${effekseer_SOURCE_DIR}/Dev/Cpp
         ${effekseer_SOURCE_DIR}/Dev/Cpp/Effekseer
