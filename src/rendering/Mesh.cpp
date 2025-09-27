@@ -10,6 +10,7 @@
 #include <glad/glad.h>
 #include <spdlog/spdlog.h>
 #include "rendering/Renderer.h"
+#include "Jolt/Physics/Collision/Shape/MeshShape.h"
 
 namespace Engine {
 	namespace Rendering {
@@ -57,6 +58,36 @@ namespace Engine {
 			glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) offsetof(Vertex, Bitangent));
 
 			glBindVertexArray(0);
+
+
+			// Jolt Collisions
+			if (m_vertices.empty() || m_indices.empty()) return;
+
+			// Convert to Jolt format
+			JPH::VertexList joltVertices;
+			joltVertices.reserve(m_vertices.size());
+
+			for (const auto& v : m_vertices)
+				joltVertices.push_back(JPH::Float3(v.Position.x, v.Position.y, v.Position.z));
+
+			JPH::IndexedTriangleList joltTriangles;
+			joltTriangles.reserve(m_indices.size() / 3);
+
+			for (size_t i = 0; i < m_indices.size(); i += 3)
+				joltTriangles.emplace_back(JPH::IndexedTriangle(m_indices[i], m_indices[i + 1], m_indices[i + 2]));
+
+			// Build MeshShape
+			JPH::MeshShapeSettings meshSettings(joltVertices, joltTriangles);
+			meshSettings.mActiveEdgeCosThresholdAngle = cos(3.0f * JPH_PI / 180.0f);
+
+			JPH::Shape::ShapeResult result = meshSettings.Create();
+			if (result.HasError()) {
+				spdlog::error("Failed to create Jolt MeshShape: {}", result.GetError().c_str());
+				m_collisionShape = nullptr;
+			}
+			else {
+				m_collisionShape = result.Get();
+			}
 		}
 
 

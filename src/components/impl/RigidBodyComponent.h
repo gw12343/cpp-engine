@@ -18,13 +18,20 @@ namespace Engine::Components {
 		JPH::BodyID bodyID;
 
 		// Stored physics configuration
-		int         motionType    = (int) JPH::EMotionType::Dynamic;
-		float       mass          = 1.0f;
-		float       friction      = 0.5f;
-		float       restitution   = 0.0f;
-		float       gravityFactor = 1.0f;
-		std::string shapeType     = "Box";
-		JPH::Vec3   shapeSize     = JPH::Vec3::sReplicate(1.0f); // size/half-extents
+		int   motionType    = (int) JPH::EMotionType::Dynamic;
+		float mass          = 1.0f;
+		float friction      = 0.5f;
+		float restitution   = 0.0f;
+		float gravityFactor = 1.0f;
+
+		bool rotX = true;
+		bool rotY = true;
+		bool rotZ = true;
+
+		bool staticMesh = false;
+
+		std::string shapeType = "Box";
+		JPH::Vec3   shapeSize = JPH::Vec3::sReplicate(1.0f); // size/half-extents
 
 		RigidBodyComponent() : bodyID(0) {}
 
@@ -34,7 +41,7 @@ namespace Engine::Components {
 		template <class Archive>
 		void serialize(Archive& ar)
 		{
-			ar(CEREAL_NVP(motionType), CEREAL_NVP(mass), CEREAL_NVP(friction), CEREAL_NVP(restitution), CEREAL_NVP(gravityFactor), CEREAL_NVP(shapeType), CEREAL_NVP(shapeSize));
+			ar(CEREAL_NVP(motionType), CEREAL_NVP(mass), CEREAL_NVP(friction), CEREAL_NVP(restitution), CEREAL_NVP(gravityFactor), CEREAL_NVP(shapeType), CEREAL_NVP(shapeSize), CEREAL_NVP(rotX), CEREAL_NVP(rotY), CEREAL_NVP(rotZ));
 		}
 
 		void OnAdded(Entity& entity) override;
@@ -89,6 +96,7 @@ namespace Engine::Components {
 		[[maybe_unused]] static glm::vec3 ToGlm(const JPH::Vec3& v);
 		[[maybe_unused]] static JPH::Quat ToJolt(const glm::quat& q);
 		[[maybe_unused]] static glm::quat ToGlm(const JPH::Quat& q);
+		void                              UpdateRotationConstraints();
 	};
 } // namespace Engine::Components
 

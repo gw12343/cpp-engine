@@ -4,12 +4,17 @@
 #include "Shader.h"
 #include "Texture.h"
 
+#include "Jolt/Jolt.h"
+#include "Jolt/Physics/Collision/Shape/Shape.h"
+
 
 #include <glm/glm.hpp>
 #include <memory>
 #include <string>
 #include <unordered_set>
 #include <vector>
+
+using namespace JPH;
 
 
 namespace Engine::Rendering {
@@ -30,6 +35,9 @@ namespace Engine::Rendering {
 		[[maybe_unused]] void                          CleanUp();
 		[[maybe_unused]] static void                   CleanAllMeshes();
 		[[nodiscard]] const std::shared_ptr<Material>& GetMaterial() const { return m_material; }
+		[[nodiscard]] std::vector<Vertex>              GetVertices() const { return m_vertices; }
+		[[nodiscard]] std::vector<unsigned int>        GetIndices() const { return m_indices; }
+		[[nodiscard]] RefConst<JPH::Shape>             GetCollisionShape() const { return m_collisionShape; }
 
 	  private:
 		void SetupMesh();
@@ -38,6 +46,8 @@ namespace Engine::Rendering {
 		std::vector<unsigned int> m_indices;
 		std::shared_ptr<Material> m_material;
 
+		// TODO dont store for all meshes
+		RefConst<JPH::Shape> m_collisionShape;
 
 	  private:
 		GLuint m_vao;

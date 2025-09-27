@@ -6,10 +6,10 @@
 #include "components/impl/NavigationComponents.h"
 #include "components/impl/TransformComponent.h"
 #include "components/impl/ModelRendererComponent.h"
-#include "glad/glad.h"
 
 #include "animation/AnimationManager.h"
 #include "utils/Utils.h"
+#include "components/impl/RigidBodyComponent.h"
 // Recast/Detour includes
 #include <Recast.h>
 #include <DetourNavMesh.h>
@@ -82,6 +82,42 @@ namespace Engine {
 
 		// Update crowd simulation
 		UpdateCrowdAgents(dt);
+
+		// Move entities
+		auto view = GetCurrentSceneRegistry().view<Components::NavAgent, Components::Transform, Components::RigidBodyComponent>();
+
+		for (auto entity : view) {
+			Entity ent(entity, m_currentScene);
+			auto&  navAgent  = ent.GetComponent<Components::NavAgent>();
+			auto&  transform = ent.GetComponent<Components::Transform>();
+			auto&  rb        = ent.GetComponent<Components::RigidBodyComponent>();
+
+			if (!navAgent.hasPath || navAgent.currentWaypoint >= navAgent.path.size()) continue;
+
+
+			const glm::vec3 target = navAgent.path[navAgent.currentWaypoint];
+			const glm::vec3 pos    = glm::vec3(transform.position.x, target.y, transform.position.z);
+
+			glm::vec3 toTarget = target - pos;
+			float     dist     = glm::length(toTarget);
+
+			if (dist < navAgent.waypointTolerance) {
+				navAgent.currentWaypoint++;
+				if (navAgent.currentWaypoint >= navAgent.path.size()) {
+					navAgent.hasPath = false;
+					// Optionally stop the body
+					auto v = rb.GetLinearVelocity();
+					rb.SetLinearVelocity(glm::vec3(0, v.y, 0));
+					continue;
+				}
+				continue;
+			}
+
+			glm::vec3 dir        = glm::normalize(toTarget);
+			glm::vec3 desiredVel = dir * navAgent.speed;
+			desiredVel.y         = rb.GetLinearVelocity().y;
+			rb.SetLinearVelocity(desiredVel);
+		}
 
 		// Sync crowd agent positions with entity components
 		SyncAgentComponents();
@@ -172,6 +208,29 @@ namespace Engine {
 
 			auto a = FromMatrix(matrix);
 			dd->DrawSphereIm(0.05, a, colv);
+		}
+
+
+		if (!m_currentScene || !m_crowd) return;
+
+		auto registry = m_currentScene->GetRegistry();
+		auto view     = registry->view<Components::NavAgent, Components::Transform>();
+
+		for (auto entity : view) {
+			Entity ent(entity, m_currentScene);
+			auto&  navAgent  = ent.GetComponent<Components::NavAgent>();
+			auto&  transform = ent.GetComponent<Components::Transform>();
+
+			if (navAgent.hasPath) {
+				for (auto v : navAgent.path) {
+					auto matrix = glm::mat4(1.0f);
+					matrix      = glm::translate(matrix, v);
+
+
+					auto a = FromMatrix(matrix);
+					dd->DrawSphereIm(0.25, a, {1, 0, 0, 1});
+				}
+			}
 		}
 	}
 
@@ -459,29 +518,36 @@ namespace Engine {
 		// TODO: Replace this with your actual mesh system
 		// This is a placeholder - you need to adapt this to your mesh format
 
-		// Example: Create a simple quad for testing
-		if (navGeometry.isWalkable) {
+		auto model = GetAssetManager().Get(meshRenderer.model);
+
+
+		// add the mesh data
+		if (navGeometry.isWalkable && model != nullptr) {
+			if (model->GetMeshes().empty()) return;
+			auto& mesh = model->GetMeshes()[0];
+			SPDLOG_INFO("USING MESH DATA: {}", model->m_name);
+
+			const auto& verts   = mesh->GetVertices(); // std::vector<Vertex>
+			const auto& indices = mesh->GetIndices();  // std::vector<uint32_t>
+
+			if (verts.empty() || indices.empty()) return;
+
 			size_t baseIndex = geometry.vertices.size() / 3;
 
-			// Simple quad vertices (you'll replace this with actual mesh data)
-			std::vector<glm::vec3> localVertices = {glm::vec3(-1.0f, 0.0f, -1.0f), glm::vec3(1.0f, 0.0f, -1.0f), glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(-1.0f, 0.0f, 1.0f)};
-
-			std::vector<uint32_t> localIndices = {0, 2, 1, 0, 3, 2};
-
-			// Transform vertices to world space
+			// Transform vertices to world space and add them
 			glm::mat4 worldMatrix = transform.GetMatrix();
-			for (const auto& vertex : localVertices) {
-				glm::vec4 worldPos = worldMatrix * glm::vec4(vertex, 1.0f);
+			for (const auto& v : verts) {
+				glm::vec4 worldPos = worldMatrix * glm::vec4(v.Position, 1.0f);
 				geometry.vertices.push_back(worldPos.x);
 				geometry.vertices.push_back(worldPos.y);
 				geometry.vertices.push_back(worldPos.z);
 			}
 
 			// Add indices with base offset
-			for (size_t i = 0; i < localIndices.size(); i += 3) {
-				geometry.indices.push_back(baseIndex + localIndices[i]);
-				geometry.indices.push_back(baseIndex + localIndices[i + 1]);
-				geometry.indices.push_back(baseIndex + localIndices[i + 2]);
+			for (size_t i = 0; i < indices.size(); i += 3) {
+				geometry.indices.push_back(baseIndex + indices[i]);
+				geometry.indices.push_back(baseIndex + indices[i + 1]);
+				geometry.indices.push_back(baseIndex + indices[i + 2]);
 				geometry.areas.push_back(navGeometry.area);
 			}
 		}

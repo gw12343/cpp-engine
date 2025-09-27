@@ -141,7 +141,7 @@ namespace Engine {
 		scriptDeltaTime = dt;
 
 		if (GetState() == EDITOR) {
-            #ifndef GAME_BUILD
+#ifndef GAME_BUILD
 			// Editor script
 			if (luaUpdate.valid()) {
 				try {
@@ -151,7 +151,7 @@ namespace Engine {
 					log->error("Lua error in onUpdate: {}", e.what());
 				}
 			}
-            #endif
+#endif
 		}
 		else if (GetState() == PLAYING) {
 			{

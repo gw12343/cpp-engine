@@ -5,6 +5,8 @@
 #include "NavigationComponents.h"
 #include <imgui.h>
 #include "rendering/ui/InspectorUI.h"
+#include "navigation/NavigationManager.h"
+
 namespace Engine {
 	namespace Components {
 		void NavMeshGeometry::RenderInspector(Entity& entity)
@@ -30,6 +32,17 @@ namespace Engine {
 				isMoving = false;
 				hasPath  = false;
 				path.clear();
+			}
+
+			if (ImGui::Button("Send Random")) {
+				GetNav().SetAgentTarget(entity, GetNav().GetRandomPoint());
+			}
+
+			if (hasPath) {
+				ImGui::Text("Path Nodes: %d", path.size());
+				for (auto p : path) {
+					ImGui::Text("(%f, %f, %f)", p.x, p.y, p.z);
+				}
 			}
 		}
 	} // namespace Components

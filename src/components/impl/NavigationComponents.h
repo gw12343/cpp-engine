@@ -35,6 +35,18 @@ namespace Engine {
 			bool                   isMoving     = false;
 			int                    crowdAgentId = -1;
 
+
+			float  speed             = 3.0f;
+			size_t currentWaypoint   = 0;
+			float  waypointTolerance = 0.2f;
+
+
+			template <class Archive>
+			void serialize(Archive& ar)
+			{
+				ar(CEREAL_NVP(radius), CEREAL_NVP(height), CEREAL_NVP(maxSpeed));
+			}
+
 			void OnAdded(Entity& entity) override {}
 			void OnRemoved(Entity& entity) override{};
 			void RenderInspector(Entity& entity) override;

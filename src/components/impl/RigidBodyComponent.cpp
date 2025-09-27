@@ -15,6 +15,8 @@
 #include "physics/PhysicsManager.h"
 #include "RigidBodyComponent.h"
 #include "rendering/ui/InspectorUI.h"
+#include "ModelRendererComponent.h"
+#include "Jolt/Physics/Collision/Shape/MeshShape.h"
 
 namespace Engine::Components {
 
@@ -24,6 +26,32 @@ namespace Engine::Components {
 		GetPhysics().GetPhysicsSystem()->GetBodyInterface().RemoveBody(bodyID);
 		GetPhysics().bodyToEntityMap.erase(bodyID);
 	}
+
+	void RigidBodyComponent::UpdateRotationConstraints()
+	{
+		SPDLOG_INFO("upd");
+		// 1. Get the locking interface to modify the body.
+		JPH::BodyLockWrite lock(GetPhysics().GetPhysicsSystem()->GetBodyLockInterface(), bodyID);
+		if (!lock.Succeeded()) {
+			return;
+		}
+
+		// 2. Get the body and its motion properties.
+		JPH::Body&             body              = lock.GetBody();
+		JPH::MotionProperties* motion_properties = body.GetMotionProperties();
+
+
+		JPH::MassProperties mp;
+		mp.ScaleToMass(mass);
+
+		EAllowedDOFs dofs = JPH::EAllowedDOFs::TranslationX | JPH::EAllowedDOFs::TranslationY | JPH::EAllowedDOFs::TranslationZ;
+		if (rotX) dofs |= JPH::EAllowedDOFs::RotationX;
+		if (rotY) dofs |= JPH::EAllowedDOFs::RotationY;
+		if (rotZ) dofs |= JPH::EAllowedDOFs::RotationZ;
+		motion_properties->SetMassProperties(dofs, mp);
+	}
+
+
 	void RigidBodyComponent::OnAdded(Entity& entity)
 	{
 		BodyInterface& body_interface = GetPhysics().GetPhysicsSystem()->GetBodyInterface();
@@ -59,6 +87,7 @@ namespace Engine::Components {
 
 			JPH::BodyCreationSettings settings(shape, startPos, startRot, (JPH::EMotionType) motionType, Layers::MOVING);
 
+
 			auto                physics       = GetPhysics().GetPhysicsSystem();
 			JPH::BodyInterface& bodyInterface = physics->GetBodyInterface();
 
@@ -68,12 +97,13 @@ namespace Engine::Components {
 			settings.mOverrideMassProperties       = EOverrideMassProperties::MassAndInertiaProvided;
 
 			bodyID = bodyInterface.CreateAndAddBody(settings, JPH::EActivation::Activate);
+			UpdateRotationConstraints();
 		}
 		GetPhysics().GetPhysicsSystem()->GetBodyInterface().SetMotionQuality(bodyID, EMotionQuality::LinearCast);
 		GetPhysics().bodyToEntityMap[bodyID] = entity;
 	}
 
-	const char* items[] = {"Box", "Sphere", "Capsule", "Cylinder"};
+	const char* items[] = {"Box", "Sphere", "Capsule", "Cylinder", "Mesh"};
 
 
 	void RigidBodyComponent::RenderInspector(Entity& entity)
@@ -90,20 +120,29 @@ namespace Engine::Components {
 
 		if (LeftLabelCombo("Motion Type", &current, motionTypes, IM_ARRAYSIZE(motionTypes))) {
 			// Update when changed
-			motionType = (current == 0) ? (int) JPH::EMotionType::Kinematic : (int) JPH::EMotionType::Dynamic;
+			motionType = staticMesh ? (int) JPH::EMotionType::Static : ((current == 0) ? (int) JPH::EMotionType::Kinematic : (int) JPH::EMotionType::Dynamic);
 
 			bodyInterface.SetMotionType(bodyID, (JPH::EMotionType) motionType, JPH::EActivation::Activate);
 		}
 
 		if (LeftLabelSliderFloat("Mass", &mass, 1.0, 1000.0)) {
-			JPH::BodyLockWrite lock(physics->GetBodyLockInterface(), bodyID);
-			if (lock.Succeeded()) {
-				auto&               body = lock.GetBody();
-				auto*               mot  = body.GetMotionProperties();
-				JPH::MassProperties mp;
-				mp.ScaleToMass(mass);
-				mot->SetMassProperties(JPH::EAllowedDOFs::All, mp);
-			}
+			// Updates MassProperties too
+			UpdateRotationConstraints();
+		}
+		if (LeftLabelCheckbox("Is Static Mesh", &staticMesh)) {
+			UpdateRotationConstraints();
+		}
+
+		ImGui::NewLine();
+
+		if (LeftLabelCheckbox("Rotation X", &rotX)) {
+			UpdateRotationConstraints();
+		}
+		if (LeftLabelCheckbox("Rotation Y", &rotY)) {
+			UpdateRotationConstraints();
+		}
+		if (LeftLabelCheckbox("Rotation Z", &rotZ)) {
+			UpdateRotationConstraints();
 		}
 
 		if (LeftLabelSliderFloat("Friction", &friction, 0.00, 1.0)) {
@@ -143,6 +182,9 @@ namespace Engine::Components {
 				}
 				else if (shapeType == "Cylinder") {
 					shape_index = 3;
+				}
+				else if (shapeType == "Mesh") {
+					shape_index = 4;
 				}
 
 
@@ -186,6 +228,28 @@ namespace Engine::Components {
 								bodyInterface.SetShape(bodyID, newCylinder, true, JPH::EActivation::Activate);
 								shapeType = "Cylinder";
 								shapeSize = size;
+							}
+							else if (n == 4) {
+								Vec3 size = Vec3(tr.scale.x, tr.scale.y, tr.scale.z);
+
+								SPDLOG_INFO("yas");
+
+								auto& meshComp = entity.GetComponent<Components::ModelRenderer>();
+								auto  model    = GetAssetManager().Get(meshComp.model);
+								auto  mesh     = model->GetMeshes()[0];
+								// chose
+								SPDLOG_INFO("yas2");
+
+								if (mesh && mesh->GetCollisionShape()) {
+									JPH::RefConst<JPH::Shape> newMeshShape = mesh->GetCollisionShape();
+
+									staticMesh = true;
+									bodyInterface.SetMotionType(bodyID, JPH::EMotionType::Static, JPH::EActivation::Activate);
+									bodyInterface.SetShape(bodyID, newMeshShape, false, JPH::EActivation::Activate);
+									shapeType = "Mesh";
+									shapeSize = size;
+									SPDLOG_INFO("yas2");
+								}
 							}
 						}
 					}
@@ -243,6 +307,20 @@ namespace Engine::Components {
 
 						shapeSize = Vec3(halfHeight, radius, 0.0);
 					}
+				}
+				else if (shape.GetPtr()->GetSubType() == EShapeSubType::Mesh) {
+					const auto* mesh_shape = static_cast<const MeshShape*>(shape.GetPtr());
+
+
+					//					float radius     = capsule_shape->GetRadius();
+					//					float halfHeight = capsule_shape->GetHalfHeightOfCylinder();
+					//
+					//					if (LeftLabelDragFloat("Radius", &radius, 0.25f) || LeftLabelDragFloat("Half Height", &halfHeight, 0.25f)) {
+					//						JPH::Ref<JPH::Shape> newCapsule = new JPH::CapsuleShape(halfHeight, radius);
+					//						bodyInterface.SetShape(bodyID, newCapsule, true, JPH::EActivation::Activate);
+					//
+					//						shapeSize = Vec3(halfHeight, radius, 0.0);
+					//					}
 				}
 
 
@@ -401,6 +479,7 @@ namespace Engine::Components {
 		shapeSize = Vec3(settings.mRadius, 0.0, 0.0);
 	}
 
+
 	void RigidBodyComponent::SetCapsuleShape(const JPH::CapsuleShapeSettings& settings)
 	{
 		auto result = settings.Create();
@@ -534,6 +613,9 @@ namespace Engine::Components {
 		gravityFactor = other.gravityFactor;
 		shapeType     = other.shapeType;
 		shapeSize     = other.shapeSize;
+		rotX          = other.rotX;
+		rotY          = other.rotY;
+		rotZ          = other.rotZ;
 	}
 
 

@@ -23039,7 +23039,7 @@ public:
     void each(Func func) const {
         if constexpr(is_applicable_v<Func, decltype(std::tuple_cat(std::tuple<entity_type>{}, std::declval<basic_view>().get({})))>) {
             for(const auto pack: each()) {
-                std::apply(func, pack);
+                 std::apply(func, pack);
             }
         } else if constexpr(Get::storage_policy == deletion_policy::swap_and_pop || Get::storage_policy == deletion_policy::swap_only) {
             if constexpr(std::is_void_v<typename Get::value_type>) {

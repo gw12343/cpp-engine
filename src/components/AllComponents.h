@@ -37,6 +37,7 @@
 	X(Components::SkinnedMeshComponent, SkinnedMeshComponent, "Skinned Mesh")                                                                                                                                                                  \
 	X(Components::ParticleSystem, ParticleSystem, ICON_FA_STAR_HALF_STROKE "Particle System")                                                                                                                                                  \
 	X(Components::PlayerControllerComponent, PlayerControllerComponent, "Player Controller")                                                                                                                                                   \
-	X(Components::NavMeshGeometry, NavMeshGeometry, "NavMesh Geometry")
+	X(Components::NavMeshGeometry, NavMeshGeometry, "NavMesh Geometry")                                                                                                                                                                        \
+	X(Components::NavAgent, NavAgent, "Nav Agent")
 
 #endif // CPP_ENGINE_ALLCOMPONENTS_H
