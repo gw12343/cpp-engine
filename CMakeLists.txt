@@ -230,7 +230,7 @@ add_executable(${PROJECT_NAME} ${SOURCES}
         src/navigation/NavigationManager.h
         src/navigation/NavigationManager.cpp
         src/components/impl/NavigationComponents.h
-        src/components/impl/NavigationComponents.cpp)
+        src/components/impl/NavigationComponents.cpp
         src/utils/Builder.cpp
         src/animation/Animation.h
         src/animation/Animation.cpp

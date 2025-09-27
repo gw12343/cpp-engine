@@ -48,7 +48,7 @@ namespace Engine {
 		std::string name() const override { return "NavigationModule"; }
 
 		// Navigation mesh management
-		bool BuildNavMesh(Scene* scene);
+		bool BuildNavMesh();
 		void ClearNavMesh();
 
 		// Pathfinding
@@ -66,8 +66,6 @@ namespace Engine {
 		// Debug
 		void OnInspectorRender();
 
-		// Scene reference
-		Scene* m_currentScene;
 
 		dtNavMesh* m_navMesh;
 

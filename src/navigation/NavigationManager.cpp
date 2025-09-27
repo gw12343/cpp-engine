@@ -48,7 +48,7 @@ namespace Engine {
 		}
 	};
 
-	NavigationModule::NavigationModule() : m_context(std::make_unique<NavigationContext>()), m_navMesh(nullptr), m_navQuery(nullptr), m_filter(nullptr), m_crowd(nullptr), m_currentScene(nullptr), m_crowdInitialized(false)
+	NavigationModule::NavigationModule() : m_context(std::make_unique<NavigationContext>()), m_navMesh(nullptr), m_navQuery(nullptr), m_filter(nullptr), m_crowd(nullptr), m_crowdInitialized(false)
 	{
 	}
 
@@ -78,7 +78,7 @@ namespace Engine {
 
 	void NavigationModule::onUpdate(float dt)
 	{
-		if (!m_currentScene || !m_crowd) return;
+		if (!m_crowd) return;
 
 		// Update crowd simulation
 		UpdateCrowdAgents(dt);
@@ -87,7 +87,7 @@ namespace Engine {
 		auto view = GetCurrentSceneRegistry().view<Components::NavAgent, Components::Transform, Components::RigidBodyComponent>();
 
 		for (auto entity : view) {
-			Entity ent(entity, m_currentScene);
+			Entity ent(entity, GetCurrentScene());
 			auto&  navAgent  = ent.GetComponent<Components::NavAgent>();
 			auto&  transform = ent.GetComponent<Components::Transform>();
 			auto&  rb        = ent.GetComponent<Components::RigidBodyComponent>();
@@ -211,13 +211,13 @@ namespace Engine {
 		}
 
 
-		if (!m_currentScene || !m_crowd) return;
+		if (!m_crowd) return;
 
-		auto registry = m_currentScene->GetRegistry();
-		auto view     = registry->view<Components::NavAgent, Components::Transform>();
+		auto& registry = GetCurrentSceneRegistry();
+		auto  view     = registry.view<Components::NavAgent, Components::Transform>();
 
 		for (auto entity : view) {
-			Entity ent(entity, m_currentScene);
+			Entity ent(entity, GetCurrentScene());
 			auto&  navAgent  = ent.GetComponent<Components::NavAgent>();
 			auto&  transform = ent.GetComponent<Components::Transform>();
 
@@ -234,21 +234,14 @@ namespace Engine {
 		}
 	}
 
-	bool NavigationModule::BuildNavMesh(Scene* scene)
+	bool NavigationModule::BuildNavMesh()
 	{
-		if (!scene) {
-			log->warn("scene null");
-			return false;
-		}
-
-		m_currentScene = scene;
-
 		// Clear existing navmesh
 		ClearNavMesh();
 
 		// Collect geometry from scene
 		GeometryData geometry;
-		CollectGeometry(scene, geometry);
+		CollectGeometry(GetCurrentScene(), geometry);
 
 		log->info("Collected geometry: {} vertices, {} indices", geometry.vertices.size(), geometry.indices.size());
 
@@ -708,13 +701,13 @@ namespace Engine {
 
 	void NavigationModule::SyncAgentComponents()
 	{
-		if (!m_currentScene || !m_crowd) return;
+		if (!m_crowd) return;
 
-		auto registry = m_currentScene->GetRegistry();
-		auto view     = registry->view<Components::NavAgent, Components::Transform>();
+		auto& registry = GetCurrentSceneRegistry();
+		auto  view     = registry.view<Components::NavAgent, Components::Transform>();
 
 		for (auto entity : view) {
-			Entity ent(entity, m_currentScene);
+			Entity ent(entity, GetCurrentScene());
 			auto&  navAgent  = ent.GetComponent<Components::NavAgent>();
 			auto&  transform = ent.GetComponent<Components::Transform>();
 
@@ -736,10 +729,8 @@ namespace Engine {
 			ImGui::Checkbox("Show Agent Paths", &m_showAgentPaths);
 
 			if (ImGui::Button("Build NavMesh")) {
-				if (m_currentScene) {
-					bool success = BuildNavMesh(m_currentScene);
-					ImGui::Text("Build result: %s", success ? "Success" : "Failed");
-				}
+				bool success = BuildNavMesh();
+				ImGui::Text("Build result: %s", success ? "Success" : "Failed");
 			}
 
 			ImGui::SameLine();

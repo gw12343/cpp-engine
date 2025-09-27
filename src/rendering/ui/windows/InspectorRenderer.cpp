@@ -11,6 +11,7 @@
 #include "misc/cpp/imgui_stdlib.h"
 #include "rendering/ui/InspectorUI.h"
 
+#include "core/Input.h"
 
 namespace Engine {
 
@@ -71,7 +72,7 @@ namespace Engine {
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.3f, 0.3f, 1.0f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.7f, 0.1f, 0.1f, 1.0f));
 
-			if (ImGui::Button(deleteLabel, ImVec2(deleteWidth, 0))) {
+			if (ImGui::Button(deleteLabel, ImVec2(deleteWidth, 0)) || (GetState() != PLAYING && GetInput().IsKeyPressedThisFrame(GLFW_KEY_DELETE))) {
 				GetUI().m_selectedEntity.Destroy();
 				GetUI().m_selectedEntity = Entity();
 				ImGui::PopStyleColor(3);

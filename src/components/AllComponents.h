@@ -20,6 +20,7 @@
 #include "impl/TransformComponent.h"
 #include "impl/PlayerControllerComponent.h"
 #include "impl/GizmoComponent.h"
+#include "impl/NavigationComponents.h"
 
 #define COMPONENT_LIST                                                                                                                                                                                                                         \
 	X(Components::LuaScript, LuaScript, ICON_FA_SCROLL " Script")                                                                                                                                                                              \
@@ -35,9 +36,7 @@
 	X(Components::SkinnedMeshComponent, SkinnedMeshComponent, "Skinned Mesh")                                                                                                                                                                  \
 	X(Components::ParticleSystem, ParticleSystem, ICON_FA_STAR_HALF_STROKE " Particle System")                                                                                                                                                 \
 	X(Components::PlayerControllerComponent, PlayerControllerComponent, "Player Controller")                                                                                                                                                   \
-	X(Components::GizmoComponent, GizmoComponent, ICON_FA_GLOBE " Gizmo")\
-	X(Components::ParticleSystem, ParticleSystem, ICON_FA_STAR_HALF_STROKE "Particle System")                                                                                                                                                  \
-	X(Components::PlayerControllerComponent, PlayerControllerComponent, "Player Controller")                                                                                                                                                   \
+	X(Components::GizmoComponent, GizmoComponent, ICON_FA_GLOBE " Gizmo")                                                                                                                                                                      \
 	X(Components::NavMeshGeometry, NavMeshGeometry, "NavMesh Geometry")                                                                                                                                                                        \
 	X(Components::NavAgent, NavAgent, "Nav Agent")
 
