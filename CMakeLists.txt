@@ -90,6 +90,13 @@ FetchContent_Declare(
         GIT_TAG release_116
 )
 
+FetchContent_Declare(
+        tracy
+        GIT_REPOSITORY https://github.com/wolfpld/tracy.git
+        GIT_TAG v0.12.2
+        GIT_SHALLOW TRUE
+        GIT_PROGRESS TRUE
+)
 # --- RecastNavigation ---
 FetchContent_Declare(
         recastnavigation
@@ -149,7 +156,7 @@ set(EFSW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(EFSW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
 
-FetchContent_MakeAvailable(cereal spdlog recastnavigation nativefiledialog jolt ozz imgui effekseer lua sol2 nlohmann_json efsw)
+FetchContent_MakeAvailable(cereal spdlog recastnavigation nativefiledialog jolt ozz imgui effekseer lua sol2 nlohmann_json efsw tracy)
 
 
 if (WIN32)
@@ -224,6 +231,11 @@ add_executable(${PROJECT_NAME} ${SOURCES}
         src/navigation/NavigationManager.cpp
         src/components/impl/NavigationComponents.h
         src/components/impl/NavigationComponents.cpp)
+        src/utils/Builder.cpp
+        src/animation/Animation.h
+        src/animation/Animation.cpp
+        src/components/impl/GizmoComponent.h
+        src/components/impl/GizmoComponent.cpp)
 
 
 target_include_directories(${PROJECT_NAME} PRIVATE
@@ -346,6 +358,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         Detour
         DetourCrowd
         DetourTileCache
+        Tracy::TracyClient
 )
 
 # ----------------- Debug Info -------------------

@@ -20,7 +20,10 @@
 #include "rendering/ui/IconsFontAwesome6.h"
 namespace Engine {
 
-	void DrawSceneViewWindow()
+	ImGuizmo::OPERATION SceneViewWindow::mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+	ImGuizmo::MODE      SceneViewWindow::mCurrentGizmoMode      = ImGuizmo::LOCAL;
+
+	bool SceneViewWindow::DrawSceneViewWindow()
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 
@@ -109,6 +112,12 @@ namespace Engine {
 			}
 		}
 		ImGui::PopStyleVar();
+		ImVec2 min   = ImGui::GetWindowPos(); // top-left corner in screen space
+		ImVec2 max   = ImVec2(min.x + ImGui::GetWindowSize().x,
+                            min.y + ImGui::GetWindowSize().y); // bottom-right corner
+		ImVec2 mouse = ImGui::GetMousePos();
+
+		bool b = (mouse.x >= min.x && mouse.x < max.x && mouse.y >= min.y && mouse.y < max.y);
 		ImGui::End();
 
 		if (GetState() != PLAYING && GetInput().IsMousePositionInViewport()) {
@@ -133,5 +142,6 @@ namespace Engine {
 
 			Engine::Framebuffer::Unbind();
 		}
+		return b;
 	}
 } // namespace Engine

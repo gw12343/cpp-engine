@@ -7,7 +7,6 @@
 
 #include "impl/AnimationComponent.h"
 #include "impl/AnimationPoseComponent.h"
-#include "impl/AnimationWorkerComponent.h"
 #include "impl/AudioSourceComponent.h"
 #include "impl/EntityMetadataComponent.h"
 #include "impl/LuaScriptComponent.h"
@@ -20,7 +19,7 @@
 #include "impl/TerrainRendererComponent.h"
 #include "impl/TransformComponent.h"
 #include "impl/PlayerControllerComponent.h"
-#include "impl/NavigationComponents.h"
+#include "impl/GizmoComponent.h"
 
 #define COMPONENT_LIST                                                                                                                                                                                                                         \
 	X(Components::LuaScript, LuaScript, ICON_FA_SCROLL " Script")                                                                                                                                                                              \
@@ -33,8 +32,10 @@
 	X(Components::SkeletonComponent, SkeletonComponent, "Skeleton")                                                                                                                                                                            \
 	X(Components::AnimationComponent, AnimationComponent, "Animation")                                                                                                                                                                         \
 	X(Components::AnimationPoseComponent, AnimationPoseComponent, "Animation Pose")                                                                                                                                                            \
-	X(Components::AnimationWorkerComponent, AnimationWorkerComponent, "Animation Context")                                                                                                                                                     \
 	X(Components::SkinnedMeshComponent, SkinnedMeshComponent, "Skinned Mesh")                                                                                                                                                                  \
+	X(Components::ParticleSystem, ParticleSystem, ICON_FA_STAR_HALF_STROKE " Particle System")                                                                                                                                                 \
+	X(Components::PlayerControllerComponent, PlayerControllerComponent, "Player Controller")                                                                                                                                                   \
+	X(Components::GizmoComponent, GizmoComponent, ICON_FA_GLOBE " Gizmo")\
 	X(Components::ParticleSystem, ParticleSystem, ICON_FA_STAR_HALF_STROKE "Particle System")                                                                                                                                                  \
 	X(Components::PlayerControllerComponent, PlayerControllerComponent, "Player Controller")                                                                                                                                                   \
 	X(Components::NavMeshGeometry, NavMeshGeometry, "NavMesh Geometry")                                                                                                                                                                        \

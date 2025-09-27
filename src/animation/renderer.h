@@ -11,6 +11,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 
+#include "assets/AssetHandle.h"
+#include "rendering/Material.h"
+
 namespace Engine {
 	// Sample framework mesh type.
 	struct Mesh;
@@ -104,10 +107,10 @@ class AnimatedRenderer {
 	};
 
 	// Renders a skinned mesh at a specified location.
-	virtual bool DrawSkinnedMesh(const Engine::Mesh& _mesh, const ozz::span<ozz::math::Float4x4> _skinning_matrices, const ozz::math::Float4x4& _transform, const Options& _options = Options()) = 0;
+	virtual bool DrawSkinnedMesh(const Engine::Mesh& _mesh, const ozz::span<ozz::math::Float4x4> _skinning_matrices, const ozz::math::Float4x4& _transform, AssetHandle<Material> _material, const Options& _options = Options()) = 0;
 
 	// Renders a mesh at a specified location.
-	virtual bool DrawMesh(const Engine::Mesh& _mesh, const ozz::math::Float4x4& _transform, const Options& _options = Options()) = 0;
+	virtual bool DrawMesh(const Engine::Mesh& _mesh, const ozz::math::Float4x4& _transform, AssetHandle<Material> _material, const Options& _options = Options()) = 0;
 
 	// Renders a lines. Vertices 0 and 1 are considered a line. Vertices 2 and 3
 	// are considered a line. And so on. If the user specifies a non-even number

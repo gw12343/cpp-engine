@@ -41,6 +41,7 @@ namespace Engine {
 		static unsigned int lightDepthMaps;
 
 		Engine::Shader m_depthShader;
+		Engine::Shader m_animationDepthShader;
 	};
 
 } // namespace Engine

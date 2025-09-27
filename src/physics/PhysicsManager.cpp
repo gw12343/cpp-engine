@@ -6,6 +6,7 @@
 #include "components/impl/RigidBodyComponent.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
 #include <cstdarg>
+#include <tracy/Tracy.hpp>
 #include "PlayerController.h"
 #include "components/impl/PlayerControllerComponent.h"
 
@@ -76,6 +77,7 @@ namespace Engine {
 
 	void PhysicsManager::onUpdate(float dt)
 	{
+		ZoneScopedNC("Physics Update", 0x46556D);
 		// Collision Steps to simulate. Should be around 1 per 16ms
 		int cCollisionSteps = static_cast<int>(glm::ceil(dt * 60.0f));
 		// Retrieve the maximum number of jobs the job system can handle
@@ -85,13 +87,26 @@ namespace Engine {
 		// Step the world
 		if (GetState() == PLAYING) {
 			// Update Character controller
-			controller->Update(character, physics, allocater, dt);
+			{
+				ZoneScopedNC("Update Player Controller", 0x46556D);
+				controller->Update(character, physics, allocater, dt);
+			}
+
 			// Update Physics
-			physics->Update(dt, cCollisionSteps, allocater.get(), jobs.get());
+			{
+				ZoneScopedNC("Step Physics", 0x46556D);
+				physics->Update(dt, cCollisionSteps, allocater.get(), jobs.get());
+			}
 		}
 
-		SyncCharacterEntities();
-		SyncPhysicsEntities();
+		{
+			ZoneScopedNC("Sync Physics Characters", 0x46556D);
+			SyncCharacterEntities();
+		}
+		{
+			ZoneScopedNC("Sync Physics Entities", 0x46556D);
+			SyncPhysicsEntities();
+		}
 	}
 
 

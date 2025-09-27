@@ -6,6 +6,10 @@
 #define CPP_ENGINE_SKINNEDMESHCOMPONENT_H
 
 #include "components/Components.h"
+#include "rendering/Renderer.h"
+#include "TransformComponent.h"
+#include "assets/AssetManager.h"
+#include "core/EngineData.h"
 
 #include <cereal/cereal.hpp>
 #include <cereal/types/vector.hpp>
@@ -18,12 +22,14 @@ namespace Engine::Components {
 		std::vector<ozz::math::Float4x4>* skinning_matrices = nullptr;
 		std::string                       meshPath;
 
+		AssetHandle<Material> meshMaterial;
+
 		SkinnedMeshComponent() = default;
 
 		template <class Archive>
 		void serialize(Archive& ar)
 		{
-			ar(cereal::make_nvp("meshPath", meshPath));
+			ar(CEREAL_NVP(meshPath), CEREAL_NVP(meshMaterial));
 		}
 
 

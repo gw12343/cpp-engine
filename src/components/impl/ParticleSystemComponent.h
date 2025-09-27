@@ -21,6 +21,7 @@ namespace Engine::Components {
 		bool                  looping  = false;
 
 		ParticleSystem() = default;
+		explicit ParticleSystem(AssetHandle<Particle> particle) : effect(particle) {}
 
 		template <class Archive>
 		void serialize(Archive& ar)

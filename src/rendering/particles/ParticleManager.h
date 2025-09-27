@@ -17,7 +17,7 @@ namespace Engine {
 		void                      onGameStart() override {}
 		void                      onShutdown() override;
 		[[nodiscard]] std::string name() const override { return "ParticleModule"; };
-		void                      StopAllEffects();
+		void                      ResetInternalManager();
 
 		void Render();
 

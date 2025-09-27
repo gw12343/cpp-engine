@@ -5,18 +5,72 @@
 #include "AssetUIRenderer.h"
 #include "imgui.h"
 #include "imgui_internal.h"
-#include <unordered_map>
-#include "typeindex"
 #include "functional"
 #include "terrain/TerrainTile.h"
 #include "rendering/Renderer.h"
+#include "efsw/efsw.hpp"
+#include "utils/Utils.h"
+#include "rendering/particles/Particle.h"
+#include "animation/Animation.h"
+#include <filesystem>
+#include <functional>
 
 #define DEFAULT_ICON_SIZE 128.0f
-
+namespace fs = std::filesystem;
 
 namespace Engine {
 
 	float iconSize = DEFAULT_ICON_SIZE;
+
+#define DELETE_IF(name, type, extt, fp)                                                                                                                                                                                                        \
+	void DeleteAssetIf_##name(const std::string& filePath, std::string metaPath, const std::string& ext, const std::string& dir)                                                                                                               \
+	{                                                                                                                                                                                                                                          \
+		if (dir == fp && ext == extt) {                                                                                                                                                                                                        \
+			AssetHandle<type> handle = GetAssetManager().Load<type>(filePath);                                                                                                                                                                 \
+			GetAssetManager().Unload(handle);                                                                                                                                                                                                  \
+                                                                                                                                                                                                                                               \
+			if (fs::exists(metaPath)) {                                                                                                                                                                                                        \
+				std::error_code ec;                                                                                                                                                                                                            \
+				GetUI().log->info("path: {}", metaPath);                                                                                                                                                                                       \
+				std::filesystem::remove(metaPath, ec);                                                                                                                                                                                         \
+                                                                                                                                                                                                                                               \
+				GetUI().log->info("deleted {} metafile: {}", #name, metaPath);                                                                                                                                                                 \
+			}                                                                                                                                                                                                                                  \
+		}                                                                                                                                                                                                                                      \
+	}
+
+	DELETE_IF(Material, Material, ".material", "resources/materials/")
+	DELETE_IF(Model, Rendering::Model, ".obj", "resources/models/")
+	DELETE_IF(Particle, Particle, ".efk", "resources/particles/")
+	DELETE_IF(Sound, Audio::SoundBuffer, ".wav", "resources/sounds/")
+	DELETE_IF(Terrain, Terrain::TerrainTile, ".bin", "resources/terrain/")
+	DELETE_IF(Texture, Texture, ".png", "resources/textures/")
+	DELETE_IF(Animation, Animation, ".anim", "resources/animations/")
+
+
+	void AssetWatcher::handleFileAction(efsw::WatchID watchid, const std::string& dir, const std::string& filename, efsw::Action action, std::string oldFilename)
+	{
+		fs::path    filePath = dir + filename;
+		fs::path    metaPath = dir + filename + ".meta";
+		std::string ext      = filePath.extension();
+
+
+		// TODO add loading
+		switch (action) {
+			case efsw::Actions::Delete:
+				GetUI().log->debug("Detected deleted file: {}", filePath.c_str());
+
+				DeleteAssetIf_Material(filePath, metaPath, ext, dir);
+				DeleteAssetIf_Model(filePath, metaPath, ext, dir);
+				DeleteAssetIf_Particle(filePath, metaPath, ext, dir);
+				DeleteAssetIf_Sound(filePath, metaPath, ext, dir);
+				DeleteAssetIf_Terrain(filePath, metaPath, ext, dir);
+				DeleteAssetIf_Texture(filePath, metaPath, ext, dir);
+
+
+				break;
+		}
+	}
 
 
 	AssetUIRenderer::AssetUIRenderer()
@@ -25,6 +79,7 @@ namespace Engine {
 		             {typeid(Audio::SoundBuffer), [this]() { DrawSoundAssets(); }},
 		             {typeid(Rendering::Model), [this]() { DrawModelAssets(); }},
 		             {typeid(Material), [this]() { DrawMaterialAssets(); }},
+		             {typeid(Animation), [this]() { DrawAnimationAssets(); }},
 		             {typeid(Texture), [this]() { DrawTextureAssets(); }}
 
 		};
@@ -58,6 +113,8 @@ namespace Engine {
 					label = "Models";
 				else if (type == typeid(Audio::SoundBuffer))
 					label = "Sounds";
+				else if (type == typeid(Animation))
+					label = "Animations";
 				else if (type == typeid(Material))
 					label = "Materials";
 				else if (type == typeid(Terrain::TerrainTile))
@@ -96,7 +153,7 @@ namespace Engine {
 			std::string label     = sndPtr->name;
 			float       wrapWidth = iconSize; // restrict text to same width as preview
 			ImVec2      textSize  = ImGui::CalcTextSize(label.c_str(), nullptr, false, wrapWidth);
-			SelectableBackground(textSize, id, "Sound", "ASSET_SOUND");
+			SelectableBackground(textSize, id, "Audio::SoundBuffer", "ASSET_SOUND");
 
 
 			ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_audioIconTexture->GetID())), ImVec2(iconSize, iconSize));
@@ -129,6 +186,41 @@ namespace Engine {
 
 			ImGui::Image(GetUI().m_terrainIconTexture->GetID(), ImVec2(iconSize, iconSize));
 			ImGui::TextWrapped("Terrain %s", terrainPtr->name.c_str());
+
+			ImGui::NextColumn();
+			ImGui::PopID();
+		}
+
+		ImGui::Columns(1);
+	}
+
+	void AssetUIRenderer::DrawAnimationAssets()
+	{
+		auto& storage = GetAssetManager().GetStorage<Animation>();
+
+		float padding     = 8.0f;
+		int   columnCount = static_cast<int>(ImGui::GetContentRegionAvail().x / (iconSize + padding));
+		if (columnCount < 1) columnCount = 1;
+
+		ImGui::Columns(columnCount, nullptr, false);
+
+		for (auto& [id, animPtr] : storage.guidToAsset) {
+			if (!animPtr) continue;
+			ImGui::PushID(("snd" + id).c_str());
+
+
+			// --- Measure text to get correct rect size ---
+			std::string label     = animPtr->name;
+			float       wrapWidth = iconSize; // restrict text to same width as preview
+			ImVec2      textSize  = ImGui::CalcTextSize(label.c_str(), nullptr, false, wrapWidth);
+			SelectableBackground(textSize, id, "Animation", "ASSET_ANIMATION");
+
+
+			ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_animationIconTexture->GetID())), ImVec2(iconSize, iconSize));
+			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.0f);
+			ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + iconSize);
+			ImGui::TextWrapped("%s", label.c_str());
+			ImGui::PopTextWrapPos();
 
 			ImGui::NextColumn();
 			ImGui::PopID();
@@ -307,3 +399,5 @@ namespace Engine {
 		return clicked;
 	}
 } // namespace Engine
+
+#include "assets/AssetManager.inl"

@@ -48,7 +48,7 @@ namespace Engine {
 		/**
 		 * @brief Creates initial entities used in the game world.
 		 */
-		static void CreateInitialEntities();
+		static void LoadGameAssets();
 
 		std::shared_ptr<spdlog::logger> m_logger; ///< Logger instance.
 

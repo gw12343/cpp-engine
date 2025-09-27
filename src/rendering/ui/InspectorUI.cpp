@@ -10,6 +10,7 @@
 #include "imgui_internal.h"
 #include "rendering/particles/Particle.h"
 #include "IconsFontAwesome6.h"
+#include "animation/Animation.h"
 
 
 namespace Engine {
@@ -220,6 +221,49 @@ namespace Engine {
 		ImGui::PopID();
 	}
 
+	template <typename T, typename EditorFunc>
+	bool LeftLabelEditVector(const char* label, std::vector<T>& vec, EditorFunc editor)
+	{
+		bool is_using = false;
+		if (ImGui::CollapsingHeader(label, ImGuiTreeNodeFlags_DefaultOpen)) {
+			// Begin scrollable frame
+			ImGui::BeginChild((std::string("##") + label).c_str(), ImVec2(0, 200), true);
+
+			for (size_t i = 0; i < vec.size(); ++i) {
+				ImGui::PushID(static_cast<int>(i)); // ensure unique IDs
+
+				ImGui::Separator();
+
+				// Element label + inline remove button
+				ImGui::Text("Element %zu", i);
+				ImGui::SameLine();
+				if (ImGui::Button(("-##VECTORDELETEBUTTON" + std::string(label)).c_str())) {
+					vec.erase(vec.begin() + i);
+					ImGui::PopID();
+					is_using = true;
+					break; // exit loop after modifying container
+				}
+
+				// Call user-supplied editor for this element
+				if (editor(vec[i])) {
+					is_using = true;
+				}
+
+				ImGui::PopID();
+			}
+
+			ImGui::EndChild();
+
+			// Add new element
+			if (ImGui::Button(("+##VECTORADDBUTTON" + std::string(label)).c_str())) {
+				vec.push_back(T{}); // default-construct new element
+				is_using = true;
+			}
+		}
+
+		return is_using;
+	}
+
 
 #define LL_ASSET_DEF(name, atype, an, nameA)                                                                                                                                                                                                   \
 	bool LeftLabelAsset##name(const char* label, AssetHandle<atype>* assetRef)                                                                                                                                                                 \
@@ -241,8 +285,8 @@ namespace Engine {
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(an)) {                                                                                                                                                              \
 				if (payload->DataSize == sizeof(PayloadData)) {                                                                                                                                                                                \
 					const PayloadData* data = static_cast<const PayloadData*>(payload->Data);                                                                                                                                                  \
-                                                                                                                                                                                                                                               \
-					if (std::strcmp(data->type, #name) == 0) {                                                                                                                                                                                 \
+					GetDefaultLogger()->info("rec {} {}   wanted {}", data->id, data->type, #atype);                                                                                                                                           \
+					if (std::strcmp(data->type, #atype) == 0) {                                                                                                                                                                                \
 						*assetRef = AssetHandle<atype>(data->id);                                                                                                                                                                              \
 						newID     = data->id;                                                                                                                                                                                                  \
 						used      = true;                                                                                                                                                                                                      \
@@ -274,8 +318,17 @@ namespace Engine {
 		}                                                                                                                                                                                                                                      \
 		ImGui::Unindent(120);                                                                                                                                                                                                                  \
 		return used;                                                                                                                                                                                                                           \
+	}                                                                                                                                                                                                                                          \
+	bool LeftLabelAssetVector##name(const char* label, std::vector<AssetHandle<atype>>& assetRef)                                                                                                                                              \
+	{                                                                                                                                                                                                                                          \
+		if (LeftLabelEditVector<AssetHandle<atype>>(label, assetRef, [](AssetHandle<atype>& val) {                                                                                                                                             \
+			    ImGui::SameLine();                                                                                                                                                                                                             \
+			    return LeftLabelAsset##name("", &val);                                                                                                                                                                                         \
+		    })) {                                                                                                                                                                                                                              \
+			return true;                                                                                                                                                                                                                       \
+		}                                                                                                                                                                                                                                      \
+		return false;                                                                                                                                                                                                                          \
 	}
-
 
 	LL_ASSET_DEF(Texture, Texture, "ASSET_TEXTURE", assetPtr->GetName().c_str())
 	LL_ASSET_DEF(Model, Rendering::Model, "ASSET_MODEL", assetPtr->m_name.c_str())
@@ -284,6 +337,7 @@ namespace Engine {
 	LL_ASSET_DEF(Scene, Scene, "ASSET_SCENE", assetPtr->GetName().c_str())
 	LL_ASSET_DEF(Particle, Particle, "ASSET_PARTICLE", assetPtr->name.c_str())
 	LL_ASSET_DEF(Material, Material, "ASSET_MATERIAL", assetPtr->GetName().c_str())
+	LL_ASSET_DEF(Animation, Animation, "ASSET_ANIMATION", assetPtr->name.c_str())
 
 
 	bool LeftLabelEntity(const char* label, EntityHandle* assetRef)
@@ -338,6 +392,17 @@ namespace Engine {
 		ImGui::Unindent(120);
 
 		return used;
+	}
+
+	bool LeftLabelEntityVector(const char* label, std::vector<EntityHandle>& assetRef)
+	{
+		if (LeftLabelEditVector<EntityHandle>(label, assetRef, [](EntityHandle& val) {
+			    ImGui::SameLine();
+			    return LeftLabelEntity("", &val);
+		    })) {
+			return true;
+		}
+		return false;
 	}
 
 

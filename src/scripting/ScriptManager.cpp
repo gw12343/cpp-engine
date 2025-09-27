@@ -2,6 +2,7 @@
 // Created by gabe on 6/23/25.
 //
 
+#include <tracy/Tracy.hpp>
 #include "ScriptManager.h"
 
 #include "core/Entity.h"
@@ -15,7 +16,7 @@
 #include "components/impl/AudioSourceComponent.h"
 #include "components/impl/SkeletonComponent.h"
 #include "components/impl/AnimationPoseComponent.h"
-#include "components/impl/AnimationWorkerComponent.h"
+
 #include "components/impl/SkinnedMeshComponent.h"
 #include "components/impl/ParticleSystemComponent.h"
 #include "components/AllComponents.h"
@@ -92,7 +93,7 @@ namespace Engine {
 				for (auto v : va) {
 					out += v.get<std::string>() + " ";
 				}
-				if (!out.empty()) out.pop_back(); // remove trailing space
+				if (!out.empty()) out.pop_back(); //  remove trailing space
 
 				Logger::get("script")->debug("[Lua] {}", out);
 			});
@@ -106,8 +107,8 @@ namespace Engine {
 #ifndef GAME_BUILD
 		// Watch the scripts folder recursively
 		efsw::WatchID id = fw.addWatch("scripts", &listener, true);
-#endif
 		fw.watch();
+#endif
 	}
 
 	void ScriptManager::ReloadEditorScript()
@@ -138,6 +139,7 @@ namespace Engine {
 
 	void ScriptManager::onUpdate(float dt)
 	{
+		ZoneScoped;
 		scriptDeltaTime = dt;
 
 		if (GetState() == EDITOR) {

@@ -59,6 +59,7 @@ namespace Engine {
 		// Load meshes from a file path
 		static ozz::vector<Engine::Mesh>* LoadMeshesFromPath(const std::string& path);
 
+
 		ozz::unique_ptr<RendererImpl> renderer_;
 
 	  private:
@@ -66,21 +67,8 @@ namespace Engine {
 		std::unordered_map<std::string, std::unique_ptr<ozz::animation::Skeleton>> loaded_skeletons_;
 
 		// Map to store loaded animations
-		std::unordered_map<std::string, std::unique_ptr<ozz::animation::Animation>> loaded_animations_;
+		// std::unordered_map<std::string, std::unique_ptr<ozz::animation::Animation>> loaded_animations_;
 
-		// Animation controller
-		class PlaybackController {
-		  public:
-			PlaybackController() : time_ratio_(0.f) {}
-
-			[[nodiscard]] float time_ratio() const { return time_ratio_; }
-			void                set_time_ratio(float _ratio) { time_ratio_ = _ratio; }
-
-		  private:
-			float time_ratio_;
-		};
-
-		PlaybackController controller_;
 
 		// Rendering options
 		bool                      draw_skeleton_ = false;

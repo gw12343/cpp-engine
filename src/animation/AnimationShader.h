@@ -210,22 +210,3 @@ class AmbientTexturedShader : public AmbientShader {
 	          GLsizei                    _uv_stride,
 	          GLsizei                    _uv_offset);
 };
-/*
-class AmbientTexturedShaderInstanced : public AmbientShaderInstanced {
-public:
-
-  // Constructs the shader.
-  // Returns nullptr if shader compilation failed or a valid Shader pointer on
-  // success. The shader must then be deleted using default allocator Delete
-  // function.
-  static AmbientTexturedShaderInstanced* Build();
-
-  // Binds the shader.
-  void Bind(GLsizei _models_offset,
-            const math::Float4x4& _view_proj,
-            GLsizei _pos_stride, GLsizei _pos_offset,
-            GLsizei _normal_stride, GLsizei _normal_offset,
-            GLsizei _color_stride, GLsizei _color_offset,
-            GLsizei _uv_stride, GLsizei _uv_offset);
-};
-*/

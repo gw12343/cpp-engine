@@ -6,12 +6,12 @@
 #include "components/impl/AnimationComponent.h"
 #include "components/impl/TransformComponent.h"
 #include "components/impl/AnimationPoseComponent.h"
-#include "components/impl/AnimationWorkerComponent.h"
 #include "components/impl/SkeletonComponent.h"
 #include "components/impl/SkinnedMeshComponent.h"
 
 #include <spdlog/spdlog.h>
 #include <utils/Utils.h>
+#include <tracy/Tracy.hpp>
 #include "core/SceneManager.h"
 #include "assets/AssetManager.h"
 #include "physics/PhysicsManager.h"
@@ -49,52 +49,64 @@ namespace Engine {
 
 	void AnimationManager::onShutdown()
 	{
-		// Clean up loaded skeletons and animations
+		// Clean up loaded skeletons
 		for (auto& pair : loaded_skeletons_) {
 			pair.second.reset();
 		}
-		for (auto& pair : loaded_animations_) {
-			pair.second.reset();
-		}
-
 		renderer_.reset();
 	}
 
 
 	void AnimationManager::onUpdate(float deltaTime)
 	{
-		// Get all entities with a AnimationWorkerComponent and AnimationComponent and AnimationPoseComponent and SkeletonComponent
-		auto view = GetCurrentSceneRegistry().view<Components::AnimationWorkerComponent, Components::AnimationComponent>();
-		for (auto entity : view) {
-			Entity e(entity, GetCurrentScene());
-			auto&  animationWorkerComponent = e.GetComponent<Components::AnimationWorkerComponent>();
-			auto&  animationComponent       = e.GetComponent<Components::AnimationComponent>();
-			auto&  animationPoseComponent   = e.GetComponent<Components::AnimationPoseComponent>();
-			auto&  skeletonComponent        = e.GetComponent<Components::SkeletonComponent>();
+		ZoneScopedN("Animation Update");
+		// Get all entities with  and AnimationComponent
 
-			// Update animation time
-			if (GetState() == PLAYING) {
-				controller_.set_time_ratio((float) (sin(glfwGetTime() / 3.0f) / 2.0 + 0.5f));
-			}
+		entt::view<entt::get_t<Components::AnimationComponent>> animationView;
 
-			// Samples optimized animation at t = animation_time_
-			ozz::animation::SamplingJob sampling_job;
-			sampling_job.animation = animationComponent.animation;
-			sampling_job.context   = animationWorkerComponent.context;
-			sampling_job.ratio     = controller_.time_ratio();
-			sampling_job.output    = ozz::make_span(*animationPoseComponent.local_pose);
-			if (!sampling_job.Run()) {
-				log->error("Failed to sample animation");
-				return;
-			}
 
-			ozz::animation::LocalToModelJob ltm_job;
-			ltm_job.skeleton = skeletonComponent.skeleton;
-			ltm_job.input    = ozz::make_span(*animationPoseComponent.local_pose);
-			ltm_job.output   = ozz::make_span(*animationPoseComponent.model_pose);
-			if (!ltm_job.Run()) {
-				log->error("Failed to convert to model space");
-				return;
+		{
+			ZoneScopedN("Get animation view");
+			animationView = GetCurrentSceneRegistry().view<Components::AnimationComponent>();
+		}
+		{
+			ZoneScopedN("Sample animations");
+			for (auto entity : animationView) {
+				Entity e(entity, GetCurrentScene());
+				auto&  animationComponent     = e.GetComponent<Components::AnimationComponent>();
+				auto&  animationPoseComponent = e.GetComponent<Components::AnimationPoseComponent>();
+				auto&  skeletonComponent      = e.GetComponent<Components::SkeletonComponent>();
+
+				// Update animation time
+				if (GetState() == PLAYING) {
+					animationComponent.timescale += deltaTime;
+					animationComponent.timescale = fmod(animationComponent.timescale, 1.0f);
+				}
+
+				// Samples optimized animation at t = animation_time_
+				ozz::animation::SamplingJob sampling_job;
+				auto                        anim = GetAssetManager().Get(animationComponent.animation);
+
+				if (anim != nullptr) {
+					sampling_job.animation = anim->source;
+
+					sampling_job.context = animationComponent.context; // animationWorkerComponent.context;
+					sampling_job.ratio   = animationComponent.timescale;
+					sampling_job.output  = ozz::make_span(*animationPoseComponent.local_pose);
+					if (!sampling_job.Run()) {
+						log->error("Failed to sample animation");
+						return;
+					}
+
+					ozz::animation::LocalToModelJob ltm_job;
+					ltm_job.skeleton = skeletonComponent.skeleton;
+					ltm_job.input    = ozz::make_span(*animationPoseComponent.local_pose);
+					ltm_job.output   = ozz::make_span(*animationPoseComponent.model_pose);
+					if (!ltm_job.Run()) {
+						log->error("Failed to convert to model space");
+						return;
+					}
+				}
 			}
 		}
 	}
@@ -121,7 +133,7 @@ namespace Engine {
 				for (size_t i = 0; i < mesh.joint_remaps.size(); ++i) {
 					(*skinnedMeshComponent.skinning_matrices)[i] = (*animationPoseComponent.model_pose)[mesh.joint_remaps[i]] * mesh.inverse_bind_poses[i];
 				}
-				renderer_->DrawSkinnedMesh(mesh, ozz::make_span(*skinnedMeshComponent.skinning_matrices), transform, render_options_);
+				renderer_->DrawSkinnedMesh(mesh, ozz::make_span(*skinnedMeshComponent.skinning_matrices), transform, skinnedMeshComponent.meshMaterial, render_options_);
 			}
 		}
 
@@ -155,25 +167,16 @@ namespace Engine {
 
 	ozz::animation::Animation* AnimationManager::LoadAnimationFromPath(const std::string& path)
 	{
-		// Check if animation is already loaded
-		auto it = loaded_animations_.find(path);
-		if (it != loaded_animations_.end()) {
-			return it->second.get();
-		}
-
 		// Create a new animation
-		auto animation = std::make_unique<ozz::animation::Animation>();
+		auto animation = new ozz::animation::Animation();
 
 		// Load the animation from file
-		if (!LoadAnimation(path.c_str(), animation.get())) {
+		if (!LoadAnimation(path.c_str(), animation)) {
 			log->error("Failed to load animation from path: {}", path);
 			return nullptr;
 		}
 
-		// Store the animation in the map and return a pointer to it
-		ozz::animation::Animation* result = animation.get();
-		loaded_animations_[path]          = std::move(animation);
-		return result;
+		return animation;
 	}
 
 	std::vector<ozz::math::SoaTransform>* AnimationManager::AllocateLocalPose(const ozz::animation::Skeleton* skeleton)
@@ -187,7 +190,6 @@ namespace Engine {
 		auto local_pose = new std::vector<ozz::math::SoaTransform>();
 		local_pose->resize(skeleton->num_soa_joints());
 
-		GetAnimationManager().log->info("Allocated local pose with {} SoA joints", skeleton->num_soa_joints());
 		return local_pose;
 	}
 
@@ -201,8 +203,6 @@ namespace Engine {
 		// Create a new vector of Float4x4 matrices with the correct size
 		auto model_pose = new std::vector<ozz::math::Float4x4>();
 		model_pose->resize(skeleton->num_joints());
-
-		GetAnimationManager().log->info("Allocated model pose with {} joints", skeleton->num_joints());
 		return model_pose;
 	}
 
@@ -218,7 +218,6 @@ namespace Engine {
 			return nullptr;
 		}
 
-		GetAnimationManager().log->info("Loaded {} meshes from path: {}", meshes->size(), path);
 		return meshes;
 	}
 

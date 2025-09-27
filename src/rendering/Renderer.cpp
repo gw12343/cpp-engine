@@ -9,8 +9,13 @@
 #include "components/impl/EntityMetadataComponent.h"
 #include "components/impl/TransformComponent.h"
 #include "components/impl/ModelRendererComponent.h"
+#include "components/impl/SkinnedMeshComponent.h"
+#include "components/impl/AnimationPoseComponent.h"
+#include "components/impl/GizmoComponent.h"
 #include <spdlog/spdlog.h>
 #include "navigation/NavigationManager.h"
+#include <tracy/Tracy.hpp>
+
 namespace Engine {
 
 	void Renderer::onInit()
@@ -83,24 +88,59 @@ namespace Engine {
 
 	void Renderer::onUpdate(float dt)
 	{
+		ZoneScopedN("Render");
 		PreRender();
-		RenderShadowMaps();
+		{
+			ZoneScopedN("Render Shadow Maps");
+			RenderShadowMaps();
+		}
 #ifndef GAME_BUILD
 		Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->Bind();
 #endif
 		PreRender();
-		GetAnimationManager().Render();
-		GetNav().Render();
-		RenderEntities();
-		GetTerrainManager().Render();
-		RenderSkybox();
-		GetParticleManager().Render();
+
+		{
+			ZoneScopedN("Render Animations");
+			GetAnimationManager().Render();
+		}
+		{
+			ZoneScopedN("Render Nav Debug");
+			GetNav().Render();
+		}
+		{
+			ZoneScopedN("Render Entities");
+			RenderEntities();
+		}
+		{
+			ZoneScopedN("Render Terrains");
+			GetTerrainManager().Render();
+		}
+		{
+			ZoneScopedN("Render Skybox");
+			RenderSkybox();
+		}
+		{
+			ZoneScopedN("Render Particles");
+			GetParticleManager().Render();
+		}
 #ifndef GAME_BUILD
-		Engine::Window::GetFramebuffer(Window::FramebufferID::MOUSE_PICKING)->Bind();
-		RenderEntitiesMousePicking();
+		{
+			ZoneScopedN("Render Gizmos");
+			if (GetState() == EDITOR || GetState() == PAUSED) {
+				RenderGizmos(false);
+			}
+		}
+		{
+			ZoneScopedN("Render Mouse Picking");
+			Engine::Window::GetFramebuffer(Window::FramebufferID::MOUSE_PICKING)->Bind();
+			RenderEntitiesMousePicking();
+		}
 #endif
 		Engine::Framebuffer::Unbind();
-		PostRender();
+		{
+			ZoneScopedN("Post Render");
+			PostRender();
+		}
 	}
 
 
@@ -109,7 +149,7 @@ namespace Engine {
 		glDisable(GL_CULL_FACE);
 		ENGINE_GLCheckError();
 		glm::mat4 V = GetCamera().GetViewMatrix();
-		m_shadowRenderer->UploadShadowMatrices(m_shader, V);
+		m_shadowRenderer->UploadShadowMatrices(m_shader, V, 3);
 		ENGINE_GLCheckError();
 		// Create a view for entities with Transform and ModelRenderer components
 		auto view = GetCurrentSceneRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer>();
@@ -146,14 +186,49 @@ namespace Engine {
 
 
 		ENGINE_GLCheckError();
-		// Create a view for entities with Transform and ModelRenderer components
-		auto view = GetCurrentSceneRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer>();
-		for (auto [entity, metadata, transform, renderer] : view.each()) {
-			glm::vec3 encodedColor = EncodeEntityID(entity);
-			GetMousePickingShader().SetVec3("entityIDColor", encodedColor);
-			if (!renderer.visible) continue;
-			// Draw model
-			renderer.Draw(GetMousePickingShader(), transform, false);
+		{
+			ZoneScopedN("Model Renderer Mouse Picking");
+			// Create a view for entities with Transform and ModelRenderer components
+
+			auto view = GetCurrentSceneRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer>();
+			for (auto [entity, metadata, transform, renderer] : view.each()) {
+				glm::vec3 encodedColor = EncodeEntityID(entity);
+				GetMousePickingShader().SetVec3("entityIDColor", encodedColor);
+				if (!renderer.visible) continue;
+				// Draw model
+				renderer.Draw(GetMousePickingShader(), transform, false);
+			}
+		}
+
+		{
+			ZoneScopedN("Skinned Mesh Mouse Picking");
+			auto view = GetCurrentSceneRegistry().view<Components::SkinnedMeshComponent, Components::Transform>();
+			for (auto entity : view) {
+				Entity                    e(entity, GetCurrentScene());
+				auto&                     skinnedMeshComponent   = e.GetComponent<Components::SkinnedMeshComponent>();
+				auto&                     animationPoseComponent = e.GetComponent<Components::AnimationPoseComponent>();
+				const ozz::math::Float4x4 transform              = FromMatrix(e.GetComponent<Components::Transform>().GetMatrix());
+
+				glm::vec3 encodedColor = EncodeEntityID(entity);
+
+				// Render each mesh
+				for (const Engine::Mesh& mesh : *skinnedMeshComponent.meshes) {
+					// Render the mesh
+
+					// Builds skinning matrices, based on the output of the animation stage
+					// The mesh might not use (aka be skinned by) all skeleton joints. We
+					// use the joint remapping table (available from the mesh object) to
+					// reorder model-space matrices and build skinning ones
+					for (size_t i = 0; i < mesh.joint_remaps.size(); ++i) {
+						(*skinnedMeshComponent.skinning_matrices)[i] = (*animationPoseComponent.model_pose)[mesh.joint_remaps[i]] * mesh.inverse_bind_poses[i];
+					}
+					GetAnimationManager().renderer_->DrawSkinnedMeshMousePicking(encodedColor, mesh, ozz::make_span(*skinnedMeshComponent.skinning_matrices), transform);
+				}
+			}
+		}
+		{
+			ZoneScopedN("Gizmo Mouse Picking");
+			RenderGizmos(true);
 		}
 	}
 
@@ -178,6 +253,28 @@ namespace Engine {
 	std::shared_ptr<ShadowMapRenderer> Renderer::GetShadowRenderer()
 	{
 		return m_shadowRenderer;
+	}
+	void Renderer::RenderGizmos(bool mousePicking)
+	{
+		auto view = GetCurrentSceneRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::GizmoComponent>();
+		for (auto [entity, metadata, transform, gizmo] : view.each()) {
+			const ozz::math::Float4x4 t = FromMatrix(transform.GetMatrix());
+			// Draw gizmo
+
+			Color color = kBlack;
+			if (mousePicking) {
+				glm::vec3 encodedColor = EncodeEntityID(entity);
+				color.r                = encodedColor.r;
+				color.g                = encodedColor.g;
+				color.b                = encodedColor.b;
+			}
+			else {
+				color.r = gizmo.color.r;
+				color.g = gizmo.color.g;
+				color.b = gizmo.color.b;
+			}
+			GetAnimationManager().renderer_->DrawSphereIm(gizmo.radius, t, color);
+		}
 	}
 
 

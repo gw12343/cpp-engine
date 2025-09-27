@@ -46,5 +46,6 @@ namespace Engine {
 		Engine::Shader          m_terrainShader;
 		Engine::Shader          m_skyboxShader;
 		std::unique_ptr<Skybox> m_skybox;
+		void                    RenderGizmos(bool mousePicking);
 	};
 } // namespace Engine

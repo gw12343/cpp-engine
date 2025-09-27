@@ -5,6 +5,7 @@
 #include "Jolt/Physics/Collision/Shape/MeshShape.h"
 #include "core/module/ModuleManager.h"
 #include <memory>
+#include <spdlog/sinks/stdout_color_sinks.h>
 #include "EngineData.h"
 #include "Input.h"
 #include "scripting/ScriptManager.h"
@@ -21,7 +22,6 @@
 #include "rendering/particles/ParticleManager.h"
 #include "rendering/ui/UIManager.h"
 #include "terrain/TerrainManager.h"
-#include "components/impl/AnimationWorkerComponent.h"
 #include "components/impl/SkinnedMeshComponent.h"
 #include "assets/AssetManager.h"
 #include "assets/impl/TextureLoader.h"
@@ -31,6 +31,23 @@
 #include "rendering/particles/Particle.h"
 #include "assets/impl/ParticleLoader.h"
 #include "assets/impl/MaterialLoader.h"
+#include "assets/impl/BinarySceneLoader.h"
+#include "assets/impl/AnimationLoader.h"
+#include "components/impl/AnimationComponent.h"
+
+#if defined(__clang__) || defined(__GNUC__)
+#define TracyFunction __PRETTY_FUNCTION__
+#elif defined(_MSC_VER)
+#define TracyFunction __FUNCSIG__
+#endif
+
+#ifndef GAME_BUILD
+#define TRACY_ENABLE
+#endif
+
+#include <tracy/Tracy.hpp>
+#include "TracyClient.cpp"
+
 #include "navigation/NavigationManager.h"
 
 namespace fs = std::filesystem;
@@ -52,6 +69,7 @@ namespace Engine {
 		GetAssetManager().RegisterLoader<Scene>(std::make_unique<SCENE_LOADER>());
 		GetAssetManager().RegisterLoader<Particle>(std::make_unique<ParticleLoader>());
 		GetAssetManager().RegisterLoader<Material>(std::make_unique<MaterialLoader>());
+		GetAssetManager().RegisterLoader<Animation>(std::make_unique<AnimationLoader>());
 
 		// Initialize Modules
 		Get().window    = std::make_shared<Window>(width, height, title);
@@ -94,9 +112,9 @@ namespace Engine {
 		manager.InitAll();
 
 		AssetHandle<Particle> testParticle = GetAssetManager().Load<Particle>("resources/particles/testleaf.efk");
+		LoadGameAssets();
 		GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>(SCENE1));
-		CreateInitialEntities();
-		GetNav().m_currentScene = GetCurrentScene();
+
 
 #ifdef GAME_BUILD
 		SetState(PLAYING);
@@ -107,7 +125,7 @@ namespace Engine {
 	}
 
 
-	void GEngine::CreateInitialEntities()
+	void GEngine::LoadGameAssets()
 	{
 		// TODO store assets to be loaded at the start in scene json
 
@@ -142,6 +160,15 @@ namespace Engine {
 			if (entry.is_regular_file() && entry.path().extension() == ".wav") {
 				std::string path = entry.path().string();
 				GetAssetManager().Load<Audio::SoundBuffer>(path);
+			}
+		}
+
+		// Load all animations
+		folder = "resources/animations";
+		for (const auto& entry : fs::directory_iterator(folder)) {
+			if (entry.path().extension() == ".anim") { // entry.is_regular_file() &&
+				std::string path = entry.path().string();
+				GetAssetManager().Load<Animation>(path);
 			}
 		}
 
@@ -183,11 +210,13 @@ namespace Engine {
 	void GEngine::Run()
 	{
 		while (!GetWindow().ShouldClose()) {
+			FrameMarkStart("main");
 			auto currentFrame = static_cast<float>(glfwGetTime());
 			m_deltaTime       = currentFrame - m_lastFrame;
 			m_lastFrame       = currentFrame;
 
 			manager.UpdateAll(m_deltaTime);
+			FrameMarkEnd("main");
 		}
 	}
 
@@ -196,7 +225,7 @@ namespace Engine {
 	{
 		manager.ShutdownAll();
 
-		Components::AnimationWorkerComponent::CleanAnimationContexts();
+		Components::AnimationComponent::CleanAnimationContexts();
 		Components::SkinnedMeshComponent::CleanSkinnedModels();
 		Texture::CleanAllTextures();
 		Rendering::Mesh::CleanAllMeshes();

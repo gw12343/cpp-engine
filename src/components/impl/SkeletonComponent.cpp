@@ -21,7 +21,6 @@ namespace Engine::Components {
 	}
 	void SkeletonComponent::OnAdded(Entity& entity)
 	{
-		GetDefaultLogger()->info("added!!");
 		if (!skeletonPath.empty()) {
 			skeleton = GetAnimationManager().LoadSkeletonFromPath(skeletonPath);
 			if (!skeleton) {

@@ -158,6 +158,17 @@ namespace Engine::Components {
 									SyncFromLua();
 								}
 							}
+							else if (obj.is<std::vector<EntityHandle>>())
+							{
+								auto handle = obj.as<std::vector<EntityHandle>>();
+								if (LeftLabelEntityVector(key.c_str(), handle)) {
+									variables[key]    = handle;
+									cppVariables[key] = handle;
+									SyncFromLua();
+								}
+							}
+							// TODO add asset vector types
+
 							break;
 						}
 						default:
@@ -173,7 +184,6 @@ namespace Engine::Components {
 
 	void LuaScript::SyncFromLua()
 	{
-		GetScriptManager().log->info("loading var values from lua");
 		if (!variables.valid()) return;
 
 		cppVariables.clear();
@@ -220,6 +230,12 @@ namespace Engine::Components {
 			else if (kv.second.is<EntityHandle>()) {
 				cppVariables[key] = kv.second.as<EntityHandle>();
 			}
+			else if (kv.second.is<std::vector<EntityHandle>>()) {
+				cppVariables[key] = kv.second.as<std::vector<EntityHandle>>();
+			}
+			else {
+				SPDLOG_WARN("TRYING TO LOAD INVALID VAR VALUE FROM LUA");
+			}
 		}
 	}
 
@@ -239,7 +255,7 @@ namespace Engine::Components {
 		}
 	}
 
-	Entity GetEntityFromHandle(EntityHandle handle)
+	Entity GetEntityFromHandle(const EntityHandle& handle)
 	{
 		Scene* s = GetCurrentScene();
 		if (s->m_entityMap.count(handle)) {
@@ -247,7 +263,7 @@ namespace Engine::Components {
 		}
 		else {
 			GetScriptManager().log->warn("Script requested an invalid entity: {}", handle.GetID());
-			return Entity();
+			return {};
 		}
 	}
 
@@ -324,7 +340,7 @@ namespace Engine::Components {
 
 		    // safe setter: only overwrites if already present
 		    "setVariable",
-		    [](LuaScript& self, const std::string& name, sol::object value) {
+		    [](LuaScript& self, const std::string& name, const sol::object& value) {
 			    if (!self.variables.valid()) {
 				    GetScriptManager().log->error("LuaScript has no variable table to set into!");
 				    return;
@@ -387,7 +403,32 @@ namespace Engine::Components {
 
 		// Factory for entity handle
 		lua.new_usertype<EntityHandle>("EntityHandle", "getGuid", &EntityHandle::GetID, "isValid", &EntityHandle::IsValid, "clear", [](EntityHandle& self) { self = EntityHandle(); });
-		lua.set_function("ehandle", []() { return EntityHandle(); });
+		lua.set_function("ehandle", sol::overload([]() { return EntityHandle(); }, [](const std::string& guid) { return EntityHandle(guid); }));
+
+
+		// Factory for entity handle vector
+		// using EntityVector = ;
+
+		using EntityVector = std::vector<EntityHandle>;
+
+		lua.new_usertype<EntityVector>(
+		    "EntityVector",
+		    sol::constructors<EntityVector()>(),
+		    "push_back",
+		    static_cast<void (EntityVector::*)(const EntityHandle&)>(&EntityVector::push_back),
+		    "size",
+		    &EntityVector::size,
+		    // indexing operator (Lua is 1-based, so shift indices)
+		    sol::meta_function::index,
+		    [](EntityVector& self, std::size_t i) -> EntityHandle& {
+			    if (i == 0 || i > self.size()) throw std::out_of_range("Index out of range");
+			    return self[i - 1];
+		    },
+		    sol::meta_function::new_index,
+		    [](EntityVector& self, std::size_t i, const EntityHandle& value) {
+			    if (i == 0 || i > self.size()) throw std::out_of_range("Index out of range");
+			    self[i - 1] = value;
+		    });
 	}
 
 

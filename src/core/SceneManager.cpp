@@ -5,6 +5,7 @@
 #include "SceneManager.h"
 
 #include <utility>
+#include <tracy/Tracy.hpp>
 #include "physics/PhysicsManager.h"
 #include "scripting/ScriptManager.h"
 #include "components/impl/RigidBodyComponent.h"
@@ -20,6 +21,7 @@ namespace Engine {
 
 	void SceneManager::onUpdate(float dt)
 	{
+		ZoneScoped;
 		//		if (m_activeScene) {
 		//			// You could later call scene-specific update hooks here
 		//			log->debug("Updating scene '{}', dt={}", m_activeScene->GetName(), dt);

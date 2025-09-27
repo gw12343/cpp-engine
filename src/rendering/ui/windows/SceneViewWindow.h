@@ -11,9 +11,12 @@
 #include "imguizmo/ImGuizmo.h"
 
 namespace Engine {
-	void                       DrawSceneViewWindow();
-	static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
-	static ImGuizmo::MODE      mCurrentGizmoMode(ImGuizmo::LOCAL);
+	class SceneViewWindow {
+	  public:
+		static bool                DrawSceneViewWindow();
+		static ImGuizmo::OPERATION mCurrentGizmoOperation;
+		static ImGuizmo::MODE      mCurrentGizmoMode;
+	};
 } // namespace Engine
 
 #endif // CPP_ENGINE_SCENEVIEWWINDOW_H

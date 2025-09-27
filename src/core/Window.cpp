@@ -7,6 +7,7 @@
 #include <imgui.h>
 #include <spdlog/spdlog.h>
 #include <utility>
+#include <tracy/Tracy.hpp>
 #include "scripting/ScriptManager.h"
 #include "rendering/ui/IconsFontAwesome6.h"
 #include "imguizmo/ImGuizmo.h"
@@ -66,7 +67,7 @@ namespace Engine {
 		glfwSetWindowUserPointer(m_window, this);
 
 		glfwMakeContextCurrent(m_window);
-
+		glfwSwapInterval(0);
 
 		return true;
 	}
@@ -116,6 +117,7 @@ namespace Engine {
 
 	void Window::onUpdate(float dt)
 	{
+		ZoneScoped;
 		glfwPollEvents();
 
 		ImGui_ImplOpenGL3_NewFrame();

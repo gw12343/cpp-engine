@@ -5,6 +5,7 @@
 
 #include "rendering/Renderer.h"
 #include "rendering/ui/IconsFontAwesome6.h"
+#include "rendering/ui/windows/SceneViewWindow.h"
 
 #include "components/impl/EntityMetadataComponent.h"
 #include "components/impl/TerrainRendererComponent.h"
@@ -25,10 +26,14 @@
 #include "windows/SceneViewWindow.h"
 #include "windows/AnimationWindow.h"
 #include "utils/Builder.h"
+#include "components/impl/ModelRendererComponent.h"
+#include "rendering/particles/Particle.h"
+#include "components/impl/ParticleSystemComponent.h"
 
 #include <nfd.h>
 #include <string>
 #include <iostream>
+#include <tracy/Tracy.hpp>
 
 std::string SelectFolder()
 {
@@ -66,11 +71,16 @@ namespace Engine::UI {
 		m_materialEditor    = std::make_unique<MaterialEditor>();
 		m_inspectorRenderer = std::make_unique<InspectorRenderer>();
 
-		m_audioIconTexture   = std::make_shared<Texture>();
-		m_terrainIconTexture = std::make_shared<Texture>();
+		m_audioIconTexture     = std::make_shared<Texture>();
+		m_terrainIconTexture   = std::make_shared<Texture>();
+		m_animationIconTexture = std::make_shared<Texture>();
 #ifndef GAME_BUILD
 		m_audioIconTexture->LoadFromFile("resources/engine/speaker.png");
 		m_terrainIconTexture->LoadFromFile("resources/engine/mountain.png");
+		m_animationIconTexture->LoadFromFile("resources/engine/animation.png");
+
+		efsw::WatchID id = m_uiAssetRenderer->fw.addWatch("resources", &m_uiAssetRenderer->listener, true);
+		m_uiAssetRenderer->fw.watch();
 #endif
 	}
 
@@ -142,7 +152,7 @@ namespace Engine::UI {
 		if (GetState() != EDITOR) {
 			GetCamera().LoadEditorLocation();
 			GetUI().m_selectedEntity = Entity();
-			GetParticleManager().StopAllEffects();
+			GetParticleManager().ResetInternalManager();
 			{
 				//  clear scene
 				auto& physics = GetPhysics();
@@ -221,17 +231,17 @@ namespace Engine::UI {
 
 		if (ImGui::Begin("##TopBar", nullptr, window_flags)) {
 #define TOOLBUTTON(name, type)                                                                                                                                                                                                                 \
-	if (mCurrentGizmoOperation == ImGuizmo::type) {                                                                                                                                                                                            \
+	if (SceneViewWindow::mCurrentGizmoOperation == ImGuizmo::type) {                                                                                                                                                                           \
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.25, 0.25, 0.75, 1.0));                                                                                                                                                                 \
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.35, 0.35, 0.85, 1.0));                                                                                                                                                          \
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.45, 0.45, 0.95, 1.0));                                                                                                                                                           \
 	}                                                                                                                                                                                                                                          \
 	bool Tool##type = ImGui::Button(name);                                                                                                                                                                                                     \
-	if (mCurrentGizmoOperation == ImGuizmo::type) {                                                                                                                                                                                            \
+	if (SceneViewWindow::mCurrentGizmoOperation == ImGuizmo::type) {                                                                                                                                                                           \
 		ImGui::PopStyleColor(3);                                                                                                                                                                                                               \
 	}                                                                                                                                                                                                                                          \
 	if (Tool##type) {                                                                                                                                                                                                                          \
-		mCurrentGizmoOperation = ImGuizmo::type;                                                                                                                                                                                               \
+		SceneViewWindow::mCurrentGizmoOperation = ImGuizmo::type;                                                                                                                                                                              \
 	}
 
 
@@ -250,7 +260,7 @@ namespace Engine::UI {
 
 
 			const char* modeNames[] = {"Local", "World"};
-			int         current     = (mCurrentGizmoMode == ImGuizmo::MODE::LOCAL ? 0 : 1);
+			int         current     = (SceneViewWindow::mCurrentGizmoMode == ImGuizmo::MODE::LOCAL ? 0 : 1);
 			ImGui::SetNextItemWidth(80);
 			if (ImGui::BeginCombo("##WorldMode", modeNames[current])) {
 				for (int i = 0; i < 2; i++) {
@@ -262,7 +272,7 @@ namespace Engine::UI {
 				ImGui::EndCombo();
 			}
 
-			mCurrentGizmoMode = (current == 0 ? ImGuizmo::MODE::LOCAL : ImGuizmo::MODE::WORLD);
+			SceneViewWindow::mCurrentGizmoMode = (current == 0 ? ImGuizmo::MODE::LOCAL : ImGuizmo::MODE::WORLD);
 
 
 			// --- Center Play Controls ---
@@ -333,14 +343,14 @@ namespace Engine::UI {
 
 	void UIManager::onUpdate(float dt)
 	{
+		ZoneScoped;
 		m_selectedTheme = GetState() == EDITOR ? 2 : 0;
 		GetRenderer().PreRender();
 		float h      = RenderMainMenuBar();
 		float height = RenderTopBar(h) + h;
 		BeginDockspace(height);
 
-		DrawSceneViewWindow();
-
+		m_overSceneView = SceneViewWindow::DrawSceneViewWindow();
 		RenderHierarchyWindow();
 		m_inspectorRenderer->RenderInspectorWindow(&m_selectedEntity);
 		m_materialEditor->RenderMaterialEditor(m_selectedMaterial);
@@ -395,10 +405,46 @@ namespace Engine::UI {
 				ImGui::EndDragDropSource();
 			}
 		}
-		if (ImGui::BeginPopupContextWindow()) {
-			if (ImGui::MenuItem("Create Entity")) {
-				// Action for menu item
+
+
+		if (ImGui::BeginPopupContextWindow("HierarchyContext", ImGuiPopupFlags_NoOpenOverItems | ImGuiPopupFlags_MouseButtonRight)) {
+			ImGui::Text("Add Entity");
+			ImGui::Separator();
+			if (ImGui::MenuItem("Empty Entity")) {
 				Entity entity    = Entity::Create("New Entity", GetCurrentScene());
+				m_selectedEntity = entity;
+			}
+
+			// Get position in front of camera
+			glm::vec3 position = GetCamera().GetPosition();
+			glm::vec3 forward  = GetCamera().GetFront();
+			glm::vec3 spawnPos = position + glm::vec3(forward.x * 3, forward.y * 3, forward.z * 3);
+
+			if (ImGui::MenuItem("Add Model")) {
+				Entity                        entity = Entity::Create("New Model", GetCurrentScene());
+				AssetHandle<Rendering::Model> model;
+
+				if (!GetAssetManager().GetStorage<Rendering::Model>().guidToAsset.empty()) {
+					model = AssetHandle<Rendering::Model>(GetAssetManager().GetStorage<Rendering::Model>().guidToAsset.begin()->first);
+				}
+
+
+				entity.AddComponent<Components::Transform>(spawnPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+				entity.AddComponent<Components::ModelRenderer>(model);
+				m_selectedEntity = entity;
+			}
+			if (ImGui::MenuItem("Add Particle System")) {
+				Entity                entity = Entity::Create("New Particle System", GetCurrentScene());
+				AssetHandle<Particle> particle;
+
+				if (!GetAssetManager().GetStorage<Particle>().guidToAsset.empty()) {
+					particle = AssetHandle<Particle>(GetAssetManager().GetStorage<Particle>().guidToAsset.begin()->first);
+				}
+
+
+				entity.AddComponent<Components::Transform>(spawnPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+				entity.AddComponent<Components::ParticleSystem>(particle);
+
 				m_selectedEntity = entity;
 			}
 
@@ -418,6 +464,11 @@ namespace Engine::UI {
 		ImGui::Text("GAME PAUSED");
 		ImGui::Text("Press PLAY to resume");
 		ImGui::End();
+	}
+
+	bool UIManager::isOverSceneView() const
+	{
+		return m_overSceneView;
 	}
 
 

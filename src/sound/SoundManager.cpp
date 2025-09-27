@@ -13,6 +13,7 @@
 #include <sndfile.h>
 #include <spdlog/spdlog.h>
 #include <vector>
+#include <tracy/Tracy.hpp>
 
 
 namespace Engine::Audio {
@@ -251,6 +252,7 @@ namespace Engine::Audio {
 
 	void SoundManager::onUpdate(float dt)
 	{
+		ZoneScoped;
 		// Clear any previous errors
 		alGetError();
 
@@ -404,9 +406,7 @@ namespace Engine::Audio {
 
 		for (auto [entity, metadata, transform, audio] : audioView.each()) {
 			// Update audio source position based on entity transform
-			GetSoundManager().log->info("Trying to auto play sound");
 			if (audio.source) {
-				GetSoundManager().log->info("Trying to auto play sound111");
 				// Get the world position from the transform
 				glm::vec3 worldPos = transform.position;
 

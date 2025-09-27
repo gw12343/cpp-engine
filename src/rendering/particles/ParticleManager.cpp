@@ -1,3 +1,4 @@
+#include <tracy/Tracy.hpp>
 #include "ParticleManager.h"
 
 #include "utils/Utils.h"
@@ -45,28 +46,13 @@ namespace Engine {
 			return;
 		}
 
-		m_manager = Effekseer::Manager::Create(MAX_INSTANCES);
-		m_manager->SetSpriteRenderer(m_renderer->CreateSpriteRenderer());
-		m_manager->SetRibbonRenderer(m_renderer->CreateRibbonRenderer());
-		m_manager->SetRingRenderer(m_renderer->CreateRingRenderer());
-		m_manager->SetTrackRenderer(m_renderer->CreateTrackRenderer());
-		m_manager->SetModelRenderer(m_renderer->CreateModelRenderer());
-
-		auto textureLoader = Effekseer::MakeRefPtr<DebugTextureLoader>(m_renderer);
-		m_manager->SetTextureLoader(textureLoader);
-
-		if (!m_manager) {
-			log->error("Effekseer Manager not initialized!");
-			return;
-		}
-		else {
-			log->info("Effekseer Manager initialized!");
-		}
+		ResetInternalManager();
 	}
 
 
 	void ParticleManager::onUpdate(float dt)
 	{
+		ZoneScoped;
 		if (GetState() != PLAYING) return;
 
 		if (m_manager) {
@@ -122,9 +108,26 @@ namespace Engine {
 
 		return m_manager->Play(effect, x, y, z);
 	}
-	void ParticleManager::StopAllEffects()
+	void ParticleManager::ResetInternalManager()
 	{
-		m_manager->StopAllEffects();
+		m_manager = Effekseer::Manager::Create(MAX_INSTANCES);
+		m_manager->SetSpriteRenderer(m_renderer->CreateSpriteRenderer());
+		m_manager->SetRibbonRenderer(m_renderer->CreateRibbonRenderer());
+		m_manager->SetRingRenderer(m_renderer->CreateRingRenderer());
+		m_manager->SetTrackRenderer(m_renderer->CreateTrackRenderer());
+		m_manager->SetModelRenderer(m_renderer->CreateModelRenderer());
+
+		auto textureLoader = Effekseer::MakeRefPtr<DebugTextureLoader>(m_renderer);
+		m_manager->SetTextureLoader(textureLoader);
+
+
+		if (!m_manager) {
+			log->error("Effekseer Manager not initialized!");
+			return;
+		}
+		else {
+			log->info("Effekseer Manager initialized!");
+		}
 	}
 
 

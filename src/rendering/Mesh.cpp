@@ -95,21 +95,29 @@ namespace Engine {
 		{
 			Material* mat = materialOverride.IsValid() ? GetAssetManager().Get(materialOverride) : m_material.get();
 			if (uploadMaterial) {
-				if (mat != NULL) {
-					//			if (mat->GetDiffuseTexture()) {
-					//				glActiveTexture(GL_TEXTURE0);
-					//				shader.SetInt("material.diffuse", 0);
-					//				m_material->GetDiffuseTexture()->Bind(0);
-					//			}
+				if (mat != nullptr) {
 					ENGINE_GLCheckError();
 
 
-					if (mat->GetDiffuseTexture().IsValid()) {
-						glActiveTexture(GL_TEXTURE0);
+					if (mat->GetDiffuseTexture().IsValid() && GetAssetManager().Get(mat->GetDiffuseTexture()) != nullptr) {
 						shader.SetInt("diffuseTexture", 0);
 						GetAssetManager().Get(mat->GetDiffuseTexture())->Bind(0);
 					}
 					ENGINE_GLCheckError();
+					if (mat->GetNormalTexture().IsValid() && GetAssetManager().Get(mat->GetNormalTexture()) != nullptr) {
+						shader.SetInt("normalTexture", 1);
+						GetAssetManager().Get(mat->GetNormalTexture())->Bind(1);
+					}
+					ENGINE_GLCheckError();
+					if (mat->GetSpecularTexture().IsValid() && GetAssetManager().Get(mat->GetSpecularTexture()) != nullptr) {
+						shader.SetInt("specularTexture", 2);
+						GetAssetManager().Get(mat->GetSpecularTexture())->Bind(2);
+					}
+					ENGINE_GLCheckError();
+
+					shader.SetInt("hasDiffuseTexture", mat->GetDiffuseTexture().IsValid() ? 1 : 0);
+					shader.SetInt("hasNormalTexture", mat->GetNormalTexture().IsValid() ? 1 : 0);
+					shader.SetInt("hasSpecularTexture", mat->GetSpecularTexture().IsValid() ? 1 : 0);
 
 					shader.SetVec2("textureScale", mat->GetTextureScale());
 
@@ -119,6 +127,11 @@ namespace Engine {
 					shader.SetVec3("uAmbientColor", mat->GetAmbientColor());
 					shader.SetVec3("uEmissiveColor", mat->GetEmissiveColor());
 					shader.SetFloat("uShininess", mat->GetShininess());
+				}
+				else {
+					shader.SetInt("hasDiffuseTexture", 0);
+					shader.SetInt("hasNormalTexture", 0);
+					shader.SetInt("hasSpecularTexture", 0);
 				}
 			}
 			if (cullBackfaces)
@@ -130,22 +143,26 @@ namespace Engine {
 			glBindVertexArray(m_vao);
 			glDrawElements(GL_TRIANGLES, static_cast<int>(m_indices.size()), GL_UNSIGNED_INT, nullptr);
 			glBindVertexArray(0);
+			ENGINE_GLCheckError();
 			if (uploadMaterial) {
-				// GLCheckError();
-				//			if (mat->GetNormalTexture()) {
-				//				glActiveTexture(GL_TEXTURE2);
-				//				mat->GetNormalTexture()->Unbind();
-				//			}
-				//			if (mat->GetSpecularTexture()) {
-				//				glActiveTexture(GL_TEXTURE1);
-				//				mat->GetSpecularTexture()->Unbind();
-				//			}
-				if (mat != NULL) {
-					if (mat->GetDiffuseTexture().IsValid()) {
+				if (mat != nullptr) {
+					if (mat->GetDiffuseTexture().IsValid() && GetAssetManager().Get(mat->GetDiffuseTexture()) != nullptr) {
 						glActiveTexture(GL_TEXTURE0);
-						GetAssetManager().Get(mat->GetDiffuseTexture())->Unbind();
+						Texture::Unbind();
 					}
-					glActiveTexture(GL_TEXTURE0);
+					ENGINE_GLCheckError();
+					if (mat->GetNormalTexture().IsValid() && GetAssetManager().Get(mat->GetNormalTexture()) != nullptr) {
+						glActiveTexture(GL_TEXTURE0);
+						Texture::Unbind();
+					}
+					ENGINE_GLCheckError();
+					if (mat->GetSpecularTexture().IsValid() && GetAssetManager().Get(mat->GetSpecularTexture()) != nullptr) {
+						glActiveTexture(GL_TEXTURE0);
+						Texture::Unbind();
+					}
+					ENGINE_GLCheckError();
+				}
+				else {
 				}
 			}
 		}

@@ -49,7 +49,8 @@ namespace Engine {
 	                                    AssetHandle<Terrain ::TerrainTile>,
 	                                    AssetHandle<Particle>,
 	                                    AssetHandle<Audio::SoundBuffer>,
-	                                    EntityHandle>;
+	                                    EntityHandle,
+	                                    std::vector<EntityHandle>>;
 
 	namespace Components {
 

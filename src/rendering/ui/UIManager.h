@@ -35,12 +35,14 @@ namespace Engine {
 
 			std::shared_ptr<Texture> m_audioIconTexture;
 			std::shared_ptr<Texture> m_terrainIconTexture;
+			std::shared_ptr<Texture> m_animationIconTexture;
 			AssetHandle<Material>    m_selectedMaterial;
 
 			// Selected entity
 			Entity m_selectedEntity;
 
 			std::unique_ptr<InspectorRenderer> m_inspectorRenderer;
+			bool                               isOverSceneView() const;
 
 		  private:
 			// UI rendering methods
@@ -49,7 +51,7 @@ namespace Engine {
 			float RenderMainMenuBar();
 			void  RenderPauseOverlay();
 
-
+			bool                             m_overSceneView = false;
 			std::unique_ptr<AssetUIRenderer> m_uiAssetRenderer;
 			std::unique_ptr<MaterialEditor>  m_materialEditor;
 			int                              m_selectedTheme = 0;

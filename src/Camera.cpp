@@ -5,11 +5,12 @@
 
 #include <algorithm>
 #include <utils/Utils.h>
+#include <tracy/Tracy.hpp>
 #include "core/Window.h"
 
 #include "scripting/ScriptManager.h"
 #include "imgui.h"
-
+#include "rendering/ui/UIManager.h"
 namespace Engine {
 
 	Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) : m_front(glm::vec3(0.0f, 0.0f, -1.0f)), m_movementSpeed(2.5f), m_mouseSensitivity(0.1f), m_fov(90.0f), m_nearPlane(0.1f), m_farPlane(1500.0f)
@@ -27,9 +28,10 @@ namespace Engine {
 	}
 	void Camera::onUpdate(float dt)
 	{
+		ZoneScoped;
 		if (GetState() != PLAYING) {
 			// Handle camera movement based on right mouse button state
-			if (GetInput().IsMousePressed(GLFW_MOUSE_BUTTON_RIGHT)) {
+			if (GetInput().IsMousePressed(GLFW_MOUSE_BUTTON_RIGHT) && GetUI().isOverSceneView()) {
 				// Only capture cursor if it's not already captured
 				if (GetInput().GetCursorMode() != GLFW_CURSOR_DISABLED) {
 					GetInput().SetCursorMode(GLFW_CURSOR_DISABLED);
