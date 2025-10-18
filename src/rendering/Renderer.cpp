@@ -43,9 +43,9 @@ namespace Engine {
 			return;
 		}
 
-
+		// TODO skybox system
 		m_skybox            = std::make_unique<Skybox>();
-		const std::string p = "resources/textures/output.hdr";
+		const std::string p = "resources/textures/black.hdr";
 		if (!m_skybox->LoadFromFile(p)) {
 			log->error("Failed to load skybox");
 			return;

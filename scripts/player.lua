@@ -27,7 +27,6 @@ function Start()
 end
 
 
-
 function ShootObject(model, shape, speed, scale)
 
     local cam = getCamera()
