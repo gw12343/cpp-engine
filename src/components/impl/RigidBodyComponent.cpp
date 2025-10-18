@@ -264,6 +264,8 @@ namespace Engine::Components {
 		                                     &RigidBodyComponent::SetPosition,
 		                                     "setRotation",
 		                                     &RigidBodyComponent::SetRotation,
+		                                     "setRotationEuler",
+		                                     &RigidBodyComponent::SetRotationEuler,
 		                                     "getLinearVelocity",
 		                                     &RigidBodyComponent::GetLinearVelocity,
 		                                     "addLinearVelocity",
@@ -441,6 +443,11 @@ namespace Engine::Components {
 	void RigidBodyComponent::SetRotation(const glm::quat& rotation)
 	{
 		GetPhysics().GetPhysicsSystem()->GetBodyInterface().SetRotation(bodyID, ToJolt(rotation), JPH::EActivation::Activate);
+	}
+
+	void RigidBodyComponent::SetRotationEuler(const glm::vec3& eulerAngles)
+	{
+		GetPhysics().GetPhysicsSystem()->GetBodyInterface().SetRotation(bodyID, ToJolt(glm::quat(glm::radians(eulerAngles))), JPH::EActivation::Activate);
 	}
 
 	void RigidBodyComponent::SetLinearVelocity(const glm::vec3& velocity)

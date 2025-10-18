@@ -64,7 +64,11 @@ namespace Engine::Components {
 		                                            "getPosition",
 		                                            &PlayerControllerComponent::GetPosition,
 		                                            "setPosition",
-		                                            &PlayerControllerComponent::SetPosition);
+		                                            &PlayerControllerComponent::SetPosition,
+		                                            "setRotation",
+		                                            &PlayerControllerComponent::SetRotation,
+		                                            "setRotationEuler",
+		                                            &PlayerControllerComponent::SetRotationEuler);
 	}
 
 	void PlayerControllerComponent::SetLinearVelocity(glm::vec3 vel)
@@ -72,6 +76,13 @@ namespace Engine::Components {
 		RVec3 joltVel = RVec3(vel.x, vel.y, vel.z);
 		GetPhysics().GetCharacter()->SetLinearVelocity(joltVel);
 	}
+
+	void PlayerControllerComponent::SetRotationEuler(glm::vec3 eulerAngles)
+	{
+		glm::quat rot = glm::quat(glm::radians(eulerAngles));
+		SetRotation(rot);
+	}
+
 	glm::vec3 PlayerControllerComponent::GetLinearVelocity()
 	{
 		auto v = GetPhysics().GetCharacter()->GetLinearVelocity();

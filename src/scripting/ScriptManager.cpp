@@ -61,6 +61,8 @@ namespace Engine {
 			    [](const Engine::Entity& e) { return static_cast<bool>(e); },
 			    "getName",
 			    &Engine::Entity::GetName,
+			    "getTag",
+			    &Engine::Entity::GetTag,
 			    "setName",
 			    &Engine::Entity::SetName,
 			    "destroy",

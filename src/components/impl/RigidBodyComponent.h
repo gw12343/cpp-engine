@@ -89,6 +89,7 @@ namespace Engine::Components {
 		[[maybe_unused]] static glm::vec3 ToGlm(const JPH::Vec3& v);
 		[[maybe_unused]] static JPH::Quat ToJolt(const glm::quat& q);
 		[[maybe_unused]] static glm::quat ToGlm(const JPH::Quat& q);
+		void                              SetRotationEuler(const glm::vec3& eulerAngles);
 	};
 } // namespace Engine::Components
 

@@ -29,6 +29,7 @@ namespace Engine::Components {
 		void        SetRotation(glm::quat rot);
 		bool        IsOnGround();
 		static void AddBindings();
+		void        SetRotationEuler(glm::vec3 eulerAngles);
 	};
 } // namespace Engine::Components
 
