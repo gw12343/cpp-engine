@@ -6,6 +6,7 @@
 #define CPP_ENGINE_ENTITYMETADATACOMPONENT_H
 
 #include "components/Components.h"
+#include "core/EntityHandle.h"
 #include <cereal/cereal.hpp>
 #include <cereal/types/string.hpp>
 
@@ -19,10 +20,14 @@ namespace Engine::Components {
 		bool        toBeDestroyedNextUpdate = false;
 		std::string guid;
 
+		// TODO use pointers for runtime?
+		EntityHandle              parentEntity;
+		std::vector<EntityHandle> children;
+
 		template <class Archive>
 		void serialize(Archive& ar)
 		{
-			ar(CEREAL_NVP(name), CEREAL_NVP(tag), CEREAL_NVP(active), CEREAL_NVP(guid));
+			ar(CEREAL_NVP(name), CEREAL_NVP(tag), CEREAL_NVP(active), CEREAL_NVP(guid), CEREAL_NVP(parentEntity), CEREAL_NVP(children));
 		}
 
 		EntityMetadata();

@@ -81,6 +81,13 @@ namespace Engine {
 			}
 
 			ImGui::PopStyleColor(3);
+
+			EntityHandle newParent = metadata.parentEntity;
+			if (LeftLabelEntity("parent", &newParent)) {
+				m_selectedEntityP->SetParent(newParent);
+			}
+
+
 			ImGui::EndGroup();
 
 			ImGui::Spacing();

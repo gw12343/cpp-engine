@@ -60,33 +60,73 @@ namespace Engine {
 
 		Entity* selectedEntity = &GetUI().m_selectedEntity;
 
+
 		if (GetState() != PLAYING) {
 			if (*selectedEntity && GetCurrentSceneRegistry().valid(selectedEntity->GetHandle())) {
+				auto& meta = selectedEntity->GetComponent<Components::EntityMetadata>();
+
+
 				if (selectedEntity->HasComponent<Components::Transform>()) {
-					auto& transform = selectedEntity->GetComponent<Components::Transform>();
+					auto& tr = selectedEntity->GetComponent<Components::Transform>();
 
 					ImGuizmo::SetRect(topLeft.x, topLeft.y, width, height);
 
 					glm::mat4 view       = GetCamera().GetViewMatrix();
 					glm::mat4 projection = GetCamera().GetProjectionMatrix();
 
-					glm::mat4 model = transform.GetMatrix();
+					glm::mat4 model = tr.worldMatrix;
+
 					ImGuizmo::SetDrawlist(ImGui::GetCurrentWindow()->DrawList);
 					ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), mCurrentGizmoOperation, mCurrentGizmoMode, glm::value_ptr(model));
+
 					if (ImGuizmo::IsUsingAny()) {
-						glm::vec3 outTrans, outScale, notUsed1;
-						glm::vec4 notUsed2;
-						glm::quat newRotation;
+						glm::vec3 outTranslation, outScale, skew;
+						glm::vec4 perspective;
+						glm::quat outRotation;
 
-						glm::decompose(model, outScale, newRotation, outTrans, notUsed1, notUsed2);
+						glm::decompose(model, outScale, outRotation, outTranslation, skew, perspective);
 
-						transform.position = outTrans;
-						transform.rotation = newRotation;
-						transform.scale    = outScale;
-						transform.SyncWithPhysics(*selectedEntity);
+						tr.worldPosition = outTranslation;
+						tr.worldRotation = outRotation;
+						tr.worldScale    = outScale;
+
+
+						//  Apply to local transform, respecting hierarchy
+						if (meta.parentEntity.IsValid()) {
+							// Child: convert world to local
+							auto parentEntity = GetCurrentScene()->Get(meta.parentEntity);
+							if (parentEntity && parentEntity.HasComponent<Components::Transform>()) {
+								auto&     parentTr  = parentEntity.GetComponent<Components::Transform>();
+								glm::mat4 parentInv = glm::inverse(parentTr.worldMatrix);
+
+								glm::mat4 localMatrix = parentInv * model;
+
+								glm::vec3 skewLocal;
+								glm::vec4 perspLocal;
+								glm::quat localRot;
+								glm::vec3 localTrans, localScale;
+								glm::decompose(localMatrix, localScale, localRot, localTrans, skewLocal, perspLocal);
+
+								tr.localPosition = localTrans;
+								tr.localRotation = localRot;
+								tr.localScale    = localScale;
+							}
+						}
+						else {
+							// No hierarchy component: local equal to world
+							tr.localPosition = tr.worldPosition;
+							tr.localRotation = tr.worldRotation;
+							tr.localScale    = tr.worldScale;
+						}
+
+						// Rebuild world matrix to stay consistent
+						tr.worldMatrix = glm::translate(glm::mat4(1.0f), tr.worldPosition) * glm::toMat4(tr.worldRotation) * glm::scale(glm::mat4(1.0f), tr.worldScale);
+
+						tr.SyncWithPhysics(*selectedEntity);
 					}
 				}
 			}
+
 
 			if (GetInput().IsKeyPressed(GLFW_KEY_LEFT_CONTROL) && GetInput().IsKeyPressedThisFrame(GLFW_KEY_D) && !GetInput().IsMousePressed(GLFW_MOUSE_BUTTON_RIGHT)) {
 				if (*selectedEntity && GetCurrentScene()->GetRegistry()->valid(selectedEntity->GetHandle())) {

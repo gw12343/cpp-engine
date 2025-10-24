@@ -42,7 +42,7 @@ namespace Engine::Components {
 
 			// Spawn particle system at transform
 			auto transform = entity.GetComponent<Components::Transform>();
-			handle         = manager->Play(particle->GetEffect(), transform.position.x, transform.position.y, transform.position.z);
+			handle         = manager->Play(particle->GetEffect(), transform.worldPosition.x, transform.worldPosition.y, transform.worldPosition.z);
 		}
 	}
 
@@ -66,7 +66,7 @@ namespace Engine::Components {
 			manager->StopEffect(handle);
 			auto      transform = entity.GetComponent<Components::Transform>();
 			Particle* particle  = GetAssetManager().Get(effect);
-			handle              = manager->Play(particle->GetEffect(), transform.position.x, transform.position.y, transform.position.z);
+			handle              = manager->Play(particle->GetEffect(), transform.worldPosition.x, transform.worldPosition.y, transform.worldPosition.z);
 		}
 	}
 } // namespace Engine::Components

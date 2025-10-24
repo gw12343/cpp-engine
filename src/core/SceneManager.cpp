@@ -10,22 +10,20 @@
 #include "scripting/ScriptManager.h"
 #include "components/impl/RigidBodyComponent.h"
 #include "assets/AssetManager.h"
+#include "components/impl/EntityMetadataComponent.h"
 namespace Engine {
 
 	// Module overrides
 	void SceneManager::onInit()
 	{
-		log = spdlog::stdout_color_mt("SceneManager");
 		log->info("SceneManager initialized.");
 	}
+
 
 	void SceneManager::onUpdate(float dt)
 	{
 		ZoneScoped;
-		//		if (m_activeScene) {
-		//			// You could later call scene-specific update hooks here
-		//			log->debug("Updating scene '{}', dt={}", m_activeScene->GetName(), dt);
-		//		}
+		UpdateTransforms();
 	}
 
 
@@ -59,6 +57,38 @@ namespace Engine {
 		Scene* s           = GetAssetManager().Get(m_activeScene);
 		for (auto [entity, rb] : physicsView.each()) {
 			physics.bodyToEntityMap[rb.bodyID] = Entity(entity, s);
+		}
+	}
+	void SceneManager::UpdateTransforms()
+	{
+		auto view = GetCurrentSceneRegistry().view<Components::EntityMetadata, Components::Transform>();
+		for (auto [entity, metadata, transform] : view.each()) {
+			Entity e{entity, GetCurrentScene()};
+
+
+			if (!metadata.parentEntity.IsValid()) {
+				UpdateTransformRecursive(e, glm::mat4(1.0f));
+			}
+		}
+	}
+	void SceneManager::UpdateTransformRecursive(Entity entity, const glm::mat4& parentMatrix)
+	{
+		auto& transform = entity.GetComponent<Components::Transform>();
+
+		glm::mat4 localMatrix = glm::translate(glm::mat4(1.0f), transform.localPosition) * glm::mat4_cast(transform.localRotation) * glm::scale(glm::mat4(1.0f), transform.localScale);
+
+		transform.worldMatrix   = parentMatrix * localMatrix;
+		transform.worldPosition = glm::vec3(transform.worldMatrix[3]);
+		transform.worldRotation = glm::quat_cast(transform.worldMatrix);
+		transform.worldScale    = glm::vec3(glm::length(glm::vec3(transform.worldMatrix[0])), glm::length(glm::vec3(transform.worldMatrix[1])), glm::length(glm::vec3(transform.worldMatrix[2])));
+
+		// Update children
+		auto& hierarchy = entity.GetComponent<Components::EntityMetadata>();
+		for (auto& childHandle : hierarchy.children) {
+			auto childEntity = GetCurrentScene()->Get(childHandle);
+			if (childEntity) {
+				UpdateTransformRecursive(childEntity, transform.worldMatrix);
+			}
 		}
 	}
 } // namespace Engine

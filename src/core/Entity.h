@@ -8,7 +8,7 @@
 #include <string>
 
 namespace Engine {
-
+	class EntityHandle;
 
 	// Entity wrapper class for easier entity manipulation
 	class Entity {
@@ -33,6 +33,9 @@ namespace Engine {
 		// Get the underlying entt handle
 		[[nodiscard]] entt::entity GetHandle() const { return m_handle; }
 
+		void SetParent(const EntityHandle& parent);
+
+
 		// Template method declarations
 		template <typename T, typename... Args>
 		T& AddComponent(Args&&... args)
@@ -50,7 +53,7 @@ namespace Engine {
 		}
 
 		template <typename T>
-		bool HasComponent() const
+		[[nodiscard]] bool HasComponent() const
 		{
 			return m_scene->GetRegistry()->template all_of<T>(m_handle);
 		}

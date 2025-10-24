@@ -9,6 +9,7 @@
 #include <tracy/Tracy.hpp>
 #include "PlayerController.h"
 #include "components/impl/PlayerControllerComponent.h"
+#include "components/impl/EntityMetadataComponent.h"
 
 using namespace JPH;
 using namespace JPH::literals;
@@ -216,13 +217,13 @@ namespace Engine {
 	glm::mat4 CalculateModelMatrix(const Engine::Components::Transform& transform)
 	{
 		// Create the translation matrix
-		glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), transform.position);
+		glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), transform.worldPosition);
 
 		// Create the rotation matrix from quaternion
-		glm::mat4 rotationMatrix = glm::mat4_cast(transform.rotation);
+		glm::mat4 rotationMatrix = glm::mat4_cast(transform.worldRotation);
 
 		// Create the scale matrix
-		glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), transform.scale);
+		glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), transform.worldScale);
 
 		// Combine the matrices: Scale * Rotate * Translate
 		glm::mat4 modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
@@ -232,10 +233,44 @@ namespace Engine {
 
 	void PhysicsManager::SyncCharacterEntities()
 	{
-		auto playerView = GetCurrentSceneRegistry().view<Engine::Components::Transform, Engine::Components::PlayerControllerComponent>();
+		auto& registry   = GetCurrentSceneRegistry();
+		auto  playerView = registry.view<Engine::Components::Transform, Engine::Components::PlayerControllerComponent>();
 
-		for (auto [entity, transform, rb] : playerView.each()) {
-			transform.position = controller->GetPlayerPosition();
+		for (auto [entity, tr, controller] : playerView.each()) {
+			glm::vec3 worldPos = controller.GetPosition();
+			glm::quat worldRot = controller.GetRotation();
+
+			tr.worldPosition = worldPos;
+			tr.worldRotation = worldRot;
+
+
+			auto hr = GetCurrentSceneRegistry().get<Components::EntityMetadata>(entity);
+
+			if (!hr.parentEntity.IsValid()) {
+				// Root player: local == world
+				tr.localPosition = worldPos;
+				tr.localRotation = worldRot;
+			}
+			else {
+				// Child player: world -> local
+				auto parentEntity = GetCurrentScene()->Get(hr.parentEntity);
+				if (parentEntity && parentEntity.HasComponent<Engine::Components::Transform>()) {
+					auto&     parentTr  = parentEntity.GetComponent<Engine::Components::Transform>();
+					glm::mat4 parentInv = glm::inverse(parentTr.worldMatrix);
+
+					glm::mat4 worldMatrix = glm::translate(glm::mat4(1.0f), worldPos) * glm::toMat4(worldRot) * glm::scale(glm::mat4(1.0f), tr.worldScale);
+
+					glm::mat4 localMatrix = parentInv * worldMatrix;
+
+					tr.localPosition = glm::vec3(localMatrix[3]);
+					tr.localRotation = glm::quat_cast(localMatrix);
+					tr.localScale    = glm::vec3(glm::length(glm::vec3(localMatrix[0])), glm::length(glm::vec3(localMatrix[1])), glm::length(glm::vec3(localMatrix[2])));
+				}
+			}
+
+
+			// Update world matrix for consistency (optional if Scene::UpdateTransforms runs afterward)
+			tr.worldMatrix = glm::translate(glm::mat4(1.0f), tr.worldPosition) * glm::toMat4(tr.worldRotation) * glm::scale(glm::mat4(1.0f), tr.worldScale);
 		}
 	}
 
@@ -245,13 +280,44 @@ namespace Engine {
 		auto           physicsView    = GetCurrentSceneRegistry().view<Engine::Components::Transform, Engine::Components::RigidBodyComponent>();
 		BodyInterface& body_interface = physics->GetBodyInterface();
 
-		for (auto [entity, transform, rb] : physicsView.each()) {
+		for (auto [entity, tr, rb] : physicsView.each()) {
 			RMat44    tform = body_interface.GetCenterOfMassTransform(rb.bodyID);
 			glm::vec3 scl;
-			DecomposeMatrix(tform, transform.position, transform.rotation, scl);
-			Vec3 velocity = body_interface.GetLinearVelocity(rb.bodyID);
+			glm::vec3 worldPos;
+			glm::quat worldRot;
+
+			DecomposeMatrix(tform, worldPos, worldRot, scl);
+
+
+			tr.worldPosition = worldPos;
+			tr.worldRotation = worldRot;
+
+			auto hr = GetCurrentSceneRegistry().get<Components::EntityMetadata>(entity);
+
+			if (!hr.parentEntity.IsValid()) {
+				// Root entity: local == world
+				tr.localPosition = worldPos;
+				tr.localRotation = worldRot;
+			}
+			else {
+				// Child entity: convert world -> local using parent's world matrix
+				auto parentEntity = GetCurrentScene()->Get(hr.parentEntity);
+				if (parentEntity && parentEntity.HasComponent<Components::Transform>()) {
+					auto&     parentTr  = parentEntity.GetComponent<Components::Transform>();
+					glm::mat4 parentInv = glm::inverse(parentTr.worldMatrix);
+
+					glm::mat4 worldMatrix = glm::translate(glm::mat4(1.0f), worldPos) * glm::toMat4(worldRot) * glm::scale(glm::mat4(1.0f), tr.worldScale);
+
+					glm::mat4 localMatrix = parentInv * worldMatrix;
+
+					tr.localPosition = glm::vec3(localMatrix[3]);
+					tr.localRotation = glm::quat_cast(localMatrix);
+					tr.localScale    = glm::vec3(glm::length(glm::vec3(localMatrix[0])), glm::length(glm::vec3(localMatrix[1])), glm::length(glm::vec3(localMatrix[2])));
+				}
+			}
 		}
 	}
+
 	std::shared_ptr<CharacterVirtual> PhysicsManager::GetCharacter()
 	{
 		return character;

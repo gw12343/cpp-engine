@@ -55,6 +55,7 @@ namespace Engine {
 			std::unique_ptr<AssetUIRenderer> m_uiAssetRenderer;
 			std::unique_ptr<MaterialEditor>  m_materialEditor;
 			int                              m_selectedTheme = 0;
+			void                             RenderEntityTreeNode(Entity entity);
 		};
 	} // namespace UI
 } // namespace Engine

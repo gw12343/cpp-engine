@@ -15,63 +15,76 @@
 #include <cereal/types/vector.hpp>
 #include <cereal/types/array.hpp>
 
+
 namespace Engine {
-	class Mesh;
 	class Entity;
 	namespace Components {
-		// Transform component for positioning, rotating, and scaling entities
+
+		// Transform component for positioning, rotating, and scaling entities (with hierarchy support)
 		class Transform : public Component {
 		  public:
-			glm::vec3 position = glm::vec3(0.0f);
-			glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f); // Identity quaternion
-			glm::vec3 scale    = glm::vec3(1.0f);
+			// ───────────────────────────────
+			// Local-space properties (serialized)
+			// ───────────────────────────────
+			glm::vec3 localPosition = glm::vec3(0.0f);
+			glm::quat localRotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f); // identity quaternion
+			glm::vec3 localScale    = glm::vec3(1.0f);
 
-			Transform() = default;
+			// ───────────────────────────────
+			// World-space (computed, not serialized)
+			// ───────────────────────────────
+			glm::vec3 worldPosition = glm::vec3(0.0f);
+			glm::quat worldRotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+			glm::vec3 worldScale    = glm::vec3(1.0f);
+			glm::mat4 worldMatrix   = glm::mat4(1.0f);
 
+
+			Transform()                       = default;
+			Transform(const Transform& other) = default;
+
+			explicit Transform(const glm::vec3& pos) : localPosition(pos) {}
+			explicit Transform(const glm::vec3& pos, const glm::vec3& euler, const glm::vec3& scl = glm::vec3(1.0f)) : localPosition(pos), localRotation(glm::quat(glm::radians(euler))), localScale(scl) {}
+
+			// ───────────────────────────────
+			// Serialization
+			// ───────────────────────────────
 			template <class Archive>
 			void serialize(Archive& ar)
 			{
-				ar(cereal::make_nvp("position", position), cereal::make_nvp("rotation", rotation), cereal::make_nvp("scale", scale));
+				ar(cereal::make_nvp("position", localPosition), cereal::make_nvp("rotation", localRotation), cereal::make_nvp("scale", localScale));
+			}
+
+			// ───────────────────────────────
+			// Helpers
+			// ───────────────────────────────
+
+			// Rotation (Euler degrees)
+			void                    SetRotation(const glm::vec3& eulerDegrees) { localRotation = glm::quat(glm::radians(eulerDegrees)); }
+			[[nodiscard]] glm::vec3 GetEulerAngles() const { return glm::degrees(glm::eulerAngles(localRotation)); }
+
+			// Local transform matrix
+			[[nodiscard]] glm::mat4 GetLocalMatrix() const
+			{
+				glm::mat4 m = glm::translate(glm::mat4(1.0f), localPosition);
+				m *= glm::toMat4(localRotation);
+				m = glm::scale(m, localScale);
+				return m;
 			}
 
 
-			//			Transform(const Transform& copy)
-			//			{
-			//				position = copy.position;
-			//				rotation = copy.rotation;
-			//				scale    = copy.scale;
-			//			}
-
-			Transform(const Transform& other) : position(other.position), rotation(other.rotation), scale(other.scale) {}
-
-			explicit Transform(const glm::vec3& position) : position(position) {}
-
-			explicit Transform(const glm::vec3& position, const glm::vec3& eulerAngles = glm::vec3(0.0f), const glm::vec3& scale = glm::vec3(1.0f)) : position(position), rotation(glm::quat(glm::radians(eulerAngles))), scale(scale) {}
-
+			// Sync physics
 			void SyncWithPhysics(Entity& entity);
 
-			// Set rotation using Euler angles (in degrees)
-			void SetRotation(const glm::vec3& eulerAngles) { rotation = glm::quat(glm::radians(eulerAngles)); }
-
-			// Get rotation as Euler angles (in degrees)
-			[[nodiscard]] glm::vec3 GetEulerAngles() const { return glm::degrees(glm::eulerAngles(rotation)); }
-
-			// Get the transformation matrix
-			[[nodiscard]] glm::mat4 GetMatrix() const
-			{
-				auto matrix = glm::mat4(1.0f);
-				matrix      = glm::translate(matrix, position);
-				matrix      = matrix * glm::toMat4(rotation);
-				matrix      = glm::scale(matrix, scale);
-				return matrix;
-			}
-
+			// ───────────────────────────────
+			// Engine lifecycle
+			// ───────────────────────────────
 			void OnAdded(Entity& entity) override;
 			void OnRemoved(Entity& entity) override;
 			void RenderInspector(Entity& entity) override;
 
 			static void AddBindings();
 		};
+
 	} // namespace Components
 } // namespace Engine
 

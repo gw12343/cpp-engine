@@ -30,7 +30,7 @@ namespace Engine::Components {
 
 			// Set model matrix in shader
 			shader.Bind();
-			glm::mat4 modelMatrix = transform.GetMatrix();
+			glm::mat4 modelMatrix = transform.worldMatrix;
 			shader.SetMat4("model", &modelMatrix);
 
 			// Draw the model
