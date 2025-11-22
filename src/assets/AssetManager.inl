@@ -1,3 +1,6 @@
+#ifndef CPP_ENGINE_ASSETMANAGER_INL
+#define CPP_ENGINE_ASSETMANAGER_INL
+
 #include "AssetManager.h"
 
 #include <typeinfo>
@@ -95,3 +98,5 @@ namespace Engine {
 	}
 
 } // namespace Engine
+
+#endif // CPP_ENGINE_ASSETMANAGER_INL

@@ -44,31 +44,17 @@ namespace Engine {
 
 		// Template method declarations
 		template <typename T, typename... Args>
-		T& AddComponent(Args&&... args)
-		{
-			T& component = m_scene->GetRegistry()->template emplace<T>(m_handle, std::forward<Args>(args)...);
-			component.OnAdded(*this);
-			return component;
-		}
+		T& AddComponent(Args&&... args);
 
 
 		template <typename T>
-		T& GetComponent()
-		{
-			return m_scene->GetRegistry()->template get<T>(m_handle);
-		}
+		T& GetComponent();
 
 		template <typename T>
-		[[nodiscard]] bool HasComponent() const
-		{
-			return m_scene->GetRegistry()->template all_of<T>(m_handle);
-		}
+		[[nodiscard]] bool HasComponent() const;
 
 		template <typename T>
-		void RemoveComponent()
-		{
-			m_scene->GetRegistry()->template remove<T>(m_handle);
-		}
+		void RemoveComponent();
 
 		// Entity metadata helpers
 		[[nodiscard]] const std::string& GetName() const;
@@ -88,3 +74,5 @@ namespace Engine {
 		void         RemoveChild(const EntityHandle& handle);
 	};
 } // namespace Engine
+
+#include "Entity.inl"

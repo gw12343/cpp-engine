@@ -38,14 +38,14 @@ set(OPENAL_ROOT "C:/Users/Gabe/Documents/openal-soft-1.24.3-bin")  # Change this
 option(USE_ASSIMP_FROM_SOURCE "Build and use Assimp 6.0.2 from source" ON)
 
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    # Use MDd in Debug, MD in Release
-    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-        add_compile_options(/MDd)
-    else ()
-        add_compile_options(/MD)
-    endif ()
-endif ()
+# if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+#     # Use MDd in Debug, MD in Release
+#     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+#         add_compile_options(/MDd)
+#     else ()
+#         add_compile_options(/MD)
+#     endif ()
+# endif ()
 
 
 # Fetch external libraries
@@ -119,7 +119,8 @@ FetchContent_Declare(
 FetchContent_Declare(
         effekseer
         GIT_REPOSITORY https://github.com/Effekseer/Effekseer.git
-        GIT_TAG master
+        GIT_TAG 3cdc295ad98987427c8f980f5ee6543a9004829a
+        GIT_CONFIG "core.autocrlf=false"
 )
 
 FetchContent_Declare(
@@ -339,3 +340,5 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 # ----------------- Debug Info -------------------
 get_target_property(LINK_LIBS ${PROJECT_NAME} LINK_LIBRARIES)
 message(STATUS "${PROJECT_NAME} links: ${LINK_LIBS}")
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

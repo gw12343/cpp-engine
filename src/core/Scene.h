@@ -10,10 +10,12 @@
 #include <entt/entt.hpp>
 #include <spdlog/spdlog.h>
 #include <vector>
-#include "core/Entity.h"
+//#include "core/Entity.h"
 #include "EntityHandle.h"
 
 namespace Engine {
+	class Entity;
+	
 	// A single scene, essentially just a wrapper for entt::registry
 	class Scene {
 	  public:

@@ -72,4 +72,6 @@ namespace Engine {
 
 } // namespace Engine
 
+#include "AssetManager.inl"
+
 #endif // CPP_ENGINE_ASSETMANAGER_H
