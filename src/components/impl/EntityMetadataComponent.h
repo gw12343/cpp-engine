@@ -37,6 +37,9 @@ namespace Engine::Components {
 		void OnAdded(Entity& entity) override;
 		void OnRemoved(Entity& entity) override;
 		void RenderInspector(Entity& entity) override;
+
+		std::vector<EntityHandle> GetChildren() { return children; }
+		EntityHandle              GetParent() { return parentEntity; }
 	};
 } // namespace Engine::Components
 

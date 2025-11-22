@@ -31,9 +31,15 @@ namespace Engine {
 		bool operator!=(const Entity& other) const { return !(*this == other); }
 
 		// Get the underlying entt handle
-		[[nodiscard]] entt::entity GetHandle() const { return m_handle; }
+		[[nodiscard]] entt::entity GetENTTHandle() const { return m_handle; }
+
+		EntityHandle GetEntityHandle();
+
+		std::vector<EntityHandle> GetChildren();
 
 		void SetParent(const EntityHandle& parent);
+
+		void SetWorldTransform(glm::vec3 worldPosition, glm::quat worldRotation, glm::vec3 worldScale);
 
 
 		// Template method declarations
@@ -79,5 +85,6 @@ namespace Engine {
 
 	  private:
 		entt::entity m_handle{entt::null};
+		void         RemoveChild(const EntityHandle& handle);
 	};
 } // namespace Engine

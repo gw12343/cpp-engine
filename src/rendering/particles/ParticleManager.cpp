@@ -62,7 +62,8 @@ namespace Engine {
 		// Update particles systems' locations
 		auto view = GetCurrentSceneRegistry().view<Components::Transform, Components::ParticleSystem>();
 		for (auto [entity, transform, particleSystem] : view.each()) {
-			m_manager->SetLocation(particleSystem.handle, transform.worldPosition.x, transform.worldPosition.y, transform.worldPosition.z); // particleSystem.UpdateTransform(transform);
+			auto pos = transform.GetWorldPosition();
+			m_manager->SetLocation(particleSystem.handle, pos.x, pos.y, pos.z); // particleSystem.UpdateTransform(transform);
 		}
 	}
 	void ParticleManager::onShutdown()

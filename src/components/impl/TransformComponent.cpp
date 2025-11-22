@@ -15,6 +15,8 @@
 #include "RigidBodyComponent.h"
 #include "PlayerControllerComponent.h"
 #include "rendering/ui/InspectorUI.h"
+#include "EntityMetadataComponent.h"
+#include "glm/gtx/matrix_decompose.inl"
 
 namespace Engine::Components {
 	void Transform::OnRemoved(Entity& entity)
@@ -22,6 +24,9 @@ namespace Engine::Components {
 	}
 	void Transform::OnAdded(Entity& entity)
 	{
+		worldPosition = localPosition;
+		worldRotation = localRotation;
+		worldScale    = localScale;
 	}
 
 	void Transform::SyncWithPhysics(Entity& entity)
@@ -58,17 +63,35 @@ namespace Engine::Components {
 			updatePhysicsPositionManually = true;
 		}
 
-		glm::vec3 eulerAngles = glm::degrees(glm::eulerAngles(worldRotation));
+		glm::vec3 eulerAngles = glm::degrees(glm::eulerAngles(localRotation));
 		if (LeftLabelDragFloat3("Rotation", glm::value_ptr(eulerAngles), 1.0f)) {
-			worldRotation                 = glm::quat(glm::radians(eulerAngles));
+			localRotation                 = glm::quat(glm::radians(eulerAngles));
 			updatePhysicsPositionManually = true;
 		}
 
-		if (updatePhysicsPositionManually) {
-			SyncWithPhysics(entity);
-		}
 
 		LeftLabelDragFloat3("Scale", glm::value_ptr(localScale), 0.1f);
+
+		if (updatePhysicsPositionManually) {
+			auto& em           = entity.GetComponent<EntityMetadata>();
+			auto  parentMatrix = glm::mat4(1.0);
+
+			if (em.parentEntity.IsValid()) {
+				Entity parent = GetCurrentScene()->Get(em.parentEntity);
+				if (parent && parent.HasComponent<Transform>()) {
+					auto& parentTr = parent.GetComponent<Transform>();
+					parentMatrix   = parentTr.GetWorldMatrix();
+				}
+			}
+
+			glm::mat4 localMatrix = glm::translate(glm::mat4(1.0f), GetLocalPosition()) * glm::mat4_cast(GetLocalRotation()) * glm::scale(glm::mat4(1.0f), GetLocalScale());
+			GetDefaultLogger()->info("updating");
+			SetWorldMatrix(parentMatrix * localMatrix);
+			SetWorldPosition(glm::vec3(GetWorldMatrix()[3]));
+			SetWorldRotation(glm::quat_cast(GetWorldMatrix()));
+			SetWorldScale(glm::vec3(glm::length(glm::vec3(GetWorldMatrix()[0])), glm::length(glm::vec3(GetWorldMatrix()[1])), glm::length(glm::vec3(GetWorldMatrix()[2]))));
+			SyncWithPhysics(entity);
+		}
 	}
 
 

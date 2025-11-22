@@ -24,7 +24,7 @@ namespace Engine {
 
 
 		void UpdateTransforms();
-		void UpdateTransformRecursive(Entity entity, const glm::mat4& parentMatrix);
+		void UpdateTransformRecursive(Entity entity, const glm::mat4& parentMatrix, bool hasParent);
 
 
 		// Scene management

@@ -65,6 +65,10 @@ namespace Engine {
 			    &Engine::Entity::GetTag,
 			    "setName",
 			    &Engine::Entity::SetName,
+			    "setParent",
+			    &Engine::Entity::SetParent,
+			    "getChildren",
+			    &Engine::Entity::GetChildren,
 			    "destroy",
 			    &Engine::Entity::MarkForDestruction,
 			    COMPONENT_LIST COMPONENT_METHODS(Components::EntityMetadata, EntityMetadata));
@@ -73,6 +77,7 @@ namespace Engine {
 
 			// create_entity(name)
 			lua.set_function("createEntity", [](const std::string& name) { return Engine::Entity::Create(name, GetCurrentScene()); });
+
 
 			lua.set_function("getPlayerEntity", []() -> Engine::Entity* {
 				auto scene    = GetCurrentScene();

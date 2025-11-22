@@ -282,7 +282,7 @@ namespace Engine::Audio {
 			// Update audio source position based on entity transform
 			if (audio.source) {
 				// Get the world position from the transform
-				glm::vec3 worldPos = transform.worldPosition;
+				glm::vec3 worldPos = transform.GetWorldPosition();
 
 				// Set the 3D position of the sound source
 				audio.source->SetPosition(worldPos.x, worldPos.y, worldPos.z);
@@ -408,7 +408,7 @@ namespace Engine::Audio {
 			// Update audio source position based on entity transform
 			if (audio.source) {
 				// Get the world position from the transform
-				glm::vec3 worldPos = transform.worldPosition;
+				glm::vec3 worldPos = transform.GetWorldPosition();
 
 				// If autoPlay is enabled, try to play the sound
 				if (audio.autoPlay && audio.buffer.IsValid()) {

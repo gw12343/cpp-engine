@@ -429,6 +429,34 @@ namespace Engine::Components {
 			    if (i == 0 || i > self.size()) throw std::out_of_range("Index out of range");
 			    self[i - 1] = value;
 		    });
+
+		using MaterialHandle = AssetHandle<Material>;
+		using MaterialVector = std::vector<MaterialHandle>;
+
+
+		//		lua.new_usertype<MaterialVector>(
+		//		    "MaterialVector",
+		//
+		//		    sol::constructors<MaterialVector()>(),
+		//
+		//		    "push_back",
+		//		    static_cast<void (MaterialVector::*)(const MaterialHandle&)>(&MaterialVector::push_back),
+		//
+		//		    "size",
+		//		    &MaterialVector::size,
+		//
+		//		    // 1-based indexing for Lua
+		//		    sol::meta_function::index,
+		//		    [](MaterialVector& self, std::size_t i) -> MaterialHandle& {
+		//			    if (i == 0 || i > self.size()) throw std::out_of_range("Index out of range");
+		//			    return self[i - 1]; // return by REF, important
+		//		    },
+		//
+		//		    sol::meta_function::new_index,
+		//		    [](MaterialVector& self, std::size_t i, const MaterialHandle& value) {
+		//			    if (i == 0 || i > self.size()) throw std::out_of_range("Index out of range");
+		//			    self[i - 1] = value;
+		//		    });
 	}
 
 

@@ -552,7 +552,7 @@ namespace Engine::UI {
 
 
 		// Handle selection - only when released and not dragging
-		if (ImGui::IsItemClicked(ImGuiMouseButton_Left) && ImGui::IsMouseReleased(ImGuiMouseButton_Left) && !isDragging) {
+		if (ImGui::IsItemClicked(ImGuiMouseButton_Right) && !isDragging) {
 			m_selectedEntity = entity;
 		}
 

@@ -201,7 +201,7 @@ namespace Engine {
 				Entity                    e(entity, GetCurrentScene());
 				auto&                     skinnedMeshComponent   = e.GetComponent<Components::SkinnedMeshComponent>();
 				auto&                     animationPoseComponent = e.GetComponent<Components::AnimationPoseComponent>();
-				const ozz::math::Float4x4 transform              = FromMatrix(e.GetComponent<Components::Transform>().worldMatrix);
+				const ozz::math::Float4x4 transform              = FromMatrix(e.GetComponent<Components::Transform>().GetWorldMatrix());
 
 				glm::vec3 encodedColor = EncodeEntityID(entity);
 
@@ -252,7 +252,7 @@ namespace Engine {
 	{
 		auto view = GetCurrentSceneRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::GizmoComponent>();
 		for (auto [entity, metadata, transform, gizmo] : view.each()) {
-			const ozz::math::Float4x4 t = FromMatrix(transform.worldMatrix);
+			const ozz::math::Float4x4 t = FromMatrix(transform.GetWorldMatrix());
 			// Draw gizmo
 
 			Color color = kBlack;

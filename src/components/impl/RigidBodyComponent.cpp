@@ -52,9 +52,11 @@ namespace Engine::Components {
 
 			if (entity.HasComponent<Transform>()) {
 				auto&     tr  = entity.GetComponent<Transform>();
-				glm::vec3 pos = tr.worldPosition;
+				glm::vec3 pos = tr.GetWorldPosition();
+				glm::quat qt  = tr.GetWorldRotation();
 				startPos      = Vec3(pos.x, pos.y, pos.z);
-				startRot      = ToJolt(tr.worldRotation);
+				startRot      = ToJolt(qt);
+				GetDefaultLogger()->info("ADDED RIGIDBODY WITH WP: ({}, {}, {})  rot ({}, {}, {}, {})", pos.x, pos.y, pos.z, qt.x, qt.y, qt.z, qt.w);
 			}
 
 			JPH::BodyCreationSettings settings(shape, startPos, startRot, (JPH::EMotionType) motionType, Layers::MOVING);
@@ -157,14 +159,14 @@ namespace Engine::Components {
 							}
 
 							if (n == 0) {
-								Vec3                 size   = Vec3(tr.worldScale.x / 2.0f, tr.worldScale.y / 2.0f, tr.worldScale.z / 2.0f);
+								Vec3                 size   = Vec3(tr.GetWorldScale().x / 2.0f, tr.GetWorldScale().y / 2.0f, tr.GetWorldScale().z / 2.0f);
 								JPH::Ref<JPH::Shape> newBox = new JPH::BoxShape(size);
 								bodyInterface.SetShape(bodyID, newBox, true, JPH::EActivation::Activate);
 								shapeType = "Box";
 								shapeSize = size;
 							}
 							else if (n == 1) {
-								Vec3 size = Vec3(tr.worldScale.x / 2.0f, 0.0f, 0.0f);
+								Vec3 size = Vec3(tr.GetWorldScale().x / 2.0f, 0.0f, 0.0f);
 
 								JPH::Ref<JPH::Shape> newSphere = new JPH::SphereShape(size.GetX());
 								bodyInterface.SetShape(bodyID, newSphere, true, JPH::EActivation::Activate);
@@ -172,7 +174,7 @@ namespace Engine::Components {
 								shapeSize = size;
 							}
 							else if (n == 2) {
-								Vec3 size = Vec3(tr.worldScale.y / 4.0f, tr.worldScale.x / 2.0f, 0.0f);
+								Vec3 size = Vec3(tr.GetWorldScale().y / 4.0f, tr.GetWorldScale().x / 2.0f, 0.0f);
 
 								JPH::Ref<JPH::Shape> newCapsule = new JPH::CapsuleShape(size.GetX(), size.GetY());
 								bodyInterface.SetShape(bodyID, newCapsule, true, JPH::EActivation::Activate);
@@ -180,7 +182,7 @@ namespace Engine::Components {
 								shapeSize = size;
 							}
 							else if (n == 3) {
-								Vec3 size = Vec3(tr.worldScale.y / 4.0f, tr.worldScale.x / 2.0f, 0.0f);
+								Vec3 size = Vec3(tr.GetWorldScale().y / 4.0f, tr.GetWorldScale().x / 2.0f, 0.0f);
 
 								JPH::Ref<JPH::Shape> newCylinder = new JPH::CylinderShape(size.GetX(), size.GetY());
 								bodyInterface.SetShape(bodyID, newCylinder, true, JPH::EActivation::Activate);

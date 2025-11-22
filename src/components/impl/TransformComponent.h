@@ -22,7 +22,7 @@ namespace Engine {
 
 		// Transform component for positioning, rotating, and scaling entities (with hierarchy support)
 		class Transform : public Component {
-		  public:
+		  private:
 			// ───────────────────────────────
 			// Local-space properties (serialized)
 			// ───────────────────────────────
@@ -38,6 +38,23 @@ namespace Engine {
 			glm::vec3 worldScale    = glm::vec3(1.0f);
 			glm::mat4 worldMatrix   = glm::mat4(1.0f);
 
+		  public:
+			glm::vec3& GetLocalPosition() { return localPosition; }
+			glm::vec3& GetWorldPosition() { return worldPosition; }
+			glm::quat  GetLocalRotation() { return glm::normalize(localRotation); }
+			glm::quat  GetWorldRotation() { return glm::normalize(worldRotation); }
+			glm::vec3& GetLocalScale() { return localScale; }
+			glm::vec3& GetWorldScale() { return worldScale; }
+
+			glm::mat4& GetWorldMatrix() { return worldMatrix; }
+			void       SetLocalPosition(glm::vec3 newPos) { localPosition = newPos; }
+			void       SetWorldPosition(glm::vec3 newPos) { worldPosition = newPos; }
+			void       SetLocalRotation(glm::quat newRot) { localRotation = glm::normalize(newRot); }
+			void       SetWorldRotation(glm::quat newRot) { worldRotation = glm::normalize(newRot); }
+			void       SetLocalScale(glm::vec3 newScale) { localScale = newScale; }
+			void       SetWorldScale(glm::vec3 newScale) { worldScale = newScale; }
+
+			void SetWorldMatrix(glm::mat4 newWorldMatrix) { worldMatrix = newWorldMatrix; }
 
 			Transform()                       = default;
 			Transform(const Transform& other) = default;

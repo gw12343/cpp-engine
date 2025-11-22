@@ -62,7 +62,7 @@ namespace Engine {
 
 
 		if (GetState() != PLAYING) {
-			if (*selectedEntity && GetCurrentSceneRegistry().valid(selectedEntity->GetHandle())) {
+			if (*selectedEntity && GetCurrentSceneRegistry().valid(selectedEntity->GetENTTHandle())) {
 				auto& meta = selectedEntity->GetComponent<Components::EntityMetadata>();
 
 
@@ -74,7 +74,7 @@ namespace Engine {
 					glm::mat4 view       = GetCamera().GetViewMatrix();
 					glm::mat4 projection = GetCamera().GetProjectionMatrix();
 
-					glm::mat4 model = tr.worldMatrix;
+					glm::mat4 model = tr.GetWorldMatrix();
 
 					ImGuizmo::SetDrawlist(ImGui::GetCurrentWindow()->DrawList);
 					ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), mCurrentGizmoOperation, mCurrentGizmoMode, glm::value_ptr(model));
@@ -86,9 +86,9 @@ namespace Engine {
 
 						glm::decompose(model, outScale, outRotation, outTranslation, skew, perspective);
 
-						tr.worldPosition = outTranslation;
-						tr.worldRotation = outRotation;
-						tr.worldScale    = outScale;
+						tr.SetWorldPosition(outTranslation);
+						tr.SetWorldRotation(outRotation);
+						tr.SetWorldScale(outScale);
 
 
 						//  Apply to local transform, respecting hierarchy
@@ -97,7 +97,7 @@ namespace Engine {
 							auto parentEntity = GetCurrentScene()->Get(meta.parentEntity);
 							if (parentEntity && parentEntity.HasComponent<Components::Transform>()) {
 								auto&     parentTr  = parentEntity.GetComponent<Components::Transform>();
-								glm::mat4 parentInv = glm::inverse(parentTr.worldMatrix);
+								glm::mat4 parentInv = glm::inverse(parentTr.GetWorldMatrix());
 
 								glm::mat4 localMatrix = parentInv * model;
 
@@ -107,20 +107,20 @@ namespace Engine {
 								glm::vec3 localTrans, localScale;
 								glm::decompose(localMatrix, localScale, localRot, localTrans, skewLocal, perspLocal);
 
-								tr.localPosition = localTrans;
-								tr.localRotation = localRot;
-								tr.localScale    = localScale;
+								tr.SetLocalPosition(localTrans);
+								tr.SetLocalRotation(localRot);
+								tr.SetLocalScale(localScale);
 							}
 						}
 						else {
 							// No hierarchy component: local equal to world
-							tr.localPosition = tr.worldPosition;
-							tr.localRotation = tr.worldRotation;
-							tr.localScale    = tr.worldScale;
+							tr.SetLocalPosition(tr.GetWorldPosition());
+							tr.SetLocalRotation(tr.GetWorldRotation());
+							tr.SetLocalScale(tr.GetWorldScale());
 						}
 
 						// Rebuild world matrix to stay consistent
-						tr.worldMatrix = glm::translate(glm::mat4(1.0f), tr.worldPosition) * glm::toMat4(tr.worldRotation) * glm::scale(glm::mat4(1.0f), tr.worldScale);
+						tr.SetWorldMatrix(glm::translate(glm::mat4(1.0f), tr.GetWorldPosition()) * glm::toMat4(tr.GetWorldRotation()) * glm::scale(glm::mat4(1.0f), tr.GetWorldScale()));
 
 						tr.SyncWithPhysics(*selectedEntity);
 					}
@@ -129,7 +129,7 @@ namespace Engine {
 
 
 			if (GetInput().IsKeyPressed(GLFW_KEY_LEFT_CONTROL) && GetInput().IsKeyPressedThisFrame(GLFW_KEY_D) && !GetInput().IsMousePressed(GLFW_MOUSE_BUTTON_RIGHT)) {
-				if (*selectedEntity && GetCurrentScene()->GetRegistry()->valid(selectedEntity->GetHandle())) {
+				if (*selectedEntity && GetCurrentScene()->GetRegistry()->valid(selectedEntity->GetENTTHandle())) {
 					GetDefaultLogger()->warn("DUPLICATING");
 
 					std::string newName = selectedEntity->GetComponent<Components::EntityMetadata>().name;
