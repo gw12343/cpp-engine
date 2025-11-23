@@ -141,45 +141,122 @@ namespace Engine {
 
 		// Load all textures
 		std::string folder = "resources/textures";
-		for (const auto& entry : fs::directory_iterator(folder)) {
-			if (entry.is_regular_file() && entry.path().extension() == ".png") {
-				std::string path = entry.path().string();
-				GetAssetManager().Load<Texture>(path);
+		int loadedCount = 0;
+		try {
+			for (const auto& entry : fs::directory_iterator(folder)) {
+				if (entry.is_regular_file() && entry.path().extension() == ".png") {
+					std::string filename = entry.path().filename().string();
+					// Skip hidden files
+					if (filename[0] == '.') continue;
+					
+					std::string path = entry.path().string();
+					try {
+						GetAssetManager().Load<Texture>(path);
+						loadedCount++;
+					} catch (const std::exception& e) {
+						GetDefaultLogger()->warn("Failed to load texture {}: {}", path, e.what());
+					}
+				}
 			}
+			GetDefaultLogger()->info("Loaded {} textures", loadedCount);
+		} catch (const std::exception& e) {
+			GetDefaultLogger()->error("Error reading textures folder: {}", e.what());
 		}
+
 		// Load all materials
 		folder = "resources/materials";
-		for (const auto& entry : fs::directory_iterator(folder)) {
-			if (entry.is_regular_file() && entry.path().extension() == ".material") {
-				std::string path = entry.path().string();
-				GetAssetManager().Load<Material>(path);
+		loadedCount = 0;
+		try {
+			for (const auto& entry : fs::directory_iterator(folder)) {
+				if (entry.is_regular_file() && entry.path().extension() == ".material") {
+					std::string filename = entry.path().filename().string();
+					// Skip hidden files
+					if (filename[0] == '.') continue;
+					
+					std::string path = entry.path().string();
+					try {
+						GetAssetManager().Load<Material>(path);
+						loadedCount++;
+					} catch (const std::exception& e) {
+						GetDefaultLogger()->warn("Failed to load material {}: {}", path, e.what());
+					}
+				}
 			}
+			GetDefaultLogger()->info("Loaded {} materials", loadedCount);
+		} catch (const std::exception& e) {
+			GetDefaultLogger()->error("Error reading materials folder: {}", e.what());
 		}
+
 		// Load all models
 		folder = "resources/models";
-		for (const auto& entry : fs::directory_iterator(folder)) {
-			if (entry.is_regular_file() && entry.path().extension() == ".obj") {
-				std::string path = entry.path().string();
-				GetAssetManager().Load<Rendering::Model>(path);
+		loadedCount = 0;
+		try {
+			for (const auto& entry : fs::directory_iterator(folder)) {
+				if (entry.is_regular_file() && entry.path().extension() == ".obj") {
+					std::string filename = entry.path().filename().string();
+					// Skip hidden files
+					if (filename[0] == '.') continue;
+					
+					std::string path = entry.path().string();
+					try {
+						GetAssetManager().Load<Rendering::Model>(path);
+						loadedCount++;
+					} catch (const std::exception& e) {
+						GetDefaultLogger()->warn("Failed to load model {}: {}", path, e.what());
+					}
+				}
 			}
+			GetDefaultLogger()->info("Loaded {} models", loadedCount);
+		} catch (const std::exception& e) {
+			GetDefaultLogger()->error("Error reading models folder: {}", e.what());
 		}
 
 		// Load all sounds
 		folder = "resources/sounds";
-		for (const auto& entry : fs::directory_iterator(folder)) {
-			if (entry.is_regular_file() && entry.path().extension() == ".wav") {
-				std::string path = entry.path().string();
-				GetAssetManager().Load<Audio::SoundBuffer>(path);
+		loadedCount = 0;
+		try {
+			for (const auto& entry : fs::directory_iterator(folder)) {
+				if (entry.is_regular_file() && entry.path().extension() == ".wav") {
+					std::string filename = entry.path().filename().string();
+					// Skip hidden files
+					if (filename[0] == '.') continue;
+					
+					std::string path = entry.path().string();
+					try {
+						GetAssetManager().Load<Audio::SoundBuffer>(path);
+						loadedCount++;
+					} catch (const std::exception& e) {
+						GetDefaultLogger()->warn("Failed to load sound {}: {}", path, e.what());
+					}
+				}
 			}
+			GetDefaultLogger()->info("Loaded {} sounds", loadedCount);
+		} catch (const std::exception& e) {
+			GetDefaultLogger()->error("Error reading sounds folder: {}", e.what());
 		}
 
 		// Load all animations
 		folder = "resources/animations";
-		for (const auto& entry : fs::directory_iterator(folder)) {
-			if (entry.path().extension() == ".anim") { // entry.is_regular_file() &&
-				std::string path = entry.path().string();
-				GetAssetManager().Load<Animation>(path);
+		loadedCount = 0;
+		try {
+			for (const auto& entry : fs::directory_iterator(folder)) {
+				if (entry.path().extension() == ".anim") {
+					std::string filename = entry.path().filename().string();
+					// Skip hidden files
+					if (filename[0] == '.') continue;
+					
+					std::string path = entry.path().string();
+					try {
+						GetAssetManager().Load<Animation>(path);
+						loadedCount++;
+					} catch (const std::exception& e) {
+						GetDefaultLogger()->warn("Failed to load animation {}: {}", path, e.what());
+					}
+				}
 			}
+			GetDefaultLogger()->info("Loaded {} animations", loadedCount);
+		} catch (const std::exception& e) {
+			GetDefaultLogger()->error("Error reading animations folder: {}", e.what());
 		}
 
 		// TODO terrain instanced detail rendereing

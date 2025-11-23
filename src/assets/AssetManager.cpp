@@ -27,7 +27,7 @@ namespace Engine {
 					auto handle = GetHandleFromPath<Texture>(action.path);
 					if (handle.IsValid()) Reload(handle);
 				}
-				else if (ext == ".obj" || ext == ".gltf" || ext == ".fbx") {
+				else if (ext == ".obj") {
 					auto handle = GetHandleFromPath<Rendering::Model>(action.path);
 					if (handle.IsValid()) Reload(handle);
 				}
@@ -39,7 +39,7 @@ namespace Engine {
 				if (ext == ".png" || ext == ".jpg" || ext == ".hdr") {
 					Load<Texture>(action.path);
 				}
-				else if (ext == ".obj" || ext == ".gltf" || ext == ".fbx") {
+				else if (ext == ".obj") {
 					Load<Rendering::Model>(action.path);
 				}
 			}
@@ -47,7 +47,7 @@ namespace Engine {
 				if (ext == ".png" || ext == ".jpg" || ext == ".hdr") {
 					UnloadByPath<Texture>(action.path);
 				}
-				else if (ext == ".obj" || ext == ".gltf" || ext == ".fbx") {
+				else if (ext == ".obj") {
 					UnloadByPath<Rendering::Model>(action.path);
 				}
 			}
@@ -55,7 +55,7 @@ namespace Engine {
 				if (ext == ".png" || ext == ".jpg" || ext == ".hdr") {
 					RenameAsset<Texture>(action.path, action.newPath);
 				}
-				else if (ext == ".obj" || ext == ".gltf" || ext == ".fbx") {
+				else if (ext == ".obj") {
 					RenameAsset<Rendering::Model>(action.path, action.newPath);
 				}
 			}

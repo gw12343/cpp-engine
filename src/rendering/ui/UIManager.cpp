@@ -74,10 +74,22 @@ namespace Engine::UI {
 		m_audioIconTexture     = std::make_shared<Texture>();
 		m_terrainIconTexture   = std::make_shared<Texture>();
 		m_animationIconTexture = std::make_shared<Texture>();
+		m_folderIconTexture    = std::make_shared<Texture>();
+		m_fileIconTexture      = std::make_shared<Texture>();
+		m_modelIconTexture     = std::make_shared<Texture>();
+		m_shaderIconTexture    = std::make_shared<Texture>();
+		m_particleIconTexture  = std::make_shared<Texture>();
+		m_materialIconTexture  = std::make_shared<Texture>();
 #ifndef GAME_BUILD
 		m_audioIconTexture->LoadFromFile("resources/engine/speaker.png");
 		m_terrainIconTexture->LoadFromFile("resources/engine/mountain.png");
 		m_animationIconTexture->LoadFromFile("resources/engine/animation.png");
+		m_folderIconTexture->LoadFromFile("resources/engine/folder.png");
+		m_fileIconTexture->LoadFromFile("resources/engine/file.png");
+		m_modelIconTexture->LoadFromFile("resources/engine/model.png");
+		m_shaderIconTexture->LoadFromFile("resources/engine/shader.png");
+		m_particleIconTexture->LoadFromFile("resources/engine/particle.png");
+		m_materialIconTexture->LoadFromFile("resources/engine/material_icon.png");
 
 		efsw::WatchID id = m_uiAssetRenderer->fw.addWatch("resources", &m_uiAssetRenderer->listener, true);
 		m_uiAssetRenderer->fw.watch();
