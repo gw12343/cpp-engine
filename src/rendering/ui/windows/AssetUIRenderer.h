@@ -11,6 +11,7 @@
 #include <string>
 
 #include "rendering/ui/ModelPreview.h"
+#include "rendering/ui/MaterialPreview.h"
 #include "imgui.h"
 #include "efsw/efsw.hpp"
 
@@ -44,6 +45,7 @@ namespace Engine {
 		std::unordered_map<std::type_index, std::function<void()>> drawFuncs;
 
 		std::unordered_map<std::string, ModelPreview> m_modelPreviews;
+		std::unordered_map<std::string, MaterialPreview> m_materialPreviews;
 	};
 } // namespace Engine
 

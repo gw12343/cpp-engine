@@ -281,7 +281,12 @@ namespace Engine {
 		for (auto& [id, matPtr] : storage.guidToAsset) {
 			if (!matPtr) continue;
 			ImGui::PushID(("mat" + id).c_str());
-			auto tx = GetAssetManager().Get(matPtr->GetDiffuseTexture());
+
+			// Render material preview on sphere
+			auto& preview  = m_materialPreviews[id];
+			preview.width  = static_cast<int>(MATERIAL_PREVIEW_SIZE);
+			preview.height = static_cast<int>(MATERIAL_PREVIEW_SIZE);
+			preview.Render(matPtr.get(), GetRenderer().GetMaterialPreviewShader());
 
 			// --- Measure text to get correct rect size ---
 			std::string label     = matPtr->GetName();
@@ -292,7 +297,8 @@ namespace Engine {
 				GetUI().m_selectedMaterial = AssetHandle<Material>(id);
 			}
 
-			if (tx != NULL) ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(tx->GetID())), ImVec2(iconSize, iconSize), ImVec2(0, 1), ImVec2(1, 0));
+			// Display preview sphere texture
+			ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(preview.texture)), ImVec2(iconSize, iconSize), ImVec2(0, 1), ImVec2(1, 0));
 
 			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.0f);
 			ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + iconSize);

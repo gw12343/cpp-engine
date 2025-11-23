@@ -34,6 +34,7 @@ namespace Engine {
 		Shader& GetShader() { return m_shader; }
 		Shader& GetMousePickingShader() { return m_mousePickingShader; }
 		Shader& GetModelPreviewShader() { return m_modelPreviewShader; }
+		Shader& GetMaterialPreviewShader() { return m_materialPreviewShader; }
 		Shader& GetTerrainShader() { return m_terrainShader; }
 
 		std::shared_ptr<ShadowMapRenderer> GetShadowRenderer();
@@ -44,6 +45,7 @@ namespace Engine {
 		Engine::Shader          m_shader;
 		Engine::Shader          m_mousePickingShader;
 		Engine::Shader          m_modelPreviewShader;
+		Engine::Shader          m_materialPreviewShader;
 		Engine::Shader          m_terrainShader;
 		Engine::Shader          m_skyboxShader;
 		std::unique_ptr<Skybox> m_skybox;

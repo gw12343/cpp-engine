@@ -43,6 +43,12 @@ namespace Engine {
 			return;
 		}
 
+		// Load material preview shader
+		if (!m_materialPreviewShader.LoadFromFiles("resources/shaders/material_preview_vert.glsl", "resources/shaders/material_preview_frag.glsl", std::nullopt)) {
+			log->error("Failed to load material preview shader");
+			return;
+		}
+
 
 		m_skybox            = std::make_unique<Skybox>();
 		const std::string p = "resources/textures/output.hdr";
@@ -291,6 +297,11 @@ namespace Engine {
 		// Load model preview shader
 		if (!m_modelPreviewShader.LoadFromFiles("resources/shaders/preview_vert.glsl", "resources/shaders/preview_frag.glsl", std::nullopt)) {
 			log->error("Failed to reload model preview shader");
+		}
+
+		// Load material preview shader
+		if (!m_materialPreviewShader.LoadFromFiles("resources/shaders/material_preview_vert.glsl", "resources/shaders/material_preview_frag.glsl", std::nullopt)) {
+			log->error("Failed to reload material preview shader");
 		}
 	}
 

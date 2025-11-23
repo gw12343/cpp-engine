@@ -226,6 +226,7 @@ add_executable(${PROJECT_NAME} ${SOURCES}
         src/components/impl/GizmoComponent.h
         src/components/impl/GizmoComponent.cpp
         src/assets/AssetManager.cpp
+        src/rendering/ui/MaterialPreview.cpp
 )
 
 
