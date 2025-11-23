@@ -272,4 +272,26 @@ namespace Engine {
 	}
 
 
+	void Renderer::ReloadShaders()
+	{
+		log->info("Reloading shaders...");
+		if (!m_shader.LoadFromFiles("resources/shaders/vert.glsl", "resources/shaders/frag.glsl", std::nullopt)) {
+			log->error("Failed to reload default shader");
+		}
+
+		if (!m_mousePickingShader.LoadFromFiles("resources/shaders/picking.vert", "resources/shaders/picking.frag", std::nullopt)) {
+			log->error("Failed to reload mouse picking shader");
+		}
+
+		// Load skybox shader
+		if (!m_skyboxShader.LoadFromFiles("resources/shaders/skybox_vert.glsl", "resources/shaders/skybox_frag.glsl", std::nullopt)) {
+			log->error("Failed to reload skybox shader");
+		}
+
+		// Load model preview shader
+		if (!m_modelPreviewShader.LoadFromFiles("resources/shaders/preview_vert.glsl", "resources/shaders/preview_frag.glsl", std::nullopt)) {
+			log->error("Failed to reload model preview shader");
+		}
+	}
+
 } // namespace Engine

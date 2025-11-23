@@ -34,6 +34,7 @@
 #include "assets/impl/BinarySceneLoader.h"
 #include "assets/impl/AnimationLoader.h"
 #include "components/impl/AnimationComponent.h"
+#include "assets/AssetWatcher.h"
 
 #if defined(__clang__) || defined(__GNUC__)
 #define TracyFunction __PRETTY_FUNCTION__
@@ -98,7 +99,19 @@ namespace Engine {
 		manager.RegisterExternal(Get().terrain);
 		manager.RegisterExternal(Get().renderer);
 		manager.RegisterExternal(Get().script);
+		manager.RegisterExternal(Get().script);
 		manager.RegisterExternal(Get().scene);
+
+#ifndef GAME_BUILD
+		m_assetFileWatcher = std::make_unique<efsw::FileWatcher>();
+		m_assetWatcher     = std::make_unique<HotReloadWatcher>();
+		m_assetFileWatcher->addWatch("resources", m_assetWatcher.get(), true);
+		m_assetFileWatcher->watch();
+#endif
+	}
+
+	GEngine::~GEngine()
+	{
 	}
 
 	bool GEngine::Initialize()
@@ -212,6 +225,7 @@ namespace Engine {
 			m_deltaTime       = currentFrame - m_lastFrame;
 			m_lastFrame       = currentFrame;
 
+			GetAssetManager().Update();
 			manager.UpdateAll(m_deltaTime);
 			FrameMarkEnd("main");
 		}

@@ -11,6 +11,8 @@
 #include <string>
 #include <cassert>
 #include <random>
+#include <mutex>
+#include <vector>
 
 #include "AssetHandle.h"
 #include "IAssetLoader.h"
@@ -33,6 +35,28 @@ namespace Engine {
 		template <typename T>
 		void RegisterLoader(std::unique_ptr<IAssetLoader<T>> loader);
 
+		template <typename T>
+		void Reload(const AssetHandle<T>& handle);
+
+		template <typename T>
+		void UnloadByPath(const std::string& path);
+
+		template <typename T>
+		void RenameAsset(const std::string& oldPath, const std::string& newPath);
+
+		template <typename T>
+		AssetHandle<T> GetHandleFromPath(const std::string& path);
+
+		enum class ActionType { Reload, Load, Unload, Rename };
+		struct AssetAction {
+			ActionType  type;
+			std::string path;
+			std::string newPath; // For Rename
+		};
+
+		void QueueAction(const AssetAction& action);
+		void Update();
+
 		struct IStorageBase {
 			virtual ~IStorageBase() = default;
 		};
@@ -40,6 +64,7 @@ namespace Engine {
 		template <typename T>
 		struct AssetStorage : IStorageBase {
 			std::unordered_map<std::string, std::unique_ptr<T>> guidToAsset;
+			std::unordered_map<std::string, std::string>        pathToGuid; // New: Map path to GUID
 			std::unique_ptr<IAssetLoader<T>>                    loader;
 		};
 
@@ -66,6 +91,9 @@ namespace Engine {
 
 
 		std::unordered_map<std::type_index, std::unique_ptr<IStorageBase>> storages;
+		
+		std::vector<AssetAction> m_pendingActions;
+		std::mutex               m_actionMutex;
 
 		friend class UI::UIManager;
 	};

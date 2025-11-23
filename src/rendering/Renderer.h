@@ -19,6 +19,7 @@ namespace Engine {
 		void                      onUpdate(float dt) override;
 		void                      onGameStart() override {}
 		void                      onShutdown() override;
+		void                      ReloadShaders();
 		[[nodiscard]] std::string name() const override { return "RendererModule"; };
 
 

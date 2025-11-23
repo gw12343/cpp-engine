@@ -223,7 +223,9 @@ add_executable(${PROJECT_NAME} ${SOURCES}
         src/animation/Animation.h
         src/animation/Animation.cpp
         src/components/impl/GizmoComponent.h
+        src/components/impl/GizmoComponent.h
         src/components/impl/GizmoComponent.cpp
+        src/assets/AssetManager.cpp
 )
 
 
