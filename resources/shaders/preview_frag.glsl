@@ -22,6 +22,14 @@ void main()
     vec4 smp = texture(diffuseTexture, fs_in.TexCoords * texScale);
     vec3 color = smp.rgb;
     float alpha = smp.a;
+    
+    // Fallback for models without material data
+    // If texture is very dark (likely missing/invalid), use default gray
+    if (length(color) < 0.1) {
+        color = vec3(0.7); // Light gray
+        alpha = 1.0;
+    }
+    
     if (alpha < 0.5f){
         discard;
     }
