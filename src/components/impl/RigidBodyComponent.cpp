@@ -56,7 +56,6 @@ namespace Engine::Components {
 				glm::quat qt  = tr.GetWorldRotation();
 				startPos      = Vec3(pos.x, pos.y, pos.z);
 				startRot      = ToJolt(qt);
-				GetDefaultLogger()->info("ADDED RIGIDBODY WITH WP: ({}, {}, {})  rot ({}, {}, {}, {})", pos.x, pos.y, pos.z, qt.x, qt.y, qt.z, qt.w);
 			}
 
 			JPH::BodyCreationSettings settings(shape, startPos, startRot, (JPH::EMotionType) motionType, Layers::MOVING);

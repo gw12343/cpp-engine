@@ -19,6 +19,7 @@
 #include "core/Input.h"
 
 #include "core/SceneManager.h"
+#include "scripting/ScriptManager.h"
 #include "core/module/ModuleManager.h"
 
 #include "windows/ConsoleWindow.h"
@@ -165,6 +166,10 @@ namespace Engine::UI {
 			GetCamera().LoadEditorLocation();
 			GetUI().m_selectedEntity = Entity();
 			GetParticleManager().ResetInternalManager();
+			
+			// Clear event subscriptions when stopping the game
+			GetScriptManager().GetEventBus().ClearAllSubscriptions();
+			
 			{
 				//  clear scene
 				auto& physics = GetPhysics();
