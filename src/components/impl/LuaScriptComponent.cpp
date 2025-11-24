@@ -331,7 +331,18 @@ namespace Engine::Components {
 
 		try {
 			// Load the script into the environment
+#ifdef GAME_BUILD
+			// In game builds, load compiled .luac bytecode instead of source
+			std::string loadPath = scriptPath;
+			if (loadPath.size() >= 4 && loadPath.substr(loadPath.size() - 4) == ".lua") {
+				loadPath = loadPath.substr(0, loadPath.size() - 4) + ".luac";
+			}
+			GetScriptManager().log->info("Loading compiled script: {}", loadPath);
+			GetScriptManager().lua.script_file(loadPath, env);
+#else
+			// In editor mode, load source .lua files
 			GetScriptManager().lua.script_file(scriptPath, env);
+#endif
 
 			// Bind lifecycle functions
 			start                = env["Start"];
@@ -355,7 +366,7 @@ namespace Engine::Components {
 			env.set_function("getEntityFromHandle", GetEntityFromHandle);
 		}
 		catch (const sol::error& err) {
-			GetScriptManager().log->error("[LuaScript] Error in {}: {}", scriptPath, err.what());
+			GetScriptManager().log->error("[LuaScript] Error in  (original path){}: {}", scriptPath, err.what());
 		}
 	}
 

@@ -292,10 +292,11 @@ namespace Engine {
 		//		}
 	}
 
-
+	int i = 0;
 	void GEngine::Run()
 	{
 		while (!GetWindow().ShouldClose()) {
+			i++;
 			FrameMarkStart("main");
 			auto currentFrame = static_cast<float>(glfwGetTime());
 			m_deltaTime       = currentFrame - m_lastFrame;
@@ -303,6 +304,10 @@ namespace Engine {
 
 			GetAssetManager().Update();
 			manager.UpdateAll(m_deltaTime);
+			if(i % 2000 == 0){
+				GetDefaultLogger()->info("Frame time: {}", m_deltaTime);
+				GetDefaultLogger()->info("Frame rate: {}", 1.0f / m_deltaTime);
+			}
 			FrameMarkEnd("main");
 		}
 	}
