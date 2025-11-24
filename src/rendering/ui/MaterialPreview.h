@@ -25,6 +25,7 @@ namespace Engine {
 
 		void Initialize();
 		void Render(Material* material, Shader& shader);
+		void Render(Material* material, Shader& shader, float yaw, float pitch);
 
 	  private:
 		void GenerateSphere();

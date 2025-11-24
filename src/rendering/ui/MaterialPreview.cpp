@@ -240,6 +240,84 @@ namespace Engine {
 		glBindVertexArray(0);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void MaterialPreview::Render(Material* material, Shader& shader, float yaw, float pitch)
+{
+	if (!initialized) {
+		width = height = MATERIAL_PREVIEW_SIZE;
+		Initialize();
 	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	glViewport(0, 0, width, height);
+	glEnable(GL_DEPTH_TEST);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	shader.Bind();
+
+	// Camera setup using spherical coordinates
+	float distance = 4.0f; // Distance from sphere center
+	float yawRad = glm::radians(yaw);
+	float pitchRad = glm::radians(pitch);
+
+	// Compute camera position from spherical coordinates
+	glm::vec3 camPos;
+	camPos.x = distance * cos(pitchRad) * cos(yawRad);
+	camPos.y = distance * sin(pitchRad);
+	camPos.z = distance * cos(pitchRad) * sin(yawRad);
+
+	glm::vec3 center = glm::vec3(0.0f);
+
+	glm::mat4 proj = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 100.0f);
+	glm::mat4 view = glm::lookAt(camPos, center, glm::vec3(0, 1, 0));
+	glm::mat4 model = glm::mat4(1.0f);
+
+	shader.SetMat4("projection", &proj);
+	shader.SetMat4("view", &view);
+	shader.SetMat4("model", &model);
+
+	// Bind material textures
+	auto& assetMgr = GetAssetManager();
+
+	// Diffuse texture
+	auto diffuseTex = assetMgr.Get(material->GetDiffuseTexture());
+	if (diffuseTex) {
+		diffuseTex->Bind(0);
+	} else {
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	// Specular texture
+	auto specularTex = assetMgr.Get(material->GetSpecularTexture());
+	if (specularTex) {
+		specularTex->Bind(1);
+	} else {
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	// Normal texture
+	auto normalTex = assetMgr.Get(material->GetNormalTexture());
+	if (normalTex) {
+		normalTex->Bind(2);
+	} else {
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	// Set material properties
+	shader.SetVec3("diffuseColor", material->GetDiffuseColor());
+	shader.SetVec3("specularColor", material->GetSpecularColor());
+	shader.SetFloat("shininess", material->GetShininess());
+
+	// Draw sphere
+	glBindVertexArray(sphereVAO);
+	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
 
 } // namespace Engine

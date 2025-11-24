@@ -6,6 +6,7 @@
 #define CPP_ENGINE_ASSETUIRENDERER_H
 
 #include <unordered_map>
+#include <unordered_set>
 #include <typeindex>
 #include <functional>
 #include <string>
@@ -73,6 +74,9 @@ namespace Engine {
 		// For previews
 		std::unordered_map<std::string, ModelPreview> m_modelPreviews;
 		std::unordered_map<std::string, MaterialPreview> m_materialPreviews;
+		// Cache to avoid reloading assets every frame
+		std::unordered_set<std::string> m_loadedModelPaths;
+		std::unordered_set<std::string> m_loadedMaterialPaths;
 	};
 } // namespace Engine
 

@@ -83,8 +83,6 @@ end
 
 
 function Update()
-    print("gameObject type:", type(gameObject))
-    print("gameObject:", gameObject)
     local input = getInput()
     local camera = getCamera()
     local tr = gameObject:GetTransform()

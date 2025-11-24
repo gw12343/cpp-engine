@@ -2,237 +2,28 @@
     "entities": [
         {
             "EntityMetadata": {
-                "name": "Container",
+                "name": "Copy of floor",
                 "tag": "",
                 "active": true,
-                "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a",
+                "guid": "3ef77280f11732f852b913a5f773aaba",
                 "parentEntity": {
                     "guid": ""
                 },
                 "children": []
             },
             "LuaScript": {
-                "nullopt": false,
-                "data": {
-                    "scriptPath": "scripts/test_vectors.lua",
-                    "variables": [
-                        {
-                            "key": "materials",
-                            "value": {
-                                "index": 16,
-                                "data": [
-                                    {
-                                        "guid": "50261caca552b9ed2cda4de3bc2b2e6b"
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            "key": "scenes",
-                            "value": {
-                                "index": 17,
-                                "data": []
-                            }
-                        },
-                        {
-                            "key": "tiles",
-                            "value": {
-                                "index": 18,
-                                "data": []
-                            }
-                        },
-                        {
-                            "key": "models",
-                            "value": {
-                                "index": 15,
-                                "data": [
-                                    {
-                                        "guid": "16ab47c200b25ccb2b9dbcf46297059f"
-                                    },
-                                    {
-                                        "guid": ""
-                                    },
-                                    {
-                                        "guid": ""
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            "key": "sounds",
-                            "value": {
-                                "index": 20,
-                                "data": [
-                                    {
-                                        "guid": "a974db1b6552d57b0799b03f250089bb"
-                                    },
-                                    {
-                                        "guid": "5934d5e25811aaab0768ad9457b3af78"
-                                    },
-                                    {
-                                        "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            "key": "textures",
-                            "value": {
-                                "index": 14,
-                                "data": [
-                                    {
-                                        "guid": "684bda7719ce8774b0883115da989766"
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            "key": "particles",
-                            "value": {
-                                "index": 19,
-                                "data": []
-                            }
-                        }
-                    ]
-                }
+                "nullopt": true
             },
             "ShadowCaster": {
                 "nullopt": true
-            },
-            "Transform": {
-                "nullopt": true
-            },
-            "TerrainRenderer": {
-                "nullopt": true
-            },
-            "ModelRenderer": {
-                "nullopt": true
-            },
-            "RigidBodyComponent": {
-                "nullopt": true
-            },
-            "AudioSource": {
-                "nullopt": true
-            },
-            "SkeletonComponent": {
-                "nullopt": true
-            },
-            "AnimationComponent": {
-                "nullopt": true
-            },
-            "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "SkinnedMeshComponent": {
-                "nullopt": true
-            },
-            "ParticleSystem": {
-                "nullopt": true
-            },
-            "PlayerControllerComponent": {
-                "nullopt": true
-            },
-            "GizmoComponent": {
-                "nullopt": true
-            }
-        },
-        {
-            "EntityMetadata": {
-                "name": "Player",
-                "tag": "",
-                "active": true,
-                "guid": "2ecf7797fdff414a7991e3ab19bfd32c",
-                "parentEntity": {
-                    "guid": ""
-                },
-                "children": []
-            },
-            "LuaScript": {
-                "nullopt": false,
-                "data": {
-                    "scriptPath": "scripts/player.lua",
-                    "variables": [
-                        {
-                            "key": "JUMP_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 8.0
-                            }
-                        },
-                        {
-                            "key": "SHOOT_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 15.0
-                            }
-                        },
-                        {
-                            "key": "BULLET_MATERIAL",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
-                                }
-                            }
-                        },
-                        {
-                            "key": "WALK_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 7.0
-                            }
-                        },
-                        {
-                            "key": "GRAVITY_SCALE",
-                            "value": {
-                                "index": 0,
-                                "data": 2.0
-                            }
-                        },
-                        {
-                            "key": "CAMERA_Y_OFFSET",
-                            "value": {
-                                "index": 0,
-                                "data": 1.100000023841858
-                            }
-                        },
-                        {
-                            "key": "MOUSE_SENSITIVITY",
-                            "value": {
-                                "index": 0,
-                                "data": 0.10000000149011612
-                            }
-                        },
-                        {
-                            "key": "BULLET_PARENT",
-                            "value": {
-                                "index": 12,
-                                "data": {
-                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
-                                }
-                            }
-                        },
-                        {
-                            "key": "RUN_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 12.0
-                            }
-                        }
-                    ]
-                }
-            },
-            "ShadowCaster": {
-                "nullopt": false,
-                "data": {}
             },
             "Transform": {
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": 0.12361548095941544,
-                        "y": 16.41361427307129,
-                        "z": 0.1067219153046608
+                        "x": -13.419902801513672,
+                        "y": 3.0,
+                        "z": 16.759540557861329
                     },
                     "rotation": {
                         "x": 0.0,
@@ -241,9 +32,9 @@
                         "w": 1.0
                     },
                     "scale": {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
+                        "x": 5.0,
+                        "y": 5.0,
+                        "z": 5.0
                     }
                 }
             },
@@ -255,18 +46,31 @@
                 "data": {
                     "visible": true,
                     "model": {
-                        "guid": "8f4859e3ac89632544374bc702a531e9"
+                        "guid": "e319e2b8747bee49f54e67e706d42f67"
                     },
                     "backfaceCulling": true,
                     "materialOverrides": [
                         {
-                            "guid": ""
+                            "guid": "4f843329315c8297e0905d030736e961"
                         }
                     ]
                 }
             },
             "RigidBodyComponent": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {
+                    "motionType": 1,
+                    "mass": 1.0,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 0.0,
+                    "shapeType": "Box",
+                    "shapeSize": {
+                        "x": 2.5,
+                        "y": 2.5,
+                        "z": 2.5
+                    }
+                }
             },
             "AudioSource": {
                 "nullopt": true
@@ -287,8 +91,7 @@
                 "nullopt": true
             },
             "PlayerControllerComponent": {
-                "nullopt": false,
-                "data": {}
+                "nullopt": true
             },
             "GizmoComponent": {
                 "nullopt": true
@@ -393,28 +196,101 @@
         },
         {
             "EntityMetadata": {
-                "name": "Copy of floor",
+                "name": "Player",
                 "tag": "",
                 "active": true,
-                "guid": "3ef77280f11732f852b913a5f773aaba",
+                "guid": "2ecf7797fdff414a7991e3ab19bfd32c",
                 "parentEntity": {
                     "guid": ""
                 },
                 "children": []
             },
             "LuaScript": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {
+                    "scriptPath": "scripts/player.lua",
+                    "variables": [
+                        {
+                            "key": "MOUSE_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.10000000149011612
+                            }
+                        },
+                        {
+                            "key": "SHOOT_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 15.0
+                            }
+                        },
+                        {
+                            "key": "JUMP_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 8.0
+                            }
+                        },
+                        {
+                            "key": "GRAVITY_SCALE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
+                            }
+                        },
+                        {
+                            "key": "BULLET_MATERIAL",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
+                                }
+                            }
+                        },
+                        {
+                            "key": "WALK_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 7.0
+                            }
+                        },
+                        {
+                            "key": "CAMERA_Y_OFFSET",
+                            "value": {
+                                "index": 0,
+                                "data": 1.100000023841858
+                            }
+                        },
+                        {
+                            "key": "RUN_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 12.0
+                            }
+                        },
+                        {
+                            "key": "BULLET_PARENT",
+                            "value": {
+                                "index": 12,
+                                "data": {
+                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
+                                }
+                            }
+                        }
+                    ]
+                }
             },
             "ShadowCaster": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {}
             },
             "Transform": {
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": -13.419902801513672,
-                        "y": 2.731732130050659,
-                        "z": 16.759540557861329
+                        "x": 0.12361548095941544,
+                        "y": 16.41361427307129,
+                        "z": 0.1067219153046608
                     },
                     "rotation": {
                         "x": 0.0,
@@ -423,9 +299,9 @@
                         "w": 1.0
                     },
                     "scale": {
-                        "x": 5.0,
-                        "y": 5.0,
-                        "z": 5.0
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
                     }
                 }
             },
@@ -437,31 +313,155 @@
                 "data": {
                     "visible": true,
                     "model": {
-                        "guid": "e319e2b8747bee49f54e67e706d42f67"
+                        "guid": "8f4859e3ac89632544374bc702a531e9"
                     },
                     "backfaceCulling": true,
                     "materialOverrides": [
                         {
-                            "guid": "4f843329315c8297e0905d030736e961"
+                            "guid": "50261caca552b9ed2cda4de3bc2b2e6b"
                         }
                     ]
                 }
             },
             "RigidBodyComponent": {
+                "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": false,
+                "data": {}
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Container",
+                "tag": "",
+                "active": true,
+                "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a",
+                "parentEntity": {
+                    "guid": ""
+                },
+                "children": []
+            },
+            "LuaScript": {
                 "nullopt": false,
                 "data": {
-                    "motionType": 1,
-                    "mass": 1.0,
-                    "friction": 0.5,
-                    "restitution": 0.0,
-                    "gravityFactor": 0.0,
-                    "shapeType": "Box",
-                    "shapeSize": {
-                        "x": 2.5,
-                        "y": 2.5,
-                        "z": 2.5
-                    }
+                    "scriptPath": "scripts/test_vectors.lua",
+                    "variables": [
+                        {
+                            "key": "tiles",
+                            "value": {
+                                "index": 18,
+                                "data": []
+                            }
+                        },
+                        {
+                            "key": "particles",
+                            "value": {
+                                "index": 19,
+                                "data": []
+                            }
+                        },
+                        {
+                            "key": "materials",
+                            "value": {
+                                "index": 16,
+                                "data": [
+                                    {
+                                        "guid": "50261caca552b9ed2cda4de3bc2b2e6b"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "key": "textures",
+                            "value": {
+                                "index": 14,
+                                "data": [
+                                    {
+                                        "guid": "684bda7719ce8774b0883115da989766"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "key": "scenes",
+                            "value": {
+                                "index": 17,
+                                "data": []
+                            }
+                        },
+                        {
+                            "key": "models",
+                            "value": {
+                                "index": 15,
+                                "data": [
+                                    {
+                                        "guid": "16ab47c200b25ccb2b9dbcf46297059f"
+                                    },
+                                    {
+                                        "guid": ""
+                                    },
+                                    {
+                                        "guid": ""
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "key": "sounds",
+                            "value": {
+                                "index": 20,
+                                "data": [
+                                    {
+                                        "guid": "a974db1b6552d57b0799b03f250089bb"
+                                    },
+                                    {
+                                        "guid": "5934d5e25811aaab0768ad9457b3af78"
+                                    },
+                                    {
+                                        "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
                 }
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": true
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": true
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
             },
             "AudioSource": {
                 "nullopt": true

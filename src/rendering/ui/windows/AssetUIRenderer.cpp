@@ -128,8 +128,9 @@ namespace Engine {
 
 	void AssetUIRenderer::RenderDirectoryTree()
 	{
-		// Render root "resources" folder and its subdirectories
+		// Render root folders
 		RenderDirectoryTreeNode("resources", "resources");
+		RenderDirectoryTreeNode("scripts", "scripts");
 	}
 
 	void AssetUIRenderer::RenderDirectoryTreeNode(const std::string& dirPath, const std::string& dirName)
@@ -265,58 +266,58 @@ namespace Engine {
 		}
 
 		// Drag-drop source for asset files
-		if (!isDirectory && ImGui::BeginDragDropSource()) {
-			struct PayloadData {
-				const char* type;
-				char        id[256];
-			};
-			PayloadData payload;
+	if (!isDirectory && ImGui::BeginDragDropSource()) {
+		struct PayloadData {
+			const char* type;
+			char        id[64];  // Must match size expected by InspectorUI
+		};
+		PayloadData payload;
 
-			// Determine payload type based on extension
-			const char* payloadType = "ASSET_FILE";
-			const char* assetType = "Unknown";
+		// Determine payload type based on extension
+		const char* payloadType = "ASSET_FILE";
+		const char* assetType = "Unknown";
 
-			if (ext == ".png") {
-				payloadType = "ASSET_TEXTURE";
-				assetType = "Texture";
-				
-				// Load texture and get GUID
-				auto handle = GetAssetManager().Load<Texture>(path);
-				strncpy(payload.id, handle.GetID().c_str(), sizeof(payload.id));
-			} else if (ext == ".obj") {
-				payloadType = "ASSET_MODEL";
-				assetType = "Rendering::Model";
-				
-				auto handle = GetAssetManager().Load<Rendering::Model>(path);
-				strncpy(payload.id, handle.GetID().c_str(), sizeof(payload.id));
-			} else if (ext == ".material") {
-				payloadType = "ASSET_MATERIAL";
-				assetType = "Material";
-				
-				auto handle = GetAssetManager().Load<Material>(path);
-				strncpy(payload.id, handle.GetID().c_str(), sizeof(payload.id));
-			} else if (ext == ".wav") {
-				payloadType = "ASSET_SOUND";
-				assetType = "Audio::SoundBuffer";
-				
-				auto handle = GetAssetManager().Load<Audio::SoundBuffer>(path);
-				strncpy(payload.id, handle.GetID().c_str(), sizeof(payload.id));
-			} else if (ext == ".anim") {
-				payloadType = "ASSET_ANIMATION";
-				assetType = "Animation";
-				
-				auto handle = GetAssetManager().Load<Animation>(path);
-				strncpy(payload.id, handle.GetID().c_str(), sizeof(payload.id));
-			}
-
-			payload.type = assetType;
-			payload.id[sizeof(payload.id) - 1] = '\0';
-
-			ImGui::SetDragDropPayload(payloadType, &payload, sizeof(payload));
-			ImGui::Text("%s: %s", assetType, filename.c_str());
-
-			ImGui::EndDragDropSource();
+		if (ext == ".png") {
+			payloadType = "ASSET_TEXTURE";
+			assetType = "Texture";
+			
+			// Load texture and get GUID
+			auto handle = GetAssetManager().Load<Texture>(path);
+			strncpy(payload.id, handle.GetID().c_str(), sizeof(payload.id));
+		} else if (ext == ".obj") {
+			payloadType = "ASSET_MODEL";
+			assetType = "Rendering::Model";
+			
+			auto handle = GetAssetManager().Load<Rendering::Model>(path);
+			strncpy(payload.id, handle.GetID().c_str(), sizeof(payload.id));
+		} else if (ext == ".material") {
+			payloadType = "ASSET_MATERIAL";
+			assetType = "Material";
+			
+			auto handle = GetAssetManager().Load<Material>(path);
+			strncpy(payload.id, handle.GetID().c_str(), sizeof(payload.id));
+		} else if (ext == ".wav") {
+			payloadType = "ASSET_SOUND";
+			assetType = "Audio::SoundBuffer";
+			
+			auto handle = GetAssetManager().Load<Audio::SoundBuffer>(path);
+			strncpy(payload.id, handle.GetID().c_str(), sizeof(payload.id));
+		} else if (ext == ".anim") {
+			payloadType = "ASSET_ANIMATION";
+			assetType = "Animation";
+			
+			auto handle = GetAssetManager().Load<Animation>(path);
+			strncpy(payload.id, handle.GetID().c_str(), sizeof(payload.id));
 		}
+
+		payload.type = assetType;
+		payload.id[sizeof(payload.id) - 1] = '\0';
+
+		ImGui::SetDragDropPayload(payloadType, &payload, sizeof(payload));
+		ImGui::Text("%s: %s", assetType, filename.c_str());
+
+		ImGui::EndDragDropSource();
+	}	
 
 		// Selection/hover effect
 		bool isSelected = (m_selectedFile == path);
@@ -327,11 +328,25 @@ namespace Engine {
 
 		if (clicked && !isDirectory) {
 			m_selectedFile = path;
+			
+			// If it's a material file, select it in the material editor
+			if (ext == ".material") {
+				auto handle = GetAssetManager().Load<Material>(path);
+				GetUI().m_selectedMaterial = handle;
+			}
 		}
 
 		// Draw icon
 		ImGui::SetCursorScreenPos(startPos);
-		ImGui::Image(iconID, ImVec2(iconSize, iconSize));
+		// Flip UV coordinates only for framebuffer-rendered previews (models and materials)
+		// Regular textures are already right-side up
+		if (ext == ".obj" || ext == ".material") {
+			// Framebuffer textures need Y-flip: (0,1) to (1,0)
+			ImGui::Image(iconID, ImVec2(iconSize, iconSize), ImVec2(0, 1), ImVec2(1, 0));
+		} else {
+			// Regular textures and icons: default (0,0) to (1,1)
+			ImGui::Image(iconID, ImVec2(iconSize, iconSize));
+		}
 
 		// Draw filename
 		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.0f);
@@ -415,36 +430,62 @@ namespace Engine {
 		}
 		else if (extension == ".obj") {
 			// For models, render preview with error handling
-			try {
-				GetUI().log->debug("Loading model for preview: {}", path);
-				auto handle = GetAssetManager().Load<Rendering::Model>(path);
-				auto* model = GetAssetManager().Get(handle);
-				if (model) {
-					auto& preview = m_modelPreviews[handle.GetID()];
-					preview.width = static_cast<int>(MODEL_PREVIEW_SIZE);
-					preview.height = static_cast<int>(MODEL_PREVIEW_SIZE);
-					preview.Render(model, GetRenderer().GetModelPreviewShader());
-					return reinterpret_cast<void*>(static_cast<intptr_t>(preview.texture));
+			// Check if we've already tried to load this model
+			if (m_loadedModelPaths.find(path) == m_loadedModelPaths.end()) {
+				// First time seeing this model, try to load it
+				m_loadedModelPaths.insert(path);
+				try {
+					GetUI().log->debug("Loading model for preview: {}", path);
+					auto handle = GetAssetManager().Load<Rendering::Model>(path);
+					auto* model = GetAssetManager().Get(handle);
+					if (model) {
+						auto& preview = m_modelPreviews[handle.GetID()];
+						preview.width = static_cast<int>(MODEL_PREVIEW_SIZE);
+						preview.height = static_cast<int>(MODEL_PREVIEW_SIZE);
+						preview.Render(model, GetRenderer().GetModelPreviewShader());
+					}
+				} catch (const std::exception& e) {
+					GetUI().log->warn("Failed to load model for preview {}: {}", path, e.what());
 				}
-			} catch (const std::exception& e) {
-				GetUI().log->warn("Failed to load model for preview {}: {}", path, e.what());
+			}
+			
+			// Try to get the preview from cache
+			auto handle = GetAssetManager().GetHandleFromPath<Rendering::Model>(path);
+			if (handle.IsValid()) {
+				auto it = m_modelPreviews.find(handle.GetID());
+				if (it != m_modelPreviews.end()) {
+					return reinterpret_cast<void*>(static_cast<intptr_t>(it->second.texture));
+				}
 			}
 			return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_modelIconTexture->GetID()));
 		}
 		else if (extension == ".material") {
 			// For materials, render preview on sphere with error handling
-			try {
-				auto handle = GetAssetManager().Load<Material>(path);
-				auto* mat = GetAssetManager().Get(handle);
-				if (mat) {
-					auto& preview = m_materialPreviews[handle.GetID()];
-					preview.width = static_cast<int>(MATERIAL_PREVIEW_SIZE);
-					preview.height = static_cast<int>(MATERIAL_PREVIEW_SIZE);
-					preview.Render(mat, GetRenderer().GetMaterialPreviewShader());
-					return reinterpret_cast<void*>(static_cast<intptr_t>(preview.texture));
+			// Check if we've already tried to load this material
+			if (m_loadedMaterialPaths.find(path) == m_loadedMaterialPaths.end()) {
+				// First time seeing this material, try to load it
+				m_loadedMaterialPaths.insert(path);
+				try {
+					auto handle = GetAssetManager().Load<Material>(path);
+					auto* mat = GetAssetManager().Get(handle);
+					if (mat) {
+						auto& preview = m_materialPreviews[handle.GetID()];
+						preview.width = static_cast<int>(MATERIAL_PREVIEW_SIZE);
+						preview.height = static_cast<int>(MATERIAL_PREVIEW_SIZE);
+						preview.Render(mat, GetRenderer().GetMaterialPreviewShader());
+					}
+				} catch (const std::exception& e) {
+					GetUI().log->warn("Failed to load material for preview {}: {}", path, e.what());
 				}
-			} catch (const std::exception& e) {
-				GetUI().log->warn("Failed to load material for preview {}: {}", path, e.what());
+			}
+			
+			// Try to get the preview from cache
+			auto handle = GetAssetManager().GetHandleFromPath<Material>(path);
+			if (handle.IsValid()) {
+				auto it = m_materialPreviews.find(handle.GetID());
+				if (it != m_materialPreviews.end()) {
+					return reinterpret_cast<void*>(static_cast<intptr_t>(it->second.texture));
+				}
 			}
 			return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_materialIconTexture->GetID()));
 		}

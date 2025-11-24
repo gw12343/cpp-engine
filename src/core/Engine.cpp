@@ -99,7 +99,6 @@ namespace Engine {
 		manager.RegisterExternal(Get().terrain);
 		manager.RegisterExternal(Get().renderer);
 		manager.RegisterExternal(Get().script);
-		manager.RegisterExternal(Get().script);
 		manager.RegisterExternal(Get().scene);
 
 #ifndef GAME_BUILD
