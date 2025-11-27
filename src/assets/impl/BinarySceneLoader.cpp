@@ -16,6 +16,8 @@
 #include <optional>
 #include <filesystem>
 
+#include "core/Scene.h"
+
 namespace glm {
 	template <class Archive>
 	void serialize(Archive& ar, vec3& v)

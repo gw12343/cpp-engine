@@ -101,17 +101,70 @@ namespace Engine {
 			return;
 		}
 
-		for (const auto& entry : fs::recursive_directory_iterator(scriptsDir)) {
-			if (fs::is_regular_file(entry.status()) && entry.path().extension() == ".lua") {
-				const fs::path& srcPath      = entry.path();
-				fs::path        relativePath = fs::relative(srcPath, scriptsDir);
-				fs::path        outPath      = outScriptsDir / relativePath;
-
-				// TODO luac ??
-				GetDefaultLogger()->info("Copied Script {} -> {}", srcPath.c_str(), outPath.c_str());
-				std::filesystem::copy_file(srcPath, outPath, std::filesystem::copy_options::overwrite_existing);
+		// Compile Lua scripts to bytecode
+	sol::state lua;
+	
+	for (const auto& entry : fs::recursive_directory_iterator(scriptsDir)) {
+		if (fs::is_regular_file(entry.status()) && entry.path().extension() == ".lua") {
+			const fs::path& srcPath      = entry.path();
+			fs::path        relativePath = fs::relative(srcPath, scriptsDir);
+			fs::path        outPath      = outScriptsDir / relativePath;
+			
+			// Change extension from .lua to .luac
+			outPath.replace_extension(".luac");
+			
+			// Ensure parent directory exists
+			fs::create_directories(outPath.parent_path());
+			
+			try {
+				// Load the Lua script
+				auto result = lua.load_file(srcPath.string());
+				
+				if (!result.valid()) {
+					sol::error err = result;
+					GetDefaultLogger()->error("Failed to compile script {}: {}", srcPath.c_str(), err.what());
+					continue;
+				}
+				
+				// Get the compiled function
+				sol::protected_function func = result;
+				
+				// Dump bytecode to file
+				std::ofstream outFile(outPath, std::ios::binary);
+				if (!outFile) {
+					GetDefaultLogger()->error("Failed to open output file {}", outPath.c_str());
+					continue;
+				}
+				
+				// Use Lua C API to dump the bytecode
+				lua_State* L = lua.lua_state();
+				
+				// Push the function onto the stack
+				func.push();
+				
+				// Lambda for lua_dump writer
+				auto writer = [](lua_State* L, const void* p, size_t sz, void* ud) -> int {
+					std::ofstream* file = static_cast<std::ofstream*>(ud);
+					file->write(static_cast<const char*>(p), sz);
+					return file->good() ? 0 : 1;
+				};
+				
+				int dumpResult = lua_dump(L, writer, &outFile, 0);
+				lua_pop(L, 1); // Pop the function
+				
+				if (dumpResult != 0) {
+					GetDefaultLogger()->error("Failed to dump bytecode for {}", srcPath.c_str());
+					continue;
+				}
+				
+				outFile.close();
+				GetDefaultLogger()->info("Compiled Script {} -> {}", srcPath.c_str(), outPath.c_str());
+			}
+			catch (const std::exception& e) {
+				GetDefaultLogger()->error("Exception compiling {}: {}", srcPath.c_str(), e.what());
 			}
 		}
+	}
 
 		// Save scene
 		// TODO multi-scene?

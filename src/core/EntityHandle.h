@@ -7,13 +7,14 @@
 
 #include <cstdint>
 #include <string>
+#include <utility>
 namespace Engine {
 	class EntityHandle {
 		std::string guid;
 
 	  public:
 		EntityHandle() = default;
-		explicit EntityHandle(const std::string guid) : guid(guid) {}
+		explicit EntityHandle(std::string guid) : guid(std::move(guid)) {}
 		[[nodiscard]] const std::string& GetID() const { return guid; }
 		[[nodiscard]] bool               IsValid() const { return !guid.empty(); }
 

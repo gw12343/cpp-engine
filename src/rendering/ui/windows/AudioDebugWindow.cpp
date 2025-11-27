@@ -19,7 +19,7 @@ namespace Engine {
 
 		for (auto [entity, metadata, transform, audio] : audioView.each()) {
 			if (audio.source) {
-				float distance = glm::distance(cameraPos, transform.position);
+				float distance = glm::distance(cameraPos, transform.GetWorldPosition());
 				ImGui::Text("Entity: %s", metadata.name.c_str());
 				ImGui::Text("Distance: %.2f units", distance);
 

@@ -15,5 +15,10 @@ namespace Engine {
 
 		return tex;
 	}
+	
+	bool TextureLoader::Reload(Texture& asset, const std::string& path)
+	{
+		return asset.LoadFromFile(path);
+	}
 
 } // namespace Engine

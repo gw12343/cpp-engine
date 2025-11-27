@@ -13,6 +13,7 @@ namespace Engine {
 	  public:
 		virtual ~IAssetLoader()                                          = default;
 		virtual std::unique_ptr<T> LoadFromFile(const std::string& path) = 0;
+		virtual bool               Reload(T& asset, const std::string& path) { return false; }
 	};
 } // namespace Engine
 

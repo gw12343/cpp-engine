@@ -11,6 +11,12 @@
 #include "rendering/particles/Particle.h"
 #include "IconsFontAwesome6.h"
 #include "animation/Animation.h"
+#include "rendering/Texture.h"
+#include "rendering/Material.h"
+#include "core/Scene.h"
+#include "rendering/Model.h"
+#include "terrain/TerrainTile.h"
+#include "sound/SoundManager.h"
 
 
 namespace Engine {
@@ -285,7 +291,6 @@ namespace Engine {
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(an)) {                                                                                                                                                              \
 				if (payload->DataSize == sizeof(PayloadData)) {                                                                                                                                                                                \
 					const PayloadData* data = static_cast<const PayloadData*>(payload->Data);                                                                                                                                                  \
-					GetDefaultLogger()->info("rec {} {}   wanted {}", data->id, data->type, #atype);                                                                                                                                           \
 					if (std::strcmp(data->type, #atype) == 0) {                                                                                                                                                                                \
 						*assetRef = AssetHandle<atype>(data->id);                                                                                                                                                                              \
 						newID     = data->id;                                                                                                                                                                                                  \

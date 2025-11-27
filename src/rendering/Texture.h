@@ -21,6 +21,7 @@ namespace Engine {
 		static void           Unbind();
 
 		std::string                         GetName() const { return m_name; }
+		void                                SetName(const std::string& name) { m_name = name; }
 		[[nodiscard]] GLuint                GetID() const { return m_textureID; }
 		[[nodiscard]] int                   GetWidth() const { return m_width; }
 		[[nodiscard]] int                   GetHeight() const { return m_height; }

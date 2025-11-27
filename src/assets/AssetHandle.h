@@ -19,6 +19,7 @@ namespace Engine {
 		bool               IsValid() const { return !guid.empty(); }
 
 		bool operator==(const AssetHandle<T>& other) const { return guid == other.guid; }
+		bool operator<(const AssetHandle<T>& other) const { return guid < other.guid; }
 	};
 } // namespace Engine
 

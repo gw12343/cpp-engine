@@ -19,6 +19,7 @@
 #include "core/Input.h"
 
 #include "core/SceneManager.h"
+#include "scripting/ScriptManager.h"
 #include "core/module/ModuleManager.h"
 
 #include "windows/ConsoleWindow.h"
@@ -34,6 +35,7 @@
 #include <string>
 #include <iostream>
 #include <tracy/Tracy.hpp>
+#include <RmlUi/Core.h>
 
 std::string SelectFolder()
 {
@@ -74,14 +76,28 @@ namespace Engine::UI {
 		m_audioIconTexture     = std::make_shared<Texture>();
 		m_terrainIconTexture   = std::make_shared<Texture>();
 		m_animationIconTexture = std::make_shared<Texture>();
+		m_folderIconTexture    = std::make_shared<Texture>();
+		m_fileIconTexture      = std::make_shared<Texture>();
+		m_modelIconTexture     = std::make_shared<Texture>();
+		m_shaderIconTexture    = std::make_shared<Texture>();
+		m_particleIconTexture  = std::make_shared<Texture>();
+		m_materialIconTexture  = std::make_shared<Texture>();
 #ifndef GAME_BUILD
 		m_audioIconTexture->LoadFromFile("resources/engine/speaker.png");
 		m_terrainIconTexture->LoadFromFile("resources/engine/mountain.png");
 		m_animationIconTexture->LoadFromFile("resources/engine/animation.png");
+		m_folderIconTexture->LoadFromFile("resources/engine/folder.png");
+		m_fileIconTexture->LoadFromFile("resources/engine/file.png");
+		m_modelIconTexture->LoadFromFile("resources/engine/model.png");
+		m_shaderIconTexture->LoadFromFile("resources/engine/shader.png");
+		m_particleIconTexture->LoadFromFile("resources/engine/particle.png");
+		m_materialIconTexture->LoadFromFile("resources/engine/material_icon.png");
 
 		efsw::WatchID id = m_uiAssetRenderer->fw.addWatch("resources", &m_uiAssetRenderer->listener, true);
 		m_uiAssetRenderer->fw.watch();
 #endif
+
+	// Note: RmlUi demo document will be loaded in Window after Lua plugin is initialized
 	}
 
 
@@ -153,6 +169,10 @@ namespace Engine::UI {
 			GetCamera().LoadEditorLocation();
 			GetUI().m_selectedEntity = Entity();
 			GetParticleManager().ResetInternalManager();
+			
+			// Clear event subscriptions when stopping the game
+			GetScriptManager().GetEventBus().ClearAllSubscriptions();
+			
 			{
 				//  clear scene
 				auto& physics = GetPhysics();
@@ -377,35 +397,53 @@ namespace Engine::UI {
 		// Get all entities with EntityMetadata component
 		auto view = GetCurrentSceneRegistry().view<Components::EntityMetadata>();
 
+		bool         changeParent = false;
+		Entity       _newChild;
+		EntityHandle _newParent;
+
+
+		// Render only root entities (those without parents)
 		for (auto entity : view) {
 			Entity e(entity, GetCurrentScene());
 			auto&  metadata = e.GetComponent<Components::EntityMetadata>();
 
-			// Create a selectable item for each entity
-			bool isSelected = (m_selectedEntity == e);
-
-			std::string title = metadata.name + "##" + std::to_string((int) entity);
-			if (ImGui::Selectable(title.c_str(), isSelected)) {
-				m_selectedEntity = e;
+			// Only render root entities here
+			if (!metadata.parentEntity.IsValid()) {
+				RenderEntityTreeNode(e);
 			}
-			std::string guid = e.GetComponent<Components::EntityMetadata>().guid;
-			if (ImGui::BeginDragDropSource()) {
+		}
+
+		// Create an invisible button that fills the remaining space to accept drops
+		ImVec2 contentRegionAvail = ImGui::GetContentRegionAvail();
+		if (contentRegionAvail.y > 0) {
+			ImGui::InvisibleButton("##HierarchyDropZone", contentRegionAvail);
+
+			// Handle drop onto window background to unparent
+			if (ImGui::BeginDragDropTarget()) {
 				struct PayloadData {
 					const char* type;
 					char        id[64];
 				};
-				PayloadData payload;
-				payload.type = "EntityHandle";
-				strncpy(payload.id, guid.c_str(), sizeof(payload.id));
-				payload.id[sizeof(payload.id) - 1] = '\0';
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_HANDLE")) {
+					if (payload->DataSize == sizeof(PayloadData)) {
+						const auto* data = static_cast<const PayloadData*>(payload->Data);
+						if (std::strcmp(data->type, "EntityHandle") == 0) {
+							std::string draggedGuid = data->id;
+							log->info("SETTING PARENT {}", draggedGuid);
 
-				ImGui::SetDragDropPayload("ENTITY_HANDLE", &payload, sizeof(payload));
-				ImGui::Text("Entity: %s", guid.c_str());
+							EntityHandle parentHandle = EntityHandle();
+							EntityHandle childHandle  = EntityHandle(draggedGuid);
+							Entity       child        = GetCurrentScene()->Get(childHandle);
 
-				ImGui::EndDragDropSource();
+							_newChild    = child;
+							_newParent   = parentHandle;
+							changeParent = true;
+						}
+					}
+				}
+				ImGui::EndDragDropTarget();
 			}
 		}
-
 
 		if (ImGui::BeginPopupContextWindow("HierarchyContext", ImGuiPopupFlags_NoOpenOverItems | ImGuiPopupFlags_MouseButtonRight)) {
 			ImGui::Text("Add Entity");
@@ -428,7 +466,6 @@ namespace Engine::UI {
 					model = AssetHandle<Rendering::Model>(GetAssetManager().GetStorage<Rendering::Model>().guidToAsset.begin()->first);
 				}
 
-
 				entity.AddComponent<Components::Transform>(spawnPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 				entity.AddComponent<Components::ModelRenderer>(model);
 				m_selectedEntity = entity;
@@ -441,7 +478,6 @@ namespace Engine::UI {
 					particle = AssetHandle<Particle>(GetAssetManager().GetStorage<Particle>().guidToAsset.begin()->first);
 				}
 
-
 				entity.AddComponent<Components::Transform>(spawnPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 				entity.AddComponent<Components::ParticleSystem>(particle);
 
@@ -451,8 +487,112 @@ namespace Engine::UI {
 			ImGui::EndPopup();
 		}
 
-
 		ImGui::End();
+		if (changeParent) {
+			_newChild.SetParent(_newParent);
+		}
+	}
+
+	void UIManager::RenderEntityTreeNode(Entity entity)
+	{
+		bool         changeParent = false;
+		Entity       _newChild;
+		EntityHandle _newParent;
+
+		auto& metadata = entity.GetComponent<Components::EntityMetadata>();
+
+		// Use GUID for stable ID, display name separately
+		std::string guid = metadata.guid;
+
+		// Check if this entity is selected
+		bool isSelected = (m_selectedEntity == entity);
+
+		// Set up tree node flags
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+		if (isSelected) {
+			flags |= ImGuiTreeNodeFlags_Selected;
+		}
+
+		// If entity has no children, make it a leaf node
+		if (metadata.children.empty()) {
+			flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+		}
+
+		// Push ID using GUID to keep tree state stable when name changes
+		ImGui::PushID(guid.c_str());
+
+		// Render the tree node with just the name (no ID suffix in display)
+		bool nodeOpen = ImGui::TreeNodeEx(metadata.name.c_str(), flags);
+
+		// Handle drag source
+		bool isDragging = false;
+		if (ImGui::BeginDragDropSource()) {
+			isDragging = true;
+			struct PayloadData {
+				const char* type;
+				char        id[64];
+			};
+			PayloadData payload;
+			payload.type = "EntityHandle";
+			strncpy(payload.id, guid.c_str(), sizeof(payload.id));
+			payload.id[sizeof(payload.id) - 1] = '\0';
+
+			ImGui::SetDragDropPayload("ENTITY_HANDLE", &payload, sizeof(payload));
+			ImGui::Text("Entity: %s", guid.c_str());
+
+			ImGui::EndDragDropSource();
+		}
+
+
+		if (ImGui::BeginDragDropTarget()) {
+			struct PayloadData {
+				const char* type;
+				char        id[64];
+			};
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_HANDLE")) {
+				if (payload->DataSize == sizeof(PayloadData)) {
+					const auto* data = static_cast<const PayloadData*>(payload->Data);
+					if (std::strcmp(data->type, "EntityHandle") == 0) {
+						std::string draggedGuid = data->id;
+						log->info("SETTING PARENT {}", draggedGuid);
+
+						EntityHandle parentHandle = EntityHandle(guid);
+						EntityHandle childHandle  = EntityHandle(draggedGuid);
+
+						Entity child = GetCurrentScene()->Get(childHandle);
+						// child.SetParent(parentHandle);
+						_newChild    = child;
+						_newParent   = parentHandle;
+						changeParent = true;
+					}
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+
+		// Handle selection - only when released and not dragging
+		if (ImGui::IsItemClicked(ImGuiMouseButton_Right) && !isDragging) {
+			m_selectedEntity = entity;
+		}
+
+		// Recursively render children
+		if (nodeOpen && !metadata.children.empty()) {
+			for (auto& childHandle : metadata.children) {
+				auto childEntity = GetCurrentScene()->Get(childHandle);
+				if (childEntity) {
+					RenderEntityTreeNode(childEntity);
+				}
+			}
+			ImGui::TreePop();
+		}
+
+		// Pop the ID
+		ImGui::PopID();
+
+		if (changeParent) {
+			_newChild.SetParent(_newParent);
+		}
 	}
 
 

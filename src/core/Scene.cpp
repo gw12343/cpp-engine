@@ -3,7 +3,7 @@
 //
 
 #include "core/Scene.h"
-
+#include "core/Entity.h"
 
 namespace Engine {
 	Scene::Scene(std::string name) : m_name(std::move(name))

@@ -5,6 +5,7 @@
 #ifndef CPP_ENGINE_BINARYSCENELOADER_H
 #define CPP_ENGINE_BINARYSCENELOADER_H
 
+#include "assets/AssetHandle.h"
 #include "assets/IAssetLoader.h"
 #include "core/Scene.h"
 

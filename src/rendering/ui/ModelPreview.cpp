@@ -51,16 +51,29 @@ namespace Engine {
 
 		shader.Bind();
 
-		// Compute bounding box center and radius
+		// Compute bounding box center and extents
 		glm::vec3 center  = (model->m_boundsMin + model->m_boundsMax) * 0.5f;
 		glm::vec3 extents = model->m_boundsMax - model->m_boundsMin;
 		float     radius  = glm::length(extents) * 0.5f;
 
-		// Camera setup: back up along diagonal at 2.5x radius
+		// Camera setup: position along diagonal to view model from a nice angle
 		glm::vec3 camDir = glm::normalize(glm::vec3(1.0f, 1.0f, 1.0f));
-		glm::vec3 camPos = center + camDir * (radius * 2.5f);
+		
+		// Calculate distance based on FOV to ensure entire model fits in view
+		// Use the radius (half diagonal of bounding box) to ensure model fits
+		float fov = 45.0f;
+		float distance = radius / glm::tan(glm::radians(fov * 0.5f));
+		
+		// Add safety margin - increase distance by 50% to give breathing room
+		distance *= 1.5f;
+		
+		glm::vec3 camPos = center + camDir * distance;
 
-		glm::mat4 proj     = glm::perspective(glm::radians(45.0f), 1.f, 0.1f, radius * 6.0f);
+		// Set up projection with appropriate near/far planes
+		float nearPlane = glm::max(0.01f, distance - radius * 2.0f);
+		float farPlane  = distance + radius * 2.0f;
+		
+		glm::mat4 proj     = glm::perspective(glm::radians(fov), 1.f, nearPlane, farPlane);
 		glm::mat4 view     = glm::lookAt(camPos, center, glm::vec3(0, 1, 0));
 		auto      modelMat = glm::mat4(1.0f);
 

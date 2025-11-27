@@ -19,10 +19,10 @@ namespace Engine::Components {
 	{
 		auto& lua = GetScriptManager().lua;
 
-		lua.new_usertype<ModelRenderer>("ModelRenderer", "setModel", &ModelRenderer::SetModel);
+		lua.new_usertype<ModelRenderer>("ModelRenderer", "setModel", &ModelRenderer::SetModel, "setMaterial", &ModelRenderer::SetMaterial);
 	}
 
-	void ModelRenderer::Draw(const Shader& shader, const Components::Transform& transform, bool uploadMaterial) const
+	void ModelRenderer::Draw(const Shader& shader, Components::Transform& transform, bool uploadMaterial)
 	{
 		if (visible && model.IsValid()) {
 			const auto* actualModel = GetAssetManager().Get(model);
@@ -30,7 +30,7 @@ namespace Engine::Components {
 
 			// Set model matrix in shader
 			shader.Bind();
-			glm::mat4 modelMatrix = transform.GetMatrix();
+			glm::mat4 modelMatrix = transform.GetWorldMatrix();
 			shader.SetMat4("model", &modelMatrix);
 
 			// Draw the model
@@ -95,6 +95,11 @@ namespace Engine::Components {
 		else {
 			ImGui::Text("Model: Invalid");
 		}
+	}
+	void ModelRenderer::SetMaterial(AssetHandle<Material> mat)
+	{
+		materialOverrides.clear();
+		materialOverrides.push_back(mat);
 	}
 
 } // namespace Engine::Components

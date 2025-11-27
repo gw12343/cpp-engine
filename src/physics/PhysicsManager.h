@@ -42,7 +42,7 @@ using namespace JPH::literals;
 namespace Engine {
 
 	void      DecomposeMatrix(const JPH::RMat44& mat, glm::vec3& position, glm::quat& rotation, glm::vec3& scale);
-	glm::mat4 CalculateModelMatrix(const Engine::Components::Transform& transform);
+	glm::mat4 CalculateModelMatrix(Engine::Components::Transform& transform);
 
 
 	const uint cMaxBodies             = 1024;

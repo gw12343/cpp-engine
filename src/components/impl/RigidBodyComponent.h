@@ -83,13 +83,14 @@ namespace Engine::Components {
 		[[maybe_unused]] void SetCapsuleShape(const CapsuleShapeSettings& settings);
 		[[maybe_unused]] void SetCylinderShape(const CylinderShapeSettings& settings);
 
-	  private:
+		void SetRotationEuler(const glm::vec3& eulerAngles);
+
+	  public:
 		// Conversion utilities
 		[[maybe_unused]] static JPH::Vec3 ToJolt(const glm::vec3& v);
 		[[maybe_unused]] static glm::vec3 ToGlm(const JPH::Vec3& v);
 		[[maybe_unused]] static JPH::Quat ToJolt(const glm::quat& q);
 		[[maybe_unused]] static glm::quat ToGlm(const JPH::Quat& q);
-		void                              SetRotationEuler(const glm::vec3& eulerAngles);
 	};
 } // namespace Engine::Components
 
