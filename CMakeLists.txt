@@ -148,8 +148,25 @@ FetchContent_Declare(
 set(EFSW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(EFSW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
+FetchContent_Declare(
+        rmlui
+        GIT_REPOSITORY https://github.com/mikke89/RmlUi.git
+        GIT_TAG 6.0
+)
+set(RMLUI_SAMPLES OFF CACHE BOOL "" FORCE)
+set(RMLUI_TESTS OFF CACHE BOOL "" FORCE)
+set(RMLUI_LUA_BINDINGS ON CACHE BOOL "" FORCE)
+set(RMLUI_FONT_ENGINE "freetype" CACHE STRING "" FORCE)
+
+
 
 FetchContent_MakeAvailable(cereal spdlog nativefiledialog jolt ozz imgui effekseer lua sol2 nlohmann_json efsw tracy)
+
+# Now point RmlUi to our built Lua library (after lua has been fetched)
+set(LUA_LIBRARIES ${CMAKE_BINARY_DIR}/libluad.a CACHE STRING "" FORCE)
+set(LUA_INCLUDE_DIR ${lua_SOURCE_DIR}/src CACHE STRING "" FORCE)
+
+FetchContent_MakeAvailable(rmlui)
 
 
 if (WIN32)
@@ -236,6 +253,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/include/JoltPhysics
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${lua_SOURCE_DIR}/src
+        ${rmlui_SOURCE_DIR}/Include
 )
 
 # Effekseer
@@ -338,6 +356,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         efsw
         nfd
         Tracy::TracyClient
+        rmlui_core
+        rmlui_debugger
+        rmlui_lua
 )
 
 # ----------------- Debug Info -------------------

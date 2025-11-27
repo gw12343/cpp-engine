@@ -29,7 +29,7 @@ function CollisionEnter(other)
         -- Publish the TargetHit event with score points
         publish("TargetHit", variables.POINTS)
         
-        print("Target hit! Publishing event with " .. variables.POINTS .. " points")
+        --print("Target hit! Publishing event with " .. variables.POINTS .. " points")
         
         hasBeenHit = true
         

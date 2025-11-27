@@ -53,10 +53,14 @@ namespace Engine {
 		EventBus();
 		~EventBus() = default;
 
-		// Subscribe to an event with a Lua callback
-		void Subscribe(const std::string& eventName, sol::function callback);
+		// Subscribe to an event with a Lua callback, returns subscription ID
+		uint32_t Subscribe(const std::string& eventName, sol::function callback);
+
+		// Unsubscribe from an event using subscription ID
+		void Unsubscribe(uint32_t subscriptionId);
 
 		// Unsubscribe from an event (removes all matching callbacks)
+		// Deprecated: prefer using subscription ID
 		void Unsubscribe(const std::string& eventName, sol::function callback);
 
 		// Publish an event with optional data (queues for later dispatch)
@@ -78,8 +82,15 @@ namespace Engine {
 			EventData   data;
 		};
 
-		// Map of event names to list of callbacks
-		std::unordered_map<std::string, std::vector<sol::function>> m_subscribers;
+		struct Subscription {
+			uint32_t      id;
+			sol::function callback;
+		};
+
+		// Map of event names to list of subscriptions
+		std::unordered_map<std::string, std::vector<Subscription>> m_subscribers;
+		
+		uint32_t m_nextSubscriptionId = 1;
 
 		// Queue of events to be dispatched
 		std::vector<QueuedEvent> m_eventQueue;

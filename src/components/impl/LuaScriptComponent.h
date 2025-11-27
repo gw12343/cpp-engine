@@ -94,6 +94,10 @@ namespace Engine {
 			sol::function                                   collisionEnter;
 			sol::function                                   playerCollisionEnter;
 			std::unordered_map<std::string, ScriptVariable> cppVariables;
+			
+			// Track event subscriptions for auto-cleanup
+			std::vector<uint32_t> subscriptionIDs;
+			void UnsubscribeAll();
 		};
 	} // namespace Components
 } // namespace Engine

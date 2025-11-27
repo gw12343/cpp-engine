@@ -11,10 +11,11 @@ function Start()
     subscribe("TargetHit", function(points)
         score = score + points
         targetsHit = targetsHit + 1
-        print("TARGET HIT! +", tostring(points)) -- "points | Total Score:", tostring(score), "| Targets Hit:", tostring(targetsHit))
+        --print("TARGET HIT! +", tostring(points)) -- "points | Total Score:", tostring(score), "| Targets Hit:", tostring(targetsHit))
         
         -- Publish score changed event for UI or other systems
         publish("ScoreChanged", score)
+        publish("TargetsHitUpdated", targetsHit)
     end)
     
     -- Subscribe to game reset events
@@ -22,6 +23,8 @@ function Start()
         score = 0
         targetsHit = 0
         print("Score reset!")
+        publish("ScoreChanged", 0)
+        publish("TargetsHitUpdated", 0)
     end)
     
     -- Optional: Subscribe to level complete events

@@ -35,6 +35,7 @@
 #include <string>
 #include <iostream>
 #include <tracy/Tracy.hpp>
+#include <RmlUi/Core.h>
 
 std::string SelectFolder()
 {
@@ -95,6 +96,8 @@ namespace Engine::UI {
 		efsw::WatchID id = m_uiAssetRenderer->fw.addWatch("resources", &m_uiAssetRenderer->listener, true);
 		m_uiAssetRenderer->fw.watch();
 #endif
+
+	// Note: RmlUi demo document will be loaded in Window after Lua plugin is initialized
 	}
 
 

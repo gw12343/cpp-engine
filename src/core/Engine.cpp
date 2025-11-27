@@ -86,6 +86,7 @@ namespace Engine {
 		Get().scene     = std::make_shared<SceneManager>();
 
 		// Register Modules to handle lifecycle
+		manager.RegisterExternal(Get().script); // ScriptManager must run first to clear subscriptions before UI reloads
 		manager.RegisterExternal(Get().window);
 		manager.RegisterExternal(Get().input);
 		manager.RegisterExternal(Get().camera);
@@ -98,7 +99,7 @@ namespace Engine {
 		manager.RegisterExternal(Get().particle);
 		manager.RegisterExternal(Get().terrain);
 		manager.RegisterExternal(Get().renderer);
-		manager.RegisterExternal(Get().script);
+		// manager.RegisterExternal(Get().script); // Moved to top
 		manager.RegisterExternal(Get().scene);
 
 #ifndef GAME_BUILD

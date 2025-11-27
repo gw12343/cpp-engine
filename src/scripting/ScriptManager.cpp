@@ -108,7 +108,7 @@ namespace Engine {
 			// ==================== Event Bus Lua Bindings ====================
 			// Global subscribe function: subscribe(eventName, callback)
 			lua.set_function("subscribe", [this](const std::string& eventName, sol::function callback) {
-				eventBus.Subscribe(eventName, callback);
+				return eventBus.Subscribe(eventName, callback);
 			});
 
 			// Global publish function: publish(eventName) or publish(eventName, data)

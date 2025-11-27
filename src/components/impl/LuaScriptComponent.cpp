@@ -20,8 +20,18 @@
 
 
 namespace Engine::Components {
+	void LuaScript::UnsubscribeAll()
+	{
+		for (uint32_t id : subscriptionIDs) {
+			GetScriptManager().eventBus.Unsubscribe(id);
+		}
+		subscriptionIDs.clear();
+	}
+
 	void LuaScript::OnRemoved(Entity& entity)
 	{
+		UnsubscribeAll();
+
 		if (start.valid()) {
 			start = sol::lua_nil;
 		}
@@ -319,6 +329,9 @@ namespace Engine::Components {
 		collisionEnter       = sol::function();
 		playerCollisionEnter = sol::function();
 		variables            = sol::table();
+		
+		// Clear any existing subscriptions from the previous script instance
+		UnsubscribeAll();
 
 		if (scriptPath.empty()) return;
 
@@ -327,6 +340,13 @@ namespace Engine::Components {
 
 		// Inject gameObject
 		env["gameObject"] = entity;
+		
+		// Inject custom subscribe function to track subscriptions
+		env["subscribe"] = [this](const std::string& eventName, sol::function callback) {
+			uint32_t id = GetScriptManager().eventBus.Subscribe(eventName, callback);
+			this->subscriptionIDs.push_back(id);
+			return id;
+		};
 
 
 		try {

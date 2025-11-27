@@ -13,17 +13,37 @@ namespace Engine {
 		GetDefaultLogger()->info("EventBus initialized");
 	}
 
-	void EventBus::Subscribe(const std::string& eventName, sol::function callback)
+	uint32_t EventBus::Subscribe(const std::string& eventName, sol::function callback)
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 
 		if (!callback.valid()) {
 			GetDefaultLogger()->warn("Attempted to subscribe invalid callback to event: {}", eventName);
-			return;
+			return 0;
 		}
 
-		m_subscribers[eventName].push_back(callback);
-		GetDefaultLogger()->debug("Subscribed to event: {} (total subscribers: {})", eventName, m_subscribers[eventName].size());
+		uint32_t id = m_nextSubscriptionId++;
+		m_subscribers[eventName].push_back({id, callback});
+		GetDefaultLogger()->debug("Subscribed to event: {} (id: {}, total subscribers: {})", eventName, id, m_subscribers[eventName].size());
+		return id;
+	}
+
+	void EventBus::Unsubscribe(uint32_t subscriptionId)
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+
+		for (auto& [eventName, subscribers] : m_subscribers) {
+			auto it = std::remove_if(subscribers.begin(), subscribers.end(),
+			                         [subscriptionId](const Subscription& sub) {
+				                         return sub.id == subscriptionId;
+			                         });
+
+			if (it != subscribers.end()) {
+				subscribers.erase(it, subscribers.end());
+				GetDefaultLogger()->debug("Unsubscribed id {} from event: {}", subscriptionId, eventName);
+				return; // IDs are unique, so we can stop searching
+			}
+		}
 	}
 
 	void EventBus::Unsubscribe(const std::string& eventName, sol::function callback)
@@ -37,14 +57,14 @@ namespace Engine {
 
 		// Remove all matching callbacks - note: this might not work perfectly due to sol::function comparison
 		// In practice, most scripts won't need to unsubscribe individual functions
-		auto& callbacks = it->second;
-		callbacks.erase(
-		    std::remove_if(callbacks.begin(), callbacks.end(),
-		                   [&callback](const sol::function& f) {
+		auto& subscribers = it->second;
+		subscribers.erase(
+		    std::remove_if(subscribers.begin(), subscribers.end(),
+		                   [&callback](const Subscription& sub) {
 			                   // This comparison may not work reliably - it's a limitation of sol2
-			                   return false; // For now, we don't support selective unsubscribe
+			                   return sub.callback == callback;
 		                   }),
-		    callbacks.end());
+		    subscribers.end());
 
 		GetDefaultLogger()->debug("Unsubscribed from event: {}", eventName);
 	}
@@ -91,7 +111,12 @@ namespace Engine {
 					// No subscribers for this event
 					continue;
 				}
-				callbacks = it->second; // Copy the callback list
+				
+				// Extract just the callbacks from subscriptions
+				callbacks.reserve(it->second.size());
+				for (const auto& sub : it->second) {
+					callbacks.push_back(sub.callback);
+				}
 			}
 			// Release the lock before calling callbacks!
 

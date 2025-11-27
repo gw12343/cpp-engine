@@ -1,0 +1,80 @@
+<rml>
+<head>
+	<title>Game HUD</title>
+	<link type="text/rcss" href="game_hud.rcss"/>
+	<script language="lua">
+		-- Game state
+		local targetsHit = 0
+		local score = 0
+		
+		-- Update targets display
+		function updateTargets(count)
+			targetsHit = count
+			local element = document:GetElementById("targets")
+			if element then
+				element.inner_rml = "Targets Hit: " .. targetsHit
+			end
+		end
+		
+		-- Update score display
+		function updateScore(newScore)
+			score = newScore
+			local element = document:GetElementById("score")
+			if element then
+				element.inner_rml = "Score: " .. score
+			end
+		end
+		
+		-- Subscribe to game events on load
+		function onLoad(event)
+			print("[UI] Game HUD loaded!")
+			
+			-- Get document from event
+			if event and event.current_element then
+				document = event.current_element.owner_document
+			end
+			
+			-- Subscribe to game events
+			subscribe("TargetsHitUpdated", function(count)
+				print("[UI] Targets hit updated: " .. tostring(count))
+				updateTargets(count)
+			end)
+			
+			subscribe("ScoreChanged", function(newScore)
+				print("[UI] Score updated: " .. tostring(newScore))
+				updateScore(newScore)
+			end)
+			
+			subscribe("GameReset", function()
+				print("[UI] Game Reset - UI cleared")
+				updateTargets(0)
+				updateScore(0)
+				
+				local winScreen = document:GetElementById("win-message")
+				if winScreen then
+					winScreen.class_name = ""
+				end
+			end)
+			
+			subscribe("AllTargetsDestroyed", function()
+				print("[UI] 🎉 VICTORY! 🎉")
+				local winScreen = document:GetElementById("win-message")
+				if winScreen then
+					winScreen.class_name = "show"
+				end
+			end)
+		end
+	</script>
+</head>
+<body onload="onLoad(event)">
+	<div id="hud">
+		<p id="targets" >Targets Hit: 0  </p>
+		<p id="score">Score: 0</p>
+		<p id="instructions">Press [R] to reset</p>
+	</div>
+	
+	<div id="crosshair"><p>+</p></div>
+	
+	<div id="win-message">YOU WIN!</div>
+</body>
+</rml>
