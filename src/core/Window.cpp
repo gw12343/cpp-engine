@@ -11,6 +11,9 @@
 #include "scripting/ScriptManager.h"
 #include "rendering/ui/IconsFontAwesome6.h"
 #include "imguizmo/ImGuizmo.h"
+#include <RmlUi/Core.h>
+#include <RmlUi/Lua.h>
+#include "rendering/ui/RmlUiBackend.h"
 
 namespace Engine {
 
@@ -24,6 +27,9 @@ namespace Engine {
 		m_frameBuffers[Window::FramebufferID::MOUSE_PICKING] = std::make_shared<Framebuffer>(GL_NEAREST, GL_NEAREST);
 	}
 
+	// Explicit destructor needed for unique_ptr with forward-declared types
+	Window::~Window() = default;
+
 
 	void Window::onInit()
 	{
@@ -33,6 +39,7 @@ namespace Engine {
 		InitGLFW();
 		InitGLAD();
 		InitImGui();
+		InitRmlUi();
 
 		UpdateFramebufferSizes(m_width, m_height);
 	}
@@ -114,10 +121,70 @@ namespace Engine {
 		return true;
 	}
 
+	bool Window::InitRmlUi()
+	{
+		// Create system and render interfaces
+		m_rmlSystem = std::make_unique<RmlUi_SystemInterface>();
+		m_rmlRenderer = std::make_unique<RmlUi_RenderInterface_GL3>();
+
+		// Install interfaces
+		Rml::SetSystemInterface(m_rmlSystem.get());
+		Rml::SetRenderInterface(m_rmlRenderer.get());
+
+		// Initialize RmlUi
+	if (!Rml::Initialise()) {
+		spdlog::error("Failed to initialize RmlUi");
+		return false;
+	}
+
+	// Note: RmlUi Lua plugin will be initialized later in onUpdate
+	// after ScriptManager is ready
+
+	// Create context
+	m_rmlContext = Rml::CreateContext("main", Rml::Vector2i(m_width, m_height));
+		if (!m_rmlContext) {
+			spdlog::error("Failed to create RmlUi context");
+			return false;
+		}
+
+		// Set viewport
+		m_rmlRenderer->SetViewport(m_width, m_height);
+
+		// Load fonts
+		if (!Rml::LoadFontFace("resources/fonts/Roboto-Regular.ttf")) {
+			spdlog::warn("Failed to load Roboto font for RmlUi");
+		}
+
+		spdlog::info("RmlUi initialized successfully");
+		return true;
+	}
+
 	void Window::onUpdate(float dt)
 	{
 		ZoneScoped;
 		glfwPollEvents();
+
+		// Initialize RmlUi Lua plugin once ScriptManager is ready
+		// (Can't do this in onInit because ScriptManager isn't initialized yet)
+		if (!m_rmlLuaInitialized && m_rmlContext) {
+			try {
+				lua_State* L = GetScriptManager().lua.lua_state();
+				Rml::Lua::Initialise(L);
+				m_rmlLuaInitialized = true;
+				spdlog::info("RmlUi Lua plugin initialized with engine Lua state");
+				
+				// Load demo document now that Lua is ready to process scripts
+				auto* document = m_rmlContext->LoadDocument("resources/ui/demo.rml");
+				if (document) {
+					document->Show();
+					spdlog::info("Loaded RmlUi demo document with Lua scripting");
+				} else {
+					spdlog::warn("Failed to load RmlUi demo document");
+				}
+			} catch (const std::exception& e) {
+				spdlog::error("Failed to initialize RmlUi Lua plugin: {}", e.what());
+			}
+		}
 
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -131,6 +198,35 @@ namespace Engine {
 		targetHeight = GetHeight();
 #endif
 	}
+
+void Window::onGameStart()
+{
+	// Reload RmlUi document when play button is pressed (similar to script reloading)
+	if (m_rmlContext && m_rmlLuaInitialized) {
+		spdlog::info("Reloading RmlUi document...");
+		
+		// Close all existing documents to clean up old Lua subscriptions
+		while (m_rmlContext->GetNumDocuments() > 0) {
+			auto* doc = m_rmlContext->GetDocument(0);
+			if (doc) {
+				doc->Close();
+			}
+		}
+		
+		// Force stylesheet reload by clearing the cache
+		// This ensures .rcss files are reloaded from disk
+		Rml::Factory::ClearStyleSheetCache();
+		
+		// Reload the document - this will re-execute the Lua script and set up fresh subscriptions
+		auto* document = m_rmlContext->LoadDocument("resources/ui/demo.rml");
+		if (document) {
+			document->Show();
+			spdlog::info("Reloaded RmlUi demo document");
+		} else {
+			spdlog::warn("Failed to reload RmlUi demo document");
+		}
+	}
+}	
 
 	bool Window::ShouldClose() const
 	{
@@ -158,6 +254,16 @@ namespace Engine {
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 
+		// Shutdown RmlUi
+	log->info("Shutting down RmlUi");
+	if (m_rmlContext) {
+		// In RmlUi 6.0, contexts are managed by Rml::Shutdown()
+		m_rmlContext = nullptr;
+	}
+	Rml::Shutdown();
+	m_rmlRenderer.reset();
+	m_rmlSystem.reset();
+
 		// Terminate GLFW
 		log->info("Shutting down glfw window");
 		glfwTerminate();
@@ -181,6 +287,12 @@ namespace Engine {
 		// Update viewport
 		SetFullViewport();
 		UpdateFramebufferSizes(width, height);
+
+		// Update RmlUi context dimensions
+		if (m_rmlContext) {
+			m_rmlContext->SetDimensions(Rml::Vector2i(width, height));
+			m_rmlRenderer->SetViewport(width, height);
+		}
 	}
 	[[maybe_unused]] float Window::GetAspectRatio() const
 	{

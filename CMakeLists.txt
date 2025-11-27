@@ -38,14 +38,14 @@ set(OPENAL_ROOT "C:/Users/Gabe/Documents/openal-soft-1.24.3-bin")  # Change this
 option(USE_ASSIMP_FROM_SOURCE "Build and use Assimp 6.0.2 from source" ON)
 
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    # Use MDd in Debug, MD in Release
-    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-        add_compile_options(/MDd)
-    else ()
-        add_compile_options(/MD)
-    endif ()
-endif ()
+# if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+#     # Use MDd in Debug, MD in Release
+#     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+#         add_compile_options(/MDd)
+#     else ()
+#         add_compile_options(/MD)
+#     endif ()
+# endif ()
 
 
 # Fetch external libraries
@@ -119,7 +119,8 @@ FetchContent_Declare(
 FetchContent_Declare(
         effekseer
         GIT_REPOSITORY https://github.com/Effekseer/Effekseer.git
-        GIT_TAG master
+        GIT_TAG 3cdc295ad98987427c8f980f5ee6543a9004829a
+        GIT_CONFIG "core.autocrlf=false"
 )
 
 FetchContent_Declare(
@@ -147,8 +148,25 @@ FetchContent_Declare(
 set(EFSW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(EFSW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
+FetchContent_Declare(
+        rmlui
+        GIT_REPOSITORY https://github.com/mikke89/RmlUi.git
+        GIT_TAG 6.0
+)
+set(RMLUI_SAMPLES OFF CACHE BOOL "" FORCE)
+set(RMLUI_TESTS OFF CACHE BOOL "" FORCE)
+set(RMLUI_LUA_BINDINGS ON CACHE BOOL "" FORCE)
+set(RMLUI_FONT_ENGINE "freetype" CACHE STRING "" FORCE)
+
+
 
 FetchContent_MakeAvailable(cereal spdlog nativefiledialog jolt ozz imgui effekseer lua sol2 nlohmann_json efsw tracy)
+
+# Now point RmlUi to our built Lua library (after lua has been fetched)
+set(LUA_LIBRARIES ${CMAKE_BINARY_DIR}/libluad.a CACHE STRING "" FORCE)
+set(LUA_INCLUDE_DIR ${lua_SOURCE_DIR}/src CACHE STRING "" FORCE)
+
+FetchContent_MakeAvailable(rmlui)
 
 
 if (WIN32)
@@ -222,7 +240,11 @@ add_executable(${PROJECT_NAME} ${SOURCES}
         src/animation/Animation.h
         src/animation/Animation.cpp
         src/components/impl/GizmoComponent.h
-        src/components/impl/GizmoComponent.cpp)
+        src/components/impl/GizmoComponent.h
+        src/components/impl/GizmoComponent.cpp
+        src/assets/AssetManager.cpp
+        src/rendering/ui/MaterialPreview.cpp
+)
 
 
 target_include_directories(${PROJECT_NAME} PRIVATE
@@ -231,6 +253,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/include/JoltPhysics
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${lua_SOURCE_DIR}/src
+        ${rmlui_SOURCE_DIR}/Include
 )
 
 # Effekseer
@@ -333,8 +356,13 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         efsw
         nfd
         Tracy::TracyClient
+        rmlui_core
+        rmlui_debugger
+        rmlui_lua
 )
 
 # ----------------- Debug Info -------------------
 get_target_property(LINK_LIBS ${PROJECT_NAME} LINK_LIBRARIES)
 message(STATUS "${PROJECT_NAME} links: ${LINK_LIBS}")
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

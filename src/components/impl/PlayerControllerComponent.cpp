@@ -13,8 +13,8 @@ namespace Engine::Components {
 	{
 		if (entity.HasComponent<Components::Transform>()) {
 			auto& tr = entity.GetComponent<Components::Transform>();
-			SetPosition(tr.position);
-			SetRotation(tr.rotation);
+			SetPosition(tr.GetWorldPosition());
+			SetRotation(tr.GetWorldRotation());
 		}
 	}
 	void PlayerControllerComponent::OnRemoved(Engine::Entity& entity)

@@ -23,6 +23,10 @@ namespace Engine {
 		void onShutdown() override;
 
 
+		void UpdateTransforms();
+		void UpdateTransformRecursive(Entity entity, const glm::mat4& parentMatrix, bool hasParent);
+
+
 		// Scene management
 		std::unique_ptr<Scene> CreateScene(const std::string& name);
 

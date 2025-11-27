@@ -10,22 +10,20 @@
 #include "scripting/ScriptManager.h"
 #include "components/impl/RigidBodyComponent.h"
 #include "assets/AssetManager.h"
+#include "components/impl/EntityMetadataComponent.h"
 namespace Engine {
 
 	// Module overrides
 	void SceneManager::onInit()
 	{
-		log = spdlog::stdout_color_mt("SceneManager");
 		log->info("SceneManager initialized.");
 	}
+
 
 	void SceneManager::onUpdate(float dt)
 	{
 		ZoneScoped;
-		//		if (m_activeScene) {
-		//			// You could later call scene-specific update hooks here
-		//			log->debug("Updating scene '{}', dt={}", m_activeScene->GetName(), dt);
-		//		}
+		UpdateTransforms();
 	}
 
 
@@ -59,6 +57,48 @@ namespace Engine {
 		Scene* s           = GetAssetManager().Get(m_activeScene);
 		for (auto [entity, rb] : physicsView.each()) {
 			physics.bodyToEntityMap[rb.bodyID] = Entity(entity, s);
+		}
+	}
+	void SceneManager::UpdateTransforms()
+	{
+		auto view = GetCurrentSceneRegistry().view<Components::EntityMetadata, Components::Transform>();
+		for (auto [entity, metadata, transform] : view.each()) {
+			Entity e{entity, GetCurrentScene()};
+
+
+			if (!metadata.parentEntity.IsValid()) {
+				UpdateTransformRecursive(e, glm::mat4(1.0f), false);
+			}
+		}
+	}
+	void SceneManager::UpdateTransformRecursive(Entity entity, const glm::mat4& parentMatrix, bool hasParent)
+	{
+		if (!entity.HasComponent<Components::Transform>()) return;
+		auto& transform = entity.GetComponent<Components::Transform>();
+
+		glm::mat4 localMatrix = glm::translate(glm::mat4(1.0f), transform.GetLocalPosition()) * glm::mat4_cast(transform.GetLocalRotation()) * glm::scale(glm::mat4(1.0f), transform.GetLocalScale());
+
+		transform.SetWorldMatrix(parentMatrix * localMatrix);
+		transform.SetWorldPosition(glm::vec3(transform.GetWorldMatrix()[3]));
+		transform.SetWorldRotation(glm::quat_cast(transform.GetWorldMatrix()));
+		transform.SetWorldScale(glm::vec3(glm::length(glm::vec3(transform.GetWorldMatrix()[0])), glm::length(glm::vec3(transform.GetWorldMatrix()[1])), glm::length(glm::vec3(transform.GetWorldMatrix()[2]))));
+
+		if (hasParent && entity.HasComponent<Components::RigidBodyComponent>()) {
+			auto& rb = entity.GetComponent<Components::RigidBodyComponent>();
+			// Ensure kinematic if parented
+			rb.SetKinematic(true);
+			rb.SetPosition(transform.GetWorldPosition());
+			// TODO fixme
+			// rb.SetRotation(transform.GetWorldRotation());
+		}
+
+		// Update children
+		auto& hierarchy = entity.GetComponent<Components::EntityMetadata>();
+		for (auto& childHandle : hierarchy.children) {
+			auto childEntity = GetCurrentScene()->Get(childHandle);
+			if (childEntity) {
+				UpdateTransformRecursive(childEntity, transform.GetWorldMatrix(), true);
+			}
 		}
 	}
 } // namespace Engine

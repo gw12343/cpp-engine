@@ -5,6 +5,7 @@
 #include "imgui.h"
 #include "EntityMetadataComponent.h"
 #include "core/Entity.h"
+#include "rendering/ui/InspectorUI.h"
 
 namespace Engine::Components {
 	void EntityMetadata::OnRemoved(Entity& entity)
@@ -33,20 +34,6 @@ namespace Engine::Components {
 
 	void EntityMetadata::RenderInspector(Entity& entity)
 	{
-		char nameBuffer[256];
-		strcpy(nameBuffer, name.c_str());
-		if (ImGui::InputText("Name", nameBuffer, sizeof(nameBuffer))) {
-			name = nameBuffer;
-		}
-
-		char tagBuffer[256];
-		strcpy(tagBuffer, tag.c_str());
-		if (ImGui::InputText("Tag", tagBuffer, sizeof(tagBuffer))) {
-			tag = tagBuffer;
-		}
-
-		ImGui::Checkbox("Active", &active);
-		ImGui::Text("id: %d", entity.GetHandle());
 	}
 
 	EntityMetadata::EntityMetadata()

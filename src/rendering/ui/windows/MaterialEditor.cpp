@@ -12,6 +12,7 @@
 #include "assets/AssetManager.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "assets/impl/MaterialLoader.h"
+#include "rendering/Renderer.h"
 
 namespace Engine {
 
@@ -27,6 +28,13 @@ namespace Engine {
 		else {
 			Material* material = GetAssetManager().Get(matRef);
 
+			// Two-column layout: properties on left, preview on right
+			float previewSize = 512.0f;
+			float availWidth = ImGui::GetContentRegionAvail().x;
+			float propertiesWidth = availWidth - previewSize - 20.0f; // 20px spacing
+
+			// Left column: Material properties
+			ImGui::BeginChild("PropertiesPanel", ImVec2(propertiesWidth, 0), false);
 
 			// --- Material name ---
 			{
@@ -65,9 +73,16 @@ namespace Engine {
 				material->SetShininess(shininess);
 			}
 
+			ImGui::Spacing();
 			if (ImGui::Button("Save")) {
 				loader->SaveMaterial(*material, material->m_path);
 			}
+
+			ImGui::EndChild();
+
+			// Right column: Preview
+			ImGui::SameLine();
+			RenderPreviewPanel(material);
 		}
 
 		if (ImGui::Button("Create New Material+")) {
@@ -93,6 +108,48 @@ namespace Engine {
 		}
 
 		ImGui::End();
+	}
+
+	void MaterialEditor::RenderPreviewPanel(Material* material)
+	{
+		float previewSize = 512.0f;
+		
+		ImGui::BeginChild("PreviewPanel", ImVec2(previewSize, previewSize), true);
+		
+		ImGui::Text("Preview (Drag to Rotate)");
+		ImGui::Separator();
+
+		// Get the drawable region for the preview
+		ImVec2 cursorPos = ImGui::GetCursorScreenPos();
+		ImVec2 regionSize = ImGui::GetContentRegionAvail();
+		float size = std::min(regionSize.x, regionSize.y - 30.0f); // Leave space for text
+
+		// Create invisible button for drag interaction
+		ImGui::InvisibleButton("PreviewDrag", ImVec2(size, size));
+
+		// Handle mouse drag for rotation
+		if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
+			ImVec2 delta = ImGui::GetMouseDragDelta(ImGuiMouseButton_Left);
+			m_previewYaw -= delta.x * 0.5f;  // Inverted for more natural feel
+			m_previewPitch = glm::clamp(m_previewPitch - delta.y * 0.5f, -89.0f, 89.0f);
+			ImGui::ResetMouseDragDelta(ImGuiMouseButton_Left);
+		}
+
+		// Render the preview with current rotation
+		if (!m_preview.initialized) {
+			m_preview.width = static_cast<int>(previewSize);
+			m_preview.height = static_cast<int>(previewSize);
+			m_preview.Initialize();
+		}
+
+		m_preview.Render(material, GetRenderer().GetMaterialPreviewShader(), m_previewYaw, m_previewPitch);
+
+		// Draw the preview texture
+		ImGui::SetCursorScreenPos(cursorPos);
+		void* texID = reinterpret_cast<void*>(static_cast<intptr_t>(m_preview.texture));
+		ImGui::Image(texID, ImVec2(size, size), ImVec2(0, 1), ImVec2(1, 0)); // Y-flipped for framebuffer
+
+		ImGui::EndChild();
 	}
 } // namespace Engine
 

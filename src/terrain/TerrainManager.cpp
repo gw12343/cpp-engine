@@ -48,7 +48,7 @@ namespace Engine::Terrain {
 			auto tile = GetAssetManager().Get(renderer.terrainTile);
 			if (tile == NULL) continue; // todo warn
 			glm::mat4 viewM            = GetCamera().GetViewMatrix();
-			glm::mat4 terrainTransform = transform.GetMatrix();
+			glm::mat4 terrainTransform = transform.GetWorldMatrix();
 
 			GLuint shadowSlot = tile->splatTextures.size() + tile->diffuseTextures.size();
 			GetRenderer().GetShadowRenderer()->UploadShadowMatrices(*tile->terrainShader, viewM, static_cast<int>(shadowSlot));
