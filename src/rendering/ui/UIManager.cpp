@@ -37,6 +37,12 @@
 #include <tracy/Tracy.hpp>
 #include <RmlUi/Core.h>
 
+#ifndef GAME_BUILD
+#include "core/EditorCommandStack.h"
+#include "core/commands/DeleteEntityCommand.h"
+#include "core/EntityClipboard.h"
+#endif
+
 std::string SelectFolder()
 {
 	nfdchar_t*  folder = nullptr;
@@ -144,6 +150,9 @@ namespace Engine::UI {
 			if (GetState() == EDITOR) {
 				SCENE_LOADER::SerializeScene(GetSceneManager().GetActiveScene(), "scenes/scene1.json");
 			}
+			// Clear undo/redo history when entering play mode
+			GetCommandStack().Clear();
+			GetDefaultLogger()->info("[EditorCommand] Cleared command history (entering play mode)");
 			SetState(PLAYING);
 			Get().manager->StartGame();
 		}
@@ -187,6 +196,9 @@ namespace Engine::UI {
 				}
 			}
 			GetAssetManager().Unload<Scene>(GetSceneManager().GetActiveScene());
+			// Clear undo/redo history when exiting play mode
+			GetCommandStack().Clear();
+			GetDefaultLogger()->info("[EditorCommand] Cleared command history (exiting play mode)");
 			SetState(EDITOR);
 			GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>("scenes/scene1.json"));
 		}
@@ -365,6 +377,61 @@ namespace Engine::UI {
 	{
 		ZoneScoped;
 		m_selectedTheme = GetState() == EDITOR ? 2 : 0;
+
+#ifndef GAME_BUILD
+		// Handle editor keyboard shortcuts (only in editor mode, not during text input)
+		if (GetState() == EDITOR && !ImGui::GetIO().WantTextInput) {
+			// Undo: Ctrl+Z
+			if (GetInput().IsKeyPressed(GLFW_KEY_LEFT_CONTROL) && 
+			    GetInput().IsKeyPressedThisFrame(GLFW_KEY_Z) &&
+			    !GetInput().IsKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
+				if (GetCommandStack().CanUndo()) {
+					GetCommandStack().Undo();
+				}
+			}
+
+			// Redo: Ctrl+Y or Ctrl+Shift+Z
+			if (GetInput().IsKeyPressed(GLFW_KEY_LEFT_CONTROL) && 
+			    (GetInput().IsKeyPressedThisFrame(GLFW_KEY_Y) ||
+			     (GetInput().IsKeyPressed(GLFW_KEY_LEFT_SHIFT) && 
+			      GetInput().IsKeyPressedThisFrame(GLFW_KEY_Z)))) {
+				if (GetCommandStack().CanRedo()) {
+					GetCommandStack().Redo();
+				}
+			}
+
+			// Copy: Ctrl+C
+			if (GetInput().IsKeyPressed(GLFW_KEY_LEFT_CONTROL) && 
+			    GetInput().IsKeyPressedThisFrame(GLFW_KEY_C)) {
+				if (m_selectedEntity && m_selectedEntity.IsValid()) {
+					GetClipboard().CopyEntity(m_selectedEntity);
+				}
+			}
+
+			// Paste: Ctrl+V
+			if (GetInput().IsKeyPressed(GLFW_KEY_LEFT_CONTROL) && 
+			    GetInput().IsKeyPressedThisFrame(GLFW_KEY_V)) {
+				if (GetClipboard().HasData()) {
+					EntityHandle pasted = GetClipboard().PasteEntity(GetCurrentScene());
+					if (pasted.IsValid()) {
+						m_selectedEntity = GetCurrentScene()->Get(pasted);
+					}
+				}
+			}
+
+			// Delete: Delete key
+			if (GetInput().IsKeyPressedThisFrame(GLFW_KEY_DELETE)) {
+				if (m_selectedEntity && m_selectedEntity.IsValid()) {
+					auto cmd = std::make_unique<DeleteEntityCommand>(
+					    m_selectedEntity.GetEntityHandle()
+					);
+					GetCommandStack().ExecuteCommand(std::move(cmd));
+					m_selectedEntity = Entity(); // Clear selection
+				}
+			}
+		}
+#endif
+
 		GetRenderer().PreRender();
 		float h      = RenderMainMenuBar();
 		float height = RenderTopBar(h) + h;

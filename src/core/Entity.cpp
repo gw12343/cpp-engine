@@ -117,7 +117,7 @@ namespace Engine {
 		auto registry                                              = m_scene->GetRegistry();
 		registry->get<Components::EntityMetadata>(m_handle).active = active;
 	}
-	bool Entity::IsValid()
+	bool Entity::IsValid() const
 	{
 		if (m_handle == entt::null) return false;
 		if (m_scene == nullptr) return false;

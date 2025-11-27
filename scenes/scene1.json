@@ -2,6 +2,133 @@
     "entities": [
         {
             "EntityMetadata": {
+                "name": "Copy of Target",
+                "tag": "",
+                "active": true,
+                "guid": "0a53dd1905eae6e9149c2f1e5166869e",
+                "parentEntity": {
+                    "guid": ""
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": false,
+                "data": {
+                    "scriptPath": "scripts/target.lua",
+                    "variables": [
+                        {
+                            "key": "NORMAL_COLOR",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "4f843329315c8297e0905d030736e961"
+                                }
+                            }
+                        },
+                        {
+                            "key": "POINTS",
+                            "value": {
+                                "index": 0,
+                                "data": 10.0
+                            }
+                        },
+                        {
+                            "key": "TARGET_COLOR",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": -16.726049423217775,
+                        "y": 2.5,
+                        "z": 1.353787899017334
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 5.0,
+                        "y": 5.0,
+                        "z": 5.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "e319e2b8747bee49f54e67e706d42f67"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "4f843329315c8297e0905d030736e961"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 1,
+                    "mass": 1.0,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 0.0,
+                    "shapeType": "Box",
+                    "shapeSize": {
+                        "x": 2.5,
+                        "y": 2.5,
+                        "z": 2.5
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
                 "name": "Player",
                 "tag": "",
                 "active": true,
@@ -24,24 +151,10 @@
                             }
                         },
                         {
-                            "key": "SHOOT_POWER",
+                            "key": "RUN_SPEED",
                             "value": {
                                 "index": 0,
-                                "data": 64.5
-                            }
-                        },
-                        {
-                            "key": "MOUSE_SENSITIVITY",
-                            "value": {
-                                "index": 0,
-                                "data": 0.10000000149011612
-                            }
-                        },
-                        {
-                            "key": "CAMERA_Y_OFFSET",
-                            "value": {
-                                "index": 0,
-                                "data": 1.100000023841858
+                                "data": 12.0
                             }
                         },
                         {
@@ -54,10 +167,24 @@
                             }
                         },
                         {
-                            "key": "RUN_SPEED",
+                            "key": "GRAVITY_SCALE",
                             "value": {
                                 "index": 0,
-                                "data": 12.0
+                                "data": 2.0
+                            }
+                        },
+                        {
+                            "key": "MOUSE_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.10000000149011612
+                            }
+                        },
+                        {
+                            "key": "WALK_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 7.0
                             }
                         },
                         {
@@ -70,17 +197,17 @@
                             }
                         },
                         {
-                            "key": "WALK_SPEED",
+                            "key": "SHOOT_POWER",
                             "value": {
                                 "index": 0,
-                                "data": 7.0
+                                "data": 64.5
                             }
                         },
                         {
-                            "key": "GRAVITY_SCALE",
+                            "key": "CAMERA_Y_OFFSET",
                             "value": {
                                 "index": 0,
-                                "data": 2.0
+                                "data": 1.100000023841858
                             }
                         }
                     ]
@@ -124,7 +251,7 @@
                     "backfaceCulling": true,
                     "materialOverrides": [
                         {
-                            "guid": "50261caca552b9ed2cda4de3bc2b2e6b"
+                            "guid": "a9dfb812233c1829cad774e7b2670a02"
                         }
                     ]
                 }
@@ -175,6 +302,38 @@
                     "scriptPath": "scripts/test_vectors.lua",
                     "variables": [
                         {
+                            "key": "tiles",
+                            "value": {
+                                "index": 18,
+                                "data": []
+                            }
+                        },
+                        {
+                            "key": "materials",
+                            "value": {
+                                "index": 16,
+                                "data": [
+                                    {
+                                        "guid": "50261caca552b9ed2cda4de3bc2b2e6b"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "key": "particles",
+                            "value": {
+                                "index": 19,
+                                "data": []
+                            }
+                        },
+                        {
+                            "key": "scenes",
+                            "value": {
+                                "index": 17,
+                                "data": []
+                            }
+                        },
+                        {
                             "key": "sounds",
                             "value": {
                                 "index": 20,
@@ -203,20 +362,6 @@
                             }
                         },
                         {
-                            "key": "particles",
-                            "value": {
-                                "index": 19,
-                                "data": []
-                            }
-                        },
-                        {
-                            "key": "tiles",
-                            "value": {
-                                "index": 18,
-                                "data": []
-                            }
-                        },
-                        {
                             "key": "models",
                             "value": {
                                 "index": 15,
@@ -232,24 +377,6 @@
                                     }
                                 ]
                             }
-                        },
-                        {
-                            "key": "scenes",
-                            "value": {
-                                "index": 17,
-                                "data": []
-                            }
-                        },
-                        {
-                            "key": "materials",
-                            "value": {
-                                "index": 16,
-                                "data": [
-                                    {
-                                        "guid": "50261caca552b9ed2cda4de3bc2b2e6b"
-                                    }
-                                ]
-                            }
                         }
                     ]
                 }
@@ -268,260 +395,6 @@
             },
             "RigidBodyComponent": {
                 "nullopt": true
-            },
-            "AudioSource": {
-                "nullopt": true
-            },
-            "SkeletonComponent": {
-                "nullopt": true
-            },
-            "AnimationComponent": {
-                "nullopt": true
-            },
-            "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "SkinnedMeshComponent": {
-                "nullopt": true
-            },
-            "ParticleSystem": {
-                "nullopt": true
-            },
-            "PlayerControllerComponent": {
-                "nullopt": true
-            },
-            "GizmoComponent": {
-                "nullopt": true
-            }
-        },
-        {
-            "EntityMetadata": {
-                "name": "Copy of Target",
-                "tag": "",
-                "active": true,
-                "guid": "411acd0e25d4d31d4650fa4b9d828137",
-                "parentEntity": {
-                    "guid": ""
-                },
-                "children": []
-            },
-            "LuaScript": {
-                "nullopt": false,
-                "data": {
-                    "scriptPath": "scripts/target.lua",
-                    "variables": [
-                        {
-                            "key": "NORMAL_COLOR",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
-                                }
-                            }
-                        },
-                        {
-                            "key": "POINTS",
-                            "value": {
-                                "index": 0,
-                                "data": 10.0
-                            }
-                        },
-                        {
-                            "key": "TARGET_COLOR",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
-                                }
-                            }
-                        }
-                    ]
-                }
-            },
-            "ShadowCaster": {
-                "nullopt": true
-            },
-            "Transform": {
-                "nullopt": false,
-                "data": {
-                    "position": {
-                        "x": 2.709373712539673,
-                        "y": 2.5,
-                        "z": -13.891157150268555
-                    },
-                    "rotation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0,
-                        "w": 1.0
-                    },
-                    "scale": {
-                        "x": 5.0,
-                        "y": 5.0,
-                        "z": 5.0
-                    }
-                }
-            },
-            "TerrainRenderer": {
-                "nullopt": true
-            },
-            "ModelRenderer": {
-                "nullopt": false,
-                "data": {
-                    "visible": true,
-                    "model": {
-                        "guid": "e319e2b8747bee49f54e67e706d42f67"
-                    },
-                    "backfaceCulling": true,
-                    "materialOverrides": [
-                        {
-                            "guid": "4f843329315c8297e0905d030736e961"
-                        }
-                    ]
-                }
-            },
-            "RigidBodyComponent": {
-                "nullopt": false,
-                "data": {
-                    "motionType": 1,
-                    "mass": 1.0,
-                    "friction": 0.5,
-                    "restitution": 0.0,
-                    "gravityFactor": 0.0,
-                    "shapeType": "Box",
-                    "shapeSize": {
-                        "x": 2.5,
-                        "y": 2.5,
-                        "z": 2.5
-                    }
-                }
-            },
-            "AudioSource": {
-                "nullopt": true
-            },
-            "SkeletonComponent": {
-                "nullopt": true
-            },
-            "AnimationComponent": {
-                "nullopt": true
-            },
-            "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "SkinnedMeshComponent": {
-                "nullopt": true
-            },
-            "ParticleSystem": {
-                "nullopt": true
-            },
-            "PlayerControllerComponent": {
-                "nullopt": true
-            },
-            "GizmoComponent": {
-                "nullopt": true
-            }
-        },
-        {
-            "EntityMetadata": {
-                "name": "Copy of Target",
-                "tag": "",
-                "active": true,
-                "guid": "652ea52f75b6e8215a7b07d953df4e13",
-                "parentEntity": {
-                    "guid": ""
-                },
-                "children": []
-            },
-            "LuaScript": {
-                "nullopt": false,
-                "data": {
-                    "scriptPath": "scripts/target.lua",
-                    "variables": [
-                        {
-                            "key": "NORMAL_COLOR",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
-                                }
-                            }
-                        },
-                        {
-                            "key": "POINTS",
-                            "value": {
-                                "index": 0,
-                                "data": 10.0
-                            }
-                        },
-                        {
-                            "key": "TARGET_COLOR",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
-                                }
-                            }
-                        }
-                    ]
-                }
-            },
-            "ShadowCaster": {
-                "nullopt": true
-            },
-            "Transform": {
-                "nullopt": false,
-                "data": {
-                    "position": {
-                        "x": -10.46670150756836,
-                        "y": 2.5,
-                        "z": -1.3846018314361573
-                    },
-                    "rotation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0,
-                        "w": 1.0
-                    },
-                    "scale": {
-                        "x": 5.0,
-                        "y": 5.0,
-                        "z": 5.0
-                    }
-                }
-            },
-            "TerrainRenderer": {
-                "nullopt": true
-            },
-            "ModelRenderer": {
-                "nullopt": false,
-                "data": {
-                    "visible": true,
-                    "model": {
-                        "guid": "e319e2b8747bee49f54e67e706d42f67"
-                    },
-                    "backfaceCulling": true,
-                    "materialOverrides": [
-                        {
-                            "guid": "4f843329315c8297e0905d030736e961"
-                        }
-                    ]
-                }
-            },
-            "RigidBodyComponent": {
-                "nullopt": false,
-                "data": {
-                    "motionType": 1,
-                    "mass": 1.0,
-                    "friction": 0.5,
-                    "restitution": 0.0,
-                    "gravityFactor": 0.0,
-                    "shapeType": "Box",
-                    "shapeSize": {
-                        "x": 2.5,
-                        "y": 2.5,
-                        "z": 2.5
-                    }
-                }
             },
             "AudioSource": {
                 "nullopt": true
@@ -1008,6 +881,133 @@
                         "x": 14.035833358764649,
                         "y": 2.5,
                         "z": 8.803027153015137
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 5.0,
+                        "y": 5.0,
+                        "z": 5.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "e319e2b8747bee49f54e67e706d42f67"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "4f843329315c8297e0905d030736e961"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 1,
+                    "mass": 1.0,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 0.0,
+                    "shapeType": "Box",
+                    "shapeSize": {
+                        "x": 2.5,
+                        "y": 2.5,
+                        "z": 2.5
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Copy of Target",
+                "tag": "",
+                "active": true,
+                "guid": "e7790f20a3c6a6d2fa0e758b52a52233",
+                "parentEntity": {
+                    "guid": ""
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": false,
+                "data": {
+                    "scriptPath": "scripts/target.lua",
+                    "variables": [
+                        {
+                            "key": "NORMAL_COLOR",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "4f843329315c8297e0905d030736e961"
+                                }
+                            }
+                        },
+                        {
+                            "key": "POINTS",
+                            "value": {
+                                "index": 0,
+                                "data": 10.0
+                            }
+                        },
+                        {
+                            "key": "TARGET_COLOR",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 2.709373712539673,
+                        "y": 2.5,
+                        "z": -13.891157150268555
                     },
                     "rotation": {
                         "x": 0.0,

@@ -24,7 +24,7 @@ namespace Engine {
 		// Check if entity is valid
 		explicit operator bool() const { return m_handle != entt::null; }
 
-		bool IsValid();
+		bool IsValid() const;
 
 		// Comparison operators
 		bool operator==(const Entity& other) const { return m_handle == other.m_handle; }
@@ -48,7 +48,7 @@ namespace Engine {
 
 
 		template <typename T>
-		T& GetComponent();
+		T& GetComponent() const;
 
 		template <typename T>
 		[[nodiscard]] bool HasComponent() const;

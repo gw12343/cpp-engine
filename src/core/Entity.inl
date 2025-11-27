@@ -15,9 +15,9 @@ namespace Engine {
 
 
 	template <typename T>
-	T& Entity::GetComponent()
+	T& Entity::GetComponent() const
 	{
-		return m_scene->GetRegistry()->template get<T>(m_handle);
+		return m_scene->GetRegistry()->get<T>(m_handle);
 	}
 
 	template <typename T>

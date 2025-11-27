@@ -9,6 +9,8 @@
 #include "EngineData.h"
 #include "Input.h"
 #include "scripting/ScriptManager.h"
+#include "EditorCommandStack.h"
+#include "EntityClipboard.h"
 
 #include "SceneManager.h"
 #include <filesystem>
@@ -103,6 +105,10 @@ namespace Engine {
 		manager.RegisterExternal(Get().scene);
 
 #ifndef GAME_BUILD
+		// Initialize editor command stack for undo/redo
+		Get().editorCommandStack = std::make_unique<EditorCommandStack>(50);
+		Get().entityClipboard = std::make_unique<EntityClipboard>();
+
 		m_assetFileWatcher = std::make_unique<efsw::FileWatcher>();
 		m_assetWatcher     = std::make_unique<HotReloadWatcher>();
 		m_assetFileWatcher->addWatch("resources", m_assetWatcher.get(), true);

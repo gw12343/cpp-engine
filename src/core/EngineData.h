@@ -59,6 +59,11 @@ namespace Engine {
 		std::shared_ptr<Input>                   input;
 		EngineState                              state;
 		ModuleManager*                           manager;
+
+#ifndef GAME_BUILD
+		std::unique_ptr<class EditorCommandStack> editorCommandStack;
+		std::unique_ptr<class EntityClipboard>    entityClipboard;
+#endif
 	};
 
 	EngineData& Get();
@@ -134,6 +139,18 @@ namespace Engine {
 	{
 		return *Get().input;
 	}
+
+#ifndef GAME_BUILD
+	inline auto& GetCommandStack()
+	{
+		return *Get().editorCommandStack;
+	}
+
+	inline auto& GetClipboard()
+	{
+		return *Get().entityClipboard;
+	}
+#endif
 
 	entt::registry& GetCurrentSceneRegistry();
 	Scene*          GetCurrentScene();

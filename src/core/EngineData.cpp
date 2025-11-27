@@ -3,6 +3,13 @@
 //
 
 #include "EngineData.h"
+#include "Scene.h"
+#include "Engine.h"
+
+#ifndef GAME_BUILD
+#include "EditorCommandStack.h"
+#include "EntityClipboard.h"
+#endif
 #include "assets/AssetManager.h"
 #include "SceneManager.h"
 
