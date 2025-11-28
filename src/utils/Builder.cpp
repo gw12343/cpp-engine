@@ -61,10 +61,10 @@ namespace Engine {
 		try {
 			if (!std::filesystem::exists(outPath)) {
 				std::filesystem::create_directory(outPath);
-				GetDefaultLogger()->info("Created folder: {}", outPath.c_str());
+				GetDefaultLogger()->info("Created folder: {}", outPath.string());
 			}
 			else {
-				GetDefaultLogger()->info("Folder already exists: {}", outPath.c_str());
+				GetDefaultLogger()->info("Folder already exists: {}", outPath.string());
 			}
 		}
 		catch (const std::filesystem::filesystem_error& e) {
@@ -122,7 +122,7 @@ namespace Engine {
 				
 				if (!result.valid()) {
 					sol::error err = result;
-					GetDefaultLogger()->error("Failed to compile script {}: {}", srcPath.c_str(), err.what());
+					GetDefaultLogger()->error("Failed to compile script {}: {}", srcPath.string(), err.what());
 					continue;
 				}
 				
@@ -132,7 +132,7 @@ namespace Engine {
 				// Dump bytecode to file
 				std::ofstream outFile(outPath, std::ios::binary);
 				if (!outFile) {
-					GetDefaultLogger()->error("Failed to open output file {}", outPath.c_str());
+					GetDefaultLogger()->error("Failed to open output file {}", outPath.string());
 					continue;
 				}
 				
@@ -153,15 +153,15 @@ namespace Engine {
 				lua_pop(L, 1); // Pop the function
 				
 				if (dumpResult != 0) {
-					GetDefaultLogger()->error("Failed to dump bytecode for {}", srcPath.c_str());
+					GetDefaultLogger()->error("Failed to dump bytecode for {}", srcPath.string());
 					continue;
 				}
 				
 				outFile.close();
-				GetDefaultLogger()->info("Compiled Script {} -> {}", srcPath.c_str(), outPath.c_str());
+				GetDefaultLogger()->info("Compiled Script {} -> {}", srcPath.string(), outPath.string());
 			}
 			catch (const std::exception& e) {
-				GetDefaultLogger()->error("Exception compiling {}: {}", srcPath.c_str(), e.what());
+				GetDefaultLogger()->error("Exception compiling {}: {}", srcPath.string(), e.what());
 			}
 		}
 	}
@@ -177,6 +177,10 @@ namespace Engine {
 			return;
 		}
 
-		BinarySceneLoader::SerializeScene(GetSceneManager().GetActiveScene(), (outScenesDir / "scene1.bin").c_str());
-	}
+        BinarySceneLoader::SerializeScene(
+                GetSceneManager().GetActiveScene(),
+                (outScenesDir / "scene1.bin").string()
+        );
+
+    }
 } // namespace Engine

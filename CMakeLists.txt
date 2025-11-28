@@ -21,6 +21,8 @@ add_compile_options(-w)
 
 if (WIN32)
     add_compile_definitions(NOMINMAX)
+    add_compile_definitions(WIN32_LEAN_AND_MEAN)
+    add_compile_definitions(_WINSOCK_DEPRECATED_NO_WARNINGS)
 endif ()
 # Global dependency flags
 set(SPDLOG_BUILD_WARNINGS OFF CACHE BOOL "" FORCE)
@@ -37,16 +39,16 @@ set(ozz_build_postfix OFF CACHE BOOL "" FORCE)
 set(OPENAL_ROOT "C:/Users/Gabe/Documents/openal-soft-1.24.3-bin")  # Change this if needed
 option(USE_ASSIMP_FROM_SOURCE "Build and use Assimp 6.0.2 from source" ON)
 
-
-# if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-#     # Use MDd in Debug, MD in Release
-#     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-#         add_compile_options(/MDd)
-#     else ()
-#         add_compile_options(/MD)
-#     endif ()
-# endif ()
-
+if (WIN32)
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        # Use MDd in Debug, MD in Release
+        if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+            add_compile_options(/MDd)
+        else ()
+            add_compile_options(/MD)
+        endif ()
+    endif ()
+endif()
 
 # Fetch external libraries
 include(FetchContent)
@@ -148,6 +150,26 @@ FetchContent_Declare(
 set(EFSW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(EFSW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
+# Fetch FreeType on Windows for RmlUi
+if (WIN32)
+    FetchContent_Declare(
+            freetype
+            GIT_REPOSITORY https://github.com/freetype/freetype.git
+            GIT_TAG VER-2-13-2
+    )
+    set(FT_DISABLE_ZLIB ON CACHE BOOL "" FORCE)
+    set(FT_DISABLE_BZIP2 ON CACHE BOOL "" FORCE)
+    set(FT_DISABLE_PNG ON CACHE BOOL "" FORCE)
+    set(FT_DISABLE_HARFBUZZ ON CACHE BOOL "" FORCE)
+    set(FT_DISABLE_BROTLI ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(freetype)
+
+    # Create an alias so RmlUi can find it
+    if (TARGET freetype)
+        add_library(Freetype::Freetype ALIAS freetype)
+    endif()
+endif ()
+
 FetchContent_Declare(
         rmlui
         GIT_REPOSITORY https://github.com/mikke89/RmlUi.git
@@ -163,7 +185,11 @@ set(RMLUI_FONT_ENGINE "freetype" CACHE STRING "" FORCE)
 FetchContent_MakeAvailable(cereal spdlog nativefiledialog jolt ozz imgui effekseer lua sol2 nlohmann_json efsw tracy)
 
 # Now point RmlUi to our built Lua library (after lua has been fetched)
-set(LUA_LIBRARIES ${CMAKE_BINARY_DIR}/libluad.a CACHE STRING "" FORCE)
+if (WIN32)
+    set(LUA_LIBRARIES lua CACHE STRING "" FORCE)
+else()
+    set(LUA_LIBRARIES ${CMAKE_BINARY_DIR}/libluad.a CACHE STRING "" FORCE)
+endif()
 set(LUA_INCLUDE_DIR ${lua_SOURCE_DIR}/src CACHE STRING "" FORCE)
 
 FetchContent_MakeAvailable(rmlui)
@@ -360,6 +386,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         rmlui_debugger
         rmlui_lua
 )
+
+# On Windows, explicitly link FreeType after RmlUi
+if (WIN32)
+    target_link_libraries(rmlui_core PUBLIC freetype)
+endif()
 
 # ----------------- Debug Info -------------------
 get_target_property(LINK_LIBS ${PROJECT_NAME} LINK_LIBRARIES)
