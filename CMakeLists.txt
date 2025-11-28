@@ -17,6 +17,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(ENABLE_ALL_WARNINGS "Enable all warnings and warnings as errors" OFF)
+set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE INTERNAL "No dev warnings")
+
 add_compile_options(-w)
 
 if (WIN32)
