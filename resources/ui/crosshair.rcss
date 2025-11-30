@@ -1,0 +1,47 @@
+/* Game HUD Stylesheet */
+
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	background-color: transparent;
+}
+
+#hud {
+	position: fixed;
+	top: 20px;
+	right: 20px;
+	
+	padding: 15px 20px;
+	background-color: rgba(0, 0, 0, 0.6);
+	border-radius: 8px;
+	font-family: Roboto;
+	color: #ffffff;
+	text-align: right;
+}
+
+#hud p {
+	display: block;
+	margin: 5px 0;
+	font-size: 38px;
+	font-weight: bold;
+}
+
+#crosshair {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	
+	padding: 15px 20px;
+	background-color: rgba(0, 0, 0, 0.6);
+	font-family: Roboto;
+	font-size: 38px;
+	color: #ffffff;
+	
+	text-align: center;
+	width: 20px;
+	height: 20px;
+	margin-left: -30px;
+	margin-top: -25px;
+}

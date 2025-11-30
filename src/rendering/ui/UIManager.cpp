@@ -4,6 +4,7 @@
 #include "core/EngineData.h"
 
 #include "rendering/Renderer.h"
+#include "rendering/ui/GameUIManager.h"
 #include "rendering/ui/IconsFontAwesome6.h"
 #include "rendering/ui/windows/SceneViewWindow.h"
 
@@ -141,11 +142,18 @@ namespace Engine::UI {
 #ifndef GAME_BUILD
 		if (GetState() != PLAYING) {
 			GetCamera().SaveEditorLocation();
+			bool wasPaused = GetState() == PAUSED;
 			if (GetState() == EDITOR) {
 				SCENE_LOADER::SerializeScene(GetSceneManager().GetActiveScene(), "scenes/scene1.json");
 			}
 			SetState(PLAYING);
-			Get().manager->StartGame();
+			
+			if (!wasPaused) {
+				// StartGame() calls ScriptManager::onGameStart() which clears ALL event subscriptions
+				// So we must call resetDocuments() AFTER, not before
+				Get().manager->StartGame();
+				GetGameUIManager().resetDocuments();
+			}
 		}
 #endif
 	}
@@ -189,6 +197,8 @@ namespace Engine::UI {
 			GetAssetManager().Unload<Scene>(GetSceneManager().GetActiveScene());
 			SetState(EDITOR);
 			GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>("scenes/scene1.json"));
+			GetGameUIManager().resetDocuments();
+			
 		}
 #endif
 	}

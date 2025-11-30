@@ -54,20 +54,20 @@ namespace Engine {
 	{
 		fs::path    filePath = dir + filename;
 		fs::path    metaPath = dir + filename + ".meta";
-		std::string ext      = filePath.extension();
+		std::string ext      = filePath.extension().string();
 
 
 		// TODO add loading
 		switch (action) {
 			case efsw::Actions::Delete:
-				GetUI().log->debug("Detected deleted file: {}", filePath.c_str());
+				GetUI().log->debug("Detected deleted file: {}", filePath.string());
 
-				DeleteAssetIf_Material(filePath, metaPath, ext, dir);
-				DeleteAssetIf_Model(filePath, metaPath, ext, dir);
-				DeleteAssetIf_Particle(filePath, metaPath, ext, dir);
-				DeleteAssetIf_Sound(filePath, metaPath, ext, dir);
-				DeleteAssetIf_Terrain(filePath, metaPath, ext, dir);
-				DeleteAssetIf_Texture(filePath, metaPath, ext, dir);
+				DeleteAssetIf_Material(filePath.string(), metaPath.string(), ext, dir);
+				DeleteAssetIf_Model(filePath.string(), metaPath.string(), ext, dir);
+				DeleteAssetIf_Particle(filePath.string(), metaPath.string(), ext, dir);
+				DeleteAssetIf_Sound(filePath.string(), metaPath.string(), ext, dir);
+				DeleteAssetIf_Terrain(filePath.string(), metaPath.string(), ext, dir);
+				DeleteAssetIf_Texture(filePath.string(), metaPath.string(), ext, dir);
 
 
 				break;
@@ -361,7 +361,7 @@ namespace Engine {
 				ImGui::Separator();
 				
 				if (ImGui::MenuItem("Delete")) {
-					DeleteFile(path);
+					DelFile(path);
 					ImGui::CloseCurrentPopup();
 				}
 				
@@ -564,7 +564,7 @@ namespace Engine {
 		ScanDirectory(m_currentDirectory);
 	}
 
-	void AssetUIRenderer::DeleteFile(const std::string& path)
+	void AssetUIRenderer::DelFile(const std::string& path)
 	{
 		if (!fs::exists(path)) {
 			GetUI().log->warn("Cannot delete, file does not exist: {}", path);

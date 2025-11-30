@@ -294,8 +294,12 @@ namespace Engine {
 	{
 		log->debug("Reloading all scripts");
 		
+#ifndef GAME_BUILD
 		// Clear all event subscriptions to prevent accumulation across restarts
+		// Only do this in editor mode - in game builds, scripts are precompiled
+		// and RmlUI subscriptions should persist
 		eventBus.ClearAllSubscriptions();
+#endif
 		
 		// User scripts
 		GetCurrentSceneRegistry().view<Components::LuaScript>().each([](entt::entity entity, Components::LuaScript& script) {

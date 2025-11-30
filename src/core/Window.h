@@ -7,15 +7,7 @@
 #include "rendering/Framebuffer.h"
 #include "core/module/Module.h"
 
-// Forward declarations
-namespace Rml {
-	class Context;
-}
-
 namespace Engine {
-	class RmlUi_RenderInterface_GL3;
-	class RmlUi_SystemInterface;
-
 	class Window : public Module {
 	  public:
 		enum class FramebufferID { GAME_OUT, MOUSE_PICKING };
@@ -49,9 +41,7 @@ namespace Engine {
 
 		static std::map<FramebufferID, std::shared_ptr<Framebuffer>> m_frameBuffers;
 
-		// RmlUi access
-		Rml::Context* GetRmlContext() const { return m_rmlContext; }
-		RmlUi_RenderInterface_GL3* GetRmlRenderer() const { return m_rmlRenderer.get(); }
+
 
 		int targetWidth;
 		int targetHeight;
@@ -67,12 +57,6 @@ namespace Engine {
 		bool        InitGLFW();
 		static bool InitGLAD();
 		bool        InitImGui();
-		bool        InitRmlUi();
 
-		// RmlUi
-		Rml::Context*                                 m_rmlContext = nullptr;
-		std::unique_ptr<RmlUi_RenderInterface_GL3>    m_rmlRenderer;
-		std::unique_ptr<RmlUi_SystemInterface>        m_rmlSystem;
-		bool m_rmlLuaInitialized = false;
 	};
 } // namespace Engine

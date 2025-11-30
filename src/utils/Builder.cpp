@@ -7,6 +7,7 @@
 #include <string>
 #include <iostream>
 #include <filesystem>
+#include <cstdlib>
 #include "core/EngineData.h"
 #include "assets/impl/BinarySceneLoader.h"
 #include <sol/sol.hpp>
@@ -61,10 +62,10 @@ namespace Engine {
 		try {
 			if (!std::filesystem::exists(outPath)) {
 				std::filesystem::create_directory(outPath);
-				GetDefaultLogger()->info("Created folder: {}", outPath.c_str());
+				GetDefaultLogger()->info("Created folder: {}", outPath.string());
 			}
 			else {
-				GetDefaultLogger()->info("Folder already exists: {}", outPath.c_str());
+				GetDefaultLogger()->info("Folder already exists: {}", outPath.string());
 			}
 		}
 		catch (const std::filesystem::filesystem_error& e) {
@@ -122,7 +123,7 @@ namespace Engine {
 				
 				if (!result.valid()) {
 					sol::error err = result;
-					GetDefaultLogger()->error("Failed to compile script {}: {}", srcPath.c_str(), err.what());
+					GetDefaultLogger()->error("Failed to compile script {}: {}", srcPath.string(), err.what());
 					continue;
 				}
 				
@@ -132,7 +133,7 @@ namespace Engine {
 				// Dump bytecode to file
 				std::ofstream outFile(outPath, std::ios::binary);
 				if (!outFile) {
-					GetDefaultLogger()->error("Failed to open output file {}", outPath.c_str());
+					GetDefaultLogger()->error("Failed to open output file {}", outPath.string());
 					continue;
 				}
 				
@@ -153,15 +154,15 @@ namespace Engine {
 				lua_pop(L, 1); // Pop the function
 				
 				if (dumpResult != 0) {
-					GetDefaultLogger()->error("Failed to dump bytecode for {}", srcPath.c_str());
+					GetDefaultLogger()->error("Failed to dump bytecode for {}", srcPath.string());
 					continue;
 				}
 				
 				outFile.close();
-				GetDefaultLogger()->info("Compiled Script {} -> {}", srcPath.c_str(), outPath.c_str());
+				GetDefaultLogger()->info("Compiled Script {} -> {}", srcPath.string(), outPath.string());
 			}
 			catch (const std::exception& e) {
-				GetDefaultLogger()->error("Exception compiling {}: {}", srcPath.c_str(), e.what());
+				GetDefaultLogger()->error("Exception compiling {}: {}", srcPath.string(), e.what());
 			}
 		}
 	}
@@ -177,6 +178,44 @@ namespace Engine {
 			return;
 		}
 
-		BinarySceneLoader::SerializeScene(GetSceneManager().GetActiveScene(), (outScenesDir / "scene1.bin").c_str());
-	}
+        BinarySceneLoader::SerializeScene(
+                GetSceneManager().GetActiveScene(),
+                (outScenesDir / "scene1.bin").string()
+        );
+
+		// Copy and run the game executable
+		fs::path buildDir = fs::current_path() / "build";
+		fs::path exeName = "cpp-engine_game";
+#ifdef _WIN32
+		exeName += ".exe";
+#endif
+		fs::path sourceExe = buildDir / exeName;
+		fs::path destExe = outPath / exeName;
+
+		if (fs::exists(sourceExe)) {
+			try {
+				fs::copy_file(sourceExe, destExe, fs::copy_options::overwrite_existing);
+				GetDefaultLogger()->info("Copied executable to {}", destExe.string());
+
+				// Set executable permissions on Linux/Mac
+#ifndef _WIN32
+				fs::permissions(destExe, fs::perms::owner_all | fs::perms::group_read | fs::perms::group_exec | fs::perms::others_read | fs::perms::others_exec, fs::perm_options::add);
+#endif
+
+				GetDefaultLogger()->info("Running game...");
+				std::string command;
+#ifdef _WIN32
+				command = "cd /d \"" + outPath.string() + "\" && \"" + exeName.string() + "\"";
+#else
+				command = "cd \"" + outPath.string() + "\" && ./" + exeName.string();
+#endif
+				std::system(command.c_str());
+			} catch (const std::exception& e) {
+				GetDefaultLogger()->error("Failed to copy or run executable: {}", e.what());
+			}
+		} else {
+			GetDefaultLogger()->warn("Could not find executable at {}", sourceExe.string());
+		}
+
+    }
 } // namespace Engine
