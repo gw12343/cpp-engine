@@ -17,10 +17,40 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
+                            "key": "CAMERA_Y_OFFSET",
+                            "value": {
+                                "index": 0,
+                                "data": 1.100000023841858
+                            }
+                        },
+                        {
                             "key": "JUMP_POWER",
                             "value": {
                                 "index": 0,
                                 "data": 8.0
+                            }
+                        },
+                        {
+                            "key": "SHOOT_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 64.5
+                            }
+                        },
+                        {
+                            "key": "GRAVITY_SCALE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
+                            }
+                        },
+                        {
+                            "key": "victorySound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                }
                             }
                         },
                         {
@@ -40,6 +70,22 @@
                             }
                         },
                         {
+                            "key": "shootSound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
+                                }
+                            }
+                        },
+                        {
+                            "key": "MOUSE_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.10000000149011612
+                            }
+                        },
+                        {
                             "key": "WALK_SPEED",
                             "value": {
                                 "index": 0,
@@ -52,52 +98,6 @@
                                 "index": 7,
                                 "data": {
                                     "guid": "a9dfb812233c1829cad774e7b2670a02"
-                                }
-                            }
-                        },
-                        {
-                            "key": "SHOOT_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 64.5
-                            }
-                        },
-                        {
-                            "key": "MOUSE_SENSITIVITY",
-                            "value": {
-                                "index": 0,
-                                "data": 0.10000000149011612
-                            }
-                        },
-                        {
-                            "key": "shootSound",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
-                                }
-                            }
-                        },
-                        {
-                            "key": "CAMERA_Y_OFFSET",
-                            "value": {
-                                "index": 0,
-                                "data": 1.100000023841858
-                            }
-                        },
-                        {
-                            "key": "GRAVITY_SCALE",
-                            "value": {
-                                "index": 0,
-                                "data": 2.0
-                            }
-                        },
-                        {
-                            "key": "victorySound",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
                                 }
                             }
                         }
