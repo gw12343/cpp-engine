@@ -35,7 +35,7 @@ namespace Engine {
 		void RenderContextMenu();
 
 		// File operations
-		void DeleteFile(const std::string& path);
+		void DelFile(const std::string& path);
 		void DuplicateFile(const std::string& path);
 		void RenameFile(const std::string& oldPath, const std::string& newPath);
 		void ScanDirectory(const std::string& dirPath);

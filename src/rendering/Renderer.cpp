@@ -17,6 +17,7 @@
 #include <tracy/Tracy.hpp>
 #include <RmlUi/Core.h>
 #include "rendering/ui/RmlUiBackend.h"
+#include "rendering/ui/GameUIManager.h"
 
 namespace Engine {
 
@@ -129,68 +130,7 @@ namespace Engine {
 		{
 			ZoneScopedN("Render RmlUi");
 			// Render RmlUi into the framebuffer
-			if (auto* context = GetWindow().GetRmlContext()) {
-				auto& window = GetWindow();
-				
-				// Update context dimensions based on build type
-#ifdef GAME_BUILD
-				// In game builds, use full window size
-				context->SetDimensions(Rml::Vector2i(window.GetWidth(), window.GetHeight()));
-				GetWindow().GetRmlRenderer()->SetViewport(window.GetWidth(), window.GetHeight());
-				
-				// Process mouse input with window coordinates
-				double mouseX, mouseY;
-				glfwGetCursorPos(window.GetNativeWindow(), &mouseX, &mouseY);
-				context->ProcessMouseMove((int)mouseX, (int)mouseY, 0);
-				
-				// Handle mouse buttons
-				if (glfwGetMouseButton(window.GetNativeWindow(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-					static bool wasPressed = false;
-					if (!wasPressed) {
-						context->ProcessMouseButtonDown(0, 0);
-						wasPressed = true;
-					}
-				} else {
-					static bool wasPressed = false;
-					if (wasPressed) {
-						context->ProcessMouseButtonUp(0, 0);
-					}
-					wasPressed = false;
-				}
-#else
-				// In editor mode, use scene view size
-				context->SetDimensions(Rml::Vector2i(window.targetWidth, window.targetHeight));
-				GetWindow().GetRmlRenderer()->SetViewport(window.targetWidth, window.targetHeight);
-				
-				// Process scaled mouse input
-				if (GetInput().IsMousePositionInViewport()) {
-					glm::vec2 mousePos = GetInput().GetMousePositionInViewport();
-					context->ProcessMouseMove((int)mousePos.x, (int)mousePos.y, 0);
-					
-					// Handle mouse button clicks
-					if (GetInput().IsMouseClicked(GLFW_MOUSE_BUTTON_LEFT)) {
-						context->ProcessMouseButtonDown(0, 0);
-					}
-					else if (!GetInput().IsMousePressed(GLFW_MOUSE_BUTTON_LEFT)) {
-						// Button was just released
-						context->ProcessMouseButtonUp(0, 0);
-					}
-				}
-#endif
-				
-				// Update RmlUi (moved from Window::onUpdate)
-				context->Update();
-
-				// Enable blending for RmlUi
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				glDisable(GL_DEPTH_TEST);
-
-				context->Render();
-
-				glEnable(GL_DEPTH_TEST);
-				glDisable(GL_BLEND);
-			}
+			GetGameUIManager().Render();
 		}
 		
 #ifndef GAME_BUILD

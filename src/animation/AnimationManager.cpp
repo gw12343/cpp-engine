@@ -9,7 +9,7 @@
 #include "components/impl/SkeletonComponent.h"
 #include "components/impl/SkinnedMeshComponent.h"
 
-#include <spdlog/spdlog.h>
+
 #include <utils/Utils.h>
 #include <tracy/Tracy.hpp>
 #include "core/SceneManager.h"

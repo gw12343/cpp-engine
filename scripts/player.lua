@@ -18,7 +18,10 @@ variables = {
 
     BULLET_PARENT = ehandle(),
 
-    BULLET_MATERIAL = material()
+    BULLET_MATERIAL = material(),
+
+	shootSound = sound(),
+	victorySound = sound()
 }
 
 
@@ -28,12 +31,27 @@ variables = {
 function Start()
     print("Started script!");
 
+
+
+	subscribe("TargetHit", function(points)
+        local playerSource = gameObject:GetAudioSource()
+		playerSource:setSound(variables.shootSound)
+		playerSource:play()
+    end)
+
+	subscribe("AllTargetsDestroyed", function()
+        local playerSource = gameObject:GetAudioSource()
+		playerSource:setSound(variables.victorySound)
+		playerSource:play()
+    end)
+    
+
 end
 
 ballCount = 0
 
 function ShootObject(model, shape, speed, scale)
-
+	
     local cam = getCamera()
     local cpos = cam:getPosition()
     local foward = cam:getFront()

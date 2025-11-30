@@ -19,6 +19,7 @@
 #include "impl/TerrainRendererComponent.h"
 #include "impl/TransformComponent.h"
 #include "impl/PlayerControllerComponent.h"
+#include "impl/RmlUIComponent.h"
 #include "impl/GizmoComponent.h"
 
 #define COMPONENT_LIST                                                                                                                                                                                                                         \
@@ -35,6 +36,7 @@
 	X(Components::SkinnedMeshComponent, SkinnedMeshComponent, "Skinned Mesh")                                                                                                                                                                  \
 	X(Components::ParticleSystem, ParticleSystem, ICON_FA_STAR_HALF_STROKE " Particle System")                                                                                                                                                 \
 	X(Components::PlayerControllerComponent, PlayerControllerComponent, "Player Controller")                                                                                                                                                   \
+	X(Components::RmlUIComponent, RmlUIComponent, ICON_FA_WINDOW_MAXIMIZE " RmlUI")                                                                                                                                                            \
 	X(Components::GizmoComponent, GizmoComponent, ICON_FA_GLOBE " Gizmo")
 
 #endif // CPP_ENGINE_ALLCOMPONENTS_H
