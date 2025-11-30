@@ -17,17 +17,26 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
+                            "key": "WALK_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 7.0
+                            }
+                        },
+                        {
+                            "key": "BULLET_MATERIAL",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
+                                }
+                            }
+                        },
+                        {
                             "key": "JUMP_POWER",
                             "value": {
                                 "index": 0,
                                 "data": 8.0
-                            }
-                        },
-                        {
-                            "key": "SHOOT_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 64.5
                             }
                         },
                         {
@@ -38,10 +47,24 @@
                             }
                         },
                         {
+                            "key": "GRAVITY_SCALE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
+                            }
+                        },
+                        {
                             "key": "CAMERA_Y_OFFSET",
                             "value": {
                                 "index": 0,
                                 "data": 1.100000023841858
+                            }
+                        },
+                        {
+                            "key": "SHOOT_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 64.5
                             }
                         },
                         {
@@ -58,29 +81,6 @@
                             "value": {
                                 "index": 0,
                                 "data": 12.0
-                            }
-                        },
-                        {
-                            "key": "BULLET_MATERIAL",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
-                                }
-                            }
-                        },
-                        {
-                            "key": "WALK_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 7.0
-                            }
-                        },
-                        {
-                            "key": "GRAVITY_SCALE",
-                            "value": {
-                                "index": 0,
-                                "data": 2.0
                             }
                         }
                     ]
@@ -154,18 +154,21 @@
                 "nullopt": false,
                 "data": {}
             },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
             "GizmoComponent": {
                 "nullopt": true
             }
         },
         {
             "EntityMetadata": {
-                "name": "Container",
+                "name": "BallContainer",
                 "tag": "",
                 "active": true,
                 "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a",
                 "parentEntity": {
-                    "guid": ""
+                    "guid": "8664f8636f7b2e27369247fc65f0af93"
                 },
                 "children": []
             },
@@ -174,6 +177,44 @@
                 "data": {
                     "scriptPath": "scripts/test_vectors.lua",
                     "variables": [
+                        {
+                            "key": "tiles",
+                            "value": {
+                                "index": 18,
+                                "data": []
+                            }
+                        },
+                        {
+                            "key": "scenes",
+                            "value": {
+                                "index": 17,
+                                "data": []
+                            }
+                        },
+                        {
+                            "key": "models",
+                            "value": {
+                                "index": 15,
+                                "data": [
+                                    {
+                                        "guid": "16ab47c200b25ccb2b9dbcf46297059f"
+                                    },
+                                    {
+                                        "guid": ""
+                                    },
+                                    {
+                                        "guid": ""
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "key": "particles",
+                            "value": {
+                                "index": 19,
+                                "data": []
+                            }
+                        },
                         {
                             "key": "sounds",
                             "value": {
@@ -200,44 +241,6 @@
                                         "guid": "684bda7719ce8774b0883115da989766"
                                     }
                                 ]
-                            }
-                        },
-                        {
-                            "key": "particles",
-                            "value": {
-                                "index": 19,
-                                "data": []
-                            }
-                        },
-                        {
-                            "key": "tiles",
-                            "value": {
-                                "index": 18,
-                                "data": []
-                            }
-                        },
-                        {
-                            "key": "models",
-                            "value": {
-                                "index": 15,
-                                "data": [
-                                    {
-                                        "guid": "16ab47c200b25ccb2b9dbcf46297059f"
-                                    },
-                                    {
-                                        "guid": ""
-                                    },
-                                    {
-                                        "guid": ""
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            "key": "scenes",
-                            "value": {
-                                "index": 17,
-                                "data": []
                             }
                         },
                         {
@@ -290,6 +293,9 @@
             "PlayerControllerComponent": {
                 "nullopt": true
             },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
             "GizmoComponent": {
                 "nullopt": true
             }
@@ -301,7 +307,7 @@
                 "active": true,
                 "guid": "411acd0e25d4d31d4650fa4b9d828137",
                 "parentEntity": {
-                    "guid": ""
+                    "guid": "d2baab450e935acc786385403305cc33"
                 },
                 "children": []
             },
@@ -311,11 +317,11 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
-                            "key": "NORMAL_COLOR",
+                            "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
+                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
                             }
                         },
@@ -327,11 +333,11 @@
                             }
                         },
                         {
-                            "key": "TARGET_COLOR",
+                            "key": "NORMAL_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
+                                    "guid": "4f843329315c8297e0905d030736e961"
                                 }
                             }
                         }
@@ -339,7 +345,8 @@
                 }
             },
             "ShadowCaster": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {}
             },
             "Transform": {
                 "nullopt": false,
@@ -417,6 +424,9 @@
             "PlayerControllerComponent": {
                 "nullopt": true
             },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
             "GizmoComponent": {
                 "nullopt": true
             }
@@ -428,7 +438,7 @@
                 "active": true,
                 "guid": "652ea52f75b6e8215a7b07d953df4e13",
                 "parentEntity": {
-                    "guid": ""
+                    "guid": "d2baab450e935acc786385403305cc33"
                 },
                 "children": []
             },
@@ -438,11 +448,11 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
-                            "key": "NORMAL_COLOR",
+                            "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
+                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
                             }
                         },
@@ -454,11 +464,11 @@
                             }
                         },
                         {
-                            "key": "TARGET_COLOR",
+                            "key": "NORMAL_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
+                                    "guid": "4f843329315c8297e0905d030736e961"
                                 }
                             }
                         }
@@ -466,7 +476,8 @@
                 }
             },
             "ShadowCaster": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {}
             },
             "Transform": {
                 "nullopt": false,
@@ -544,18 +555,21 @@
             "PlayerControllerComponent": {
                 "nullopt": true
             },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
             "GizmoComponent": {
                 "nullopt": true
             }
         },
         {
             "EntityMetadata": {
-                "name": "floor",
+                "name": "Floor",
                 "tag": "",
                 "active": true,
                 "guid": "6d0dadf264f2732514bcd57a8c40fd8d",
                 "parentEntity": {
-                    "guid": ""
+                    "guid": "77b9ef246028ea5757c8bd10a7a21f9b"
                 },
                 "children": []
             },
@@ -577,7 +591,7 @@
                         "x": 0.0,
                         "y": 0.0,
                         "z": 0.0,
-                        "w": 1.0
+                        "w": 0.9999999403953552
                     },
                     "scale": {
                         "x": 60.0,
@@ -641,6 +655,9 @@
             "PlayerControllerComponent": {
                 "nullopt": true
             },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
             "GizmoComponent": {
                 "nullopt": true
             }
@@ -652,7 +669,7 @@
                 "active": true,
                 "guid": "73c9881ef8e3660939a9f062e1586bb0",
                 "parentEntity": {
-                    "guid": ""
+                    "guid": "8664f8636f7b2e27369247fc65f0af93"
                 },
                 "children": []
             },
@@ -699,27 +716,108 @@
             "PlayerControllerComponent": {
                 "nullopt": true
             },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
             "GizmoComponent": {
                 "nullopt": true
             }
         },
         {
             "EntityMetadata": {
-                "name": "UIManager",
+                "name": "Map",
+                "tag": "",
+                "active": true,
+                "guid": "77b9ef246028ea5757c8bd10a7a21f9b",
+                "parentEntity": {
+                    "guid": ""
+                },
+                "children": [
+                    {
+                        "guid": "d2baab450e935acc786385403305cc33"
+                    },
+                    {
+                        "guid": "6d0dadf264f2732514bcd57a8c40fd8d"
+                    }
+                ]
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": true
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "ScoreUI",
                 "tag": "",
                 "active": true,
                 "guid": "846e51a4bd28ef768eb4d879b67fd402",
                 "parentEntity": {
-                    "guid": ""
+                    "guid": "cec5b932db92dfd2d7158ca746d2cb08"
                 },
                 "children": []
             },
             "LuaScript": {
-                "nullopt": false,
-                "data": {
-                    "scriptPath": "scripts/game_ui.lua",
-                    "variables": []
-                }
+                "nullopt": true
             },
             "ShadowCaster": {
                 "nullopt": true
@@ -757,6 +855,13 @@
             "PlayerControllerComponent": {
                 "nullopt": true
             },
+            "RmlUIComponent": {
+                "nullopt": false,
+                "data": {
+                    "documentPath": "resources/ui/demo.rml",
+                    "isVisible": true
+                }
+            },
             "GizmoComponent": {
                 "nullopt": true
             }
@@ -770,7 +875,14 @@
                 "parentEntity": {
                     "guid": ""
                 },
-                "children": []
+                "children": [
+                    {
+                        "guid": "73c9881ef8e3660939a9f062e1586bb0"
+                    },
+                    {
+                        "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
+                    }
+                ]
             },
             "LuaScript": {
                 "nullopt": false,
@@ -823,6 +935,9 @@
             "PlayerControllerComponent": {
                 "nullopt": true
             },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
             "GizmoComponent": {
                 "nullopt": true
             }
@@ -834,7 +949,7 @@
                 "active": true,
                 "guid": "a3df7c3a93df52ced8f57f49a0e601dd",
                 "parentEntity": {
-                    "guid": ""
+                    "guid": "d2baab450e935acc786385403305cc33"
                 },
                 "children": []
             },
@@ -844,11 +959,11 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
-                            "key": "NORMAL_COLOR",
+                            "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
+                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
                             }
                         },
@@ -860,11 +975,11 @@
                             }
                         },
                         {
-                            "key": "TARGET_COLOR",
+                            "key": "NORMAL_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
+                                    "guid": "4f843329315c8297e0905d030736e961"
                                 }
                             }
                         }
@@ -872,7 +987,8 @@
                 }
             },
             "ShadowCaster": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {}
             },
             "Transform": {
                 "nullopt": false,
@@ -950,6 +1066,9 @@
             "PlayerControllerComponent": {
                 "nullopt": true
             },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
             "GizmoComponent": {
                 "nullopt": true
             }
@@ -961,7 +1080,7 @@
                 "active": true,
                 "guid": "cd1a87cc6be3b1c5eeeaba3194af585b",
                 "parentEntity": {
-                    "guid": ""
+                    "guid": "d2baab450e935acc786385403305cc33"
                 },
                 "children": []
             },
@@ -971,11 +1090,11 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
-                            "key": "NORMAL_COLOR",
+                            "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
+                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
                             }
                         },
@@ -987,11 +1106,11 @@
                             }
                         },
                         {
-                            "key": "TARGET_COLOR",
+                            "key": "NORMAL_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
+                                    "guid": "4f843329315c8297e0905d030736e961"
                                 }
                             }
                         }
@@ -999,7 +1118,8 @@
                 }
             },
             "ShadowCaster": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {}
             },
             "Transform": {
                 "nullopt": false,
@@ -1077,6 +1197,211 @@
             "PlayerControllerComponent": {
                 "nullopt": true
             },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "UI",
+                "tag": "",
+                "active": true,
+                "guid": "cec5b932db92dfd2d7158ca746d2cb08",
+                "parentEntity": {
+                    "guid": ""
+                },
+                "children": [
+                    {
+                        "guid": "846e51a4bd28ef768eb4d879b67fd402"
+                    },
+                    {
+                        "guid": "df21e50392179ca74b94ebaed732f495"
+                    }
+                ]
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": true
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": true
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Targets",
+                "tag": "",
+                "active": true,
+                "guid": "d2baab450e935acc786385403305cc33",
+                "parentEntity": {
+                    "guid": "77b9ef246028ea5757c8bd10a7a21f9b"
+                },
+                "children": [
+                    {
+                        "guid": "cd1a87cc6be3b1c5eeeaba3194af585b"
+                    },
+                    {
+                        "guid": "f9ec768891ac8d2f0545baf4238a83f2"
+                    },
+                    {
+                        "guid": "a3df7c3a93df52ced8f57f49a0e601dd"
+                    },
+                    {
+                        "guid": "652ea52f75b6e8215a7b07d953df4e13"
+                    },
+                    {
+                        "guid": "411acd0e25d4d31d4650fa4b9d828137"
+                    }
+                ]
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": true
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": true
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "CrosshairUI",
+                "tag": "",
+                "active": true,
+                "guid": "df21e50392179ca74b94ebaed732f495",
+                "parentEntity": {
+                    "guid": "cec5b932db92dfd2d7158ca746d2cb08"
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": false,
+                "data": {
+                    "scriptPath": "scripts/crosshair.lua",
+                    "variables": []
+                }
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": true
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": true
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": false,
+                "data": {
+                    "documentPath": "resources/ui/crosshair.rml",
+                    "isVisible": true
+                }
+            },
             "GizmoComponent": {
                 "nullopt": true
             }
@@ -1088,7 +1413,7 @@
                 "active": true,
                 "guid": "f9ec768891ac8d2f0545baf4238a83f2",
                 "parentEntity": {
-                    "guid": ""
+                    "guid": "d2baab450e935acc786385403305cc33"
                 },
                 "children": []
             },
@@ -1098,11 +1423,11 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
-                            "key": "NORMAL_COLOR",
+                            "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
+                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
                             }
                         },
@@ -1114,11 +1439,11 @@
                             }
                         },
                         {
-                            "key": "TARGET_COLOR",
+                            "key": "NORMAL_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
+                                    "guid": "4f843329315c8297e0905d030736e961"
                                 }
                             }
                         }
@@ -1126,7 +1451,8 @@
                 }
             },
             "ShadowCaster": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {}
             },
             "Transform": {
                 "nullopt": false,
@@ -1202,6 +1528,9 @@
                 "nullopt": true
             },
             "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
                 "nullopt": true
             },
             "GizmoComponent": {

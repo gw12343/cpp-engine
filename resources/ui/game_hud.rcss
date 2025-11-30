@@ -26,7 +26,6 @@ body {
 	margin: 5px 0;
 	font-size: 38px;
 	font-weight: bold;
-	text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 #targets {
@@ -45,23 +44,6 @@ body {
 	margin-top: 10px;
 }
 
-#crosshair {
-	position: fixed;
-	top: 50%;
-	left: 50%;
-	
-	padding: 15px 20px;
-	background-color: rgba(0, 0, 0, 0.6);
-	font-family: Roboto;
-	font-size: 38px;
-	color: #ffffff;
-	
-	text-align: center;
-	width: 20px;
-	height: 20px;
-	margin-left: -30px;
-	margin-top: -25px;
-}
 
 @keyframes slide-in {
 	from {
@@ -83,9 +65,7 @@ body {
 	font-family: Roboto;
 	font-size: 80px;
 	color: #FFD700;
-	font-weight: bold;
-	text-shadow: 4px 4px 8px black;
-	
+	font-weight: bold;	
 	font-effect: outline(2px black);
 }
 

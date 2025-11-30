@@ -1,5 +1,6 @@
 #pragma once
 
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <unordered_map>
@@ -30,7 +31,7 @@ namespace Engine {
 		glm::vec2                  GetMousePositionInViewport() const;
 		glm::vec2                  GetMousePositionInViewportScaledFlipped() const;
 		glm::vec2                  GetMouseDelta() const;
-		// float                      GetMouseScrollDelta();
+		float                      GetMouseScrollDelta();
 		[[maybe_unused]] void SetMousePosition(const glm::vec2& position);
 
 		void                          SetCursorMode(int mode);
@@ -40,17 +41,19 @@ namespace Engine {
 		bool                          IsMouseClicked(int btn);
 		std::unordered_map<int, bool> m_mouseButtonStates;
 		std::unordered_map<int, bool> m_prevMouseButtonStates;
+		
+		void ResetScroll();
 
 
 		//		// Callbacks
 		//		[[maybe_unused]] void MouseCallback(GLFWwindow* window, double xpos, double ypos);
-		//		void                  ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+		static void                  ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
 
 	  private:
 		glm::vec2 m_mousePosition;
 		glm::vec2 m_lastMousePosition;
-		// float                         m_scrollDelta;
+		float                         m_scrollDelta;
 		std::unordered_map<int, bool> m_keyStates;     // Current frame
 		std::unordered_map<int, bool> m_prevKeyStates; // Previous frame
 

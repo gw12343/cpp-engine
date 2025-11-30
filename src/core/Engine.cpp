@@ -21,6 +21,7 @@
 #include "animation/AnimationManager.h"
 #include "rendering/particles/ParticleManager.h"
 #include "rendering/ui/UIManager.h"
+#include "rendering/ui/GameUIManager.h"
 #include "terrain/TerrainManager.h"
 #include "components/impl/SkinnedMeshComponent.h"
 #include "assets/AssetManager.h"
@@ -72,6 +73,7 @@ namespace Engine {
 		GetAssetManager().RegisterLoader<Animation>(std::make_unique<AnimationLoader>());
 
 		// Initialize Modules
+		Get().script    = std::make_shared<ScriptManager>();
 		Get().window    = std::make_shared<Window>(width, height, title);
 		Get().input     = std::make_shared<Input>();
 		Get().camera    = std::make_shared<Camera>(glm::vec3(0.0f, 3.0f, 6.0f), glm::vec3(0, 1, 0), -90.0f, -30.0f);
@@ -81,8 +83,8 @@ namespace Engine {
 		Get().animation = std::make_shared<AnimationManager>();
 		Get().particle  = std::make_shared<ParticleManager>();
 		Get().ui        = std::make_shared<UI::UIManager>();
+		Get().gameUI    = std::make_shared<GameUIManager>();
 		Get().terrain   = std::make_shared<Terrain::TerrainManager>();
-		Get().script    = std::make_shared<ScriptManager>();
 		Get().scene     = std::make_shared<SceneManager>();
 
 		// Register Modules to handle lifecycle
@@ -95,6 +97,7 @@ namespace Engine {
 #ifndef GAME_BUILD
 		manager.RegisterExternal(Get().ui);
 #endif
+		manager.RegisterExternal(Get().gameUI);
 		manager.RegisterExternal(Get().animation);
 		manager.RegisterExternal(Get().particle);
 		manager.RegisterExternal(Get().terrain);
