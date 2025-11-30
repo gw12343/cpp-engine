@@ -8,17 +8,17 @@
 #include "core/module/Module.h"
 
 namespace Engine {
-
 	class Window : public Module {
 	  public:
 		enum class FramebufferID { GAME_OUT, MOUSE_PICKING };
 
 		Window(int width, int height, std::string title);
+		~Window();
 
 
 		[[nodiscard]] std::string name() const override { return "WindowModule"; }
 		void                      onInit() override;
-		void                      onGameStart() override {}
+		void                      onGameStart() override;
 		void                      onUpdate(float dt) override;
 		void                      onShutdown() override;
 		void                      setLuaBindings() override;
@@ -42,6 +42,7 @@ namespace Engine {
 		static std::map<FramebufferID, std::shared_ptr<Framebuffer>> m_frameBuffers;
 
 
+
 		int targetWidth;
 		int targetHeight;
 		int targetX;
@@ -56,5 +57,6 @@ namespace Engine {
 		bool        InitGLFW();
 		static bool InitGLAD();
 		bool        InitImGui();
+
 	};
 } // namespace Engine

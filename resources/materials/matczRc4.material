@@ -1,0 +1,38 @@
+{
+    "colors": {
+        "ambient": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "diffuse": [
+            0.800000011920929,
+            0.800000011920929,
+            0.800000011920929
+        ],
+        "emissive": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "specular": [
+            0.5,
+            0.5,
+            0.5
+        ]
+    },
+    "name": "slope_ball",
+    "properties": {
+        "shininess": 32.0,
+        "textureScale": [
+            1.0,
+            1.0
+        ]
+    },
+    "textures": {
+        "diffuse": "32fb7e91a134af6cb3bb60671569519b",
+        "height": "",
+        "normal": "",
+        "specular": ""
+    }
+}

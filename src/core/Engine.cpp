@@ -21,6 +21,7 @@
 #include "animation/AnimationManager.h"
 #include "rendering/particles/ParticleManager.h"
 #include "rendering/ui/UIManager.h"
+#include "rendering/ui/GameUIManager.h"
 #include "terrain/TerrainManager.h"
 #include "components/impl/SkinnedMeshComponent.h"
 #include "assets/AssetManager.h"
@@ -34,6 +35,7 @@
 #include "assets/impl/BinarySceneLoader.h"
 #include "assets/impl/AnimationLoader.h"
 #include "components/impl/AnimationComponent.h"
+#include "assets/AssetWatcher.h"
 
 #if defined(__clang__) || defined(__GNUC__)
 #define TracyFunction __PRETTY_FUNCTION__
@@ -71,6 +73,7 @@ namespace Engine {
 		GetAssetManager().RegisterLoader<Animation>(std::make_unique<AnimationLoader>());
 
 		// Initialize Modules
+		Get().script    = std::make_shared<ScriptManager>();
 		Get().window    = std::make_shared<Window>(width, height, title);
 		Get().input     = std::make_shared<Input>();
 		Get().camera    = std::make_shared<Camera>(glm::vec3(0.0f, 3.0f, 6.0f), glm::vec3(0, 1, 0), -90.0f, -30.0f);
@@ -80,11 +83,12 @@ namespace Engine {
 		Get().animation = std::make_shared<AnimationManager>();
 		Get().particle  = std::make_shared<ParticleManager>();
 		Get().ui        = std::make_shared<UI::UIManager>();
+		Get().gameUI    = std::make_shared<GameUIManager>();
 		Get().terrain   = std::make_shared<Terrain::TerrainManager>();
-		Get().script    = std::make_shared<ScriptManager>();
 		Get().scene     = std::make_shared<SceneManager>();
 
 		// Register Modules to handle lifecycle
+		manager.RegisterExternal(Get().script); // ScriptManager must run first to clear subscriptions before UI reloads
 		manager.RegisterExternal(Get().window);
 		manager.RegisterExternal(Get().input);
 		manager.RegisterExternal(Get().camera);
@@ -93,12 +97,24 @@ namespace Engine {
 #ifndef GAME_BUILD
 		manager.RegisterExternal(Get().ui);
 #endif
+		manager.RegisterExternal(Get().gameUI);
 		manager.RegisterExternal(Get().animation);
 		manager.RegisterExternal(Get().particle);
 		manager.RegisterExternal(Get().terrain);
 		manager.RegisterExternal(Get().renderer);
-		manager.RegisterExternal(Get().script);
+		// manager.RegisterExternal(Get().script); // Moved to top
 		manager.RegisterExternal(Get().scene);
+
+#ifndef GAME_BUILD
+		m_assetFileWatcher = std::make_unique<efsw::FileWatcher>();
+		m_assetWatcher     = std::make_unique<HotReloadWatcher>();
+		m_assetFileWatcher->addWatch("resources", m_assetWatcher.get(), true);
+		m_assetFileWatcher->watch();
+#endif
+	}
+
+	GEngine::~GEngine()
+	{
 	}
 
 	bool GEngine::Initialize()
@@ -128,45 +144,122 @@ namespace Engine {
 
 		// Load all textures
 		std::string folder = "resources/textures";
-		for (const auto& entry : fs::directory_iterator(folder)) {
-			if (entry.is_regular_file() && entry.path().extension() == ".png") {
-				std::string path = entry.path().string();
-				GetAssetManager().Load<Texture>(path);
+		int loadedCount = 0;
+		try {
+			for (const auto& entry : fs::directory_iterator(folder)) {
+				if (entry.is_regular_file() && entry.path().extension() == ".png") {
+					std::string filename = entry.path().filename().string();
+					// Skip hidden files
+					if (filename[0] == '.') continue;
+					
+					std::string path = entry.path().string();
+					try {
+						GetAssetManager().Load<Texture>(path);
+						loadedCount++;
+					} catch (const std::exception& e) {
+						GetDefaultLogger()->warn("Failed to load texture {}: {}", path, e.what());
+					}
+				}
 			}
+			GetDefaultLogger()->info("Loaded {} textures", loadedCount);
+		} catch (const std::exception& e) {
+			GetDefaultLogger()->error("Error reading textures folder: {}", e.what());
 		}
+
 		// Load all materials
 		folder = "resources/materials";
-		for (const auto& entry : fs::directory_iterator(folder)) {
-			if (entry.is_regular_file() && entry.path().extension() == ".material") {
-				std::string path = entry.path().string();
-				GetAssetManager().Load<Material>(path);
+		loadedCount = 0;
+		try {
+			for (const auto& entry : fs::directory_iterator(folder)) {
+				if (entry.is_regular_file() && entry.path().extension() == ".material") {
+					std::string filename = entry.path().filename().string();
+					// Skip hidden files
+					if (filename[0] == '.') continue;
+					
+					std::string path = entry.path().string();
+					try {
+						GetAssetManager().Load<Material>(path);
+						loadedCount++;
+					} catch (const std::exception& e) {
+						GetDefaultLogger()->warn("Failed to load material {}: {}", path, e.what());
+					}
+				}
 			}
+			GetDefaultLogger()->info("Loaded {} materials", loadedCount);
+		} catch (const std::exception& e) {
+			GetDefaultLogger()->error("Error reading materials folder: {}", e.what());
 		}
+
 		// Load all models
 		folder = "resources/models";
-		for (const auto& entry : fs::directory_iterator(folder)) {
-			if (entry.is_regular_file() && entry.path().extension() == ".obj") {
-				std::string path = entry.path().string();
-				GetAssetManager().Load<Rendering::Model>(path);
+		loadedCount = 0;
+		try {
+			for (const auto& entry : fs::directory_iterator(folder)) {
+				if (entry.is_regular_file() && entry.path().extension() == ".obj") {
+					std::string filename = entry.path().filename().string();
+					// Skip hidden files
+					if (filename[0] == '.') continue;
+					
+					std::string path = entry.path().string();
+					try {
+						GetAssetManager().Load<Rendering::Model>(path);
+						loadedCount++;
+					} catch (const std::exception& e) {
+						GetDefaultLogger()->warn("Failed to load model {}: {}", path, e.what());
+					}
+				}
 			}
+			GetDefaultLogger()->info("Loaded {} models", loadedCount);
+		} catch (const std::exception& e) {
+			GetDefaultLogger()->error("Error reading models folder: {}", e.what());
 		}
 
 		// Load all sounds
 		folder = "resources/sounds";
-		for (const auto& entry : fs::directory_iterator(folder)) {
-			if (entry.is_regular_file() && entry.path().extension() == ".wav") {
-				std::string path = entry.path().string();
-				GetAssetManager().Load<Audio::SoundBuffer>(path);
+		loadedCount = 0;
+		try {
+			for (const auto& entry : fs::directory_iterator(folder)) {
+				if (entry.is_regular_file() && entry.path().extension() == ".wav") {
+					std::string filename = entry.path().filename().string();
+					// Skip hidden files
+					if (filename[0] == '.') continue;
+					
+					std::string path = entry.path().string();
+					try {
+						GetAssetManager().Load<Audio::SoundBuffer>(path);
+						loadedCount++;
+					} catch (const std::exception& e) {
+						GetDefaultLogger()->warn("Failed to load sound {}: {}", path, e.what());
+					}
+				}
 			}
+			GetDefaultLogger()->info("Loaded {} sounds", loadedCount);
+		} catch (const std::exception& e) {
+			GetDefaultLogger()->error("Error reading sounds folder: {}", e.what());
 		}
 
 		// Load all animations
 		folder = "resources/animations";
-		for (const auto& entry : fs::directory_iterator(folder)) {
-			if (entry.path().extension() == ".anim") { // entry.is_regular_file() &&
-				std::string path = entry.path().string();
-				GetAssetManager().Load<Animation>(path);
+		loadedCount = 0;
+		try {
+			for (const auto& entry : fs::directory_iterator(folder)) {
+				if (entry.path().extension() == ".anim") {
+					std::string filename = entry.path().filename().string();
+					// Skip hidden files
+					if (filename[0] == '.') continue;
+					
+					std::string path = entry.path().string();
+					try {
+						GetAssetManager().Load<Animation>(path);
+						loadedCount++;
+					} catch (const std::exception& e) {
+						GetDefaultLogger()->warn("Failed to load animation {}: {}", path, e.what());
+					}
+				}
 			}
+			GetDefaultLogger()->info("Loaded {} animations", loadedCount);
+		} catch (const std::exception& e) {
+			GetDefaultLogger()->error("Error reading animations folder: {}", e.what());
 		}
 
 		// TODO terrain instanced detail rendereing
@@ -203,16 +296,22 @@ namespace Engine {
 		//		}
 	}
 
-
+	int i = 0;
 	void GEngine::Run()
 	{
 		while (!GetWindow().ShouldClose()) {
+			i++;
 			FrameMarkStart("main");
 			auto currentFrame = static_cast<float>(glfwGetTime());
 			m_deltaTime       = currentFrame - m_lastFrame;
 			m_lastFrame       = currentFrame;
 
+			GetAssetManager().Update();
 			manager.UpdateAll(m_deltaTime);
+			if(i % 2000 == 0){
+				//GetDefaultLogger()->info("Frame time: {}", m_deltaTime);
+				//GetDefaultLogger()->info("Frame rate: {}", 1.0f / m_deltaTime);
+			}
 			FrameMarkEnd("main");
 		}
 	}

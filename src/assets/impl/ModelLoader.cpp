@@ -50,11 +50,10 @@ namespace Engine {
 				aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 				ENGINE_ASSERT(mesh, "Null aiMesh pointer encountered");
 
-				// Bounding box accumulation
+				// Bounding box accumulation (in local model space, no transformation)
 				for (unsigned int v = 0; v < mesh->mNumVertices; ++v) {
-					aiVector3D pos         = mesh->mVertices[v];
-					glm::vec4  transformed = transform * glm::vec4(pos.x, pos.y, pos.z, 1.0f);
-					glm::vec3  p           = glm::vec3(transformed);
+					aiVector3D pos = mesh->mVertices[v];
+					glm::vec3  p   = glm::vec3(pos.x, pos.y, pos.z);
 
 					boundsMin = glm::min(boundsMin, p);
 					boundsMax = glm::max(boundsMax, p);

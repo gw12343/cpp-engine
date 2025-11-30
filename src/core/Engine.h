@@ -5,6 +5,14 @@
 #include <spdlog/spdlog.h>
 
 namespace Engine {
+	class HotReloadWatcher;
+}
+
+namespace efsw {
+	class FileWatcher;
+}
+
+namespace Engine {
 
 	// Forward declaration
 	class Entity;
@@ -25,7 +33,7 @@ namespace Engine {
 		/**
 		 * @brief Destroys the engine instance.
 		 */
-		~GEngine() = default;
+		~GEngine();
 
 		/**
 		 * @brief Initializes subsystems and resources.
@@ -55,6 +63,9 @@ namespace Engine {
 
 		float m_deltaTime; ///< Time elapsed since last frame.
 		float m_lastFrame; ///< Timestamp of last frame.
+
+		std::unique_ptr<efsw::FileWatcher> m_assetFileWatcher;
+		std::unique_ptr<HotReloadWatcher>  m_assetWatcher;
 	};
 
 } // namespace Engine

@@ -122,6 +122,7 @@ namespace Engine {
 
 		auto registry = scene->GetRegistry();
 
+		// Collect all entities with their metadata
 		registry->view<Components::EntityMetadata>().each([&](auto entity, auto meta) {
 			SerializedEntity se;
 			se.meta = meta;
@@ -131,11 +132,14 @@ namespace Engine {
 			COMPONENT_LIST
 #undef X
 
-			// if (registry.all_of<Components::Transform>(entity)) se.Transform = registry.get<Components::Transform>(entity);
-
 			entities.push_back(std::move(se));
-			// Repeat for other components...
 		});
+
+		// Sort entities by GUID to ensure deterministic serialization for version control
+		std::sort(entities.begin(), entities.end(), [](const SerializedEntity& a, const SerializedEntity& b) {
+			return a.meta.guid < b.meta.guid;
+		});
+
 		archive(cereal::make_nvp("entities", entities));
 	}
 

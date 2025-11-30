@@ -65,6 +65,10 @@ namespace Engine {
 			    &Engine::Entity::GetTag,
 			    "setName",
 			    &Engine::Entity::SetName,
+			    "setParent",
+			    &Engine::Entity::SetParent,
+			    "getChildren",
+			    &Engine::Entity::GetChildren,
 			    "destroy",
 			    &Engine::Entity::MarkForDestruction,
 			    COMPONENT_LIST COMPONENT_METHODS(Components::EntityMetadata, EntityMetadata));
@@ -73,6 +77,7 @@ namespace Engine {
 
 			// create_entity(name)
 			lua.set_function("createEntity", [](const std::string& name) { return Engine::Entity::Create(name, GetCurrentScene()); });
+
 
 			lua.set_function("getPlayerEntity", []() -> Engine::Entity* {
 				auto scene    = GetCurrentScene();
@@ -99,6 +104,39 @@ namespace Engine {
 
 				Logger::get("script")->debug("[Lua] {}", out);
 			});
+
+			// ==================== Event Bus Lua Bindings ====================
+			// Global subscribe function: subscribe(eventName, callback)
+			lua.set_function("subscribe", [this](const std::string& eventName, sol::function callback) {
+				return eventBus.Subscribe(eventName, callback);
+			});
+
+			// Global publish function: publish(eventName) or publish(eventName, data)
+			lua.set_function("publish", sol::overload(
+			    [this](const std::string& eventName) {
+				    eventBus.Publish(eventName);
+			    },
+			    [this](const std::string& eventName, float data) {
+				    eventBus.Publish(eventName, data);
+			    },
+			    [this](const std::string& eventName, int data) {
+				    eventBus.Publish(eventName, data);
+			    },
+			    [this](const std::string& eventName, bool data) {
+				    eventBus.Publish(eventName, data);
+			    },
+			    [this](const std::string& eventName, const std::string& data) {
+				    eventBus.Publish(eventName, data);
+			    },
+			    [this](const std::string& eventName, const glm::vec3& data) {
+				    eventBus.Publish(eventName, data);
+			    },
+			    [this](const std::string& eventName, Entity& entity) {
+				    eventBus.PublishEntityEvent(eventName, entity);
+			    }
+			));
+
+			log->info("Event bus Lua bindings registered");
 
 			ReloadEditorScript();
 		}
@@ -158,43 +196,54 @@ namespace Engine {
 #endif
 		}
 		else if (GetState() == PLAYING) {
-			{
-				std::lock_guard<std::mutex> lock(collisionMutex);
+		// Dispatch all queued events before processing scripts
+		eventBus.DispatchEvents();
 
-				for (const auto& event : pendingCollisions) {
-					Entity& a = event.a;
-					Entity& b = event.b;
+		{
+			std::lock_guard<std::mutex> lock(collisionMutex);
 
+			for (const auto& event : pendingCollisions) {
+				Entity& a = event.a;
+				Entity& b = event.b;
 
-					if (a.HasComponent<Components::LuaScript>()) {
-						auto& sc = a.GetComponent<Components::LuaScript>();
-						sc.OnCollisionEnter(b);
-					}
+				// Publish collision events to the event bus
+				eventBus.PublishEntityEvent("OnCollisionEnter", b);
+				eventBus.PublishEntityEvent("OnCollisionEnter", a);
 
-					if (b.HasComponent<Components::LuaScript>()) {
-						auto& sc = b.GetComponent<Components::LuaScript>();
-						sc.OnCollisionEnter(a);
-					}
+				// Maintain backward compatibility: also call the old callbacks
+				if (a.HasComponent<Components::LuaScript>()) {
+					auto& sc = a.GetComponent<Components::LuaScript>();
+					sc.OnCollisionEnter(b);
 				}
 
-				pendingCollisions.clear();
-			}
-
-			{
-				std::lock_guard<std::mutex> lock(collisionMutex);
-
-				for (auto& entity : pendingCharacterCollisions) {
-					if (entity.HasComponent<Components::LuaScript>()) {
-						auto& sc = entity.GetComponent<Components::LuaScript>();
-						sc.OnPlayerCollisionEnter();
-					}
+				if (b.HasComponent<Components::LuaScript>()) {
+					auto& sc = b.GetComponent<Components::LuaScript>();
+					sc.OnCollisionEnter(a);
 				}
-
-				pendingCharacterCollisions.clear();
 			}
 
+			pendingCollisions.clear();
+		}
 
-			// User scripts
+		{
+			std::lock_guard<std::mutex> lock(collisionMutex);
+
+			for (auto& entity : pendingCharacterCollisions) {
+				// Publish player collision event
+				eventBus.Publish("OnPlayerCollisionEnter");
+
+				// Maintain backward compatibility
+				if (entity.HasComponent<Components::LuaScript>()) {
+					auto& sc = entity.GetComponent<Components::LuaScript>();
+					sc.OnPlayerCollisionEnter();
+				}
+			}
+
+			pendingCharacterCollisions.clear();
+		}
+
+
+		// User scripts
 			GetCurrentSceneRegistry().view<Components::LuaScript>().each([this, &dt](entt::entity entity, Components::LuaScript& script) {
 				if (script.env) {
 					script.env["deltaTime"] = scriptDeltaTime;
@@ -244,6 +293,14 @@ namespace Engine {
 	void ScriptManager::onGameStart()
 	{
 		log->debug("Reloading all scripts");
+		
+#ifndef GAME_BUILD
+		// Clear all event subscriptions to prevent accumulation across restarts
+		// Only do this in editor mode - in game builds, scripts are precompiled
+		// and RmlUI subscriptions should persist
+		eventBus.ClearAllSubscriptions();
+#endif
+		
 		// User scripts
 		GetCurrentSceneRegistry().view<Components::LuaScript>().each([](entt::entity entity, Components::LuaScript& script) {
 			if (script.env) {

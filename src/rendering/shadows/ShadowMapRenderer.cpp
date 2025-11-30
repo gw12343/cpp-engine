@@ -208,7 +208,7 @@ namespace Engine {
 			auto&  skinnedMeshComponent   = e.GetComponent<Components::SkinnedMeshComponent>();
 			auto&  animationPoseComponent = e.GetComponent<Components::AnimationPoseComponent>();
 
-			const ozz::math::Float4x4 model = FromMatrix(e.GetComponent<Components::Transform>().GetMatrix());
+			const ozz::math::Float4x4 model = FromMatrix(e.GetComponent<Components::Transform>().GetWorldMatrix());
 
 
 			// Render each mesh

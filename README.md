@@ -69,7 +69,7 @@ cmake --build .
 using namespace Engine;
 
 int main() {
-    GEngine engine(1600, 1200, "My Game");
+    GEngine engine(1600*2, 1200*2, "My Game");
     
     if (!engine.Initialize()) {
         return -1;
