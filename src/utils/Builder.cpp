@@ -7,6 +7,7 @@
 #include <string>
 #include <iostream>
 #include <filesystem>
+#include <cstdlib>
 #include "core/EngineData.h"
 #include "assets/impl/BinarySceneLoader.h"
 #include <sol/sol.hpp>
@@ -181,6 +182,40 @@ namespace Engine {
                 GetSceneManager().GetActiveScene(),
                 (outScenesDir / "scene1.bin").string()
         );
+
+		// Copy and run the game executable
+		fs::path buildDir = fs::current_path() / "build";
+		fs::path exeName = "cpp-engine_game";
+#ifdef _WIN32
+		exeName += ".exe";
+#endif
+		fs::path sourceExe = buildDir / exeName;
+		fs::path destExe = outPath / exeName;
+
+		if (fs::exists(sourceExe)) {
+			try {
+				fs::copy_file(sourceExe, destExe, fs::copy_options::overwrite_existing);
+				GetDefaultLogger()->info("Copied executable to {}", destExe.string());
+
+				// Set executable permissions on Linux/Mac
+#ifndef _WIN32
+				fs::permissions(destExe, fs::perms::owner_all | fs::perms::group_read | fs::perms::group_exec | fs::perms::others_read | fs::perms::others_exec, fs::perm_options::add);
+#endif
+
+				GetDefaultLogger()->info("Running game...");
+				std::string command;
+#ifdef _WIN32
+				command = "cd /d \"" + outPath.string() + "\" && \"" + exeName.string() + "\"";
+#else
+				command = "cd \"" + outPath.string() + "\" && ./" + exeName.string();
+#endif
+				std::system(command.c_str());
+			} catch (const std::exception& e) {
+				GetDefaultLogger()->error("Failed to copy or run executable: {}", e.what());
+			}
+		} else {
+			GetDefaultLogger()->warn("Could not find executable at {}", sourceExe.string());
+		}
 
     }
 } // namespace Engine

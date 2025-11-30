@@ -17,11 +17,25 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
-                            "key": "BULLET_MATERIAL",
+                            "key": "JUMP_POWER",
                             "value": {
-                                "index": 7,
+                                "index": 0,
+                                "data": 8.0
+                            }
+                        },
+                        {
+                            "key": "RUN_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 12.0
+                            }
+                        },
+                        {
+                            "key": "BULLET_PARENT",
+                            "value": {
+                                "index": 12,
                                 "data": {
-                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
+                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
                                 }
                             }
                         },
@@ -33,25 +47,11 @@
                             }
                         },
                         {
-                            "key": "GRAVITY_SCALE",
+                            "key": "BULLET_MATERIAL",
                             "value": {
-                                "index": 0,
-                                "data": 2.0
-                            }
-                        },
-                        {
-                            "key": "JUMP_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 8.0
-                            }
-                        },
-                        {
-                            "key": "victorySound",
-                            "value": {
-                                "index": 11,
+                                "index": 7,
                                 "data": {
-                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
                                 }
                             }
                         },
@@ -60,13 +60,6 @@
                             "value": {
                                 "index": 0,
                                 "data": 64.5
-                            }
-                        },
-                        {
-                            "key": "CAMERA_Y_OFFSET",
-                            "value": {
-                                "index": 0,
-                                "data": 1.100000023841858
                             }
                         },
                         {
@@ -86,18 +79,25 @@
                             }
                         },
                         {
-                            "key": "RUN_SPEED",
+                            "key": "CAMERA_Y_OFFSET",
                             "value": {
                                 "index": 0,
-                                "data": 12.0
+                                "data": 1.100000023841858
                             }
                         },
                         {
-                            "key": "BULLET_PARENT",
+                            "key": "GRAVITY_SCALE",
                             "value": {
-                                "index": 12,
+                                "index": 0,
+                                "data": 2.0
+                            }
+                        },
+                        {
+                            "key": "victorySound",
+                            "value": {
+                                "index": 11,
                                 "data": {
-                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
                                 }
                             }
                         }
@@ -266,15 +266,6 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
-                            "key": "NORMAL_COLOR",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
-                                }
-                            }
-                        },
-                        {
                             "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
@@ -288,6 +279,15 @@
                             "value": {
                                 "index": 0,
                                 "data": 10.0
+                            }
+                        },
+                        {
+                            "key": "NORMAL_COLOR",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "4f843329315c8297e0905d030736e961"
+                                }
                             }
                         }
                     ]
@@ -382,6 +382,109 @@
         },
         {
             "EntityMetadata": {
+                "name": "New Model",
+                "tag": "",
+                "active": true,
+                "guid": "42f57b287d194a58db6bbe5d7899eb01",
+                "parentEntity": {
+                    "guid": "77b9ef246028ea5757c8bd10a7a21f9b"
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 14.401437759399414,
+                        "y": -0.06574535369873047,
+                        "z": -7.810932159423828
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "440eeeeb3deb20a70e023d8d0146dfcd"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "c65e206dfc749371e59f05aa1e2eda9c"
+                        },
+                        {
+                            "guid": "976658d88caf7f7fd4823ad2b7d6c99f"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 1,
+                    "mass": 1.0,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 1.0,
+                    "shapeType": "Box",
+                    "shapeSize": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
                 "name": "Copy of Target",
                 "tag": "",
                 "active": true,
@@ -397,15 +500,6 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
-                            "key": "NORMAL_COLOR",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
-                                }
-                            }
-                        },
-                        {
                             "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
@@ -419,6 +513,15 @@
                             "value": {
                                 "index": 0,
                                 "data": 10.0
+                            }
+                        },
+                        {
+                            "key": "NORMAL_COLOR",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "4f843329315c8297e0905d030736e961"
+                                }
                             }
                         }
                     ]
@@ -687,6 +790,9 @@
                     },
                     {
                         "guid": "6d0dadf264f2732514bcd57a8c40fd8d"
+                    },
+                    {
+                        "guid": "42f57b287d194a58db6bbe5d7899eb01"
                     }
                 ]
             },
@@ -908,15 +1014,6 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
-                            "key": "NORMAL_COLOR",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
-                                }
-                            }
-                        },
-                        {
                             "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
@@ -930,6 +1027,15 @@
                             "value": {
                                 "index": 0,
                                 "data": 10.0
+                            }
+                        },
+                        {
+                            "key": "NORMAL_COLOR",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "4f843329315c8297e0905d030736e961"
+                                }
                             }
                         }
                     ]
@@ -1039,15 +1145,6 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
-                            "key": "NORMAL_COLOR",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
-                                }
-                            }
-                        },
-                        {
                             "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
@@ -1061,6 +1158,15 @@
                             "value": {
                                 "index": 0,
                                 "data": 10.0
+                            }
+                        },
+                        {
+                            "key": "NORMAL_COLOR",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "4f843329315c8297e0905d030736e961"
+                                }
                             }
                         }
                     ]
@@ -1372,15 +1478,6 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
-                            "key": "NORMAL_COLOR",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
-                                }
-                            }
-                        },
-                        {
                             "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
@@ -1394,6 +1491,15 @@
                             "value": {
                                 "index": 0,
                                 "data": 10.0
+                            }
+                        },
+                        {
+                            "key": "NORMAL_COLOR",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "4f843329315c8297e0905d030736e961"
+                                }
                             }
                         }
                     ]
