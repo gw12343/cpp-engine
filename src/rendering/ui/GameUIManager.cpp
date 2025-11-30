@@ -4,7 +4,6 @@
 #include "core/Window.h"
 #include "core/EngineData.h"
 #include "scripting/ScriptManager.h"
-#include <spdlog/spdlog.h>
 #include <tracy/Tracy.hpp>
 
 namespace Engine {
@@ -27,14 +26,14 @@ namespace Engine {
 
 		// Initialize RmlUi
 		if (!Rml::Initialise()) {
-			spdlog::error("Failed to initialize RmlUi");
+			log->error("Failed to initialize RmlUi");
 			return;
 		}
 
 		// Create context
 		m_rmlContext = Rml::CreateContext("main", Rml::Vector2i(width, height));
 		if (!m_rmlContext) {
-			spdlog::error("Failed to create RmlUi context");
+			log->error("Failed to create RmlUi context");
 			return;
 		}
 
@@ -43,35 +42,25 @@ namespace Engine {
 
 		// Load fonts
 		if (!Rml::LoadFontFace("resources/fonts/Roboto-Regular.ttf")) {
-			spdlog::warn("Failed to load Roboto font for RmlUi");
+			log->warn("Failed to load Roboto font for RmlUi");
 		}
 
-		spdlog::info("RmlUi initialized successfully");
+		log->info("RmlUi initialized successfully");
+		
+		// Initialize RmlUi Lua plugin immediately
+		// This must happen before scenes load so RmlUIComponent documents can use Lua
+		try {
+			lua_State* L = GetScriptManager().lua.lua_state();
+			Rml::Lua::Initialise(L);
+			m_rmlLuaInitialized = true;
+			log->info("RmlUi Lua plugin initialized with engine Lua state");
+		} catch (const std::exception& e) {
+			log->error("Failed to initialize RmlUi Lua plugin: {}", e.what());
+		}
 	}
 
 	void GameUIManager::onUpdate(float dt) {
 		ZoneScoped;
-
-		// Initialize RmlUi Lua plugin once ScriptManager is ready
-		if (!m_rmlLuaInitialized && m_rmlContext) {
-			try {
-				lua_State* L = GetScriptManager().lua.lua_state();
-				Rml::Lua::Initialise(L);
-				m_rmlLuaInitialized = true;
-				spdlog::info("RmlUi Lua plugin initialized with engine Lua state");
-				
-				// Load demo document now that Lua is ready to process scripts
-				// auto* document = m_rmlContext->LoadDocument("resources/ui/demo.rml");
-				// if (document) {
-				// 	document->Show();
-				// 	spdlog::info("Loaded RmlUi demo document with Lua scripting");
-				// } else {
-				// 	spdlog::warn("Failed to load RmlUi demo document");
-				// }
-			} catch (const std::exception& e) {
-				spdlog::error("Failed to initialize RmlUi Lua plugin: {}", e.what());
-			}
-		}
 
 		if (m_rmlContext) {
 			auto& window = GetWindow();
@@ -162,9 +151,8 @@ namespace Engine {
 	}
 
 	void GameUIManager::resetDocuments() {
-#ifndef GAME_BUILD
 		if (m_rmlContext && m_rmlLuaInitialized) {
-			spdlog::info("Reloading RmlUi documents...");
+			log->info("Reloading RmlUi documents...");
 
 			// Close all existing documents to clean up old Lua subscriptions
 			while (m_rmlContext->GetNumDocuments() > 0) {
@@ -188,12 +176,11 @@ namespace Engine {
 				}
 			}
 		}
-#endif
 	}
 
 
 	void GameUIManager::onShutdown() {
-		spdlog::info("Shutting down RmlUi");
+		log->info("Shutting down RmlUi");
 		
 		// Close all documents first
 		if (m_rmlContext) {

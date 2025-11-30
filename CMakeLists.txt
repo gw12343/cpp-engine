@@ -261,7 +261,7 @@ target_include_directories(lua PUBLIC ${lua_SOURCE_DIR}/src)
 # ----------------- Source & Includes -------------------
 file(GLOB_RECURSE SOURCES "lib/src/*.cpp" "lib/src/*.c" "src/*.cpp" "src/*.inl")
 
-#add_compile_definitions(GAME_BUILD)
+add_compile_definitions(GAME_BUILD)
 
 add_executable(${PROJECT_NAME} ${SOURCES}
         src/utils/Builder.cpp

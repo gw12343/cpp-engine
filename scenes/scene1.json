@@ -17,13 +17,6 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
-                            "key": "WALK_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 7.0
-                            }
-                        },
-                        {
                             "key": "BULLET_MATERIAL",
                             "value": {
                                 "index": 7,
@@ -33,17 +26,10 @@
                             }
                         },
                         {
-                            "key": "JUMP_POWER",
+                            "key": "WALK_SPEED",
                             "value": {
                                 "index": 0,
-                                "data": 8.0
-                            }
-                        },
-                        {
-                            "key": "MOUSE_SENSITIVITY",
-                            "value": {
-                                "index": 0,
-                                "data": 0.10000000149011612
+                                "data": 7.0
                             }
                         },
                         {
@@ -54,10 +40,19 @@
                             }
                         },
                         {
-                            "key": "CAMERA_Y_OFFSET",
+                            "key": "JUMP_POWER",
                             "value": {
                                 "index": 0,
-                                "data": 1.100000023841858
+                                "data": 8.0
+                            }
+                        },
+                        {
+                            "key": "victorySound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                }
                             }
                         },
                         {
@@ -68,11 +63,25 @@
                             }
                         },
                         {
-                            "key": "BULLET_PARENT",
+                            "key": "CAMERA_Y_OFFSET",
                             "value": {
-                                "index": 12,
+                                "index": 0,
+                                "data": 1.100000023841858
+                            }
+                        },
+                        {
+                            "key": "MOUSE_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.10000000149011612
+                            }
+                        },
+                        {
+                            "key": "shootSound",
+                            "value": {
+                                "index": 11,
                                 "data": {
-                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
+                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
                                 }
                             }
                         },
@@ -81,6 +90,15 @@
                             "value": {
                                 "index": 0,
                                 "data": 12.0
+                            }
+                        },
+                        {
+                            "key": "BULLET_PARENT",
+                            "value": {
+                                "index": 12,
+                                "data": {
+                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
+                                }
                             }
                         }
                     ]
@@ -133,7 +151,20 @@
                 "nullopt": true
             },
             "AudioSource": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {
+                    "autoPlay": false,
+                    "looping": false,
+                    "volume": 1.0,
+                    "pitch": 1.0,
+                    "isPlaying": false,
+                    "referenceDistance": 1.0,
+                    "maxDistance": 100.0,
+                    "rolloffFactor": 1.0,
+                    "buffer": {
+                        "guid": ""
+                    }
+                }
             },
             "SkeletonComponent": {
                 "nullopt": true
@@ -173,89 +204,7 @@
                 "children": []
             },
             "LuaScript": {
-                "nullopt": false,
-                "data": {
-                    "scriptPath": "scripts/test_vectors.lua",
-                    "variables": [
-                        {
-                            "key": "tiles",
-                            "value": {
-                                "index": 18,
-                                "data": []
-                            }
-                        },
-                        {
-                            "key": "scenes",
-                            "value": {
-                                "index": 17,
-                                "data": []
-                            }
-                        },
-                        {
-                            "key": "models",
-                            "value": {
-                                "index": 15,
-                                "data": [
-                                    {
-                                        "guid": "16ab47c200b25ccb2b9dbcf46297059f"
-                                    },
-                                    {
-                                        "guid": ""
-                                    },
-                                    {
-                                        "guid": ""
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            "key": "particles",
-                            "value": {
-                                "index": 19,
-                                "data": []
-                            }
-                        },
-                        {
-                            "key": "sounds",
-                            "value": {
-                                "index": 20,
-                                "data": [
-                                    {
-                                        "guid": "a974db1b6552d57b0799b03f250089bb"
-                                    },
-                                    {
-                                        "guid": "5934d5e25811aaab0768ad9457b3af78"
-                                    },
-                                    {
-                                        "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            "key": "textures",
-                            "value": {
-                                "index": 14,
-                                "data": [
-                                    {
-                                        "guid": "684bda7719ce8774b0883115da989766"
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            "key": "materials",
-                            "value": {
-                                "index": 16,
-                                "data": [
-                                    {
-                                        "guid": "50261caca552b9ed2cda4de3bc2b2e6b"
-                                    }
-                                ]
-                            }
-                        }
-                    ]
-                }
+                "nullopt": true
             },
             "ShadowCaster": {
                 "nullopt": true
@@ -317,6 +266,15 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
+                            "key": "NORMAL_COLOR",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "4f843329315c8297e0905d030736e961"
+                                }
+                            }
+                        },
+                        {
                             "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
@@ -330,15 +288,6 @@
                             "value": {
                                 "index": 0,
                                 "data": 10.0
-                            }
-                        },
-                        {
-                            "key": "NORMAL_COLOR",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
-                                }
                             }
                         }
                     ]
@@ -448,6 +397,15 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
+                            "key": "NORMAL_COLOR",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "4f843329315c8297e0905d030736e961"
+                                }
+                            }
+                        },
+                        {
                             "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
@@ -461,15 +419,6 @@
                             "value": {
                                 "index": 0,
                                 "data": 10.0
-                            }
-                        },
-                        {
-                            "key": "NORMAL_COLOR",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
-                                }
                             }
                         }
                     ]
@@ -959,6 +908,15 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
+                            "key": "NORMAL_COLOR",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "4f843329315c8297e0905d030736e961"
+                                }
+                            }
+                        },
+                        {
                             "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
@@ -972,15 +930,6 @@
                             "value": {
                                 "index": 0,
                                 "data": 10.0
-                            }
-                        },
-                        {
-                            "key": "NORMAL_COLOR",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
-                                }
                             }
                         }
                     ]
@@ -1090,6 +1039,15 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
+                            "key": "NORMAL_COLOR",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "4f843329315c8297e0905d030736e961"
+                                }
+                            }
+                        },
+                        {
                             "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
@@ -1103,15 +1061,6 @@
                             "value": {
                                 "index": 0,
                                 "data": 10.0
-                            }
-                        },
-                        {
-                            "key": "NORMAL_COLOR",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
-                                }
                             }
                         }
                     ]
@@ -1423,6 +1372,15 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
+                            "key": "NORMAL_COLOR",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "4f843329315c8297e0905d030736e961"
+                                }
+                            }
+                        },
+                        {
                             "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
@@ -1436,15 +1394,6 @@
                             "value": {
                                 "index": 0,
                                 "data": 10.0
-                            }
-                        },
-                        {
-                            "key": "NORMAL_COLOR",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
-                                }
                             }
                         }
                     ]

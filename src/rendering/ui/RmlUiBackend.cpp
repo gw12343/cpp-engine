@@ -1,9 +1,11 @@
 #include <glad/glad.h>
 #include "RmlUiBackend.h"
+#include "core/EngineData.h"
+#include "rendering/ui/GameUIManager.h"
+#include "rendering/ui/GameUIManager.h"
 #include <RmlUi/Core.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <spdlog/spdlog.h>
 
 // stb_image is already used elsewhere in the project
 #include <stb/stb_image.h>
@@ -63,7 +65,7 @@ static GLuint CompileGLShader(GLenum type, const char* source) {
 	if (!success) {
 		char info_log[512];
 		glGetShaderInfoLog(shader, 512, nullptr, info_log);
-		spdlog::error("RmlUi Shader compilation failed: {}", info_log);
+		GetGameUIManager().log->error("RmlUi Shader compilation failed: {}", info_log);
 		return 0;
 	}
 
@@ -88,7 +90,7 @@ void RmlUi_RenderInterface_GL3::CreateShaders() {
 	GLuint fragment_shader = CompileGLShader(GL_FRAGMENT_SHADER, fragment_shader_source);
 
 	if (!vertex_shader || !fragment_shader) {
-		spdlog::error("Failed to compile RmlUi shaders");
+		GetGameUIManager().log->error("Failed to compile RmlUi shaders");
 		return;
 	}
 
@@ -103,7 +105,7 @@ void RmlUi_RenderInterface_GL3::CreateShaders() {
 	if (!success) {
 		char info_log[512];
 		glGetProgramInfoLog(m_program_id, 512, nullptr, info_log);
-		spdlog::error("RmlUi Program linking failed: {}", info_log);
+		GetGameUIManager().log->error("RmlUi Program linking failed: {}", info_log);
 	}
 
 	glDeleteShader(vertex_shader);
@@ -112,7 +114,7 @@ void RmlUi_RenderInterface_GL3::CreateShaders() {
 	// Set identity transform initially
 	m_transform = glm::mat4(1.0f);
 
-	spdlog::info("RmlUi OpenGL3 backend initialized");
+	GetGameUIManager().log->info("RmlUi OpenGL3 backend initialized");
 }
 
 void RmlUi_RenderInterface_GL3::DestroyShaders() {
@@ -267,7 +269,7 @@ Rml::TextureHandle RmlUi_RenderInterface_GL3::LoadTexture(Rml::Vector2i& texture
 	unsigned char* data = stbi_load(source.c_str(), &width, &height, &channels, 4);
 
 	if (!data) {
-		spdlog::error("Failed to load texture: {}", source);
+		GetGameUIManager().log->error("Failed to load texture: {}", source);
 		return 0;
 	}
 
@@ -292,7 +294,7 @@ Rml::TextureHandle RmlUi_RenderInterface_GL3::LoadTexture(Rml::Vector2i& texture
 	Rml::TextureHandle handle = m_next_texture_id++;
 	m_textures[handle] = gl_texture;
 
-	spdlog::debug("Loaded RmlUi texture: {} ({}x{})", source, width, height);
+	GetGameUIManager().log->debug("Loaded RmlUi texture: {} ({}x{})", source, width, height);
 
 	return handle;
 }
