@@ -1,8 +1,6 @@
 #include "Skybox.h"
 #include "core/EngineData.h"
 
-
-#include <spdlog/spdlog.h>
 #include <glad/glad.h>
 
 namespace Engine {

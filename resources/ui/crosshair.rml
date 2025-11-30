@@ -1,0 +1,9 @@
+<rml>
+<head>
+	<title>Game HUD</title>
+	<link type="text/rcss" href="crosshair.rcss"/>
+</head>
+<body>
+	<div id="crosshair"><p>+</p></div>
+</body>
+</rml>

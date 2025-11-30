@@ -8,7 +8,7 @@
 #include <string>
 
 namespace Engine {
-
+	class EntityHandle;
 
 	// Entity wrapper class for easier entity manipulation
 	class Entity {
@@ -31,35 +31,30 @@ namespace Engine {
 		bool operator!=(const Entity& other) const { return !(*this == other); }
 
 		// Get the underlying entt handle
-		[[nodiscard]] entt::entity GetHandle() const { return m_handle; }
+		[[nodiscard]] entt::entity GetENTTHandle() const { return m_handle; }
+
+		EntityHandle GetEntityHandle();
+
+		std::vector<EntityHandle> GetChildren();
+
+		void SetParent(const EntityHandle& parent);
+
+		void SetWorldTransform(glm::vec3 worldPosition, glm::quat worldRotation, glm::vec3 worldScale);
+
 
 		// Template method declarations
 		template <typename T, typename... Args>
-		T& AddComponent(Args&&... args)
-		{
-			T& component = m_scene->GetRegistry()->template emplace<T>(m_handle, std::forward<Args>(args)...);
-			component.OnAdded(*this);
-			return component;
-		}
+		T& AddComponent(Args&&... args);
 
 
 		template <typename T>
-		T& GetComponent()
-		{
-			return m_scene->GetRegistry()->template get<T>(m_handle);
-		}
+		T& GetComponent();
 
 		template <typename T>
-		bool HasComponent() const
-		{
-			return m_scene->GetRegistry()->template all_of<T>(m_handle);
-		}
+		[[nodiscard]] bool HasComponent() const;
 
 		template <typename T>
-		void RemoveComponent()
-		{
-			m_scene->GetRegistry()->template remove<T>(m_handle);
-		}
+		void RemoveComponent();
 
 		// Entity metadata helpers
 		[[nodiscard]] const std::string& GetName() const;
@@ -76,5 +71,8 @@ namespace Engine {
 
 	  private:
 		entt::entity m_handle{entt::null};
+		void         RemoveChild(const EntityHandle& handle);
 	};
 } // namespace Engine
+
+#include "Entity.inl"

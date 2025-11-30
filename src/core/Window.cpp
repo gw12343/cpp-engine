@@ -1,5 +1,6 @@
 #include "Window.h"
 #include "EngineData.h"
+#include "rendering/ui/GameUIManager.h"
 
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
@@ -10,6 +11,7 @@
 #include <tracy/Tracy.hpp>
 #include "scripting/ScriptManager.h"
 #include "rendering/ui/IconsFontAwesome6.h"
+#include "imguizmo/ImGuizmo.h"
 #include "imguizmo/ImGuizmo.h"
 
 namespace Engine {
@@ -23,6 +25,9 @@ namespace Engine {
 		m_frameBuffers[Window::FramebufferID::GAME_OUT]      = std::make_shared<Framebuffer>(GL_LINEAR, GL_LINEAR);
 		m_frameBuffers[Window::FramebufferID::MOUSE_PICKING] = std::make_shared<Framebuffer>(GL_NEAREST, GL_NEAREST);
 	}
+
+	// Explicit destructor needed for unique_ptr with forward-declared types
+	Window::~Window() = default;
 
 
 	void Window::onInit()
@@ -114,9 +119,13 @@ namespace Engine {
 		return true;
 	}
 
+
+
 	void Window::onUpdate(float dt)
 	{
 		ZoneScoped;
+		glfwPollEvents();
+
 		glfwPollEvents();
 
 		ImGui_ImplOpenGL3_NewFrame();
@@ -131,6 +140,10 @@ namespace Engine {
 		targetHeight = GetHeight();
 #endif
 	}
+
+void Window::onGameStart()
+{
+}	
 
 	bool Window::ShouldClose() const
 	{
@@ -181,6 +194,9 @@ namespace Engine {
 		// Update viewport
 		SetFullViewport();
 		UpdateFramebufferSizes(width, height);
+
+		// Update RmlUi context dimensions
+		GetGameUIManager().OnResize(width, height);
 	}
 	[[maybe_unused]] float Window::GetAspectRatio() const
 	{

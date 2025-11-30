@@ -14,7 +14,14 @@ variables = {
     RUN_SPEED = 12.0,
     JUMP_POWER = 8.0,
     GRAVITY_SCALE = 2.0,
-    SHOOT_POWER = 15
+    SHOOT_POWER = 15,
+
+    BULLET_PARENT = ehandle(),
+
+    BULLET_MATERIAL = material(),
+
+	shootSound = sound(),
+	victorySound = sound()
 }
 
 
@@ -24,23 +31,43 @@ variables = {
 function Start()
     print("Started script!");
 
+
+
+	subscribe("TargetHit", function(points)
+        local playerSource = gameObject:GetAudioSource()
+		playerSource:setSound(variables.shootSound)
+		playerSource:play()
+    end)
+
+	subscribe("AllTargetsDestroyed", function()
+        local playerSource = gameObject:GetAudioSource()
+		playerSource:setSound(variables.victorySound)
+		playerSource:play()
+    end)
+    
+
 end
 
-
+ballCount = 0
 
 function ShootObject(model, shape, speed, scale)
-
+	
     local cam = getCamera()
     local cpos = cam:getPosition()
     local foward = cam:getFront()
     -- Summon entity
-    local newBall = createEntity("Ball")
+    local newBall = createEntity("Ball"..ballCount)
+    ballCount = ballCount + 1
     -- Add Components
     local tr = newBall:AddTransform()
     local mr = newBall:AddModelRenderer();
+
+    mr:setMaterial(variables.BULLET_MATERIAL)
+
     local rb = newBall:AddRigidBodyComponent();
     local sc = newBall:AddLuaScript();
-    newBall:AddShadowCaster();
+    newBall:AddShadowCaster()
+    newBall:setParent(variables.BULLET_PARENT)
 
     tr.scale = vec3(scale, scale, scale)
     mr:setModel(model)

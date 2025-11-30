@@ -20,8 +20,18 @@
 
 
 namespace Engine::Components {
+	void LuaScript::UnsubscribeAll()
+	{
+		for (uint32_t id : subscriptionIDs) {
+			GetScriptManager().eventBus.Unsubscribe(id);
+		}
+		subscriptionIDs.clear();
+	}
+
 	void LuaScript::OnRemoved(Entity& entity)
 	{
+		UnsubscribeAll();
+
 		if (start.valid()) {
 			start = sol::lua_nil;
 		}
@@ -168,6 +178,24 @@ namespace Engine::Components {
 								}
 							}
 							// TODO add asset vector types
+#define ASSET_VEC_CHK(nme, typ)                                                                                                                                                                                                                \
+	else if (obj.is<std::vector<AssetHandle<typ>>>())                                                                                                                                                                                          \
+	{                                                                                                                                                                                                                                          \
+		auto handle = obj.as<std::vector<AssetHandle<typ>>>();                                                                                                                                                                                 \
+		if (LeftLabelAssetVector##nme(key.c_str(), handle)) {                                                                                                                                                                                  \
+			variables[key]    = handle;                                                                                                                                                                                                        \
+			cppVariables[key] = handle;                                                                                                                                                                                                        \
+			SyncFromLua();                                                                                                                                                                                                                     \
+		}                                                                                                                                                                                                                                      \
+	}
+
+							ASSET_VEC_CHK(Texture, Texture)
+							ASSET_VEC_CHK(Model, Rendering::Model)
+							ASSET_VEC_CHK(Material, Material)
+							ASSET_VEC_CHK(Scene, Scene)
+							ASSET_VEC_CHK(Terrain, Terrain::TerrainTile)
+							ASSET_VEC_CHK(Particle, Particle)
+							ASSET_VEC_CHK(Sound, Audio::SoundBuffer)
 
 							break;
 						}
@@ -233,6 +261,27 @@ namespace Engine::Components {
 			else if (kv.second.is<std::vector<EntityHandle>>()) {
 				cppVariables[key] = kv.second.as<std::vector<EntityHandle>>();
 			}
+			else if (kv.second.is<std::vector<AssetHandle<Texture>>>()) {
+				cppVariables[key] = kv.second.as<std::vector<AssetHandle<Texture>>>();
+			}
+			else if (kv.second.is<std::vector<AssetHandle<Rendering::Model>>>()) {
+				cppVariables[key] = kv.second.as<std::vector<AssetHandle<Rendering::Model>>>();
+			}
+			else if (kv.second.is<std::vector<AssetHandle<Material>>>()) {
+				cppVariables[key] = kv.second.as<std::vector<AssetHandle<Material>>>();
+			}
+			else if (kv.second.is<std::vector<AssetHandle<Scene>>>()) {
+				cppVariables[key] = kv.second.as<std::vector<AssetHandle<Scene>>>();
+			}
+			else if (kv.second.is<std::vector<AssetHandle<Terrain::TerrainTile>>>()) {
+				cppVariables[key] = kv.second.as<std::vector<AssetHandle<Terrain::TerrainTile>>>();
+			}
+			else if (kv.second.is<std::vector<AssetHandle<Particle>>>()) {
+				cppVariables[key] = kv.second.as<std::vector<AssetHandle<Particle>>>();
+			}
+			else if (kv.second.is<std::vector<AssetHandle<Audio::SoundBuffer>>>()) {
+				cppVariables[key] = kv.second.as<std::vector<AssetHandle<Audio::SoundBuffer>>>();
+			}
 			else {
 				SPDLOG_WARN("TRYING TO LOAD INVALID VAR VALUE FROM LUA");
 			}
@@ -246,11 +295,13 @@ namespace Engine::Components {
 		for (auto& [key, value] : cppVariables) {
 			sol::object existing = variables[key];
 			if (existing.valid()) {
-				std::visit(
-				    [&](auto&& arg) {
-					    variables[key] = arg; // only overwrite if Lua already had the key
-				    },
+
+				    std::visit(
+						[&, key = key](auto&& arg) {
+							variables[key] = arg; // only overwrite if Lua already had the key
+						},
 				    value);
+				
 			}
 		}
 	}
@@ -278,6 +329,9 @@ namespace Engine::Components {
 		collisionEnter       = sol::function();
 		playerCollisionEnter = sol::function();
 		variables            = sol::table();
+		
+		// Clear any existing subscriptions from the previous script instance
+		UnsubscribeAll();
 
 		if (scriptPath.empty()) return;
 
@@ -286,11 +340,29 @@ namespace Engine::Components {
 
 		// Inject gameObject
 		env["gameObject"] = entity;
+		
+		// Inject custom subscribe function to track subscriptions
+		env["subscribe"] = [this](const std::string& eventName, sol::function callback) {
+			uint32_t id = GetScriptManager().eventBus.Subscribe(eventName, callback);
+			this->subscriptionIDs.push_back(id);
+			return id;
+		};
 
 
 		try {
 			// Load the script into the environment
+#ifdef GAME_BUILD
+			// In game builds, load compiled .luac bytecode instead of source
+			std::string loadPath = scriptPath;
+			if (loadPath.size() >= 4 && loadPath.substr(loadPath.size() - 4) == ".lua") {
+				loadPath = loadPath.substr(0, loadPath.size() - 4) + ".luac";
+			}
+			GetScriptManager().log->info("Loading compiled script: {}", loadPath);
+			GetScriptManager().lua.script_file(loadPath, env);
+#else
+			// In editor mode, load source .lua files
 			GetScriptManager().lua.script_file(scriptPath, env);
+#endif
 
 			// Bind lifecycle functions
 			start                = env["Start"];
@@ -314,7 +386,7 @@ namespace Engine::Components {
 			env.set_function("getEntityFromHandle", GetEntityFromHandle);
 		}
 		catch (const sol::error& err) {
-			GetScriptManager().log->error("[LuaScript] Error in {}: {}", scriptPath, err.what());
+			GetScriptManager().log->error("[LuaScript] Error in  (original path){}: {}", scriptPath, err.what());
 		}
 	}
 
@@ -429,6 +501,31 @@ namespace Engine::Components {
 			    if (i == 0 || i > self.size()) throw std::out_of_range("Index out of range");
 			    self[i - 1] = value;
 		    });
+
+		using MaterialHandle = AssetHandle<Material>;
+		using MaterialVector = std::vector<MaterialHandle>;
+
+#define BIND_ASSET_VECTOR(Name, Type)                                                                                                                                                                                                          \
+	{                                                                                                                                                                                                                                          \
+		using VectorType = std::vector<AssetHandle<Type>>;                                                                                                                                                                                     \
+		lua.new_usertype<VectorType>(Name, sol::constructors<VectorType()>(), "push_back", static_cast<void (VectorType::*)(const AssetHandle<Type>&)>(&VectorType::push_back), "size", &VectorType::size, sol::meta_function::index,          \
+		    [](VectorType& self, std::size_t i) -> AssetHandle<Type>& {                                                                                                                                                                        \
+			    if (i == 0 || i > self.size()) throw std::out_of_range("Index out of range");                                                                                                                                                  \
+			    return self[i - 1];                                                                                                                                                                                                            \
+		    },                                                                                                                                                                                                                                 \
+		    sol::meta_function::new_index, [](VectorType& self, std::size_t i, const AssetHandle<Type>& value) {                                                                                                                               \
+			    if (i == 0 || i > self.size()) throw std::out_of_range("Index out of range");                                                                                                                                                  \
+			    self[i - 1] = value;                                                                                                                                                                                                           \
+		    });                                                                                                                                                                                                                                \
+	}
+
+		BIND_ASSET_VECTOR("TextureVector", Texture)
+		BIND_ASSET_VECTOR("ModelVector", Rendering::Model)
+		BIND_ASSET_VECTOR("MaterialVector", Material)
+		BIND_ASSET_VECTOR("SceneVector", Scene)
+		BIND_ASSET_VECTOR("TerrainTileVector", Terrain::TerrainTile)
+		BIND_ASSET_VECTOR("ParticleVector", Particle)
+		BIND_ASSET_VECTOR("SoundVector", Audio::SoundBuffer)
 	}
 
 

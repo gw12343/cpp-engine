@@ -2,26 +2,21 @@ cmake_minimum_required(VERSION 3.24)
 project(cpp-engine VERSION 0.1.0 LANGUAGES C CXX)
 
 # ----------------- Build Options -----------------
-option(GAME_BUILD "Compile engine as game build (stripped for game)" OFF)
-
-if (GAME_BUILD)
-    message(STATUS "Configuring GAME_BUILD")
-    add_compile_definitions(GAME_BUILD)
-    set(TARGET_NAME "${PROJECT_NAME}_game")
-else ()
-    set(TARGET_NAME "${PROJECT_NAME}")
-endif ()
-
 # Compiler settings
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(ENABLE_ALL_WARNINGS "Enable all warnings and warnings as errors" OFF)
+set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE INTERNAL "No dev warnings")
+
 add_compile_options(-w)
 
 if (WIN32)
     add_compile_definitions(NOMINMAX)
+    add_compile_definitions(WIN32_LEAN_AND_MEAN)
+    add_compile_definitions(_WINSOCK_DEPRECATED_NO_WARNINGS)
 endif ()
+
 # Global dependency flags
 set(SPDLOG_BUILD_WARNINGS OFF CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
@@ -37,20 +32,19 @@ set(ozz_build_postfix OFF CACHE BOOL "" FORCE)
 set(OPENAL_ROOT "C:/Users/Gabe/Documents/openal-soft-1.24.3-bin")  # Change this if needed
 option(USE_ASSIMP_FROM_SOURCE "Build and use Assimp 6.0.2 from source" ON)
 
-
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    # Use MDd in Debug, MD in Release
-    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-        add_compile_options(/MDd)
-    else ()
-        add_compile_options(/MD)
+if (WIN32)
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        # Use MDd in Debug, MD in Release
+        if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+            add_compile_options(/MDd)
+        else ()
+            add_compile_options(/MD)
+        endif ()
     endif ()
-endif ()
-
+endif()
 
 # Fetch external libraries
 include(FetchContent)
-
 
 if (USE_ASSIMP_FROM_SOURCE)
     include(FetchContent)
@@ -119,7 +113,8 @@ FetchContent_Declare(
 FetchContent_Declare(
         effekseer
         GIT_REPOSITORY https://github.com/Effekseer/Effekseer.git
-        GIT_TAG master
+        GIT_TAG 3cdc295ad98987427c8f980f5ee6543a9004829a
+        GIT_CONFIG "core.autocrlf=false"
 )
 
 FetchContent_Declare(
@@ -136,7 +131,7 @@ FetchContent_Declare(
 FetchContent_Declare(
         nlohmann_json
         GIT_REPOSITORY https://github.com/nlohmann/json.git
-        GIT_TAG v3.11.3 # or the latest stable version you prefer
+        GIT_TAG v3.11.3
 )
 
 FetchContent_Declare(
@@ -147,9 +142,47 @@ FetchContent_Declare(
 set(EFSW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(EFSW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
+# Fetch FreeType on Windows for RmlUi
+if (WIN32)
+    FetchContent_Declare(
+            freetype
+            GIT_REPOSITORY https://github.com/freetype/freetype.git
+            GIT_TAG VER-2-13-2
+    )
+    set(FT_DISABLE_ZLIB ON CACHE BOOL "" FORCE)
+    set(FT_DISABLE_BZIP2 ON CACHE BOOL "" FORCE)
+    set(FT_DISABLE_PNG ON CACHE BOOL "" FORCE)
+    set(FT_DISABLE_HARFBUZZ ON CACHE BOOL "" FORCE)
+    set(FT_DISABLE_BROTLI ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(freetype)
+
+    # Create an alias so RmlUi can find it
+    if (TARGET freetype)
+        add_library(Freetype::Freetype ALIAS freetype)
+    endif()
+endif ()
+
+FetchContent_Declare(
+        rmlui
+        GIT_REPOSITORY https://github.com/mikke89/RmlUi.git
+        GIT_TAG 6.0
+)
+set(RMLUI_SAMPLES OFF CACHE BOOL "" FORCE)
+set(RMLUI_TESTS OFF CACHE BOOL "" FORCE)
+set(RMLUI_LUA_BINDINGS ON CACHE BOOL "" FORCE)
+set(RMLUI_FONT_ENGINE "freetype" CACHE STRING "" FORCE)
 
 FetchContent_MakeAvailable(cereal spdlog nativefiledialog jolt ozz imgui effekseer lua sol2 nlohmann_json efsw tracy)
 
+# Now point RmlUi to our built Lua library (after lua has been fetched)
+if (WIN32)
+    set(LUA_LIBRARIES lua CACHE STRING "" FORCE)
+else()
+    set(LUA_LIBRARIES ${CMAKE_BINARY_DIR}/libluad.a CACHE STRING "" FORCE)
+endif()
+set(LUA_INCLUDE_DIR ${lua_SOURCE_DIR}/src CACHE STRING "" FORCE)
+
+FetchContent_MakeAvailable(rmlui)
 
 if (WIN32)
     FetchContent_Declare(
@@ -158,8 +191,8 @@ if (WIN32)
             GIT_TAG 1.2.2
     )
 
-    set(ENABLE_EXTERNAL_LIBS OFF CACHE BOOL "" FORCE)  # Avoid building FLAC/MP3/VORBIS, optional
-    set(BUILD_PROGRAMS OFF CACHE BOOL "" FORCE)        # No command-line tools
+    set(ENABLE_EXTERNAL_LIBS OFF CACHE BOOL "" FORCE)
+    set(BUILD_PROGRAMS OFF CACHE BOOL "" FORCE)
     set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
     set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(sndfile)
@@ -173,7 +206,7 @@ add_library(nfd STATIC
 
 if (WIN32)
     target_sources(nfd PRIVATE ${nativefiledialog_SOURCE_DIR}/src/nfd_win.cpp)
-else () # Linux
+else ()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
     include_directories(${GTK3_INCLUDE_DIRS})
@@ -215,126 +248,137 @@ target_include_directories(lua PUBLIC ${lua_SOURCE_DIR}/src)
 # ----------------- Source & Includes -------------------
 file(GLOB_RECURSE SOURCES "lib/src/*.cpp" "lib/src/*.c" "src/*.cpp" "src/*.inl")
 
-#add_compile_definitions(GAME_BUILD)
+# ----------------- Function to setup an executable -------------------
+function(setup_executable TARGET_NAME GAME_BUILD_FLAG)
+    add_executable(${TARGET_NAME} ${SOURCES})
 
-add_executable(${PROJECT_NAME} ${SOURCES}
-        src/utils/Builder.cpp
-        src/animation/Animation.h
-        src/animation/Animation.cpp
-        src/components/impl/GizmoComponent.h
-        src/components/impl/GizmoComponent.cpp)
+    if (GAME_BUILD_FLAG)
+        target_compile_definitions(${TARGET_NAME} PRIVATE GAME_BUILD)
+        message(STATUS "Configuring ${TARGET_NAME} with GAME_BUILD")
+    else()
+        message(STATUS "Configuring ${TARGET_NAME} without GAME_BUILD")
+    endif()
 
+    target_include_directories(${TARGET_NAME} PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/lib/include
+            ${CMAKE_CURRENT_SOURCE_DIR}/lib/src/JoltPhysics
+            ${CMAKE_CURRENT_SOURCE_DIR}/lib/include/JoltPhysics
+            ${CMAKE_CURRENT_SOURCE_DIR}/src
+            ${lua_SOURCE_DIR}/src
+            ${rmlui_SOURCE_DIR}/Include
+    )
 
-target_include_directories(${PROJECT_NAME} PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/src/JoltPhysics
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/include/JoltPhysics
-        ${CMAKE_CURRENT_SOURCE_DIR}/src
-        ${lua_SOURCE_DIR}/src
-)
+    # Effekseer
+    target_include_directories(${TARGET_NAME} PRIVATE
+            ${effekseer_SOURCE_DIR}/Dev/Cpp
+            ${effekseer_SOURCE_DIR}/Dev/Cpp/Effekseer
+            ${effekseer_SOURCE_DIR}/Dev/Cpp/EffekseerRendererGL
+            ${effekseer_SOURCE_DIR}/Dev/Cpp/EffekseerRendererCommon
+    )
 
-# Effekseer
-target_include_directories(${PROJECT_NAME} PRIVATE
-        ${effekseer_SOURCE_DIR}/Dev/Cpp
-        ${effekseer_SOURCE_DIR}/Dev/Cpp/Effekseer
-        ${effekseer_SOURCE_DIR}/Dev/Cpp/EffekseerRendererGL
-        ${effekseer_SOURCE_DIR}/Dev/Cpp/EffekseerRendererCommon
-)
+    # OpenGL
+    find_package(OpenGL REQUIRED)
+    target_link_libraries(${TARGET_NAME} PRIVATE OpenGL::GL)
 
-# ----------------- Platform-specific Dependencies -------------------
+    # OpenAL
+    if (WIN32)
+        set(OPENAL_LIBRARY "${OPENAL_ROOT}/libs/Win64/OpenAL32.lib")
+        set(OPENAL_INCLUDE_DIR "${OPENAL_ROOT}/include")
 
-# OpenGL
-find_package(OpenGL REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
+        if (EXISTS "${OPENAL_LIBRARY}" AND EXISTS "${OPENAL_INCLUDE_DIR}/AL/al.h")
+            message(STATUS "Using manually specified OpenAL from ${OPENAL_ROOT}")
+        else ()
+            message(FATAL_ERROR "OpenAL not found! Please set OPENAL_ROOT to the path where OpenAL Soft is installed.")
+        endif ()
 
-# OpenAL
-if (WIN32)
-    set(OPENAL_LIBRARY "${OPENAL_ROOT}/libs/Win64/OpenAL32.lib")
-    set(OPENAL_INCLUDE_DIR "${OPENAL_ROOT}/include")
-
-    if (EXISTS "${OPENAL_LIBRARY}" AND EXISTS "${OPENAL_INCLUDE_DIR}/AL/al.h")
-        message(STATUS "Using manually specified OpenAL from ${OPENAL_ROOT}")
+        target_include_directories(${TARGET_NAME} PRIVATE ${OPENAL_INCLUDE_DIR})
+        target_link_libraries(${TARGET_NAME} PRIVATE "${OPENAL_LIBRARY}")
     else ()
-        message(FATAL_ERROR "OpenAL not found! Please set OPENAL_ROOT to the path where OpenAL Soft is installed.")
+        find_package(OpenAL REQUIRED)
+        target_link_libraries(${TARGET_NAME} PRIVATE ${OPENAL_LIBRARY})
     endif ()
 
-    include_directories(${OPENAL_INCLUDE_DIR})
-    target_link_libraries(${PROJECT_NAME} PRIVATE "${OPENAL_LIBRARY}")
-else ()
-    find_package(OpenAL REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${OPENAL_LIBRARY})
-endif ()
-
-
-if (WIN32)
-    # Use built-in or bundled .lib
-    set(ASSIMP_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/assimp.lib")
-    if (EXISTS "${ASSIMP_LIB}")
-        message(STATUS "Using bundled Assimp on Windows: ${ASSIMP_LIB}")
-        target_link_libraries(${PROJECT_NAME} PRIVATE "${ASSIMP_LIB}")
+    # Assimp
+    if (WIN32)
+        set(ASSIMP_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/assimp.lib")
+        if (EXISTS "${ASSIMP_LIB}")
+            message(STATUS "Using bundled Assimp on Windows: ${ASSIMP_LIB}")
+            target_link_libraries(${TARGET_NAME} PRIVATE "${ASSIMP_LIB}")
+        else ()
+            find_package(ASSIMP REQUIRED)
+            target_link_libraries(${TARGET_NAME} PRIVATE assimp::assimp)
+        endif ()
     else ()
-        find_package(ASSIMP REQUIRED)
-        target_link_libraries(${PROJECT_NAME} PRIVATE assimp::assimp)
+        if (USE_ASSIMP_FROM_SOURCE)
+            target_link_libraries(${TARGET_NAME} PRIVATE assimp)
+        else ()
+            find_package(ASSIMP 6.0.2 REQUIRED)
+            target_link_libraries(${TARGET_NAME} PRIVATE assimp::assimp)
+        endif ()
     endif ()
-else ()
-    if (USE_ASSIMP_FROM_SOURCE)
-        # Use the built-in CMake target from our fetch/build
-        target_link_libraries(${PROJECT_NAME} PRIVATE assimp)
+
+    # GLFW
+    if (WIN32)
+        set(GLFW_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/glfw3.lib")
+        set(GLFW_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/include")
+        if (EXISTS "${GLFW_LIB}")
+            message(STATUS "Using manually specified GLFW at ${GLFW_LIB}")
+            target_link_libraries(${TARGET_NAME} PRIVATE "${GLFW_LIB}")
+            target_include_directories(${TARGET_NAME} PRIVATE "${GLFW_INCLUDE_DIR}")
+        else ()
+            message(FATAL_ERROR "GLFW library not found at ${GLFW_LIB}")
+        endif ()
     else ()
-        find_package(ASSIMP 6.0.2 REQUIRED)
-        target_link_libraries(${PROJECT_NAME} PRIVATE assimp::assimp)
+        find_package(glfw3 REQUIRED)
+        target_link_libraries(${TARGET_NAME} PRIVATE glfw)
     endif ()
-endif ()
 
-if (WIN32)
-    set(GLFW_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/glfw3.lib")
-    set(GLFW_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/include")  # Optional if needed
-    if (EXISTS "${GLFW_LIB}")
-        message(STATUS "Using manually specified GLFW at ${GLFW_LIB}")
-        target_link_libraries(${PROJECT_NAME} PRIVATE "${GLFW_LIB}")
-        target_link_libraries(imgui PRIVATE "${GLFW_LIB}")
-        target_include_directories(${PROJECT_NAME} PRIVATE "${GLFW_INCLUDE_DIR}")
+    # SndFile
+    if (WIN32)
+        target_link_libraries(${TARGET_NAME} PRIVATE sndfile)
     else ()
-        message(FATAL_ERROR "GLFW library not found at ${GLFW_LIB}")
+        find_package(PkgConfig REQUIRED)
+        pkg_check_modules(SNDFILE REQUIRED sndfile)
+        target_include_directories(${TARGET_NAME} PRIVATE ${SNDFILE_INCLUDE_DIRS})
+        target_link_directories(${TARGET_NAME} PRIVATE ${SNDFILE_LIBRARY_DIRS})
+        target_link_libraries(${TARGET_NAME} PRIVATE ${SNDFILE_LIBRARIES})
     endif ()
-else ()
-    find_package(glfw3 REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
-    target_link_libraries(imgui PRIVATE glfw)
-endif ()
 
+    # Link all libraries
+    target_link_libraries(${TARGET_NAME} PRIVATE
+            lua
+            sol2::sol2
+            imgui
+            cereal::cereal
+            spdlog::spdlog
+            Jolt
+            ozz_animation ozz_animation_offline ozz_geometry
+            Effekseer
+            EffekseerRendererGL
+            nlohmann_json::nlohmann_json
+            efsw
+            nfd
+            Tracy::TracyClient
+            rmlui_core
+            rmlui_debugger
+            rmlui_lua
+    )
 
-include_directories(${OPENAL_INCLUDE_DIR})
+    # Debug Info
+    get_target_property(LINK_LIBS ${TARGET_NAME} LINK_LIBRARIES)
+    message(STATUS "${TARGET_NAME} links: ${LINK_LIBS}")
+endfunction()
 
-# SndFile
+# ----------------- Create Both Executables -------------------
+# Development build (without GAME_BUILD)
+setup_executable(${PROJECT_NAME} OFF)
+
+# Game build (with GAME_BUILD)
+setup_executable(${PROJECT_NAME}_game ON)
+
+# On Windows, explicitly link FreeType after RmlUi
 if (WIN32)
-    target_link_libraries(${PROJECT_NAME} PRIVATE sndfile)
-else ()
-    # Linux/macOS
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(SNDFILE REQUIRED sndfile)
-    include_directories(${SNDFILE_INCLUDE_DIRS})
-    link_directories(${SNDFILE_LIBRARY_DIRS})
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${SNDFILE_LIBRARIES})
-endif ()
+    target_link_libraries(rmlui_core PUBLIC freetype)
+endif()
 
-# ----------------- Link Everything Else -------------------
-target_link_libraries(${PROJECT_NAME} PRIVATE
-        lua
-        sol2::sol2
-        imgui
-        cereal::cereal
-        spdlog::spdlog
-        Jolt
-        ozz_animation ozz_animation_offline ozz_geometry
-        Effekseer
-        EffekseerRendererGL
-        nlohmann_json::nlohmann_json
-        efsw
-        nfd
-        Tracy::TracyClient
-)
-
-# ----------------- Debug Info -------------------
-get_target_property(LINK_LIBS ${PROJECT_NAME} LINK_LIBRARIES)
-message(STATUS "${PROJECT_NAME} links: ${LINK_LIBS}")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

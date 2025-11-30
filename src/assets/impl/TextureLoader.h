@@ -15,6 +15,7 @@ namespace Engine {
 	class TextureLoader : public IAssetLoader<Texture> {
 	  public:
 		std::unique_ptr<Texture> LoadFromFile(const std::string& path) override;
+		bool                     Reload(Texture& asset, const std::string& path) override;
 	};
 } // namespace Engine
 

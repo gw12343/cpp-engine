@@ -18,7 +18,7 @@ namespace Engine {
 
 	void Input::onInit()
 	{
-		// glfwSetScrollCallback(GetWindow().GetNativeWindow(), ScrollCallback);
+		glfwSetScrollCallback(GetWindow().GetNativeWindow(), ScrollCallback);
 
 		// Prime the last-mouse position so GetMouseDelta is zero on first frame
 		double x, y;
@@ -122,12 +122,14 @@ namespace Engine {
 		return glm::vec2(m_mousePosition.x, m_lastMousePosition.y) - glm::vec2(m_lastMousePosition.x, m_mousePosition.y); // m_mousePosition - m_lastMousePosition;
 	}
 
-	//	float Input::GetMouseScrollDelta()
-	//	{
-	//		float f       = m_scrollDelta;
-	//		m_scrollDelta = 0;
-	//		return f;
-	//	}
+	float Input::GetMouseScrollDelta()
+	{
+		return m_scrollDelta;
+	}
+	
+	void Input::ResetScroll() {
+		m_scrollDelta = 0;
+	}
 
 	[[maybe_unused]] void Input::SetMousePosition(const glm::vec2& pos)
 	{
@@ -158,11 +160,11 @@ namespace Engine {
 	//	[[maybe_unused]] void Input::MouseCallback(GLFWwindow* /*wnd*/, double /*x*/, double /*y*/)
 	//	{
 	//	}
-	//
-	//	void Input::ScrollCallback(GLFWwindow* /*wnd*/, double /*xoff*/, double yoff)
-	//	{
-	//		m_scrollDelta = static_cast<float>(yoff);
-	//	}
+	
+	void Input::ScrollCallback(GLFWwindow* /*wnd*/, double /*xoff*/, double yoff)
+	{
+		GetInput().m_scrollDelta += static_cast<float>(yoff);
+	}
 
 	bool Input::IsKeyPressedThisFrame(int key)
 	{

@@ -1,5 +1,9 @@
 function Start()
-
+	print("bullet started!")
+	subscribe("GameReset", function()
+        -- destroy bullet
+        gameObject:destroy()
+    end)
 end
 
 

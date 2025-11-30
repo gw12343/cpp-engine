@@ -7,6 +7,7 @@
 #include <string>
 #include <iostream>
 #include <filesystem>
+#include <cstdlib>
 #include "core/EngineData.h"
 #include "assets/impl/BinarySceneLoader.h"
 #include <sol/sol.hpp>
@@ -61,10 +62,10 @@ namespace Engine {
 		try {
 			if (!std::filesystem::exists(outPath)) {
 				std::filesystem::create_directory(outPath);
-				GetDefaultLogger()->info("Created folder: {}", outPath.c_str());
+				GetDefaultLogger()->info("Created folder: {}", outPath.string());
 			}
 			else {
-				GetDefaultLogger()->info("Folder already exists: {}", outPath.c_str());
+				GetDefaultLogger()->info("Folder already exists: {}", outPath.string());
 			}
 		}
 		catch (const std::filesystem::filesystem_error& e) {
@@ -101,17 +102,70 @@ namespace Engine {
 			return;
 		}
 
-		for (const auto& entry : fs::recursive_directory_iterator(scriptsDir)) {
-			if (fs::is_regular_file(entry.status()) && entry.path().extension() == ".lua") {
-				const fs::path& srcPath      = entry.path();
-				fs::path        relativePath = fs::relative(srcPath, scriptsDir);
-				fs::path        outPath      = outScriptsDir / relativePath;
-
-				// TODO luac ??
-				GetDefaultLogger()->info("Copied Script {} -> {}", srcPath.c_str(), outPath.c_str());
-				std::filesystem::copy_file(srcPath, outPath, std::filesystem::copy_options::overwrite_existing);
+		// Compile Lua scripts to bytecode
+	sol::state lua;
+	
+	for (const auto& entry : fs::recursive_directory_iterator(scriptsDir)) {
+		if (fs::is_regular_file(entry.status()) && entry.path().extension() == ".lua") {
+			const fs::path& srcPath      = entry.path();
+			fs::path        relativePath = fs::relative(srcPath, scriptsDir);
+			fs::path        outPath      = outScriptsDir / relativePath;
+			
+			// Change extension from .lua to .luac
+			outPath.replace_extension(".luac");
+			
+			// Ensure parent directory exists
+			fs::create_directories(outPath.parent_path());
+			
+			try {
+				// Load the Lua script
+				auto result = lua.load_file(srcPath.string());
+				
+				if (!result.valid()) {
+					sol::error err = result;
+					GetDefaultLogger()->error("Failed to compile script {}: {}", srcPath.string(), err.what());
+					continue;
+				}
+				
+				// Get the compiled function
+				sol::protected_function func = result;
+				
+				// Dump bytecode to file
+				std::ofstream outFile(outPath, std::ios::binary);
+				if (!outFile) {
+					GetDefaultLogger()->error("Failed to open output file {}", outPath.string());
+					continue;
+				}
+				
+				// Use Lua C API to dump the bytecode
+				lua_State* L = lua.lua_state();
+				
+				// Push the function onto the stack
+				func.push();
+				
+				// Lambda for lua_dump writer
+				auto writer = [](lua_State* L, const void* p, size_t sz, void* ud) -> int {
+					std::ofstream* file = static_cast<std::ofstream*>(ud);
+					file->write(static_cast<const char*>(p), sz);
+					return file->good() ? 0 : 1;
+				};
+				
+				int dumpResult = lua_dump(L, writer, &outFile, 0);
+				lua_pop(L, 1); // Pop the function
+				
+				if (dumpResult != 0) {
+					GetDefaultLogger()->error("Failed to dump bytecode for {}", srcPath.string());
+					continue;
+				}
+				
+				outFile.close();
+				GetDefaultLogger()->info("Compiled Script {} -> {}", srcPath.string(), outPath.string());
+			}
+			catch (const std::exception& e) {
+				GetDefaultLogger()->error("Exception compiling {}: {}", srcPath.string(), e.what());
 			}
 		}
+	}
 
 		// Save scene
 		// TODO multi-scene?
@@ -124,6 +178,44 @@ namespace Engine {
 			return;
 		}
 
-		BinarySceneLoader::SerializeScene(GetSceneManager().GetActiveScene(), (outScenesDir / "scene1.bin").c_str());
-	}
+        BinarySceneLoader::SerializeScene(
+                GetSceneManager().GetActiveScene(),
+                (outScenesDir / "scene1.bin").string()
+        );
+
+		// Copy and run the game executable
+		fs::path buildDir = fs::current_path() / "build";
+		fs::path exeName = "cpp-engine_game";
+#ifdef _WIN32
+		exeName += ".exe";
+#endif
+		fs::path sourceExe = buildDir / exeName;
+		fs::path destExe = outPath / exeName;
+
+		if (fs::exists(sourceExe)) {
+			try {
+				fs::copy_file(sourceExe, destExe, fs::copy_options::overwrite_existing);
+				GetDefaultLogger()->info("Copied executable to {}", destExe.string());
+
+				// Set executable permissions on Linux/Mac
+#ifndef _WIN32
+				fs::permissions(destExe, fs::perms::owner_all | fs::perms::group_read | fs::perms::group_exec | fs::perms::others_read | fs::perms::others_exec, fs::perm_options::add);
+#endif
+
+				GetDefaultLogger()->info("Running game...");
+				std::string command;
+#ifdef _WIN32
+				command = "cd /d \"" + outPath.string() + "\" && \"" + exeName.string() + "\"";
+#else
+				command = "cd \"" + outPath.string() + "\" && ./" + exeName.string();
+#endif
+				std::system(command.c_str());
+			} catch (const std::exception& e) {
+				GetDefaultLogger()->error("Failed to copy or run executable: {}", e.what());
+			}
+		} else {
+			GetDefaultLogger()->warn("Could not find executable at {}", sourceExe.string());
+		}
+
+    }
 } // namespace Engine

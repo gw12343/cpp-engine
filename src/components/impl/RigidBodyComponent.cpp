@@ -52,9 +52,10 @@ namespace Engine::Components {
 
 			if (entity.HasComponent<Transform>()) {
 				auto&     tr  = entity.GetComponent<Transform>();
-				glm::vec3 pos = tr.position;
+				glm::vec3 pos = tr.GetWorldPosition();
+				glm::quat qt  = tr.GetWorldRotation();
 				startPos      = Vec3(pos.x, pos.y, pos.z);
-				startRot      = ToJolt(tr.rotation);
+				startRot      = ToJolt(qt);
 			}
 
 			JPH::BodyCreationSettings settings(shape, startPos, startRot, (JPH::EMotionType) motionType, Layers::MOVING);
@@ -157,14 +158,14 @@ namespace Engine::Components {
 							}
 
 							if (n == 0) {
-								Vec3                 size   = Vec3(tr.scale.x / 2.0f, tr.scale.y / 2.0f, tr.scale.z / 2.0f);
+								Vec3                 size   = Vec3(tr.GetWorldScale().x / 2.0f, tr.GetWorldScale().y / 2.0f, tr.GetWorldScale().z / 2.0f);
 								JPH::Ref<JPH::Shape> newBox = new JPH::BoxShape(size);
 								bodyInterface.SetShape(bodyID, newBox, true, JPH::EActivation::Activate);
 								shapeType = "Box";
 								shapeSize = size;
 							}
 							else if (n == 1) {
-								Vec3 size = Vec3(tr.scale.x / 2.0f, 0.0f, 0.0f);
+								Vec3 size = Vec3(tr.GetWorldScale().x / 2.0f, 0.0f, 0.0f);
 
 								JPH::Ref<JPH::Shape> newSphere = new JPH::SphereShape(size.GetX());
 								bodyInterface.SetShape(bodyID, newSphere, true, JPH::EActivation::Activate);
@@ -172,7 +173,7 @@ namespace Engine::Components {
 								shapeSize = size;
 							}
 							else if (n == 2) {
-								Vec3 size = Vec3(tr.scale.y / 4.0f, tr.scale.x / 2.0f, 0.0f);
+								Vec3 size = Vec3(tr.GetWorldScale().y / 4.0f, tr.GetWorldScale().x / 2.0f, 0.0f);
 
 								JPH::Ref<JPH::Shape> newCapsule = new JPH::CapsuleShape(size.GetX(), size.GetY());
 								bodyInterface.SetShape(bodyID, newCapsule, true, JPH::EActivation::Activate);
@@ -180,7 +181,7 @@ namespace Engine::Components {
 								shapeSize = size;
 							}
 							else if (n == 3) {
-								Vec3 size = Vec3(tr.scale.y / 4.0f, tr.scale.x / 2.0f, 0.0f);
+								Vec3 size = Vec3(tr.GetWorldScale().y / 4.0f, tr.GetWorldScale().x / 2.0f, 0.0f);
 
 								JPH::Ref<JPH::Shape> newCylinder = new JPH::CylinderShape(size.GetX(), size.GetY());
 								bodyInterface.SetShape(bodyID, newCylinder, true, JPH::EActivation::Activate);
@@ -333,7 +334,8 @@ namespace Engine::Components {
 
 	JPH::Quat RigidBodyComponent::ToJolt(const glm::quat& q)
 	{
-		return {q.x, q.y, q.z, q.w};
+		glm::quat normalized = glm::normalize(q);
+		return {normalized.x, normalized.y, normalized.z, normalized.w};
 	}
 
 	glm::quat RigidBodyComponent::ToGlm(const JPH::Quat& q)

@@ -3,6 +3,7 @@
 #include "assets/impl/ModelLoader.h"
 #include "utils/Utils.h"
 #include "core/EngineData.h"
+#include "core/Input.h"
 #include "terrain/TerrainManager.h"
 #include "animation/AnimationManager.h"
 #include "rendering/particles/ParticleManager.h"
@@ -14,6 +15,9 @@
 #include "components/impl/GizmoComponent.h"
 #include <spdlog/spdlog.h>
 #include <tracy/Tracy.hpp>
+#include <RmlUi/Core.h>
+#include "rendering/ui/RmlUiBackend.h"
+#include "rendering/ui/GameUIManager.h"
 
 namespace Engine {
 
@@ -40,6 +44,12 @@ namespace Engine {
 		// Load model preview shader
 		if (!m_modelPreviewShader.LoadFromFiles("resources/shaders/preview_vert.glsl", "resources/shaders/preview_frag.glsl", std::nullopt)) {
 			log->error("Failed to load model preview shader");
+			return;
+		}
+
+		// Load material preview shader
+		if (!m_materialPreviewShader.LoadFromFiles("resources/shaders/material_preview_vert.glsl", "resources/shaders/material_preview_frag.glsl", std::nullopt)) {
+			log->error("Failed to load material preview shader");
 			return;
 		}
 
@@ -117,6 +127,12 @@ namespace Engine {
 			ZoneScopedN("Render Particles");
 			GetParticleManager().Render();
 		}
+		{
+			ZoneScopedN("Render RmlUi");
+			// Render RmlUi into the framebuffer
+			GetGameUIManager().Render();
+		}
+		
 #ifndef GAME_BUILD
 		{
 			ZoneScopedN("Render Gizmos");
@@ -124,6 +140,7 @@ namespace Engine {
 				RenderGizmos(false);
 			}
 		}
+		
 		{
 			ZoneScopedN("Render Mouse Picking");
 			Engine::Window::GetFramebuffer(Window::FramebufferID::MOUSE_PICKING)->Bind();
@@ -201,7 +218,7 @@ namespace Engine {
 				Entity                    e(entity, GetCurrentScene());
 				auto&                     skinnedMeshComponent   = e.GetComponent<Components::SkinnedMeshComponent>();
 				auto&                     animationPoseComponent = e.GetComponent<Components::AnimationPoseComponent>();
-				const ozz::math::Float4x4 transform              = FromMatrix(e.GetComponent<Components::Transform>().GetMatrix());
+				const ozz::math::Float4x4 transform              = FromMatrix(e.GetComponent<Components::Transform>().GetWorldMatrix());
 
 				glm::vec3 encodedColor = EncodeEntityID(entity);
 
@@ -252,7 +269,7 @@ namespace Engine {
 	{
 		auto view = GetCurrentSceneRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::GizmoComponent>();
 		for (auto [entity, metadata, transform, gizmo] : view.each()) {
-			const ozz::math::Float4x4 t = FromMatrix(transform.GetMatrix());
+			const ozz::math::Float4x4 t = FromMatrix(transform.GetWorldMatrix());
 			// Draw gizmo
 
 			Color color = kBlack;
@@ -271,5 +288,32 @@ namespace Engine {
 		}
 	}
 
+
+	void Renderer::ReloadShaders()
+	{
+		log->info("Reloading shaders...");
+		if (!m_shader.LoadFromFiles("resources/shaders/vert.glsl", "resources/shaders/frag.glsl", std::nullopt)) {
+			log->error("Failed to reload default shader");
+		}
+
+		if (!m_mousePickingShader.LoadFromFiles("resources/shaders/picking.vert", "resources/shaders/picking.frag", std::nullopt)) {
+			log->error("Failed to reload mouse picking shader");
+		}
+
+		// Load skybox shader
+		if (!m_skyboxShader.LoadFromFiles("resources/shaders/skybox_vert.glsl", "resources/shaders/skybox_frag.glsl", std::nullopt)) {
+			log->error("Failed to reload skybox shader");
+		}
+
+		// Load model preview shader
+		if (!m_modelPreviewShader.LoadFromFiles("resources/shaders/preview_vert.glsl", "resources/shaders/preview_frag.glsl", std::nullopt)) {
+			log->error("Failed to reload model preview shader");
+		}
+
+		// Load material preview shader
+		if (!m_materialPreviewShader.LoadFromFiles("resources/shaders/material_preview_vert.glsl", "resources/shaders/material_preview_frag.glsl", std::nullopt)) {
+			log->error("Failed to reload material preview shader");
+		}
+	}
 
 } // namespace Engine

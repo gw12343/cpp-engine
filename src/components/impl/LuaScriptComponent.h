@@ -50,7 +50,14 @@ namespace Engine {
 	                                    AssetHandle<Particle>,
 	                                    AssetHandle<Audio::SoundBuffer>,
 	                                    EntityHandle,
-	                                    std::vector<EntityHandle>>;
+	                                    std::vector<EntityHandle>,
+	                                    std::vector<AssetHandle<Texture>>,
+	                                    std::vector<AssetHandle<Rendering::Model>>,
+	                                    std::vector<AssetHandle<Material>>,
+	                                    std::vector<AssetHandle<Scene>>,
+	                                    std::vector<AssetHandle<Terrain::TerrainTile>>,
+	                                    std::vector<AssetHandle<Particle>>,
+	                                    std::vector<AssetHandle<Audio::SoundBuffer>>>;
 
 	namespace Components {
 
@@ -87,6 +94,10 @@ namespace Engine {
 			sol::function                                   collisionEnter;
 			sol::function                                   playerCollisionEnter;
 			std::unordered_map<std::string, ScriptVariable> cppVariables;
+			
+			// Track event subscriptions for auto-cleanup
+			std::vector<uint32_t> subscriptionIDs;
+			void UnsubscribeAll();
 		};
 	} // namespace Components
 } // namespace Engine

@@ -37,6 +37,7 @@ namespace Engine {
 	class AssetManager;
 	class Scene;
 	class Input;
+	class GameUIManager;
 
 	class ModuleManager;
 
@@ -57,6 +58,7 @@ namespace Engine {
 		std::shared_ptr<PhysicsManager>          physics;
 		std::shared_ptr<Camera>                  camera;
 		std::shared_ptr<Input>                   input;
+		std::shared_ptr<GameUIManager>           gameUI;
 		EngineState                              state;
 		ModuleManager*                           manager;
 	};
@@ -133,6 +135,10 @@ namespace Engine {
 	inline auto& GetInput()
 	{
 		return *Get().input;
+	}
+	inline auto& GetGameUIManager()
+	{
+		return *Get().gameUI;
 	}
 
 	entt::registry& GetCurrentSceneRegistry();

@@ -9,7 +9,7 @@
 #include "components/impl/SkeletonComponent.h"
 #include "components/impl/SkinnedMeshComponent.h"
 
-#include <spdlog/spdlog.h>
+
 #include <utils/Utils.h>
 #include <tracy/Tracy.hpp>
 #include "core/SceneManager.h"
@@ -120,7 +120,7 @@ namespace Engine {
 			Entity                    e(entity, GetCurrentScene());
 			auto&                     skinnedMeshComponent   = e.GetComponent<Components::SkinnedMeshComponent>();
 			auto&                     animationPoseComponent = e.GetComponent<Components::AnimationPoseComponent>();
-			const ozz::math::Float4x4 transform              = FromMatrix(e.GetComponent<Components::Transform>().GetMatrix());
+			const ozz::math::Float4x4 transform              = FromMatrix(e.GetComponent<Components::Transform>().GetWorldMatrix());
 
 			// Render each mesh
 			for (const Engine::Mesh& mesh : *skinnedMeshComponent.meshes) {
