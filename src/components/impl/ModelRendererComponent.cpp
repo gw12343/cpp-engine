@@ -98,8 +98,19 @@ namespace Engine::Components {
 	}
 	void ModelRenderer::SetMaterial(AssetHandle<Material> mat)
 	{
-		materialOverrides.clear();
-		materialOverrides.push_back(mat);
+		// resize material overrides to match model
+		if (model.IsValid()) {
+			Rendering::Model* m = GetAssetManager().Get(model);
+			if (m != nullptr) {
+				materialOverrides.resize(m->GetMeshes().size());
+			}
+		}
+
+
+		// replace all materials with this one
+		for (auto& m : materialOverrides) {
+			m = mat;
+		}
 	}
 
 } // namespace Engine::Components

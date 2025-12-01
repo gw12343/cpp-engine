@@ -6,6 +6,7 @@
 #define CPP_ENGINE_RIGIDBODYCOMPONENT_H
 
 #include "physics/PhysicsManager.h"
+#include "Jolt/Physics/Collision/Shape/MeshShape.h"
 
 #include <cereal/cereal.hpp>
 #include <cereal/types/vector.hpp>
@@ -23,8 +24,9 @@ namespace Engine::Components {
 		float       friction      = 0.5f;
 		float       restitution   = 0.0f;
 		float       gravityFactor = 1.0f;
-		std::string shapeType     = "Box";
-		JPH::Vec3   shapeSize     = JPH::Vec3::sReplicate(1.0f); // size/half-extents
+		std::string       shapeType     = "Box";
+		JPH::Vec3         shapeSize     = JPH::Vec3::sReplicate(1.0f); // size/half-extents
+		std::vector<bool> meshSelection;                               // Which meshes from the model are enabled for collision
 
 		RigidBodyComponent() : bodyID(0) {}
 
@@ -34,7 +36,7 @@ namespace Engine::Components {
 		template <class Archive>
 		void serialize(Archive& ar)
 		{
-			ar(CEREAL_NVP(motionType), CEREAL_NVP(mass), CEREAL_NVP(friction), CEREAL_NVP(restitution), CEREAL_NVP(gravityFactor), CEREAL_NVP(shapeType), CEREAL_NVP(shapeSize));
+			ar(CEREAL_NVP(motionType), CEREAL_NVP(mass), CEREAL_NVP(friction), CEREAL_NVP(restitution), CEREAL_NVP(gravityFactor), CEREAL_NVP(shapeType), CEREAL_NVP(shapeSize), CEREAL_NVP(meshSelection));
 		}
 
 		void OnAdded(Entity& entity) override;
@@ -82,6 +84,7 @@ namespace Engine::Components {
 		[[maybe_unused]] void SetBoxShape(const BoxShapeSettings& settings);
 		[[maybe_unused]] void SetCapsuleShape(const CapsuleShapeSettings& settings);
 		[[maybe_unused]] void SetCylinderShape(const CylinderShapeSettings& settings);
+		[[maybe_unused]] void SetMeshShape(Entity& entity);
 
 		void SetRotationEuler(const glm::vec3& eulerAngles);
 

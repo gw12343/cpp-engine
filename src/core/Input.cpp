@@ -18,7 +18,7 @@ namespace Engine {
 
 	void Input::onInit()
 	{
-		glfwSetScrollCallback(GetWindow().GetNativeWindow(), ScrollCallback);
+		//glfwSetScrollCallback(GetWindow().GetNativeWindow(), ScrollCallback);
 
 		// Prime the last-mouse position so GetMouseDelta is zero on first frame
 		double x, y;

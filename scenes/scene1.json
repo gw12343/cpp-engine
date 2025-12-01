@@ -31,42 +31,10 @@
                             }
                         },
                         {
-                            "key": "SHOOT_POWER",
+                            "key": "MOUSE_SENSITIVITY",
                             "value": {
                                 "index": 0,
-                                "data": 64.5
-                            }
-                        },
-                        {
-                            "key": "GRAVITY_SCALE",
-                            "value": {
-                                "index": 0,
-                                "data": 2.0
-                            }
-                        },
-                        {
-                            "key": "victorySound",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
-                                }
-                            }
-                        },
-                        {
-                            "key": "RUN_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 12.0
-                            }
-                        },
-                        {
-                            "key": "BULLET_PARENT",
-                            "value": {
-                                "index": 12,
-                                "data": {
-                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
-                                }
+                                "data": 0.10000000149011612
                             }
                         },
                         {
@@ -79,10 +47,12 @@
                             }
                         },
                         {
-                            "key": "MOUSE_SENSITIVITY",
+                            "key": "victorySound",
                             "value": {
-                                "index": 0,
-                                "data": 0.10000000149011612
+                                "index": 11,
+                                "data": {
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                }
                             }
                         },
                         {
@@ -99,6 +69,36 @@
                                 "data": {
                                     "guid": "a9dfb812233c1829cad774e7b2670a02"
                                 }
+                            }
+                        },
+                        {
+                            "key": "BULLET_PARENT",
+                            "value": {
+                                "index": 12,
+                                "data": {
+                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
+                                }
+                            }
+                        },
+                        {
+                            "key": "RUN_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 12.0
+                            }
+                        },
+                        {
+                            "key": "SHOOT_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 64.5
+                            }
+                        },
+                        {
+                            "key": "GRAVITY_SCALE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
                             }
                         }
                     ]
@@ -266,19 +266,19 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
+                            "key": "POINTS",
+                            "value": {
+                                "index": 0,
+                                "data": 10.0
+                            }
+                        },
+                        {
                             "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
                                     "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
-                            }
-                        },
-                        {
-                            "key": "POINTS",
-                            "value": {
-                                "index": 0,
-                                "data": 10.0
                             }
                         },
                         {
@@ -349,7 +349,8 @@
                         "x": 2.5,
                         "y": 2.5,
                         "z": 2.5
-                    }
+                    },
+                    "meshSelection": []
                 }
             },
             "AudioSource": {
@@ -392,7 +393,37 @@
                 "children": []
             },
             "LuaScript": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {
+                    "scriptPath": "scripts/target.lua",
+                    "variables": [
+                        {
+                            "key": "POINTS",
+                            "value": {
+                                "index": 0,
+                                "data": 14.600000381469727
+                            }
+                        },
+                        {
+                            "key": "TARGET_COLOR",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
+                                }
+                            }
+                        },
+                        {
+                            "key": "NORMAL_COLOR",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "c65e206dfc749371e59f05aa1e2eda9c"
+                                }
+                            }
+                        }
+                    ]
+                }
             },
             "ShadowCaster": {
                 "nullopt": true
@@ -402,7 +433,7 @@
                 "data": {
                     "position": {
                         "x": 14.401437759399414,
-                        "y": -0.06574535369873047,
+                        "y": 0.15468239784240724,
                         "z": -7.810932159423828
                     },
                     "rotation": {
@@ -447,12 +478,16 @@
                     "friction": 0.5,
                     "restitution": 0.0,
                     "gravityFactor": 1.0,
-                    "shapeType": "Box",
+                    "shapeType": "Mesh",
                     "shapeSize": {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    }
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
+                    },
+                    "meshSelection": [
+                        true,
+                        false
+                    ]
                 }
             },
             "AudioSource": {
@@ -500,19 +535,19 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
+                            "key": "POINTS",
+                            "value": {
+                                "index": 0,
+                                "data": 10.0
+                            }
+                        },
+                        {
                             "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
                                     "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
-                            }
-                        },
-                        {
-                            "key": "POINTS",
-                            "value": {
-                                "index": 0,
-                                "data": 10.0
                             }
                         },
                         {
@@ -583,7 +618,8 @@
                         "x": 2.5,
                         "y": 2.5,
                         "z": 2.5
-                    }
+                    },
+                    "meshSelection": []
                 }
             },
             "AudioSource": {
@@ -683,7 +719,8 @@
                         "x": 30.0,
                         "y": 30.0,
                         "z": 30.0
-                    }
+                    },
+                    "meshSelection": []
                 }
             },
             "AudioSource": {
@@ -948,7 +985,7 @@
                             "key": "TOTAL_TARGETS",
                             "value": {
                                 "index": 0,
-                                "data": 5.0
+                                "data": 6.0
                             }
                         }
                     ]
@@ -1014,19 +1051,19 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
+                            "key": "POINTS",
+                            "value": {
+                                "index": 0,
+                                "data": 10.0
+                            }
+                        },
+                        {
                             "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
                                     "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
-                            }
-                        },
-                        {
-                            "key": "POINTS",
-                            "value": {
-                                "index": 0,
-                                "data": 10.0
                             }
                         },
                         {
@@ -1097,7 +1134,8 @@
                         "x": 2.5,
                         "y": 2.5,
                         "z": 2.5
-                    }
+                    },
+                    "meshSelection": []
                 }
             },
             "AudioSource": {
@@ -1145,19 +1183,19 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
+                            "key": "POINTS",
+                            "value": {
+                                "index": 0,
+                                "data": 10.0
+                            }
+                        },
+                        {
                             "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
                                     "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
-                            }
-                        },
-                        {
-                            "key": "POINTS",
-                            "value": {
-                                "index": 0,
-                                "data": 10.0
                             }
                         },
                         {
@@ -1228,7 +1266,8 @@
                         "x": 2.5,
                         "y": 2.5,
                         "z": 2.5
-                    }
+                    },
+                    "meshSelection": []
                 }
             },
             "AudioSource": {
@@ -1478,19 +1517,19 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
+                            "key": "POINTS",
+                            "value": {
+                                "index": 0,
+                                "data": 10.0
+                            }
+                        },
+                        {
                             "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
                                     "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
-                            }
-                        },
-                        {
-                            "key": "POINTS",
-                            "value": {
-                                "index": 0,
-                                "data": 10.0
                             }
                         },
                         {
@@ -1561,7 +1600,8 @@
                         "x": 2.5,
                         "y": 2.5,
                         "z": 2.5
-                    }
+                    },
+                    "meshSelection": []
                 }
             },
             "AudioSource": {
