@@ -7,6 +7,8 @@
 
 #include "physics/PhysicsManager.h"
 #include "Jolt/Physics/Collision/Shape/MeshShape.h"
+#include "Jolt/Physics/Collision/Shape/ConvexHullShape.h"
+#include "Jolt/Physics/Collision/Shape/OffsetCenterOfMassShape.h"
 
 #include <cereal/cereal.hpp>
 #include <cereal/types/vector.hpp>
@@ -27,6 +29,7 @@ namespace Engine::Components {
 		std::string       shapeType     = "Box";
 		JPH::Vec3         shapeSize     = JPH::Vec3::sReplicate(1.0f); // size/half-extents
 		std::vector<bool> meshSelection;                               // Which meshes from the model are enabled for collision
+		JPH::Vec3         centerOfMassOffset = JPH::Vec3::sZero();     // Offset for convex hull shapes
 
 		RigidBodyComponent() : bodyID(0) {}
 
@@ -85,6 +88,7 @@ namespace Engine::Components {
 		[[maybe_unused]] void SetCapsuleShape(const CapsuleShapeSettings& settings);
 		[[maybe_unused]] void SetCylinderShape(const CylinderShapeSettings& settings);
 		[[maybe_unused]] void SetMeshShape(Entity& entity);
+		[[maybe_unused]] void SetConvexMeshShape(Entity& entity);
 
 		void SetRotationEuler(const glm::vec3& eulerAngles);
 
