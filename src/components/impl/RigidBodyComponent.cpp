@@ -15,6 +15,7 @@
 #include "physics/PhysicsManager.h"
 #include "RigidBodyComponent.h"
 #include "rendering/ui/InspectorUI.h"
+#include "ModelRendererComponent.h"
 
 namespace Engine::Components {
 
@@ -42,10 +43,73 @@ namespace Engine::Components {
 			else if (shapeType == "Cylinder") {
 				shape = new JPH::CylinderShape(shapeSize.GetX(), shapeSize.GetY());
 			}
+			else if (shapeType == "Mesh") {
+				// Try to create mesh shape from ModelRenderer
+			if (entity.HasComponent<Engine::Components::ModelRenderer>()) {
+				auto& modelRenderer = entity.GetComponent<Engine::Components::ModelRenderer>();
+				if (modelRenderer.model.IsValid()) {
+					auto* model = GetAssetManager().Get(modelRenderer.model);
+					if (model) {
+						JPH::TriangleList triangles;
+						const auto& meshes = model->GetMeshes();
+						
+						// Ensure mesh selection matches model
+						if (meshSelection.size() != meshes.size()) {
+							GetPhysics().log->warn("Mesh selection size does not match model size, resizing to match. Was {} now {}", meshSelection.size(), meshes.size());
+							meshSelection.resize(meshes.size(), true);
+						}
+
+						int meshIndex = 0;
+						for (const auto& mesh : meshes) {
+							if (!meshSelection[meshIndex]) {
+								meshIndex++;
+								continue;
+							}
+							const auto& vertices = mesh->GetVertices();
+							const auto& indices = mesh->GetIndices();
+							
+							// Convert indices to triangles
+							for (size_t i = 0; i < indices.size(); i += 3) {
+								if (i + 2 < indices.size()) {
+									const auto& v0 = vertices[indices[i]].Position;
+									const auto& v1 = vertices[indices[i + 1]].Position;
+									const auto& v2 = vertices[indices[i + 2]].Position;
+									
+									JPH::Triangle triangle(
+										JPH::Float3(v0.x, v0.y, v0.z),
+										JPH::Float3(v1.x, v1.y, v1.z),
+										JPH::Float3(v2.x, v2.y, v2.z)
+									);
+									triangles.push_back(triangle);
+								}
+							}
+							meshIndex++;
+						}
+						
+						if (!triangles.empty()) {
+							JPH::MeshShapeSettings meshSettings(triangles);
+							shape = meshSettings.Create().Get();
+						} else {
+							GetPhysics().log->warn("Failed to extract mesh data, falling back to box collider");
+							shape = new JPH::BoxShape(shapeSize);
+							shapeType = "Box";
+						}
+					} else {
+						GetPhysics().log->warn("ModelRenderer has no model loaded, falling back to box collider");
+						shape = new JPH::BoxShape(shapeSize);
+						shapeType = "Box";
+					}
+				} else {
+					GetPhysics().log->warn("Entity has no ModelRenderer component, falling back to box collider");
+					shape = new JPH::BoxShape(shapeSize);
+					shapeType = "Box";
+				}
+			}
 			else {
 				// default to box
 				shape = new JPH::BoxShape(shapeSize);
 			}
+		}
 
 			RVec3 startPos(0, 0, 0);
 			Quat  startRot = Quat::sIdentity();
@@ -74,7 +138,7 @@ namespace Engine::Components {
 		GetPhysics().bodyToEntityMap[bodyID] = entity;
 	}
 
-	const char* items[] = {"Box", "Sphere", "Capsule", "Cylinder"};
+	const char* items[] = {"Box", "Sphere", "Capsule", "Cylinder", "Mesh"};
 
 
 	void RigidBodyComponent::RenderInspector(Entity& entity)
@@ -143,8 +207,11 @@ namespace Engine::Components {
 					shape_index = 2;
 				}
 				else if (shapeType == "Cylinder") {
-					shape_index = 3;
-				}
+				shape_index = 3;
+			}
+			else if (shapeType == "Mesh") {
+				shape_index = 4;
+			}
 
 
 				if (LeftLabelBeginCombo("Shape", items[shape_index])) // Label + preview
@@ -181,14 +248,18 @@ namespace Engine::Components {
 								shapeSize = size;
 							}
 							else if (n == 3) {
-								Vec3 size = Vec3(tr.GetWorldScale().y / 4.0f, tr.GetWorldScale().x / 2.0f, 0.0f);
+					Vec3 size = Vec3(tr.GetWorldScale().y / 4.0f, tr.GetWorldScale().x / 2.0f, 0.0f);
 
-								JPH::Ref<JPH::Shape> newCylinder = new JPH::CylinderShape(size.GetX(), size.GetY());
-								bodyInterface.SetShape(bodyID, newCylinder, true, JPH::EActivation::Activate);
-								shapeType = "Cylinder";
-								shapeSize = size;
-							}
-						}
+					JPH::Ref<JPH::Shape> newCylinder = new JPH::CylinderShape(size.GetX(), size.GetY());
+					bodyInterface.SetShape(bodyID, newCylinder, true, JPH::EActivation::Activate);
+					shapeType = "Cylinder";
+					shapeSize = size;
+				}
+				else if (n == 4) {
+					// Create mesh collider from ModelRenderer
+					SetMeshShape(entity);
+				}
+			}
 					}
 					LeftLabelEndCombo();
 				}
@@ -245,8 +316,46 @@ namespace Engine::Components {
 						shapeSize = Vec3(halfHeight, radius, 0.0);
 					}
 				}
+				else if (shape.GetPtr()->GetSubType() == EShapeSubType::Mesh) {
+					// Display read-only mesh info
+					ImGui::TextWrapped("Mesh Collider (from ModelRenderer)");
+					ImGui::TextWrapped("Mesh colliders are read-only and derive from the entity's model geometry.");
+					
+					if (ImGui::Button("Refresh from Model")) {
+						SetMeshShape(entity);
+					}
 
+					if (entity.HasComponent<Engine::Components::ModelRenderer>()) {
+						auto& modelRenderer = entity.GetComponent<Engine::Components::ModelRenderer>();
+						if (modelRenderer.model.IsValid()) {
+							auto* model = GetAssetManager().Get(modelRenderer.model);
+							if (model) {
+								const auto& meshes = model->GetMeshes();
+								if (meshSelection.size() != meshes.size()) {
+									meshSelection.resize(meshes.size(), true);
+								}
 
+								if (ImGui::TreeNode("Mesh Selection")) {
+									bool changed = false;
+									for (size_t i = 0; i < meshes.size(); ++i) {
+										std::string label = "Mesh " + std::to_string(i);
+										// Use bool for ImGui
+										bool enabled = meshSelection[i];
+										if (ImGui::Checkbox(label.c_str(), &enabled)) {
+											meshSelection[i] = enabled;
+											changed = true;
+										}
+									}
+									ImGui::TreePop();
+									
+									if (changed) {
+										SetMeshShape(entity);
+									}
+								}
+							}
+						}
+					}
+				}
 				ImGui::TreePop();
 			}
 		}
@@ -317,7 +426,9 @@ namespace Engine::Components {
 		                                     "setCapsuleShape",
 		                                     &RigidBodyComponent::SetCapsuleShape,
 		                                     "setCylinderShape",
-		                                     &RigidBodyComponent::SetCylinderShape);
+		                                     &RigidBodyComponent::SetCylinderShape,
+		                                     "setMeshShape",
+		                                     &RigidBodyComponent::SetMeshShape);
 	}
 
 
@@ -358,7 +469,9 @@ namespace Engine::Components {
 	void RigidBodyComponent::SetCollisionShapeRef(const JPH::ShapeRefC& shape)
 	{
 		auto& bodyInterface = GetPhysics().GetPhysicsSystem()->GetBodyInterface();
-		bodyInterface.SetShape(bodyID, shape, true, JPH::EActivation::Activate);
+		// Mesh shapes cannot calculate mass/inertia, so we must not update mass properties automatically
+		bool updateMass = shape.GetPtr()->GetSubType() != EShapeSubType::Mesh;
+		bodyInterface.SetShape(bodyID, shape, updateMass, JPH::EActivation::Activate);
 
 		if (shape.GetPtr()->GetSubType() == EShapeSubType::Box) {
 			shapeType             = "Box";
@@ -379,6 +492,10 @@ namespace Engine::Components {
 			shapeType                 = "Capsule";
 			const auto* capsule_shape = static_cast<const CapsuleShape*>(shape.GetPtr());
 			shapeSize                 = Vec3(capsule_shape->GetHalfHeightOfCylinder(), capsule_shape->GetRadius(), 0.0);
+		}
+		else if (shape.GetPtr()->GetSubType() == EShapeSubType::Mesh) {
+			shapeType = "Mesh";
+			// Mesh shape size is not stored since it's derived from the model
 		}
 	}
 
@@ -425,6 +542,80 @@ namespace Engine::Components {
 		SetCollisionShapeRef(result.Get());
 		shapeType = "Cylinder";
 		shapeSize = Vec3(settings.mHalfHeight, settings.mRadius, 0.0);
+	}
+
+	void RigidBodyComponent::SetMeshShape(Entity& entity)
+	{
+		// Check if entity has ModelRenderer
+		if (!entity.HasComponent<Engine::Components::ModelRenderer>()) {
+			GetPhysics().log->warn("Cannot create mesh collider: Entity has no ModelRenderer component");
+			return;
+		}
+
+		auto& modelRenderer = entity.GetComponent<Engine::Components::ModelRenderer>();
+		if (!modelRenderer.model.IsValid()) {
+			GetPhysics().log->warn("Cannot create mesh collider: ModelRenderer has no valid model");
+			return;
+		}
+
+		auto* model = GetAssetManager().Get(modelRenderer.model);
+		if (!model) {
+			GetPhysics().log->warn("Cannot create mesh collider: Model asset could not be loaded");
+			return;
+		}
+
+		JPH::TriangleList triangles;
+		const auto& meshes = model->GetMeshes();
+		
+		// Ensure mesh selection matches model
+		if (meshSelection.size() != meshes.size()) {
+			meshSelection.resize(meshes.size(), true);
+		}
+
+		// Extract triangle data from all meshes
+		int meshIndex = 0;
+		for (const auto& mesh : meshes) {
+			// Skip disabled meshes
+			if (!meshSelection[meshIndex]) {
+				meshIndex++;
+				continue;
+			}
+			const auto& vertices = mesh->GetVertices();
+			const auto& indices = mesh->GetIndices();
+			
+			// Convert indices to triangles
+			for (size_t i = 0; i < indices.size(); i += 3) {
+				if (i + 2 < indices.size()) {
+					const auto& v0 = vertices[indices[i]].Position;
+					const auto& v1 = vertices[indices[i + 1]].Position;
+					const auto& v2 = vertices[indices[i + 2]].Position;
+					
+					JPH::Triangle triangle(
+						JPH::Float3(v0.x, v0.y, v0.z),
+						JPH::Float3(v1.x, v1.y, v1.z),
+						JPH::Float3(v2.x, v2.y, v2.z)
+					);
+					triangles.push_back(triangle);
+				}
+			}
+			meshIndex++;
+		}
+		
+		if (triangles.empty()) {
+			GetPhysics().log->warn("Cannot create mesh collider: No valid triangles found in model");
+			return;
+		}
+		
+		// Create mesh shape
+		JPH::MeshShapeSettings meshSettings(triangles);
+		auto result = meshSettings.Create();
+		if (result.HasError()) {
+			GetPhysics().log->error("MeshShape creation failed: " + result.GetError());
+			return;
+		}
+		
+		SetCollisionShapeRef(result.Get());
+		shapeType = "Mesh";
 	}
 
 
@@ -543,6 +734,11 @@ namespace Engine::Components {
 		gravityFactor = other.gravityFactor;
 		shapeType     = other.shapeType;
 		shapeSize     = other.shapeSize;
+		meshSelection = other.meshSelection;
+		// prevent all elements of meshSelection to be false
+		if (meshSelection.size() > 0 && std::all_of(meshSelection.begin(), meshSelection.end(), [](bool b) { return !b; })) {
+			meshSelection[0] = true;
+		}
 	}
 
 

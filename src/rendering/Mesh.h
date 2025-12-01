@@ -30,6 +30,8 @@ namespace Engine::Rendering {
 		[[maybe_unused]] void                          CleanUp();
 		[[maybe_unused]] static void                   CleanAllMeshes();
 		[[nodiscard]] const std::shared_ptr<Material>& GetMaterial() const { return m_material; }
+		[[nodiscard]] const std::vector<Vertex>&       GetVertices() const { return m_vertices; }
+		[[nodiscard]] const std::vector<unsigned int>& GetIndices() const { return m_indices; }
 
 	  private:
 		void SetupMesh();
