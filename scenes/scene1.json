@@ -24,10 +24,42 @@
                             }
                         },
                         {
+                            "key": "JUMP_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 8.0
+                            }
+                        },
+                        {
                             "key": "SHOOT_POWER",
                             "value": {
                                 "index": 0,
                                 "data": 64.5
+                            }
+                        },
+                        {
+                            "key": "MOUSE_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.10000000149011612
+                            }
+                        },
+                        {
+                            "key": "shootSound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
+                                }
+                            }
+                        },
+                        {
+                            "key": "victorySound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                }
                             }
                         },
                         {
@@ -47,42 +79,10 @@
                             }
                         },
                         {
-                            "key": "shootSound",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
-                                }
-                            }
-                        },
-                        {
-                            "key": "MOUSE_SENSITIVITY",
+                            "key": "RUN_SPEED",
                             "value": {
                                 "index": 0,
-                                "data": 0.10000000149011612
-                            }
-                        },
-                        {
-                            "key": "JUMP_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 8.0
-                            }
-                        },
-                        {
-                            "key": "victorySound",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
-                                }
-                            }
-                        },
-                        {
-                            "key": "CAMERA_Y_OFFSET",
-                            "value": {
-                                "index": 0,
-                                "data": 1.100000023841858
+                                "data": 12.0
                             }
                         },
                         {
@@ -95,10 +95,10 @@
                             }
                         },
                         {
-                            "key": "RUN_SPEED",
+                            "key": "CAMERA_Y_OFFSET",
                             "value": {
                                 "index": 0,
-                                "data": 12.0
+                                "data": 1.100000023841858
                             }
                         }
                     ]
@@ -266,11 +266,11 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
-                            "key": "TARGET_COLOR",
+                            "key": "NORMAL_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
+                                    "guid": "4f843329315c8297e0905d030736e961"
                                 }
                             }
                         },
@@ -282,11 +282,11 @@
                             }
                         },
                         {
-                            "key": "NORMAL_COLOR",
+                            "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
+                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
                             }
                         }
@@ -401,11 +401,11 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
-                            "key": "TARGET_COLOR",
+                            "key": "NORMAL_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
+                                    "guid": "c65e206dfc749371e59f05aa1e2eda9c"
                                 }
                             }
                         },
@@ -417,11 +417,11 @@
                             }
                         },
                         {
-                            "key": "NORMAL_COLOR",
+                            "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "c65e206dfc749371e59f05aa1e2eda9c"
+                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
                             }
                         }
@@ -541,11 +541,11 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
-                            "key": "TARGET_COLOR",
+                            "key": "NORMAL_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
+                                    "guid": "4f843329315c8297e0905d030736e961"
                                 }
                             }
                         },
@@ -557,11 +557,11 @@
                             }
                         },
                         {
-                            "key": "NORMAL_COLOR",
+                            "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
+                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
                             }
                         }
@@ -1064,7 +1064,21 @@
                 "children": []
             },
             "LuaScript": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {
+                    "scriptPath": "scripts/teapot.lua",
+                    "variables": [
+                        {
+                            "key": "SPAWNPOINT",
+                            "value": {
+                                "index": 12,
+                                "data": {
+                                    "guid": "fbc97bfaf3146487d86ff920fd94709b"
+                                }
+                            }
+                        }
+                    ]
+                }
             },
             "ShadowCaster": {
                 "nullopt": true
@@ -1111,8 +1125,8 @@
             "RigidBodyComponent": {
                 "nullopt": false,
                 "data": {
-                    "motionType": 1,
-                    "mass": 29.049999237060548,
+                    "motionType": 2,
+                    "mass": 81.75499725341797,
                     "friction": 0.5,
                     "restitution": 0.0,
                     "gravityFactor": 1.0,
@@ -1175,11 +1189,11 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
-                            "key": "TARGET_COLOR",
+                            "key": "NORMAL_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
+                                    "guid": "4f843329315c8297e0905d030736e961"
                                 }
                             }
                         },
@@ -1191,11 +1205,11 @@
                             }
                         },
                         {
-                            "key": "NORMAL_COLOR",
+                            "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
+                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
                             }
                         }
@@ -1310,11 +1324,11 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
-                            "key": "TARGET_COLOR",
+                            "key": "NORMAL_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
+                                    "guid": "4f843329315c8297e0905d030736e961"
                                 }
                             }
                         },
@@ -1326,11 +1340,11 @@
                             }
                         },
                         {
-                            "key": "NORMAL_COLOR",
+                            "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
+                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
                             }
                         }
@@ -1647,11 +1661,11 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
-                            "key": "TARGET_COLOR",
+                            "key": "NORMAL_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
+                                    "guid": "4f843329315c8297e0905d030736e961"
                                 }
                             }
                         },
@@ -1663,11 +1677,11 @@
                             }
                         },
                         {
-                            "key": "NORMAL_COLOR",
+                            "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
+                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
                             }
                         }
@@ -1783,7 +1797,25 @@
                 "nullopt": true
             },
             "Transform": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 7.240387916564941,
+                        "y": 10.854677200317383,
+                        "z": -4.977656841278076
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
             },
             "TerrainRenderer": {
                 "nullopt": true
@@ -1819,7 +1851,15 @@
                 "nullopt": true
             },
             "GizmoComponent": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {
+                    "radius": 0.6000000238418579,
+                    "color": {
+                        "x": 0.8039867281913757,
+                        "y": 0.024039454758167268,
+                        "z": 0.4282650053501129
+                    }
+                }
             }
         }
     ]

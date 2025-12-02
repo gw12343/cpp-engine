@@ -132,7 +132,7 @@ namespace Engine {
 			// Render RmlUi into the framebuffer
 			GetGameUIManager().Render();
 		}
-		
+
 #ifndef GAME_BUILD
 		{
 			ZoneScopedN("Render Gizmos");
@@ -140,7 +140,7 @@ namespace Engine {
 				RenderGizmos(false);
 			}
 		}
-		
+
 		{
 			ZoneScopedN("Render Mouse Picking");
 			Engine::Window::GetFramebuffer(Window::FramebufferID::MOUSE_PICKING)->Bind();
