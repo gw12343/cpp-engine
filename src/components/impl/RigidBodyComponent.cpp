@@ -2,6 +2,8 @@
 // Created by gabe on 6/24/25.
 //
 
+#include "assets/AssetManager.h"
+#include "assets/AssetManager.h"
 #include "components/Components.h"
 
 #include "core/Entity.h"
@@ -15,7 +17,6 @@
 #include "physics/PhysicsManager.h"
 #include "RigidBodyComponent.h"
 #include "rendering/ui/InspectorUI.h"
-#include "ModelRendererComponent.h"
 
 namespace Engine::Components {
 
@@ -44,15 +45,14 @@ namespace Engine::Components {
 				shape = new JPH::CylinderShape(shapeSize.GetX(), shapeSize.GetY());
 			}
 			else if (shapeType == "ConvexMesh") {
-			// Try to create convex mesh shape from ModelRenderer
-			if (entity.HasComponent<Engine::Components::ModelRenderer>()) {
-				auto& modelRenderer = entity.GetComponent<Engine::Components::ModelRenderer>();
-				if (modelRenderer.model.IsValid()) {
-					auto* model = GetAssetManager().Get(modelRenderer.model);
+				// Try to create convex mesh shape from model
+				GetPhysics().log->info("Creating convex mesh shape from model {}", colliderModel.GetID());
+				if (colliderModel.IsValid()) {
+					auto* model = GetAssetManager().Get(colliderModel);
 					if (model) {
 						JPH::Array<JPH::Vec3> points;
-						const auto& meshes = model->GetMeshes();
-						
+						const auto&           meshes = model->GetMeshes();
+
 						// Ensure mesh selection matches model
 						if (meshSelection.size() != meshes.size()) {
 							GetPhysics().log->warn("Mesh selection size does not match model size, resizing to match. Was {} now {}", meshSelection.size(), meshes.size());
@@ -66,113 +66,106 @@ namespace Engine::Components {
 								continue;
 							}
 							const auto& vertices = mesh->GetVertices();
-							
+
 							// Add all vertices as points for convex hull
 							for (const auto& vertex : vertices) {
 								points.push_back(JPH::Vec3(vertex.Position.x, vertex.Position.y, vertex.Position.z));
 							}
 							meshIndex++;
 						}
-						
-					if (!points.empty()) {
-						JPH::ConvexHullShapeSettings convexSettings(points);
-						auto convexResult = convexSettings.Create();
-						if (!convexResult.HasError()) {
-							// Store the center of mass offset for later use in physics sync
-							centerOfMassOffset = convexResult.Get()->GetCenterOfMass();
-							shape = convexResult.Get();
-						} else {
-							GetPhysics().log->warn("Failed to create convex hull, falling back to box collider");
-							shape = new JPH::BoxShape(shapeSize);
-							shapeType = "Box";
-						}
-					} else {
-							GetPhysics().log->warn("Failed to extract vertex data, falling back to box collider");
-							shape = new JPH::BoxShape(shapeSize);
-							shapeType = "Box";
-						}
-					} else {
-						GetPhysics().log->warn("ModelRenderer model could not be loaded, falling back to box collider");
-						shape = new JPH::BoxShape(shapeSize);
-						shapeType = "Box";
-					}
-				} else {
-					GetPhysics().log->warn("ModelRenderer has no valid model, falling back to box collider");
-					shape = new JPH::BoxShape(shapeSize);
-					shapeType = "Box";
-				}
-			} else {
-				GetPhysics().log->warn("Entity has no ModelRenderer component, falling back to box collider");
-				shape = new JPH::BoxShape(shapeSize);
-				shapeType = "Box";
-			}
-		}
-				
-			else if (shapeType == "Mesh") {
-				// Try to create mesh shape from ModelRenderer
-				if (entity.HasComponent<Engine::Components::ModelRenderer>()) {
-					auto& modelRenderer = entity.GetComponent<Engine::Components::ModelRenderer>();
-					if (modelRenderer.model.IsValid()) {
-						auto* model = GetAssetManager().Get(modelRenderer.model);
-						if (model) {
-							JPH::TriangleList triangles;
-							const auto& meshes = model->GetMeshes();
-							
-							// Ensure mesh selection matches model
-							if (meshSelection.size() != meshes.size()) {
-								GetPhysics().log->warn("Mesh selection size does not match model size, resizing to match. Was {} now {}", meshSelection.size(), meshes.size());
-								meshSelection.resize(meshes.size(), true);
-							}
 
-							int meshIndex = 0;
-							for (const auto& mesh : meshes) {
-								if (!meshSelection[meshIndex]) {
-									meshIndex++;
-									continue;
-								}
-								const auto& vertices = mesh->GetVertices();
-								const auto& indices = mesh->GetIndices();
-								
-								// Convert indices to triangles
-								for (size_t i = 0; i < indices.size(); i += 3) {
-									if (i + 2 < indices.size()) {
-										const auto& v0 = vertices[indices[i]].Position;
-										const auto& v1 = vertices[indices[i + 1]].Position;
-										const auto& v2 = vertices[indices[i + 2]].Position;
-										
-										JPH::Triangle triangle(
-											JPH::Float3(v0.x, v0.y, v0.z),
-											JPH::Float3(v1.x, v1.y, v1.z),
-											JPH::Float3(v2.x, v2.y, v2.z)
-										);
-										triangles.push_back(triangle);
-									}
-								}
-								meshIndex++;
+						if (!points.empty()) {
+							JPH::ConvexHullShapeSettings convexSettings(points);
+							auto                         convexResult = convexSettings.Create();
+							if (!convexResult.HasError()) {
+								// Store the center of mass offset for later use in physics sync
+								centerOfMassOffset = convexResult.Get()->GetCenterOfMass();
+								shape              = convexResult.Get();
 							}
-							
-							if (!triangles.empty()) {
-								JPH::MeshShapeSettings meshSettings(triangles);
-								shape = meshSettings.Create().Get();
-							} else {
-								GetPhysics().log->warn("Failed to extract mesh data, falling back to box collider");
-								shape = new JPH::BoxShape(shapeSize);
+							else {
+								GetPhysics().log->warn("Failed to create convex hull, falling back to box collider");
+								shape     = new JPH::BoxShape(shapeSize);
 								shapeType = "Box";
 							}
-						} else {
-							GetPhysics().log->warn("ModelRenderer has no model loaded, falling back to box collider");
-							shape = new JPH::BoxShape(shapeSize);
+						}
+						else {
+							GetPhysics().log->warn("Failed to extract vertex data, falling back to box collider");
+							shape     = new JPH::BoxShape(shapeSize);
 							shapeType = "Box";
 						}
-					} else {
-						GetPhysics().log->warn("Entity has no ModelRenderer component, falling back to box collider");
-						shape = new JPH::BoxShape(shapeSize);
+					}
+					else {
+						GetPhysics().log->warn("ModelRenderer model could not be loaded, falling back to box collider");
+						shape     = new JPH::BoxShape(shapeSize);
+						shapeType = "Box";
+					}
+				}
+				else {
+					GetPhysics().log->warn("ModelRenderer has no valid model, falling back to box collider");
+					shape     = new JPH::BoxShape(shapeSize);
+					shapeType = "Box";
+				}
+			}
+
+			else if (shapeType == "Mesh") {
+				GetPhysics().log->info("Creating mesh shape from model {}", colliderModel.GetID());
+				// Try to create mesh shape from model
+				if (colliderModel.IsValid()) {
+					auto* model = GetAssetManager().Get(colliderModel);
+					if (model) {
+						JPH::TriangleList triangles;
+						const auto&       meshes = model->GetMeshes();
+
+						// Ensure mesh selection matches model
+						if (meshSelection.size() != meshes.size()) {
+							GetPhysics().log->warn("Mesh selection size does not match model size, resizing to match. Was {} now {}", meshSelection.size(), meshes.size());
+							meshSelection.resize(meshes.size(), true);
+						}
+
+						int meshIndex = 0;
+						for (const auto& mesh : meshes) {
+							if (!meshSelection[meshIndex]) {
+								meshIndex++;
+								continue;
+							}
+							const auto& vertices = mesh->GetVertices();
+							const auto& indices  = mesh->GetIndices();
+
+							// Convert indices to triangles
+							for (size_t i = 0; i < indices.size(); i += 3) {
+								if (i + 2 < indices.size()) {
+									const auto& v0 = vertices[indices[i]].Position;
+									const auto& v1 = vertices[indices[i + 1]].Position;
+									const auto& v2 = vertices[indices[i + 2]].Position;
+
+									JPH::Triangle triangle(JPH::Float3(v0.x, v0.y, v0.z), JPH::Float3(v1.x, v1.y, v1.z), JPH::Float3(v2.x, v2.y, v2.z));
+									triangles.push_back(triangle);
+								}
+							}
+							meshIndex++;
+						}
+
+						if (!triangles.empty()) {
+							JPH::MeshShapeSettings meshSettings(triangles);
+							shape = meshSettings.Create().Get();
+						}
+						else {
+							GetPhysics().log->warn("Failed to extract mesh data, falling back to box collider");
+							shape     = new JPH::BoxShape(shapeSize);
+							shapeType = "Box";
+						}
+					}
+					else {
+						GetPhysics().log->warn("ModelRenderer has no model loaded, falling back to box collider");
+						shape     = new JPH::BoxShape(shapeSize);
 						shapeType = "Box";
 					}
 				}
 				else {
 					// default to box
-					shape = new JPH::BoxShape(shapeSize);
+					GetPhysics().log->warn("Invalid model, falling back to box collider");
+					shape     = new JPH::BoxShape(shapeSize);
+					shapeType = "Box";
 				}
 			}
 
@@ -196,6 +189,8 @@ namespace Engine::Components {
 			settings.mFriction                     = friction;
 			settings.mRestitution                  = restitution;
 			settings.mOverrideMassProperties       = EOverrideMassProperties::MassAndInertiaProvided;
+
+			GetPhysics().log->info("Creating body with shape type {}", shapeType);
 
 			bodyID = bodyInterface.CreateAndAddBody(settings, JPH::EActivation::Activate);
 		}
@@ -338,7 +333,7 @@ namespace Engine::Components {
 
 				auto shape = bodyInterface.GetShape(bodyID);
 
-				if (shape.GetPtr()->GetSubType() == EShapeSubType::Box) {
+				if (shapeType == "Box") {
 					const auto* box_shape = static_cast<const BoxShape*>(shape.GetPtr());
 
 					float halfExtents[3] = {box_shape->GetHalfExtent().GetX(), box_shape->GetHalfExtent().GetY(), box_shape->GetHalfExtent().GetZ()};
@@ -350,7 +345,7 @@ namespace Engine::Components {
 						shapeSize = size;
 					}
 				}
-				else if (shape.GetPtr()->GetSubType() == EShapeSubType::Sphere) {
+				else if (shapeType == "Sphere") {
 					const auto* sphere_shape = static_cast<const SphereShape*>(shape.GetPtr());
 
 					float radius = sphere_shape->GetRadius();
@@ -361,7 +356,7 @@ namespace Engine::Components {
 						shapeSize = Vec3(radius, 0.0, 0.0);
 					}
 				}
-				else if (shape.GetPtr()->GetSubType() == EShapeSubType::Cylinder) {
+				else if (shapeType == "Cylinder") {
 					const auto* cylinder_shape = static_cast<const CylinderShape*>(shape.GetPtr());
 
 
@@ -375,7 +370,7 @@ namespace Engine::Components {
 						shapeSize = Vec3(halfHeight, radius, 0.0);
 					}
 				}
-				else if (shape.GetPtr()->GetSubType() == EShapeSubType::Capsule) {
+				else if (shapeType == "Capsule") {
 					const auto* capsule_shape = static_cast<const CapsuleShape*>(shape.GetPtr());
 
 					float radius     = capsule_shape->GetRadius();
@@ -388,85 +383,87 @@ namespace Engine::Components {
 						shapeSize = Vec3(halfHeight, radius, 0.0);
 					}
 				}
-				else if (shape.GetPtr()->GetSubType() == EShapeSubType::Mesh) {
+				else if (shapeType == "Mesh") {
 					// Display read-only mesh info
 					ImGui::TextWrapped("Mesh Collider (from ModelRenderer)");
 					ImGui::TextWrapped("Mesh colliders are read-only and derive from the entity's model geometry.");
-					
+
+					if (LeftLabelAssetModel("Collider Model", &colliderModel)) {
+						SetMeshShape(entity);
+					}
+
 					if (ImGui::Button("Refresh from Model")) {
 						SetMeshShape(entity);
 					}
 
-					if (entity.HasComponent<Engine::Components::ModelRenderer>()) {
-						auto& modelRenderer = entity.GetComponent<Engine::Components::ModelRenderer>();
-						if (modelRenderer.model.IsValid()) {
-							auto* model = GetAssetManager().Get(modelRenderer.model);
-							if (model) {
-								const auto& meshes = model->GetMeshes();
-								if (meshSelection.size() != meshes.size()) {
-									meshSelection.resize(meshes.size(), true);
-								}
+					if (colliderModel.IsValid()) {
+						auto* model = GetAssetManager().Get(colliderModel);
+						if (model) {
+							const auto& meshes = model->GetMeshes();
+							if (meshSelection.size() != meshes.size()) {
+								meshSelection.resize(meshes.size(), true);
+							}
 
-								if (ImGui::TreeNode("Mesh Selection")) {
-									bool changed = false;
-									for (size_t i = 0; i < meshes.size(); ++i) {
-										std::string label = "Mesh " + std::to_string(i);
-										// Use bool for ImGui
-										bool enabled = meshSelection[i];
-										if (ImGui::Checkbox(label.c_str(), &enabled)) {
-											meshSelection[i] = enabled;
-											changed = true;
-										}
+							if (ImGui::TreeNode("Mesh Selection")) {
+								bool changed = false;
+								for (size_t i = 0; i < meshes.size(); ++i) {
+									std::string label = "Mesh " + std::to_string(i);
+									// Use bool for ImGui
+									bool enabled = meshSelection[i];
+									if (ImGui::Checkbox(label.c_str(), &enabled)) {
+										meshSelection[i] = enabled;
+										changed          = true;
 									}
-									ImGui::TreePop();
-									
-									if (changed) {
-										SetMeshShape(entity);
-									}
+								}
+								ImGui::TreePop();
+
+								if (changed) {
+									SetMeshShape(entity);
 								}
 							}
 						}
 					}
 				}
-		else if (shape.GetPtr()->GetSubType() == EShapeSubType::ConvexHull) {
-			// Display convex mesh info
-			ImGui::TextWrapped("Convex Mesh Collider (from ModelRenderer)");
-			ImGui::TextWrapped("Convex mesh colliders are suitable for dynamic bodies and support proper mass/inertia calculation.");
-			
-			if (ImGui::Button("Refresh from Model##ConvexMesh")) {
-				SetConvexMeshShape(entity);
-			}
+				else if (shapeType == "ConvexMesh") {
+					// Display convex mesh info
+					ImGui::TextWrapped("Convex Mesh Collider (from ModelRenderer)");
+					ImGui::TextWrapped("Convex mesh colliders are suitable for dynamic bodies and support proper mass/inertia calculation.");
 
-			if (entity.HasComponent<Engine::Components::ModelRenderer>()) {
-				auto& modelRenderer = entity.GetComponent<Engine::Components::ModelRenderer>();
-				if (modelRenderer.model.IsValid()) {
-					auto* model = GetAssetManager().Get(modelRenderer.model);
-					if (model) {
-						const auto& meshes = model->GetMeshes();
-						if (meshSelection.size() != meshes.size()) {
-							meshSelection.resize(meshes.size(), true);
-						}
+					if (LeftLabelAssetModel("Collider Model", &colliderModel)) {
+						SetConvexMeshShape(entity);
+					}
 
-						if (ImGui::TreeNode("Mesh Selection##ConvexMesh")) {
-							bool changed = false;
-							for (size_t i = 0; i < meshes.size(); ++i) {
-								std::string label = "Mesh " + std::to_string(i) + "##Convex";
-								bool enabled = meshSelection[i];
-								if (ImGui::Checkbox(label.c_str(), &enabled)) {
-									meshSelection[i] = enabled;
-									changed = true;
-								}
+					if (ImGui::Button("Refresh from Model##ConvexMesh")) {
+						SetConvexMeshShape(entity);
+					}
+
+					if (colliderModel.IsValid()) {
+						auto* model = GetAssetManager().Get(colliderModel);
+						if (model) {
+							const auto& meshes = model->GetMeshes();
+							if (meshSelection.size() != meshes.size()) {
+								meshSelection.resize(meshes.size(), true);
 							}
-							ImGui::TreePop();
-							
-							if (changed) {
-								SetConvexMeshShape(entity);
+
+							if (ImGui::TreeNode("Mesh Selection##ConvexMesh")) {
+								bool changed = false;
+								for (size_t i = 0; i < meshes.size(); ++i) {
+									std::string label   = "Mesh " + std::to_string(i) + "##Convex";
+									bool        enabled = meshSelection[i];
+									if (ImGui::Checkbox(label.c_str(), &enabled)) {
+										meshSelection[i] = enabled;
+										changed          = true;
+									}
+								}
+								ImGui::TreePop();
+
+								if (changed) {
+									SetConvexMeshShape(entity);
+								}
 							}
 						}
 					}
 				}
-			}
-		}
 				ImGui::TreePop();
 			}
 		}
@@ -663,27 +660,23 @@ namespace Engine::Components {
 
 	void RigidBodyComponent::SetMeshShape(Entity& entity)
 	{
-		// Check if entity has ModelRenderer
-		if (!entity.HasComponent<Engine::Components::ModelRenderer>()) {
-			GetPhysics().log->warn("Cannot create mesh collider: Entity has no ModelRenderer component");
+		shapeType = "Mesh";
+
+		// Check if colliderModel is set
+		if (!colliderModel.IsValid()) {
+			GetPhysics().log->warn("Cannot create mesh collider: No collider model set");
 			return;
 		}
 
-		auto& modelRenderer = entity.GetComponent<Engine::Components::ModelRenderer>();
-		if (!modelRenderer.model.IsValid()) {
-			GetPhysics().log->warn("Cannot create mesh collider: ModelRenderer has no valid model");
-			return;
-		}
-
-		auto* model = GetAssetManager().Get(modelRenderer.model);
+		auto* model = GetAssetManager().Get(colliderModel);
 		if (!model) {
-			GetPhysics().log->warn("Cannot create mesh collider: Model asset could not be loaded");
+			GetPhysics().log->warn("Cannot create mesh collider: Collider model could not be loaded");
 			return;
 		}
 
 		JPH::TriangleList triangles;
-		const auto& meshes = model->GetMeshes();
-		
+		const auto&       meshes = model->GetMeshes();
+
 		// Ensure mesh selection matches model
 		if (meshSelection.size() != meshes.size()) {
 			meshSelection.resize(meshes.size(), true);
@@ -698,108 +691,100 @@ namespace Engine::Components {
 				continue;
 			}
 			const auto& vertices = mesh->GetVertices();
-			const auto& indices = mesh->GetIndices();
-			
+			const auto& indices  = mesh->GetIndices();
+
 			// Convert indices to triangles
 			for (size_t i = 0; i < indices.size(); i += 3) {
 				if (i + 2 < indices.size()) {
 					const auto& v0 = vertices[indices[i]].Position;
 					const auto& v1 = vertices[indices[i + 1]].Position;
 					const auto& v2 = vertices[indices[i + 2]].Position;
-					
-					JPH::Triangle triangle(
-						JPH::Float3(v0.x, v0.y, v0.z),
-						JPH::Float3(v1.x, v1.y, v1.z),
-						JPH::Float3(v2.x, v2.y, v2.z)
-					);
+
+					JPH::Triangle triangle(JPH::Float3(v0.x, v0.y, v0.z), JPH::Float3(v1.x, v1.y, v1.z), JPH::Float3(v2.x, v2.y, v2.z));
 					triangles.push_back(triangle);
 				}
 			}
 			meshIndex++;
 		}
-		
+
 		if (triangles.empty()) {
 			GetPhysics().log->warn("Cannot create mesh collider: No valid triangles found in model");
 			return;
 		}
-		
+
 		// Create mesh shape
-	JPH::MeshShapeSettings meshSettings(triangles);
-	auto result = meshSettings.Create();
-	if (result.HasError()) {
-		GetPhysics().log->error("MeshShape creation failed: " + result.GetError());
-		return;
-	}
-	
-	SetCollisionShapeRef(result.Get());
-	shapeType = "Mesh";
-}
+		JPH::MeshShapeSettings meshSettings(triangles);
+		auto                   result = meshSettings.Create();
+		if (result.HasError()) {
+			GetPhysics().log->error("MeshShape creation failed: " + result.GetError());
+			return;
+		}
 
-void RigidBodyComponent::SetConvexMeshShape(Entity& entity)
-{
-	// Check if entity has ModelRenderer
-	if (!entity.HasComponent<Engine::Components::ModelRenderer>()) {
-		GetPhysics().log->warn("Cannot create convex mesh collider: Entity has no ModelRenderer component");
-		return;
+		SetCollisionShapeRef(result.Get());
+		shapeType = "Mesh";
 	}
 
-	auto& modelRenderer = entity.GetComponent<Engine::Components::ModelRenderer>();
-	if (!modelRenderer.model.IsValid()) {
-		GetPhysics().log->warn("Cannot create convex mesh collider: ModelRenderer has no valid model");
-		return;
-	}
+	void RigidBodyComponent::SetConvexMeshShape(Entity& entity)
+	{
+		shapeType = "ConvexMesh";
 
-	auto* model = GetAssetManager().Get(modelRenderer.model);
-	if (!model) {
-		GetPhysics().log->warn("Cannot create convex mesh collider: Model asset could not be loaded");
-		return;
-	}
+		// Check if colliderModel is set
+		if (!colliderModel.IsValid()) {
+			GetPhysics().log->warn("Cannot create convex mesh collider: No collider model set");
+			return;
+		}
 
-	JPH::Array<JPH::Vec3> points;
-	const auto& meshes = model->GetMeshes();
-	
-	// Ensure mesh selection matches model
-	if (meshSelection.size() != meshes.size()) {
-		GetPhysics().log->warn("Mesh selection size does not match model size, resizing to match. Was {} now {}", meshSelection.size(), meshes.size());
-		meshSelection.resize(meshes.size(), true);
-	}
+		auto* model = GetAssetManager().Get(colliderModel);
+		if (!model) {
+			GetPhysics().log->warn("Cannot create convex mesh collider: Collider model could not be loaded");
+			return;
+		}
 
-	// Extract vertex positions from all selected meshes
-	int meshIndex = 0;
-	for (const auto& mesh : meshes) {
-		// Skip disabled meshes
-		if (!meshSelection[meshIndex]) {
+		JPH::Array<JPH::Vec3> points;
+		const auto&           meshes = model->GetMeshes();
+
+		// Ensure mesh selection matches model
+		if (meshSelection.size() != meshes.size()) {
+			GetPhysics().log->warn("Mesh selection size does not match model size, resizing to match. Was {} now {}", meshSelection.size(), meshes.size());
+			meshSelection.resize(meshes.size(), true);
+		}
+
+		// Extract vertex positions from all selected meshes
+		int meshIndex = 0;
+		for (const auto& mesh : meshes) {
+			// Skip disabled meshes
+			if (!meshSelection[meshIndex]) {
+				meshIndex++;
+				continue;
+			}
+			const auto& vertices = mesh->GetVertices();
+
+			// Add all vertices as points for convex hull
+			for (const auto& vertex : vertices) {
+				points.push_back(JPH::Vec3(vertex.Position.x, vertex.Position.y, vertex.Position.z));
+			}
 			meshIndex++;
-			continue;
 		}
-		const auto& vertices = mesh->GetVertices();
-		
-		// Add all vertices as points for convex hull
-		for (const auto& vertex : vertices) {
-			points.push_back(JPH::Vec3(vertex.Position.x, vertex.Position.y, vertex.Position.z));
+
+		if (points.empty()) {
+			GetPhysics().log->warn("Cannot create convex mesh collider: No valid vertices found in model");
+			return;
 		}
-		meshIndex++;
+
+		// Create convex hull shape
+		JPH::ConvexHullShapeSettings convexSettings(points);
+		auto                         result = convexSettings.Create();
+		if (result.HasError()) {
+			GetPhysics().log->error("ConvexHullShape creation failed: " + result.GetError());
+			return;
+		}
+
+		// Store the center of mass offset for later use in physics sync
+		centerOfMassOffset = result.Get()->GetCenterOfMass();
+
+		SetCollisionShapeRef(result.Get());
+		shapeType = "ConvexMesh";
 	}
-	
-	if (points.empty()) {
-		GetPhysics().log->warn("Cannot create convex mesh collider: No valid vertices found in model");
-		return;
-	}
-	
-	// Create convex hull shape
-	JPH::ConvexHullShapeSettings convexSettings(points);
-	auto result = convexSettings.Create();
-	if (result.HasError()) {
-		GetPhysics().log->error("ConvexHullShape creation failed: " + result.GetError());
-		return;
-	}
-	
-	// Store the center of mass offset for later use in physics sync
-	centerOfMassOffset = result.Get()->GetCenterOfMass();
-	
-	SetCollisionShapeRef(result.Get());
-	shapeType = "ConvexMesh";
-}
 
 
 	glm::vec3 RigidBodyComponent::GetPosition() const
@@ -918,6 +903,7 @@ void RigidBodyComponent::SetConvexMeshShape(Entity& entity)
 		shapeType     = other.shapeType;
 		shapeSize     = other.shapeSize;
 		meshSelection = other.meshSelection;
+		colliderModel = other.colliderModel;
 		// prevent all elements of meshSelection to be false
 		if (meshSelection.size() > 0 && std::all_of(meshSelection.begin(), meshSelection.end(), [](bool b) { return !b; })) {
 			meshSelection[0] = true;
