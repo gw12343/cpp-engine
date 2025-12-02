@@ -30,6 +30,7 @@ namespace Engine::Components {
 		JPH::Vec3         shapeSize     = JPH::Vec3::sReplicate(1.0f); // size/half-extents
 		std::vector<bool> meshSelection;                               // Which meshes from the model are enabled for collision
 		JPH::Vec3         centerOfMassOffset = JPH::Vec3::sZero();     // Offset for convex hull shapes
+		AssetHandle<Rendering::Model> colliderModel;                   // Model used for mesh/convex mesh colliders
 
 		RigidBodyComponent() : bodyID(0) {}
 
@@ -39,7 +40,7 @@ namespace Engine::Components {
 		template <class Archive>
 		void serialize(Archive& ar)
 		{
-			ar(CEREAL_NVP(motionType), CEREAL_NVP(mass), CEREAL_NVP(friction), CEREAL_NVP(restitution), CEREAL_NVP(gravityFactor), CEREAL_NVP(shapeType), CEREAL_NVP(shapeSize), CEREAL_NVP(meshSelection));
+			ar(CEREAL_NVP(motionType), CEREAL_NVP(mass), CEREAL_NVP(friction), CEREAL_NVP(restitution), CEREAL_NVP(gravityFactor), CEREAL_NVP(shapeType), CEREAL_NVP(shapeSize), CEREAL_NVP(meshSelection), CEREAL_NVP(colliderModel));
 		}
 
 		void OnAdded(Entity& entity) override;

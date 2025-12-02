@@ -169,9 +169,11 @@ namespace Engine {
 		auto& newParentData = par.GetComponent<Components::EntityMetadata>();
 		newParentData.children.push_back(childHandle);
 
-		auto& childTr = registry.get<Components::Transform>(m_handle);
+		if (HasComponent<Components::Transform>()) {
+			auto& childTr = registry.get<Components::Transform>(m_handle);
 
-		SetWorldTransform(childTr.GetWorldPosition(), childTr.GetWorldRotation(), childTr.GetWorldScale());
+			SetWorldTransform(childTr.GetWorldPosition(), childTr.GetWorldRotation(), childTr.GetWorldScale());
+		}
 		// --- 4. Optional: maintain world transform consistency ---
 		//		if (registry.any_of<Components::Transform>(m_handle)) {
 		//			auto& childTr = registry.get<Components::Transform>(m_handle);
