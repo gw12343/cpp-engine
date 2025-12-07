@@ -27,5 +27,5 @@ function Start()
 end
 
 function Update()
-    -- In a real game, this would render UI elements
+
 end

@@ -2,6 +2,93 @@
     "entities": [
         {
             "EntityMetadata": {
+                "name": "New Model",
+                "tag": "",
+                "active": true,
+                "guid": "28eba9cf6c0b8a1c115a72ec3a841f64",
+                "parentEntity": {
+                    "guid": ""
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 7.412207126617432,
+                        "y": 2.299574613571167,
+                        "z": 8.143495559692383
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "8f4859e3ac89632544374bc702a531e9"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": ""
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
                 "name": "Player",
                 "tag": "",
                 "active": true,
@@ -17,65 +104,10 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
-                            "key": "GRAVITY_SCALE",
-                            "value": {
-                                "index": 0,
-                                "data": 2.0
-                            }
-                        },
-                        {
-                            "key": "JUMP_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 8.0
-                            }
-                        },
-                        {
                             "key": "SHOOT_POWER",
                             "value": {
                                 "index": 0,
                                 "data": 64.5
-                            }
-                        },
-                        {
-                            "key": "MOUSE_SENSITIVITY",
-                            "value": {
-                                "index": 0,
-                                "data": 0.10000000149011612
-                            }
-                        },
-                        {
-                            "key": "shootSound",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
-                                }
-                            }
-                        },
-                        {
-                            "key": "victorySound",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
-                                }
-                            }
-                        },
-                        {
-                            "key": "BULLET_MATERIAL",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
-                                }
-                            }
-                        },
-                        {
-                            "key": "WALK_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 7.0
                             }
                         },
                         {
@@ -95,10 +127,65 @@
                             }
                         },
                         {
+                            "key": "victorySound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                }
+                            }
+                        },
+                        {
+                            "key": "GRAVITY_SCALE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
+                            }
+                        },
+                        {
                             "key": "CAMERA_Y_OFFSET",
                             "value": {
                                 "index": 0,
                                 "data": 1.100000023841858
+                            }
+                        },
+                        {
+                            "key": "MOUSE_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.10000000149011612
+                            }
+                        },
+                        {
+                            "key": "shootSound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
+                                }
+                            }
+                        },
+                        {
+                            "key": "JUMP_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 8.0
+                            }
+                        },
+                        {
+                            "key": "BULLET_MATERIAL",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
+                                }
+                            }
+                        },
+                        {
+                            "key": "WALK_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 7.0
                             }
                         }
                     ]
@@ -275,19 +362,19 @@
                             }
                         },
                         {
-                            "key": "POINTS",
-                            "value": {
-                                "index": 0,
-                                "data": 10.0
-                            }
-                        },
-                        {
                             "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
                                     "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
+                            }
+                        },
+                        {
+                            "key": "POINTS",
+                            "value": {
+                                "index": 0,
+                                "data": 10.0
                             }
                         }
                     ]
@@ -410,19 +497,19 @@
                             }
                         },
                         {
-                            "key": "POINTS",
-                            "value": {
-                                "index": 0,
-                                "data": 14.600000381469727
-                            }
-                        },
-                        {
                             "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
                                     "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
+                            }
+                        },
+                        {
+                            "key": "POINTS",
+                            "value": {
+                                "index": 0,
+                                "data": 14.600000381469727
                             }
                         }
                     ]
@@ -550,19 +637,19 @@
                             }
                         },
                         {
-                            "key": "POINTS",
-                            "value": {
-                                "index": 0,
-                                "data": 10.0
-                            }
-                        },
-                        {
                             "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
                                     "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
+                            }
+                        },
+                        {
+                            "key": "POINTS",
+                            "value": {
+                                "index": 0,
+                                "data": 10.0
                             }
                         }
                     ]
@@ -1198,19 +1285,19 @@
                             }
                         },
                         {
-                            "key": "POINTS",
-                            "value": {
-                                "index": 0,
-                                "data": 10.0
-                            }
-                        },
-                        {
                             "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
                                     "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
+                            }
+                        },
+                        {
+                            "key": "POINTS",
+                            "value": {
+                                "index": 0,
+                                "data": 10.0
                             }
                         }
                     ]
@@ -1333,19 +1420,19 @@
                             }
                         },
                         {
-                            "key": "POINTS",
-                            "value": {
-                                "index": 0,
-                                "data": 10.0
-                            }
-                        },
-                        {
                             "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
                                     "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
+                            }
+                        },
+                        {
+                            "key": "POINTS",
+                            "value": {
+                                "index": 0,
+                                "data": 10.0
                             }
                         }
                     ]
@@ -1670,19 +1757,19 @@
                             }
                         },
                         {
-                            "key": "POINTS",
-                            "value": {
-                                "index": 0,
-                                "data": 10.0
-                            }
-                        },
-                        {
                             "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
                                     "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
+                            }
+                        },
+                        {
+                            "key": "POINTS",
+                            "value": {
+                                "index": 0,
+                                "data": 10.0
                             }
                         }
                     ]
