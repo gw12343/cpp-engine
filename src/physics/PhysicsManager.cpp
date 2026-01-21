@@ -288,6 +288,13 @@ namespace Engine {
 
 			DecomposeMatrix(tform, worldPos, worldRot, scl);
 
+			// Apply center of mass offset for convex hull shapes
+			if (rb.centerOfMassOffset.LengthSq() > 0.0f) {
+				// Convert offset from local-space to world-space (rotated) and subtract from position
+				glm::vec3 offsetGlm = glm::vec3(rb.centerOfMassOffset.GetX(), rb.centerOfMassOffset.GetY(), rb.centerOfMassOffset.GetZ());
+				glm::vec3 rotatedOffset = worldRot * offsetGlm;
+				worldPos -= rotatedOffset;
+			}
 
 			tr.SetWorldPosition(worldPos);
 			tr.SetWorldRotation(worldRot);

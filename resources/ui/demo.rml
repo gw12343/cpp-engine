@@ -28,7 +28,7 @@
 		-- Subscribe to game events on load
 		function onLoad(event)
 			print("[UI] Game HUD loaded!")
-			print("[UI] demo loaded!")
+			debug("[UI] demo loaded!")
 			
 			-- Get document from event
 			if event and event.current_element then
