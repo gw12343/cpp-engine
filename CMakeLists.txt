@@ -142,6 +142,22 @@ FetchContent_Declare(
 set(EFSW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(EFSW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
+
+# ----------------- OpenXR -----------------
+FetchContent_Declare(
+        openxr
+        GIT_REPOSITORY https://github.com/KhronosGroup/OpenXR-SDK.git
+        GIT_TAG release-1.0.34
+)
+
+# Configure OpenXR SDK build
+set(BUILD_API_LAYERS OFF CACHE BOOL "" FORCE)
+set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(BUILD_CONFORMANCE_TESTS OFF CACHE BOOL "" FORCE)
+set(BUILD_LOADER ON CACHE BOOL "" FORCE)
+set(BUILD_WITH_SYSTEM_JSONCPP OFF CACHE BOOL "" FORCE)
+
+
 # Fetch FreeType on Windows for RmlUi
 if (WIN32)
     FetchContent_Declare(
@@ -172,7 +188,9 @@ set(RMLUI_TESTS OFF CACHE BOOL "" FORCE)
 set(RMLUI_LUA_BINDINGS ON CACHE BOOL "" FORCE)
 set(RMLUI_FONT_ENGINE "freetype" CACHE STRING "" FORCE)
 
-FetchContent_MakeAvailable(cereal spdlog nativefiledialog jolt ozz imgui effekseer lua sol2 nlohmann_json efsw tracy)
+FetchContent_MakeAvailable(cereal openxr spdlog nativefiledialog jolt ozz imgui effekseer lua sol2 nlohmann_json efsw tracy)
+
+
 
 # Now point RmlUi to our built Lua library (after lua has been fetched)
 if (WIN32)
@@ -258,6 +276,7 @@ function(setup_executable TARGET_NAME GAME_BUILD_FLAG)
     else()
         message(STATUS "Configuring ${TARGET_NAME} without GAME_BUILD")
     endif()
+        target_compile_definitions(${TARGET_NAME} PRIVATE VR)
 
     target_include_directories(${TARGET_NAME} PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/lib/include
@@ -333,6 +352,15 @@ function(setup_executable TARGET_NAME GAME_BUILD_FLAG)
         target_link_libraries(${TARGET_NAME} PRIVATE glfw)
     endif ()
 
+
+
+    # TODO if vr?
+    target_include_directories(${TARGET_NAME} PRIVATE
+            ${openxr_SOURCE_DIR}/include
+    )
+
+
+
     # SndFile
     if (WIN32)
         target_link_libraries(${TARGET_NAME} PRIVATE sndfile)
@@ -362,6 +390,8 @@ function(setup_executable TARGET_NAME GAME_BUILD_FLAG)
             rmlui_core
             rmlui_debugger
             rmlui_lua
+            OpenXR::openxr_loader
+
     )
 
     # Debug Info

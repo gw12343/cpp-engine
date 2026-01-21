@@ -17,7 +17,7 @@
 #include "Window.h"
 #include "rendering/Renderer.h"
 #include "physics/PhysicsManager.h"
-
+#include "vr/VRManager.h"
 #include "animation/AnimationManager.h"
 #include "rendering/particles/ParticleManager.h"
 #include "rendering/ui/UIManager.h"
@@ -51,6 +51,7 @@
 #include "TracyClient.cpp"
 
 
+
 namespace fs = std::filesystem;
 
 namespace Engine {
@@ -75,7 +76,10 @@ namespace Engine {
 		// Initialize Modules
 		Get().script    = std::make_shared<ScriptManager>();
 		Get().window    = std::make_shared<Window>(width, height, title);
-		Get().input     = std::make_shared<Input>();
+#ifdef VR
+		Get().vr        = std::make_shared<VRModule>();
+#endif
+        Get().input     = std::make_shared<Input>();
 		Get().camera    = std::make_shared<Camera>(glm::vec3(0.0f, 3.0f, 6.0f), glm::vec3(0, 1, 0), -90.0f, -30.0f);
 		Get().renderer  = std::make_shared<Renderer>();
 		Get().physics   = std::make_shared<PhysicsManager>();
@@ -90,7 +94,10 @@ namespace Engine {
 		// Register Modules to handle lifecycle
 		manager.RegisterExternal(Get().script); // ScriptManager must run first to clear subscriptions before UI reloads
 		manager.RegisterExternal(Get().window);
-		manager.RegisterExternal(Get().input);
+#ifdef VR
+        manager.RegisterExternal(Get().vr);
+#endif
+        manager.RegisterExternal(Get().input);
 		manager.RegisterExternal(Get().camera);
 		manager.RegisterExternal(Get().physics);
 		manager.RegisterExternal(Get().sound);

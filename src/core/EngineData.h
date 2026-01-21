@@ -38,6 +38,7 @@ namespace Engine {
 	class Scene;
 	class Input;
 	class GameUIManager;
+	class VRModule;
 
 	class ModuleManager;
 
@@ -58,6 +59,7 @@ namespace Engine {
 		std::shared_ptr<PhysicsManager>          physics;
 		std::shared_ptr<Camera>                  camera;
 		std::shared_ptr<Input>                   input;
+		std::shared_ptr<VRModule>               vr;
 		std::shared_ptr<GameUIManager>           gameUI;
 		EngineState                              state;
 		ModuleManager*                           manager;
@@ -91,6 +93,11 @@ namespace Engine {
 	{
 		return *Get().scene;
 	}
+
+    inline auto& GetVR()
+    {
+        return *Get().vr;
+    }
 
 	inline auto& GetWindow()
 	{

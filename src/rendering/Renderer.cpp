@@ -18,6 +18,7 @@
 #include <RmlUi/Core.h>
 #include "rendering/ui/RmlUiBackend.h"
 #include "rendering/ui/GameUIManager.h"
+#include "vr/VRManager.h"
 
 namespace Engine {
 
@@ -97,6 +98,9 @@ namespace Engine {
 
 	void Renderer::onUpdate(float dt)
 	{
+
+        GetVR().waitForXRFrame();
+
 		ZoneScopedN("Render");
 		PreRender();
 		{
@@ -150,7 +154,8 @@ namespace Engine {
 		Engine::Framebuffer::Unbind();
 		{
 			ZoneScopedN("Post Render");
-			PostRender();
+            GetVR().endXRFrame();
+            //PostRender();
 		}
 	}
 
