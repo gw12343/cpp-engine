@@ -83,14 +83,15 @@ namespace Engine {
 		transform.SetWorldRotation(glm::quat_cast(transform.GetWorldMatrix()));
 		transform.SetWorldScale(glm::vec3(glm::length(glm::vec3(transform.GetWorldMatrix()[0])), glm::length(glm::vec3(transform.GetWorldMatrix()[1])), glm::length(glm::vec3(transform.GetWorldMatrix()[2]))));
 
-		if (hasParent && entity.HasComponent<Components::RigidBodyComponent>()) {
-			auto& rb = entity.GetComponent<Components::RigidBodyComponent>();
-			// Ensure kinematic if parented
-			rb.SetKinematic(true);
-			rb.SetPosition(transform.GetWorldPosition());
-			// TODO fixme
-			// rb.SetRotation(transform.GetWorldRotation());
-		}
+		// TODO fixme physics? independent simulations?
+		// if (hasParent && entity.HasComponent<Components::RigidBodyComponent>()) {
+		// 	auto& rb = entity.GetComponent<Components::RigidBodyComponent>();
+		// 	// Ensure kinematic if parented
+		// 	rb.SetKinematic(true);
+		// 	rb.SetPosition(transform.GetWorldPosition());
+		// 	// TODO fixme
+		// 	// rb.SetRotation(transform.GetWorldRotation());
+		// }
 
 		// Update children
 		auto& hierarchy = entity.GetComponent<Components::EntityMetadata>();

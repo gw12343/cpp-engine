@@ -17,10 +17,10 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
-                            "key": "CAMERA_Y_OFFSET",
+                            "key": "GRAVITY_SCALE",
                             "value": {
                                 "index": 0,
-                                "data": 1.100000023841858
+                                "data": 2.0
                             }
                         },
                         {
@@ -38,10 +38,19 @@
                             }
                         },
                         {
-                            "key": "GRAVITY_SCALE",
+                            "key": "MOUSE_SENSITIVITY",
                             "value": {
                                 "index": 0,
-                                "data": 2.0
+                                "data": 0.10000000149011612
+                            }
+                        },
+                        {
+                            "key": "shootSound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
+                                }
                             }
                         },
                         {
@@ -51,6 +60,22 @@
                                 "data": {
                                     "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
                                 }
+                            }
+                        },
+                        {
+                            "key": "BULLET_MATERIAL",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
+                                }
+                            }
+                        },
+                        {
+                            "key": "WALK_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 7.0
                             }
                         },
                         {
@@ -70,35 +95,10 @@
                             }
                         },
                         {
-                            "key": "shootSound",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
-                                }
-                            }
-                        },
-                        {
-                            "key": "MOUSE_SENSITIVITY",
+                            "key": "CAMERA_Y_OFFSET",
                             "value": {
                                 "index": 0,
-                                "data": 0.10000000149011612
-                            }
-                        },
-                        {
-                            "key": "WALK_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 7.0
-                            }
-                        },
-                        {
-                            "key": "BULLET_MATERIAL",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
-                                }
+                                "data": 1.100000023841858
                             }
                         }
                     ]
@@ -266,11 +266,11 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
-                            "key": "TARGET_COLOR",
+                            "key": "NORMAL_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
+                                    "guid": "4f843329315c8297e0905d030736e961"
                                 }
                             }
                         },
@@ -282,11 +282,11 @@
                             }
                         },
                         {
-                            "key": "NORMAL_COLOR",
+                            "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
+                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
                             }
                         }
@@ -349,6 +349,10 @@
                         "x": 2.5,
                         "y": 2.5,
                         "z": 2.5
+                    },
+                    "meshSelection": [],
+                    "colliderModel": {
+                        "guid": ""
                     }
                 }
             },
@@ -392,7 +396,37 @@
                 "children": []
             },
             "LuaScript": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {
+                    "scriptPath": "scripts/target.lua",
+                    "variables": [
+                        {
+                            "key": "NORMAL_COLOR",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "c65e206dfc749371e59f05aa1e2eda9c"
+                                }
+                            }
+                        },
+                        {
+                            "key": "POINTS",
+                            "value": {
+                                "index": 0,
+                                "data": 14.600000381469727
+                            }
+                        },
+                        {
+                            "key": "TARGET_COLOR",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
+                                }
+                            }
+                        }
+                    ]
+                }
             },
             "ShadowCaster": {
                 "nullopt": true
@@ -402,7 +436,7 @@
                 "data": {
                     "position": {
                         "x": 14.401437759399414,
-                        "y": -0.06574535369873047,
+                        "y": 0.15468239784240724,
                         "z": -7.810932159423828
                     },
                     "rotation": {
@@ -447,11 +481,18 @@
                     "friction": 0.5,
                     "restitution": 0.0,
                     "gravityFactor": 1.0,
-                    "shapeType": "Box",
+                    "shapeType": "Mesh",
                     "shapeSize": {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
+                    },
+                    "meshSelection": [
+                        true,
+                        false
+                    ],
+                    "colliderModel": {
+                        "guid": "440eeeeb3deb20a70e023d8d0146dfcd"
                     }
                 }
             },
@@ -500,11 +541,11 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
-                            "key": "TARGET_COLOR",
+                            "key": "NORMAL_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
+                                    "guid": "4f843329315c8297e0905d030736e961"
                                 }
                             }
                         },
@@ -516,11 +557,11 @@
                             }
                         },
                         {
-                            "key": "NORMAL_COLOR",
+                            "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
+                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
                             }
                         }
@@ -583,6 +624,10 @@
                         "x": 2.5,
                         "y": 2.5,
                         "z": 2.5
+                    },
+                    "meshSelection": [],
+                    "colliderModel": {
+                        "guid": ""
                     }
                 }
             },
@@ -683,6 +728,10 @@
                         "x": 30.0,
                         "y": 30.0,
                         "z": 30.0
+                    },
+                    "meshSelection": [],
+                    "colliderModel": {
+                        "guid": ""
                     }
                 }
             },
@@ -793,6 +842,12 @@
                     },
                     {
                         "guid": "42f57b287d194a58db6bbe5d7899eb01"
+                    },
+                    {
+                        "guid": "fbc97bfaf3146487d86ff920fd94709b"
+                    },
+                    {
+                        "guid": "909cd2aea681d481ce239727c2fe44fb"
                     }
                 ]
             },
@@ -948,7 +1003,7 @@
                             "key": "TOTAL_TARGETS",
                             "value": {
                                 "index": 0,
-                                "data": 5.0
+                                "data": 6.0
                             }
                         }
                     ]
@@ -999,6 +1054,126 @@
         },
         {
             "EntityMetadata": {
+                "name": "Teapot",
+                "tag": "",
+                "active": true,
+                "guid": "909cd2aea681d481ce239727c2fe44fb",
+                "parentEntity": {
+                    "guid": "77b9ef246028ea5757c8bd10a7a21f9b"
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": false,
+                "data": {
+                    "scriptPath": "scripts/teapot.lua",
+                    "variables": [
+                        {
+                            "key": "SPAWNPOINT",
+                            "value": {
+                                "index": 12,
+                                "data": {
+                                    "guid": "fbc97bfaf3146487d86ff920fd94709b"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 7.381422519683838,
+                        "y": 10.684118270874024,
+                        "z": -1.0644311904907227
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "db54c662aea0a2c2556d727a28f94dfa"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "86d97f79ce43148363dcdc1461170b38"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 2,
+                    "mass": 81.75499725341797,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 1.0,
+                    "shapeType": "ConvexMesh",
+                    "shapeSize": {
+                        "x": 0.5,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "meshSelection": [
+                        true
+                    ],
+                    "colliderModel": {
+                        "guid": "db54c662aea0a2c2556d727a28f94dfa"
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
                 "name": "Copy of Target",
                 "tag": "",
                 "active": true,
@@ -1014,11 +1189,11 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
-                            "key": "TARGET_COLOR",
+                            "key": "NORMAL_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
+                                    "guid": "4f843329315c8297e0905d030736e961"
                                 }
                             }
                         },
@@ -1030,11 +1205,11 @@
                             }
                         },
                         {
-                            "key": "NORMAL_COLOR",
+                            "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
+                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
                             }
                         }
@@ -1097,6 +1272,10 @@
                         "x": 2.5,
                         "y": 2.5,
                         "z": 2.5
+                    },
+                    "meshSelection": [],
+                    "colliderModel": {
+                        "guid": ""
                     }
                 }
             },
@@ -1145,11 +1324,11 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
-                            "key": "TARGET_COLOR",
+                            "key": "NORMAL_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
+                                    "guid": "4f843329315c8297e0905d030736e961"
                                 }
                             }
                         },
@@ -1161,11 +1340,11 @@
                             }
                         },
                         {
-                            "key": "NORMAL_COLOR",
+                            "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
+                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
                             }
                         }
@@ -1228,6 +1407,10 @@
                         "x": 2.5,
                         "y": 2.5,
                         "z": 2.5
+                    },
+                    "meshSelection": [],
+                    "colliderModel": {
+                        "guid": ""
                     }
                 }
             },
@@ -1478,11 +1661,11 @@
                     "scriptPath": "scripts/target.lua",
                     "variables": [
                         {
-                            "key": "TARGET_COLOR",
+                            "key": "NORMAL_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
+                                    "guid": "4f843329315c8297e0905d030736e961"
                                 }
                             }
                         },
@@ -1494,11 +1677,11 @@
                             }
                         },
                         {
-                            "key": "NORMAL_COLOR",
+                            "key": "TARGET_COLOR",
                             "value": {
                                 "index": 7,
                                 "data": {
-                                    "guid": "4f843329315c8297e0905d030736e961"
+                                    "guid": "f474b376ddeab38cc693c76d29e4d3a4"
                                 }
                             }
                         }
@@ -1561,6 +1744,10 @@
                         "x": 2.5,
                         "y": 2.5,
                         "z": 2.5
+                    },
+                    "meshSelection": [],
+                    "colliderModel": {
+                        "guid": ""
                     }
                 }
             },
@@ -1590,6 +1777,89 @@
             },
             "GizmoComponent": {
                 "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Teapot_Spawnpoint",
+                "tag": "",
+                "active": true,
+                "guid": "fbc97bfaf3146487d86ff920fd94709b",
+                "parentEntity": {
+                    "guid": "77b9ef246028ea5757c8bd10a7a21f9b"
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 7.240387916564941,
+                        "y": 10.854677200317383,
+                        "z": -4.977656841278076
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": true
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": false,
+                "data": {
+                    "radius": 0.6000000238418579,
+                    "color": {
+                        "x": 0.8039867281913757,
+                        "y": 0.024039454758167268,
+                        "z": 0.4282650053501129
+                    }
+                }
             }
         }
     ]
