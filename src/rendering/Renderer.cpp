@@ -18,6 +18,7 @@
 #include <RmlUi/Core.h>
 #include "rendering/ui/RmlUiBackend.h"
 #include "rendering/ui/GameUIManager.h"
+#include "scripting/ScriptManager.h"
 
 namespace Engine {
 
@@ -106,6 +107,7 @@ namespace Engine {
 #ifndef GAME_BUILD
 		Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->Bind();
 #endif
+
 		PreRender();
 		{
 			ZoneScopedN("Render Animations");
@@ -146,6 +148,10 @@ namespace Engine {
 			Engine::Window::GetFramebuffer(Window::FramebufferID::MOUSE_PICKING)->Bind();
 			RenderEntitiesMousePicking();
 		}
+#endif
+
+#ifndef GAME_BUILD
+        GetScriptManager().EditorScriptUpdate(dt);
 #endif
 		Engine::Framebuffer::Unbind();
 		{

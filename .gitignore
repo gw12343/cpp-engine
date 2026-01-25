@@ -12,7 +12,6 @@ _deps
 build
 cmake-build-*/
 imgui.ini
-.vscode
 .idea
 .cache
 .vs

@@ -70,7 +70,9 @@ namespace Engine::Components {
 		}
 
 
-		LeftLabelDragFloat3("Scale", glm::value_ptr(localScale), 0.1f);
+		if(LeftLabelDragFloat3("Scale", glm::value_ptr(localScale), 0.1f)){
+            updatePhysicsPositionManually = true;
+        }
 
 		if (updatePhysicsPositionManually) {
 			auto& em           = entity.GetComponent<EntityMetadata>();

@@ -622,6 +622,21 @@ namespace Engine::UI {
 	}
 
 
+
+    void UIManager::setLuaBindings() {
+
+        // Input binding
+        GetScriptManager().lua.new_usertype<UIManager>("UI",
+                                                   "getSelectedEntity",
+                                                   &UIManager::getSelectedEntity
+        );
+
+
+        // Global accessor
+        GetScriptManager().lua.set_function("getUI", []() -> UIManager& { return Engine::GetUI(); });
+
+    }
+
 } // namespace Engine::UI
 
 #include "assets/AssetManager.inl"

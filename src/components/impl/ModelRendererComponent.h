@@ -37,6 +37,9 @@ namespace Engine::Components {
 		void Draw(const Shader& shader, Components::Transform& transform, bool uploadMaterial);
 
 		void SetModel(const std::string& path);
+
+
+
 		void SetMaterial(AssetHandle<Material> mat);
 
 		static void AddBindings();
