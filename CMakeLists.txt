@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 project(cpp-engine VERSION 0.1.0 LANGUAGES C CXX)
 
-# ----------------- Build Options -----------------
+# ----------------- Build Options ----------------
 # Compiler settings
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -10,6 +10,7 @@ option(ENABLE_ALL_WARNINGS "Enable all warnings and warnings as errors" OFF)
 set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE INTERNAL "No dev warnings")
 
 add_compile_options(-w)
+
 
 if (WIN32)
     add_compile_definitions(NOMINMAX)
@@ -230,6 +231,8 @@ add_library(imgui STATIC
         ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
 
         ${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.cpp
+        src/rendering/GBuffer.h
+        src/rendering/GBuffer.cpp
 )
 
 target_include_directories(imgui PUBLIC

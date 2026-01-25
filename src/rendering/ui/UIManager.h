@@ -29,6 +29,7 @@ namespace Engine {
 			void                      onGameStart() override {}
 			void                      onShutdown() override;
 			[[nodiscard]] std::string name() const override { return "UIModule"; };
+            void                      setLuaBindings() override;
 
 			void BeginDockspace(float ht);
 			void EndDockspace();
@@ -45,11 +46,11 @@ namespace Engine {
 			AssetHandle<Material>    m_selectedMaterial;
 
 			// Selected entity
-			Entity m_selectedEntity;
+			Entity m_selectedEntity = Entity();
 
 			std::unique_ptr<InspectorRenderer> m_inspectorRenderer;
 			bool                               isOverSceneView() const;
-
+            [[nodiscard]] const Engine::Entity& getSelectedEntity() const { return m_selectedEntity; }
 		  private:
 			// UI rendering methods
 			void  RenderHierarchyWindow();

@@ -340,7 +340,7 @@ namespace Engine::Components {
 
 		// Inject gameObject
 		env["gameObject"] = entity;
-		
+
 		// Inject custom subscribe function to track subscriptions
 		env["subscribe"] = [this](const std::string& eventName, sol::function callback) {
 			uint32_t id = GetScriptManager().eventBus.Subscribe(eventName, callback);

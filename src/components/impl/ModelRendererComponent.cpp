@@ -19,7 +19,7 @@ namespace Engine::Components {
 	{
 		auto& lua = GetScriptManager().lua;
 
-		lua.new_usertype<ModelRenderer>("ModelRenderer", "setModel", &ModelRenderer::SetModel, "setMaterial", &ModelRenderer::SetMaterial);
+		lua.new_usertype<ModelRenderer>("ModelRenderer",  "model", &ModelRenderer::model,  "setModel", &ModelRenderer::SetModel, "setMaterial", &ModelRenderer::SetMaterial);
 	}
 
 	void ModelRenderer::Draw(const Shader& shader, Components::Transform& transform, bool uploadMaterial)

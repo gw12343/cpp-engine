@@ -131,6 +131,7 @@ namespace Engine {
 		// Render root folders
 		RenderDirectoryTreeNode("resources", "resources");
 		RenderDirectoryTreeNode("scripts", "scripts");
+		RenderDirectoryTreeNode("assets", "assets");
 	}
 
 	void AssetUIRenderer::RenderDirectoryTreeNode(const std::string& dirPath, const std::string& dirName)
@@ -462,6 +463,7 @@ namespace Engine {
 		else if (extension == ".material") {
 			// For materials, render preview on sphere with error handling
 			// Check if we've already tried to load this material
+
 			if (m_loadedMaterialPaths.find(path) == m_loadedMaterialPaths.end()) {
 				// First time seeing this material, try to load it
 				m_loadedMaterialPaths.insert(path);
