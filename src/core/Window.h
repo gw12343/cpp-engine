@@ -6,6 +6,7 @@
 #include <map>
 #include "rendering/Framebuffer.h"
 #include "core/module/Module.h"
+#include "rendering/GBuffer.h"
 
 namespace Engine {
 	class Window : public Module {
@@ -41,7 +42,9 @@ namespace Engine {
 
 		static std::map<FramebufferID, std::shared_ptr<Framebuffer>> m_frameBuffers;
 
+        static std::shared_ptr<GBuffer> m_gbuffer;
 
+        std::shared_ptr<GBuffer> GetGBuffer() { return m_gbuffer; }
 
 		int targetWidth;
 		int targetHeight;
@@ -49,10 +52,10 @@ namespace Engine {
 		int targetY;
 
 	  private:
-		GLFWwindow* m_window;
-		int         m_width;
-		int         m_height;
-		std::string m_title;
+		GLFWwindow*              m_window;
+		int                      m_width;
+		int                      m_height;
+		std::string              m_title;
 
 		bool        InitGLFW();
 		static bool InitGLAD();

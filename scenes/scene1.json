@@ -17,31 +17,10 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
-                            "key": "WALK_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 7.0
-                            }
-                        },
-                        {
-                            "key": "MOUSE_SENSITIVITY",
-                            "value": {
-                                "index": 0,
-                                "data": 0.10000000149011612
-                            }
-                        },
-                        {
                             "key": "CAMERA_Y_OFFSET",
                             "value": {
                                 "index": 0,
                                 "data": 1.100000023841858
-                            }
-                        },
-                        {
-                            "key": "RUN_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 12.0
                             }
                         },
                         {
@@ -54,28 +33,24 @@
                             }
                         },
                         {
-                            "key": "SHOOT_POWER",
+                            "key": "RUN_SPEED",
                             "value": {
                                 "index": 0,
-                                "data": 10.0
+                                "data": 12.0
                             }
                         },
                         {
-                            "key": "victorySound",
+                            "key": "MOUSE_SENSITIVITY",
                             "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
-                                }
+                                "index": 0,
+                                "data": 0.10000000149011612
                             }
                         },
                         {
-                            "key": "shootSound",
+                            "key": "WALK_SPEED",
                             "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
-                                }
+                                "index": 0,
+                                "data": 7.0
                             }
                         },
                         {
@@ -100,6 +75,31 @@
                                 "index": 0,
                                 "data": 2.0
                             }
+                        },
+                        {
+                            "key": "shootSound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
+                                }
+                            }
+                        },
+                        {
+                            "key": "SHOOT_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 10.0
+                            }
+                        },
+                        {
+                            "key": "victorySound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                }
+                            }
                         }
                     ]
                 }
@@ -113,7 +113,7 @@
                 "data": {
                     "position": {
                         "x": 60.913516998291019,
-                        "y": 14.055487632751465,
+                        "y": 16.097660064697267,
                         "z": 2.2202939987182619
                     },
                     "rotation": {
@@ -258,14 +258,17 @@
                 "parentEntity": {
                     "guid": "77b9ef246028ea5757c8bd10a7a21f9b"
                 },
-                "children": []
+                "children": [
+                    {
+                        "guid": "beb34d1fefa7e8d1d1878d4d72bdfb9b"
+                    }
+                ]
             },
             "LuaScript": {
                 "nullopt": true
             },
             "ShadowCaster": {
-                "nullopt": false,
-                "data": {}
+                "nullopt": true
             },
             "Transform": {
                 "nullopt": false,
@@ -789,7 +792,7 @@
                 "active": true,
                 "guid": "beb34d1fefa7e8d1d1878d4d72bdfb9b",
                 "parentEntity": {
-                    "guid": ""
+                    "guid": "652ea52f75b6e8215a7b07d953df4e13"
                 },
                 "children": []
             },

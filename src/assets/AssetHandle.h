@@ -15,8 +15,8 @@ namespace Engine {
 	  public:
 		AssetHandle() = default;
 		explicit AssetHandle(const std::string& guid) : guid(guid) {}
-		const std::string& GetID() const { return guid; }
-		bool               IsValid() const { return !guid.empty(); }
+		[[nodiscard]] const std::string& GetID() const { return guid; }
+		[[nodiscard]] bool               IsValid() const { return !guid.empty() && guid.size() == 32; }
 
 		bool operator==(const AssetHandle<T>& other) const { return guid == other.guid; }
 		bool operator<(const AssetHandle<T>& other) const { return guid < other.guid; }

@@ -33,6 +33,10 @@ namespace Engine::Rendering {
 		[[nodiscard]] const std::vector<Vertex>&       GetVertices() const { return m_vertices; }
 		[[nodiscard]] const std::vector<unsigned int>& GetIndices() const { return m_indices; }
 
+        [[nodiscard]] GLuint GetVAO() { return m_vao; }
+        [[nodiscard]] GLuint GetVBO() { return m_vbo; }
+        [[nodiscard]] GLuint GetEBO() { return m_ebo; }
+
 	  private:
 		void SetupMesh();
 
