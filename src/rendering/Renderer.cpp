@@ -1,5 +1,6 @@
 #include "Renderer.h"
 
+#include "glad/glad.h"
 #include "assets/impl/ModelLoader.h"
 #include "utils/Utils.h"
 #include "core/EngineData.h"
@@ -19,6 +20,8 @@
 #include "rendering/ui/RmlUiBackend.h"
 #include "rendering/ui/GameUIManager.h"
 #include "scripting/ScriptManager.h"
+#include "DebugGroup.h"
+
 
 namespace Engine {
 
@@ -54,6 +57,18 @@ namespace Engine {
 			return;
 		}
 
+        // Load GBuffer shader
+        if (!m_gbufferShader.LoadFromFiles("resources/shaders/gbuffer_vert.glsl", "resources/shaders/gbuffer_frag.glsl", std::nullopt)) {
+			log->error("Failed to load gbuffer shader");
+			return;
+		}
+
+        // Load lighting shader
+        if (!m_lightingShader.LoadFromFiles("resources/shaders/lighting_vert.glsl", "resources/shaders/lighting_frag.glsl", std::nullopt)) {
+			log->error("Failed to load lighting shader");
+			return;
+		}
+
 
 		m_skybox            = std::make_unique<Skybox>();
 		const std::string p = "resources/textures/output.hdr";
@@ -68,7 +83,40 @@ namespace Engine {
 		glCullFace(GL_BACK);
 
 		m_shadowRenderer->Initalize();
+        InitFullscreenQuad();
 	}
+
+    void Renderer::InitFullscreenQuad()
+    {
+        if (quadVAO != 0) return;
+
+        float quadVertices[] = {
+                // positions   // texcoords
+                -1.0f, -1.0f,  0.0f, 0.0f,
+                1.0f, -1.0f,  1.0f, 0.0f,
+                1.0f,  1.0f,  1.0f, 1.0f,
+
+                -1.0f, -1.0f,  0.0f, 0.0f,
+                1.0f,  1.0f,  1.0f, 1.0f,
+                -1.0f,  1.0f,  0.0f, 1.0f
+        };
+
+        glGenVertexArrays(1, &quadVAO);
+        glGenBuffers(1, &quadVBO);
+
+        glBindVertexArray(quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
+                              (void*)(2 * sizeof(float)));
+
+        glBindVertexArray(0);
+    }
 
 	void Renderer::PreRender()
 	{
@@ -96,7 +144,55 @@ namespace Engine {
 	{
 	}
 
-	void Renderer::onUpdate(float dt)
+    void Renderer::RenderLightingPass()
+    {
+        ZoneScopedN("Deferred Lighting");
+
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+
+        m_lightingShader.Bind();
+
+        // G-buffer textures
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, GetWindow().GetGBuffer()->GetDepth());
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, GetWindow().GetGBuffer()->GetNormal());
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, GetWindow().GetGBuffer()->GetAlbedo());
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, GetWindow().GetGBuffer()->GetMaterial());
+
+
+
+        glm::mat4 V = GetCamera().GetViewMatrix();
+        glm::mat4 viewInv = glm::inverse(V);
+        m_lightingShader.SetMat4("invView", &viewInv);
+        glm::mat4 projInv = glm::inverse(GetCamera().GetProjectionMatrix());
+        m_lightingShader.SetMat4("invProjection", &projInv);
+
+
+        m_lightingShader.SetInt("gDepth", 0);
+        m_lightingShader.SetInt("gNormal", 1);
+        m_lightingShader.SetInt("gAlbedo", 2);
+        m_lightingShader.SetInt("gMaterial", 3);
+        m_lightingShader.SetInt("skybox", 4);
+
+        m_skybox->m_texture->Bind(4);
+
+        // Camera + light uniforms
+        m_shadowRenderer->UploadShadowMatrices(m_lightingShader, V, 5);
+
+
+        glBindVertexArray(quadVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
+
+        glEnable(GL_DEPTH_TEST);
+    }
+
+
+    void Renderer::onUpdate(float dt)
 	{
 		ZoneScopedN("Render");
 		PreRender();
@@ -104,27 +200,56 @@ namespace Engine {
 			ZoneScopedN("Render Shadow Maps");
 			RenderShadowMaps();
 		}
+
+        {
+            ZoneScopedN("Render GBuffer");
+            DebugGroup group("Deferred GBuffer Pass");
+
+
+
+            GetWindow().GetGBuffer()->Bind();
+
+
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            RenderEntitiesGBuffer();
+
+
+
+            // TODO -- GetTerrainManager().RenderGBuffer();
+
+            GetWindow().GetGBuffer()->Unbind();
+        }
+
 #ifndef GAME_BUILD
 		Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->Bind();
 #endif
 
-		PreRender();
-		{
-			ZoneScopedN("Render Animations");
-			GetAnimationManager().Render();
-		}
-		{
-			ZoneScopedN("Render Entities");
-			RenderEntities();
-		}
-		{
-			ZoneScopedN("Render Terrains");
-			GetTerrainManager().Render();
-		}
-		{
-			ZoneScopedN("Render Skybox");
-			RenderSkybox();
-		}
+        {
+			ZoneScopedN("Render Lighting Pass");
+            DebugGroup group("Deferred Lighting Pass");
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glDisable(GL_CULL_FACE);
+            RenderLightingPass();
+
+        }
+//		{
+//			ZoneScopedN("Render Animations");
+//			GetAnimationManager().Render();
+//		}
+//		{
+//			ZoneScopedN("Render Entities");
+//			RenderEntities();
+//		}
+//		{
+//			ZoneScopedN("Render Terrains");
+//			GetTerrainManager().Render();
+//		}
+//		{
+//			ZoneScopedN("Render Skybox");
+//			RenderSkybox();
+//		}
+
 		{
 			ZoneScopedN("Render Particles");
 			GetParticleManager().Render();
@@ -153,6 +278,10 @@ namespace Engine {
 #ifndef GAME_BUILD
         GetScriptManager().EditorScriptUpdate(dt);
 #endif
+
+
+
+
 		Engine::Framebuffer::Unbind();
 		{
 			ZoneScopedN("Post Render");
@@ -161,7 +290,50 @@ namespace Engine {
 	}
 
 
-	void Renderer::RenderEntities()
+    void Renderer::RenderEntitiesGBuffer()
+    {
+        ZoneScopedN("Render Entities GBuffer");
+
+        glDisable(GL_CULL_FACE);          // match forward for now
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
+        glDisable(GL_BLEND);
+
+        ENGINE_GLCheckError();
+
+        Shader& gbufferShader = GetGBufferShader();
+
+        gbufferShader.Bind();
+
+        // View / projection matricies
+
+        glm::mat4 V = GetCamera().GetViewMatrix();
+        gbufferShader.SetMat4("view", &V);
+        glm::mat4 proj = GetCamera().GetProjectionMatrix();
+        gbufferShader.SetMat4("projection", &proj);
+
+        ENGINE_GLCheckError();
+
+        auto view = GetCurrentSceneRegistry().view<
+                Engine::Components::EntityMetadata,
+                Engine::Components::Transform,
+                Engine::Components::ModelRenderer
+        >();
+
+        for (auto [entity, metadata, transform, renderer] : view.each()) {
+            if (!renderer.visible)
+                continue;
+
+            renderer.Draw(gbufferShader, transform, true);
+        }
+
+        //TODO add unbind??
+        //gbufferShader.Unbind();
+    }
+
+
+
+    void Renderer::RenderEntities()
 	{
 		glDisable(GL_CULL_FACE);
 		ENGINE_GLCheckError();
@@ -176,6 +348,7 @@ namespace Engine {
 			renderer.Draw(GetShader(), transform, true);
 		}
 	}
+
 
 	glm::vec3 EncodeEntityID(entt::entity entityID)
 	{
@@ -249,9 +422,12 @@ namespace Engine {
 		}
 	}
 
-	void Renderer::RenderSkybox()
+
+    void Renderer::RenderSkybox()
 	{
 		m_skyboxShader.Bind();
+        glDepthMask(GL_FALSE);
+        glDepthFunc(GL_LEQUAL);
 
 		// Set up view and projection matrices for skybox
 		glm::mat4 view       = GetCamera().GetViewMatrix();
@@ -266,10 +442,6 @@ namespace Engine {
 	void Renderer::RenderShadowMaps()
 	{
 		m_shadowRenderer->RenderShadowMaps();
-	}
-	std::shared_ptr<ShadowMapRenderer> Renderer::GetShadowRenderer()
-	{
-		return m_shadowRenderer;
 	}
 	void Renderer::RenderGizmos(bool mousePicking)
 	{
@@ -293,8 +465,6 @@ namespace Engine {
 			GetAnimationManager().renderer_->DrawSphereIm(gizmo.radius, t, color);
 		}
 	}
-
-
 	void Renderer::ReloadShaders()
 	{
 		log->info("Reloading shaders...");
@@ -320,6 +490,23 @@ namespace Engine {
 		if (!m_materialPreviewShader.LoadFromFiles("resources/shaders/material_preview_vert.glsl", "resources/shaders/material_preview_frag.glsl", std::nullopt)) {
 			log->error("Failed to reload material preview shader");
 		}
+
+        // Load GBuffer shader
+        if (!m_gbufferShader.LoadFromFiles("resources/shaders/gbuffer_vert.glsl", "resources/shaders/gbuffer_frag.glsl", std::nullopt)) {
+            log->error("Failed to load gbuffer shader");
+            return;
+        }
+
+        // Load lighting shader
+        if (!m_lightingShader.LoadFromFiles("resources/shaders/lighting_vert.glsl", "resources/shaders/lighting_frag.glsl", std::nullopt)) {
+            log->error("Failed to load lighting shader");
+            return;
+        }
 	}
+
+    std::shared_ptr<ShadowMapRenderer> Renderer::GetShadowRenderer()
+    {
+        return m_shadowRenderer;
+    }
 
 } // namespace Engine

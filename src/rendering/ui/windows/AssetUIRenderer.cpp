@@ -335,6 +335,11 @@ namespace Engine {
 				auto handle = GetAssetManager().Load<Material>(path);
 				GetUI().m_selectedMaterial = handle;
 			}
+
+            if (ext == ".obj") {
+                auto handle = GetAssetManager().Load<Rendering::Model>(path);
+                GetUI().m_selectedModel = handle;
+            }
 		}
 
 		// Draw icon

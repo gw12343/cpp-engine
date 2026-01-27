@@ -31,6 +31,7 @@
 #include "components/impl/ModelRendererComponent.h"
 #include "rendering/particles/Particle.h"
 #include "components/impl/ParticleSystemComponent.h"
+#include "InspectorUI.h"
 
 #include <nfd.h>
 #include <string>
@@ -387,6 +388,8 @@ namespace Engine::UI {
 
 		DrawAnimationWindow();
 		DrawAudioDebugWindow();
+        RenderModelDebug(m_selectedModel);
+        RenderGBufferDebug(GetWindow().GetGBuffer());
 		DrawConsoleWindow(Logger::getImGuiSink(), &consoleOpen);
 
 		m_uiAssetRenderer->RenderAssetWindow();
@@ -616,6 +619,81 @@ namespace Engine::UI {
 		ImGui::End();
 	}
 
+    void UIManager::RenderModelDebug(AssetHandle<Engine::Rendering::Model> handle) {
+        ImGui::Begin("Model Debug");
+
+
+        if (!handle.IsValid()) {
+            ImGui::Text("Invalid model selected.");
+        }
+        else {
+            Rendering::Model* model = GetAssetManager().Get(handle);
+
+            std::string name = model->m_name;
+            ImGui::Text("Model: %s", name.c_str());
+
+            for(int i = 0 ; i < model->GetMeshes().size(); i ++) {
+                char buff[256];
+                sprintf(buff, "Mesh %d", i);
+
+                if(ImGui::TreeNode(buff)) {
+                    auto m = model->GetMeshes()[i];
+                    ImGui::Text("VAO: %i", m->GetVAO());
+                    ImGui::Text("VBO: %i", m->GetVBO());
+                    ImGui::Text("EBO: %i", m->GetEBO());
+
+                    ImGui::TreePop();
+                }
+
+            }
+
+
+            ImGui::Separator();
+
+
+
+            // Right column: Preview
+            ImGui::SameLine();
+        }
+
+
+
+
+        ImGui::End();
+    }
+
+
+    static bool gbufferDebug = true;
+
+    void UIManager::RenderGBufferDebug(std::shared_ptr<GBuffer> gbuffer)
+    {
+        ImGui::Begin("GBuffer Debug", &gbufferDebug);
+
+        const float previewSize = 200.0f;
+
+        ImGui::Text("Albedo");
+        ImGui::Image((ImTextureID)(intptr_t)gbuffer->GetAlbedo(),
+                     ImVec2(previewSize, previewSize));
+
+        ImGui::Text("Normal");
+        ImGui::Image((ImTextureID)(intptr_t)gbuffer->GetNormal(),
+                     ImVec2(previewSize, previewSize));
+
+        ImGui::Text("Material");
+        ImGui::Image((ImTextureID)(intptr_t)gbuffer->GetMaterial(),
+                     ImVec2(previewSize, previewSize));
+
+        ImGui::Text("Emissive");
+        ImGui::Image((ImTextureID)(intptr_t)gbuffer->GetEmissive(),
+                     ImVec2(previewSize, previewSize));
+
+        ImGui::Text("Depth");
+        ImGui::Image((ImTextureID)(intptr_t)gbuffer->GetDepth(),
+                     ImVec2(previewSize, previewSize));
+
+        ImGui::End();
+    }
+
 	bool UIManager::isOverSceneView() const
 	{
 		return m_overSceneView;
@@ -636,6 +714,8 @@ namespace Engine::UI {
         GetScriptManager().lua.set_function("getUI", []() -> UIManager& { return Engine::GetUI(); });
 
     }
+
+
 
 } // namespace Engine::UI
 

@@ -19,16 +19,35 @@ namespace Engine {
 	static const ImWchar icons_ranges[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
 
 	std::map<Window::FramebufferID, std::shared_ptr<Framebuffer>> Window::m_frameBuffers;
+    std::shared_ptr<GBuffer> Window::m_gbuffer;
+
 
 	Window::Window(int width, int height, std::string title) : m_window(nullptr), m_width(width), m_height(height), m_title(std::move(title))
 	{
 		m_frameBuffers[Window::FramebufferID::GAME_OUT]      = std::make_shared<Framebuffer>(GL_LINEAR, GL_LINEAR);
 		m_frameBuffers[Window::FramebufferID::MOUSE_PICKING] = std::make_shared<Framebuffer>(GL_NEAREST, GL_NEAREST);
+        m_gbuffer = std::make_shared<GBuffer>();
+
+
 	}
 
 	// Explicit destructor needed for unique_ptr with forward-declared types
 	Window::~Window() = default;
 
+
+#ifndef GAME_BUILD
+    void APIENTRY GLDebugCallback(
+            GLenum source,
+            GLenum type,
+            GLuint id,
+            GLenum severity,
+            GLsizei length,
+            const GLchar* message,
+            const void* userParam)
+    {
+        GetWindow().log->error("GL DEBUG: {}\n", message);
+    }
+#endif
 
 	void Window::onInit()
 	{
@@ -39,7 +58,25 @@ namespace Engine {
 		InitGLAD();
 		InitImGui();
 
-		UpdateFramebufferSizes(m_width, m_height);
+        // Debug Support
+#ifndef GAME_BUILD
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(GLDebugCallback, nullptr);
+
+
+        glDebugMessageControl(
+                GL_DONT_CARE,
+                GL_DONT_CARE,
+                GL_DEBUG_SEVERITY_NOTIFICATION,
+                0, nullptr,
+                GL_FALSE
+        );
+#endif
+
+        m_gbuffer->Init(m_width, m_height);
+
+        UpdateFramebufferSizes(m_width, m_height);
 	}
 
 
@@ -72,6 +109,9 @@ namespace Engine {
 
 		glfwMakeContextCurrent(m_window);
 		glfwSwapInterval(0);
+
+
+
 
 		return true;
 	}
@@ -213,7 +253,10 @@ void Window::onGameStart()
 		for (const auto& [id, fb] : m_frameBuffers) {
 			fb->Resize(render_width, render_height);
 		}
+        m_gbuffer->Resize(render_width, render_height);
 	}
+
+
 	void Window::UpdateViewportSize(int render_width, int render_height, int x, int y)
 	{
 		targetX = x;

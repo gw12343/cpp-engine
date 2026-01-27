@@ -231,8 +231,7 @@ add_library(imgui STATIC
         ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
 
         ${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.cpp
-        src/rendering/GBuffer.h
-        src/rendering/GBuffer.cpp
+        src/rendering/DebugGroup.h
 )
 
 target_include_directories(imgui PUBLIC

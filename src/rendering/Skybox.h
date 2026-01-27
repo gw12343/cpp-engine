@@ -18,12 +18,12 @@ namespace Engine {
 		bool LoadFromFile(const std::string& path);
 		void Draw(const Shader& shader) const;
 
+		std::unique_ptr<Texture> m_texture;
 	  private:
 		void SetupMesh();
 
 		GLuint                   m_vao;
 		GLuint                   m_vbo;
-		std::unique_ptr<Texture> m_texture;
 		bool                     m_initialized;
 	};
 } // namespace Engine
