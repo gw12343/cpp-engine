@@ -142,15 +142,13 @@ void main()
     float specStrength = material.r;
     float shininess = material.g * 256.0;
 
-/* -------- Super Strong SSAO-like AO (for testing) -------- */
-    // Approximate AO by darkening based on angle between normal and view direction
-    // Clamp to [0,1] and multiply strongly to emphasize shadows
+/* -------- Super Strong SSAO-like AO (testing) -------- */
     float ao = clamp(dot(N, V), 0.0, 1.0);
-    ao = pow(ao, 6.0); // increase contrast, so near grazing angles are very dark
-    ao = 0.2 + 0.8 * ao; // remap so minimum is 0.2 (not pure black)
-    ao = clamp(ao * 1.8, 0.0, 1.0); // amplify AO strength to be very strong
+    ao = pow(ao, 6.0);
+    ao = 0.2 + 0.8 * ao;
+    ao = clamp(ao * 1.8, 0.0, 1.0);
 
-/* -------- Ambient (stable, opaque) -------- */
+/* -------- Ambient -------- */
     vec3 ambient = 0.05 * Albedo;
 
 /* -------- Diffuse + wrap -------- */
@@ -168,7 +166,7 @@ void main()
 /* -------- Energy conservation -------- */
     diffuse *= (1.0 - specStrength);
 
-/* -------- Sky IBL (tone down intensity) -------- */
+/* -------- Sky IBL -------- */
     vec3 skyDiffuse = SampleSky(N) * 0.15;
     vec3 R = reflect(-V, N);
     vec3 skySpec = SampleSky(R) * specStrength * 0.2;
@@ -180,13 +178,27 @@ void main()
     ao * (ambient + skyDiffuse) +
     (1.0 - shadow) * (diffuse + specular + skySpec);
 
-/* -------- Fog (constant color + distance start) -------- */
-    float fogStart = 30.0;
-    float fogEnd = 300.0;
+/* -------- Fog -------- */
     float dist = length(viewPos - FragPos);
-    float fogFactor = clamp((dist - fogStart) / (fogEnd - fogStart), 0.0, 1.0);
 
-    vec3 fogColor = vec3(0.6, 0.7, 0.8); // soft atmospheric color
+    // Exponential fog (stable at distance)
+    float fogDensity = 0.005;
+    float fogFactor = 1.0 - exp(-dist * fogDensity);
+    fogFactor = clamp(fogFactor, 0.0, 1.0);
+
+    // Fade AO & shadows with fog
+    ao = mix(1.0, ao, 1.0 - fogFactor);
+    shadow *= (1.0 - fogFactor);
+
+    // Re-evaluate lighting with faded terms
+    lighting =
+    ao * (ambient + skyDiffuse) +
+    (1.0 - shadow) * (diffuse + specular + skySpec);
+
+    // Prevent zero-light pixels before fog blend
+    lighting = max(lighting, vec3(0.02));
+
+    vec3 fogColor = vec3(0.6, 0.7, 0.8);
     lighting = mix(lighting, fogColor, fogFactor);
 
     FragColor = vec4(lighting, 1.0);
