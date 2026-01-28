@@ -32,6 +32,7 @@
 #include "rendering/particles/Particle.h"
 #include "components/impl/ParticleSystemComponent.h"
 #include "InspectorUI.h"
+#include "assets/impl/MaterialLoader.h"
 
 #include <nfd.h>
 #include <string>
@@ -631,25 +632,52 @@ namespace Engine::UI {
 
             std::string name = model->m_name;
             ImGui::Text("Model: %s", name.c_str());
+            ImGui::Text("Meshes: %d", model->GetMeshes().size());
 
-            for(int i = 0 ; i < model->GetMeshes().size(); i ++) {
-                char buff[256];
-                sprintf(buff, "Mesh %d", i);
+            if(ImGui::TreeNode("Meshes")) {
 
-                if(ImGui::TreeNode(buff)) {
-                    auto m = model->GetMeshes()[i];
-                    ImGui::Text("VAO: %i", m->GetVAO());
-                    ImGui::Text("VBO: %i", m->GetVBO());
-                    ImGui::Text("EBO: %i", m->GetEBO());
+                for (int i = 0; i < model->GetMeshes().size(); i++) {
+                    char buff[256];
+                    sprintf(buff, "Mesh %d", i);
 
-                    ImGui::TreePop();
+                    if (ImGui::TreeNode(buff)) {
+                        auto m = model->GetMeshes()[i];
+                        ImGui::Text("VAO: %i", m->GetVAO());
+                        ImGui::Text("VBO: %i", m->GetVBO());
+                        ImGui::Text("EBO: %i", m->GetEBO());
+
+                        ImGui::TreePop();
+                    }
+
                 }
-
+                ImGui::TreePop();
             }
 
 
             ImGui::Separator();
 
+            if(ImGui::Button("Extract Materials")) {
+                auto exportPath = SelectFolder();
+
+                if(!exportPath.empty()) {
+                    log->info("Materials being extracted to: {}", exportPath);
+
+                    auto loader = ((MaterialLoader*) (GetAssetManager().GetStorage<Material>().loader.get()));
+                    int n = 0;
+                    for(auto mesh : model->GetMeshes()) {
+                        auto mat = mesh->GetMaterial();
+
+                        log->info("Mat name {}", mat->GetName());
+                        log->info("--> albedo {}", mat->GetDiffuseTexture().GetID());
+                        Material mt = *mat.get();
+                        loader->SaveMaterial(mt, exportPath + "/material-" + mat->GetName() + "#" + (std::to_string(n++))+".material");
+                    }
+
+
+                }else {
+                    log->warn("No path selected, so materials won't be extracted!");
+                }
+            }
 
 
             // Right column: Preview
