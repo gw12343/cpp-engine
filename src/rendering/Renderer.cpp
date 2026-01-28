@@ -29,46 +29,7 @@ namespace Engine {
 	{
 		m_shadowRenderer = std::make_shared<ShadowMapRenderer>();
 
-		if (!m_shader.LoadFromFiles("resources/shaders/vert.glsl", "resources/shaders/frag.glsl", std::nullopt)) {
-			log->error("Failed to load default shader");
-			return;
-		}
-
-		if (!m_mousePickingShader.LoadFromFiles("resources/shaders/picking.vert", "resources/shaders/picking.frag", std::nullopt)) {
-			log->error("Failed to load mouse picking shader");
-			return;
-		}
-
-		// Load skybox shader
-		if (!m_skyboxShader.LoadFromFiles("resources/shaders/skybox_vert.glsl", "resources/shaders/skybox_frag.glsl", std::nullopt)) {
-			log->error("Failed to load skybox shader");
-			return;
-		}
-
-		// Load model preview shader
-		if (!m_modelPreviewShader.LoadFromFiles("resources/shaders/preview_vert.glsl", "resources/shaders/preview_frag.glsl", std::nullopt)) {
-			log->error("Failed to load model preview shader");
-			return;
-		}
-
-		// Load material preview shader
-		if (!m_materialPreviewShader.LoadFromFiles("resources/shaders/material_preview_vert.glsl", "resources/shaders/material_preview_frag.glsl", std::nullopt)) {
-			log->error("Failed to load material preview shader");
-			return;
-		}
-
-        // Load GBuffer shader
-        if (!m_gbufferShader.LoadFromFiles("resources/shaders/gbuffer_vert.glsl", "resources/shaders/gbuffer_frag.glsl", std::nullopt)) {
-			log->error("Failed to load gbuffer shader");
-			return;
-		}
-
-        // Load lighting shader
-        if (!m_lightingShader.LoadFromFiles("resources/shaders/lighting_vert.glsl", "resources/shaders/lighting_frag.glsl", std::nullopt)) {
-			log->error("Failed to load lighting shader");
-			return;
-		}
-
+        ReloadShaders();
 
 		m_skybox            = std::make_unique<Skybox>();
 		const std::string p = "resources/textures/output.hdr";
@@ -91,7 +52,7 @@ namespace Engine {
         if (quadVAO != 0) return;
 
         float quadVertices[] = {
-                // positions   // texcoords
+                // positions   // tex
                 -1.0f, -1.0f,  0.0f, 0.0f,
                 1.0f, -1.0f,  1.0f, 0.0f,
                 1.0f,  1.0f,  1.0f, 1.0f,
@@ -237,23 +198,15 @@ namespace Engine {
 //			ZoneScopedN("Render Animations");
 //			GetAnimationManager().Render();
 //		}
-//		{
-//			ZoneScopedN("Render Entities");
-//			RenderEntities();
-//		}
-//		{
-//			ZoneScopedN("Render Terrains");
-//			GetTerrainManager().Render();
-//		}
-//		{
-//			ZoneScopedN("Render Skybox");
-//			RenderSkybox();
-//		}
 
 		{
-			ZoneScopedN("Render Particles");
-			GetParticleManager().Render();
+			ZoneScopedN("Render Terrains");
+			GetTerrainManager().Render();
 		}
+//		{
+//			ZoneScopedN("Render Particles");
+//			GetParticleManager().Render();
+//		}
 		{
 			ZoneScopedN("Render RmlUi");
 			// Render RmlUi into the framebuffer
@@ -332,24 +285,6 @@ namespace Engine {
     }
 
 
-
-    void Renderer::RenderEntities()
-	{
-		glDisable(GL_CULL_FACE);
-		ENGINE_GLCheckError();
-		glm::mat4 V = GetCamera().GetViewMatrix();
-		m_shadowRenderer->UploadShadowMatrices(m_shader, V, 3);
-		ENGINE_GLCheckError();
-		// Create a view for entities with Transform and ModelRenderer components
-		auto view = GetCurrentSceneRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer>();
-		for (auto [entity, metadata, transform, renderer] : view.each()) {
-			if (!renderer.visible) continue;
-			// Draw model
-			renderer.Draw(GetShader(), transform, true);
-		}
-	}
-
-
 	glm::vec3 EncodeEntityID(entt::entity entityID)
 	{
 		auto  id = static_cast<uint32_t>(entityID);
@@ -422,23 +357,6 @@ namespace Engine {
 		}
 	}
 
-
-    void Renderer::RenderSkybox()
-	{
-		m_skyboxShader.Bind();
-        glDepthMask(GL_FALSE);
-        glDepthFunc(GL_LEQUAL);
-
-		// Set up view and projection matrices for skybox
-		glm::mat4 view       = GetCamera().GetViewMatrix();
-		glm::mat4 projection = GetCamera().GetProjectionMatrix();
-
-		m_skyboxShader.SetMat4("view", &view);
-		m_skyboxShader.SetMat4("projection", &projection);
-
-		// Draw skybox
-		m_skybox->Draw(m_skyboxShader);
-	}
 	void Renderer::RenderShadowMaps()
 	{
 		m_shadowRenderer->RenderShadowMaps();
@@ -465,30 +383,26 @@ namespace Engine {
 			GetAnimationManager().renderer_->DrawSphereIm(gizmo.radius, t, color);
 		}
 	}
-	void Renderer::ReloadShaders()
+
+    void Renderer::ReloadShaders()
 	{
 		log->info("Reloading shaders...");
 		if (!m_shader.LoadFromFiles("resources/shaders/vert.glsl", "resources/shaders/frag.glsl", std::nullopt)) {
-			log->error("Failed to reload default shader");
+			log->error("Failed to load default shader");
 		}
 
 		if (!m_mousePickingShader.LoadFromFiles("resources/shaders/picking.vert", "resources/shaders/picking.frag", std::nullopt)) {
-			log->error("Failed to reload mouse picking shader");
-		}
-
-		// Load skybox shader
-		if (!m_skyboxShader.LoadFromFiles("resources/shaders/skybox_vert.glsl", "resources/shaders/skybox_frag.glsl", std::nullopt)) {
-			log->error("Failed to reload skybox shader");
+			log->error("Failed to load mouse picking shader");
 		}
 
 		// Load model preview shader
 		if (!m_modelPreviewShader.LoadFromFiles("resources/shaders/preview_vert.glsl", "resources/shaders/preview_frag.glsl", std::nullopt)) {
-			log->error("Failed to reload model preview shader");
+			log->error("Failed to load model preview shader");
 		}
 
 		// Load material preview shader
 		if (!m_materialPreviewShader.LoadFromFiles("resources/shaders/material_preview_vert.glsl", "resources/shaders/material_preview_frag.glsl", std::nullopt)) {
-			log->error("Failed to reload material preview shader");
+			log->error("Failed to load material preview shader");
 		}
 
         // Load GBuffer shader

@@ -17,6 +17,38 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
+                            "key": "GRAVITY_SCALE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
+                            }
+                        },
+                        {
+                            "key": "RUN_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 12.0
+                            }
+                        },
+                        {
+                            "key": "BULLET_PARENT",
+                            "value": {
+                                "index": 12,
+                                "data": {
+                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
+                                }
+                            }
+                        },
+                        {
+                            "key": "shootSound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
+                                }
+                            }
+                        },
+                        {
                             "key": "victorySound",
                             "value": {
                                 "index": 11,
@@ -26,10 +58,10 @@
                             }
                         },
                         {
-                            "key": "CAMERA_Y_OFFSET",
+                            "key": "SHOOT_POWER",
                             "value": {
                                 "index": 0,
-                                "data": 1.100000023841858
+                                "data": 10.0
                             }
                         },
                         {
@@ -44,38 +76,6 @@
                             "value": {
                                 "index": 0,
                                 "data": 7.0
-                            }
-                        },
-                        {
-                            "key": "SHOOT_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 10.0
-                            }
-                        },
-                        {
-                            "key": "shootSound",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
-                                }
-                            }
-                        },
-                        {
-                            "key": "BULLET_PARENT",
-                            "value": {
-                                "index": 12,
-                                "data": {
-                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
-                                }
-                            }
-                        },
-                        {
-                            "key": "RUN_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 12.0
                             }
                         },
                         {
@@ -95,10 +95,10 @@
                             }
                         },
                         {
-                            "key": "GRAVITY_SCALE",
+                            "key": "CAMERA_Y_OFFSET",
                             "value": {
                                 "index": 0,
-                                "data": 2.0
+                                "data": 1.100000023841858
                             }
                         }
                     ]
@@ -520,6 +520,9 @@
                 "children": [
                     {
                         "guid": "652ea52f75b6e8215a7b07d953df4e13"
+                    },
+                    {
+                        "guid": "800df26ba3690ad3bde5fc05e85b0996"
                     }
                 ]
             },
@@ -552,6 +555,87 @@
             },
             "TerrainRenderer": {
                 "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": true
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "AnimationPoseComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "New Entity",
+                "tag": "",
+                "active": true,
+                "guid": "800df26ba3690ad3bde5fc05e85b0996",
+                "parentEntity": {
+                    "guid": "77b9ef246028ea5757c8bd10a7a21f9b"
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 0.0,
+                        "y": -179.5039520263672,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "terrainTile": {
+                        "guid": "08d79874f4071a0b863432f509a9d70a"
+                    }
+                }
             },
             "ModelRenderer": {
                 "nullopt": true
