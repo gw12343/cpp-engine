@@ -12,25 +12,43 @@
 
 
 namespace Engine {
-	template <typename T>
-	AssetHandle<T> AssetManager::Load(const std::string& path)
-	{
-		auto& storage = GetStorage<T>();
+    inline std::string NormalizePath(const std::string& path)
+    {
+        // Get canonical absolute path, but if file doesn't exist, weakly_canonical or absolute.
+        try {
+            auto p = std::filesystem::weakly_canonical(std::filesystem::path(path));
+            // Make relative to current working directory for determinism
+            auto cwd = std::filesystem::current_path();
+            if (p.string().find(cwd.string()) == 0) {
+                p = std::filesystem::relative(p, cwd);
+            }
+            return p.string();
+        } catch (...) {
+            // fallback if something goes wrong
+            return std::filesystem::absolute(path).string();
+        }
+    }
 
-		// Load or create .meta file
-		std::string guid = EnsureMetaFile<T>(path);
 
-		auto it = storage.guidToAsset.find(guid);
-		if (it != storage.guidToAsset.end()) return AssetHandle<T>(guid);
+    template <typename T>
+    AssetHandle<T> AssetManager::Load(const std::string& path)
+    {
+        std::string normPath = NormalizePath(path);
+        auto& storage = GetStorage<T>();
 
-		assert(storage.loader);
-		auto asset = storage.loader->LoadFromFile(path);
-		if (!asset) return AssetHandle<T>();
+        std::string guid = EnsureMetaFile<T>(normPath);
 
-		storage.guidToAsset[guid] = std::move(asset);
-		storage.pathToGuid[path]  = guid;
-		return AssetHandle<T>(guid);
-	}
+        auto it = storage.guidToAsset.find(guid);
+        if (it != storage.guidToAsset.end()) return AssetHandle<T>(guid);
+
+        assert(storage.loader);
+        auto asset = storage.loader->LoadFromFile(normPath);
+        if (!asset) return AssetHandle<T>();
+
+        storage.guidToAsset[guid] = std::move(asset);
+        storage.pathToGuid[normPath] = guid;
+        return AssetHandle<T>(guid);
+    }
 
 	template <typename T>
 	T* AssetManager::Get(const AssetHandle<T>& handle)
@@ -83,49 +101,53 @@ namespace Engine {
 		}
 	}
 
-	template <typename T>
-	AssetHandle<T> AssetManager::GetHandleFromPath(const std::string& path)
-	{
-		auto& storage = GetStorage<T>();
-		auto  it      = storage.pathToGuid.find(path);
-		if (it != storage.pathToGuid.end()) {
-			return AssetHandle<T>(it->second);
-		}
-		return AssetHandle<T>();
-	}
+    template <typename T>
+    AssetHandle<T> AssetManager::GetHandleFromPath(const std::string& path)
+    {
+        std::string normPath = NormalizePath(path);
+        auto& storage = GetStorage<T>();
+        auto it = storage.pathToGuid.find(normPath);
+        if (it != storage.pathToGuid.end()) {
+            return AssetHandle<T>(it->second);
+        }
+        return AssetHandle<T>();
+    }
 
-	template <typename T>
-	void AssetManager::UnloadByPath(const std::string& path)
-	{
-		auto& storage = GetStorage<T>();
-		auto  it      = storage.pathToGuid.find(path);
-		if (it != storage.pathToGuid.end()) {
-			std::string guid = it->second;
-			storage.guidToAsset.erase(guid);
-			storage.pathToGuid.erase(it);
-			Logger::get("core")->info("Unloaded asset: {}", path);
-		}
-	}
+    template <typename T>
+    void AssetManager::UnloadByPath(const std::string& path)
+    {
+        std::string normPath = NormalizePath(path);
+        auto& storage = GetStorage<T>();
+        auto it = storage.pathToGuid.find(normPath);
+        if (it != storage.pathToGuid.end()) {
+            std::string guid = it->second;
+            storage.guidToAsset.erase(guid);
+            storage.pathToGuid.erase(it);
+            Logger::get("core")->info("Unloaded asset: {}", normPath);
+        }
+    }
 
 	template <typename T>
 	void AssetManager::RenameAsset(const std::string& oldPath, const std::string& newPath)
 	{
-		auto& storage = GetStorage<T>();
-		auto  it      = storage.pathToGuid.find(oldPath);
-		if (it != storage.pathToGuid.end()) {
-			std::string guid = it->second;
-			storage.pathToGuid.erase(it);
-			storage.pathToGuid[newPath] = guid;
-			// Rename .meta file
-			std::string oldMetaPath = oldPath + ".meta";
-			std::string newMetaPath = newPath + ".meta";
-			if (std::filesystem::exists(oldMetaPath)) {
-				std::error_code ec;
-				std::filesystem::rename(oldMetaPath, newMetaPath, ec);
-				if (ec) {
-					Logger::get("core")->error("Failed to rename meta file: {} -> {}", oldMetaPath, newMetaPath);
-				}
-			}
+        std::string normOld = NormalizePath(oldPath);
+        std::string normNew = NormalizePath(newPath);
+        auto& storage = GetStorage<T>();
+        auto it = storage.pathToGuid.find(normOld);
+        if (it != storage.pathToGuid.end()) {
+            std::string guid = it->second;
+            storage.pathToGuid.erase(it);
+            storage.pathToGuid[normNew] = guid;
+
+            std::string oldMetaPath = normOld + ".meta";
+            std::string newMetaPath = normNew + ".meta";
+            if (std::filesystem::exists(oldMetaPath)) {
+                std::error_code ec;
+                std::filesystem::rename(oldMetaPath, newMetaPath, ec);
+                if (ec) {
+                    Logger::get("core")->error("Failed to rename meta file: {} -> {}", oldMetaPath, newMetaPath);
+                }
+            }
 			
 			// Update asset's internal name if it has one
 			auto assetIt = storage.guidToAsset.find(guid);

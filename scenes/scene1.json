@@ -17,35 +17,10 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
-                            "key": "RUN_SPEED",
+                            "key": "CAMERA_Y_OFFSET",
                             "value": {
                                 "index": 0,
-                                "data": 12.0
-                            }
-                        },
-                        {
-                            "key": "BULLET_PARENT",
-                            "value": {
-                                "index": 12,
-                                "data": {
-                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
-                                }
-                            }
-                        },
-                        {
-                            "key": "SHOOT_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 10.0
-                            }
-                        },
-                        {
-                            "key": "shootSound",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
-                                }
+                                "data": 1.100000023841858
                             }
                         },
                         {
@@ -63,10 +38,28 @@
                             }
                         },
                         {
-                            "key": "JUMP_POWER",
+                            "key": "victorySound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                }
+                            }
+                        },
+                        {
+                            "key": "shootSound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
+                                }
+                            }
+                        },
+                        {
+                            "key": "GRAVITY_SCALE",
                             "value": {
                                 "index": 0,
-                                "data": 8.0
+                                "data": 2.0
                             }
                         },
                         {
@@ -79,26 +72,33 @@
                             }
                         },
                         {
-                            "key": "CAMERA_Y_OFFSET",
+                            "key": "JUMP_POWER",
                             "value": {
                                 "index": 0,
-                                "data": 1.100000023841858
+                                "data": 8.0
                             }
                         },
                         {
-                            "key": "victorySound",
+                            "key": "BULLET_PARENT",
                             "value": {
-                                "index": 11,
+                                "index": 12,
                                 "data": {
-                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
                                 }
                             }
                         },
                         {
-                            "key": "GRAVITY_SCALE",
+                            "key": "RUN_SPEED",
                             "value": {
                                 "index": 0,
-                                "data": 2.0
+                                "data": 12.0
+                            }
+                        },
+                        {
+                            "key": "SHOOT_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 10.0
                             }
                         }
                     ]
@@ -112,9 +112,9 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": 60.91352081298828,
-                        "y": 14.121304512023926,
-                        "z": 5.610670566558838
+                        "x": 248.38839721679688,
+                        "y": 51.5913200378418,
+                        "z": 8.086766242980957
                     },
                     "rotation": {
                         "x": 0.0,
@@ -285,9 +285,9 @@
                         "w": 1.0
                     },
                     "scale": {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
+                        "x": 4.0,
+                        "y": 4.0,
+                        "z": 4.0
                     }
                 }
             },
@@ -817,9 +817,9 @@
                         "w": 1.0
                     },
                     "scale": {
-                        "x": 0.9999912977218628,
-                        "y": 0.9999831318855286,
-                        "z": 0.9999998211860657
+                        "x": 4.0,
+                        "y": 4.0,
+                        "z": 4.0
                     }
                 }
             },
