@@ -17,6 +17,15 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
+                            "key": "victorySound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                }
+                            }
+                        },
+                        {
                             "key": "CAMERA_Y_OFFSET",
                             "value": {
                                 "index": 0,
@@ -38,12 +47,10 @@
                             }
                         },
                         {
-                            "key": "victorySound",
+                            "key": "SHOOT_POWER",
                             "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
-                                }
+                                "index": 0,
+                                "data": 10.0
                             }
                         },
                         {
@@ -53,29 +60,6 @@
                                 "data": {
                                     "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
                                 }
-                            }
-                        },
-                        {
-                            "key": "GRAVITY_SCALE",
-                            "value": {
-                                "index": 0,
-                                "data": 2.0
-                            }
-                        },
-                        {
-                            "key": "BULLET_MATERIAL",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
-                                }
-                            }
-                        },
-                        {
-                            "key": "JUMP_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 8.0
                             }
                         },
                         {
@@ -95,10 +79,26 @@
                             }
                         },
                         {
-                            "key": "SHOOT_POWER",
+                            "key": "BULLET_MATERIAL",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
+                                }
+                            }
+                        },
+                        {
+                            "key": "JUMP_POWER",
                             "value": {
                                 "index": 0,
-                                "data": 10.0
+                                "data": 8.0
+                            }
+                        },
+                        {
+                            "key": "GRAVITY_SCALE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
                             }
                         }
                     ]
@@ -112,9 +112,9 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": 248.38839721679688,
-                        "y": 51.5913200378418,
-                        "z": 8.086766242980957
+                        "x": 61.79624938964844,
+                        "y": 13.935158729553223,
+                        "z": 5.464488983154297
                     },
                     "rotation": {
                         "x": 0.0,
@@ -285,9 +285,9 @@
                         "w": 1.0
                     },
                     "scale": {
-                        "x": 4.0,
-                        "y": 4.0,
-                        "z": 4.0
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
                     }
                 }
             },
@@ -510,67 +510,6 @@
         },
         {
             "EntityMetadata": {
-                "name": "ScoreManager",
-                "tag": "",
-                "active": true,
-                "guid": "73c9881ef8e3660939a9f062e1586bb0",
-                "parentEntity": {
-                    "guid": "8664f8636f7b2e27369247fc65f0af93"
-                },
-                "children": []
-            },
-            "LuaScript": {
-                "nullopt": false,
-                "data": {
-                    "scriptPath": "scripts/score_manager.lua",
-                    "variables": []
-                }
-            },
-            "ShadowCaster": {
-                "nullopt": true
-            },
-            "Transform": {
-                "nullopt": true
-            },
-            "TerrainRenderer": {
-                "nullopt": true
-            },
-            "ModelRenderer": {
-                "nullopt": true
-            },
-            "RigidBodyComponent": {
-                "nullopt": true
-            },
-            "AudioSource": {
-                "nullopt": true
-            },
-            "SkeletonComponent": {
-                "nullopt": true
-            },
-            "AnimationComponent": {
-                "nullopt": true
-            },
-            "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "SkinnedMeshComponent": {
-                "nullopt": true
-            },
-            "ParticleSystem": {
-                "nullopt": true
-            },
-            "PlayerControllerComponent": {
-                "nullopt": true
-            },
-            "RmlUIComponent": {
-                "nullopt": true
-            },
-            "GizmoComponent": {
-                "nullopt": true
-            }
-        },
-        {
-            "EntityMetadata": {
                 "name": "Map",
                 "tag": "",
                 "active": true,
@@ -650,67 +589,6 @@
         },
         {
             "EntityMetadata": {
-                "name": "ScoreUI",
-                "tag": "",
-                "active": true,
-                "guid": "846e51a4bd28ef768eb4d879b67fd402",
-                "parentEntity": {
-                    "guid": "cec5b932db92dfd2d7158ca746d2cb08"
-                },
-                "children": []
-            },
-            "LuaScript": {
-                "nullopt": true
-            },
-            "ShadowCaster": {
-                "nullopt": true
-            },
-            "Transform": {
-                "nullopt": true
-            },
-            "TerrainRenderer": {
-                "nullopt": true
-            },
-            "ModelRenderer": {
-                "nullopt": true
-            },
-            "RigidBodyComponent": {
-                "nullopt": true
-            },
-            "AudioSource": {
-                "nullopt": true
-            },
-            "SkeletonComponent": {
-                "nullopt": true
-            },
-            "AnimationComponent": {
-                "nullopt": true
-            },
-            "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "SkinnedMeshComponent": {
-                "nullopt": true
-            },
-            "ParticleSystem": {
-                "nullopt": true
-            },
-            "PlayerControllerComponent": {
-                "nullopt": true
-            },
-            "RmlUIComponent": {
-                "nullopt": false,
-                "data": {
-                    "documentPath": "resources/ui/demo.rml",
-                    "isVisible": true
-                }
-            },
-            "GizmoComponent": {
-                "nullopt": true
-            }
-        },
-        {
-            "EntityMetadata": {
                 "name": "GameMaster",
                 "tag": "",
                 "active": true,
@@ -719,9 +597,6 @@
                     "guid": ""
                 },
                 "children": [
-                    {
-                        "guid": "73c9881ef8e3660939a9f062e1586bb0"
-                    },
                     {
                         "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
                     }
@@ -945,9 +820,6 @@
                     "guid": ""
                 },
                 "children": [
-                    {
-                        "guid": "846e51a4bd28ef768eb4d879b67fd402"
-                    },
                     {
                         "guid": "df21e50392179ca74b94ebaed732f495"
                     }
