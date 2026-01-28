@@ -494,6 +494,7 @@ namespace Engine {
 					return reinterpret_cast<void*>(static_cast<intptr_t>(it->second.texture));
 				}
 			}
+            GetDefaultLogger()->warn("got here");
 			return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_materialIconTexture->GetID()));
 		}
 		else if (extension == ".wav" || extension == ".mp3" || extension == ".ogg") {
