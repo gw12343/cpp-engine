@@ -25,46 +25,43 @@ layout (std140) uniform LightSpaceMatrices {
 uniform float cascadePlaneDistances[16];
 uniform int cascadeCount;
 
-/* ---------- Position reconstruction ---------- */
+/* ---------- Helpers ---------- */
 
 vec3 ReconstructWorldPos(vec2 uv, float depth)
 {
     float z = depth * 2.0 - 1.0;
-
     vec4 clip = vec4(uv * 2.0 - 1.0, z, 1.0);
     vec4 viewPos4 = invProjection * clip;
     viewPos4 /= viewPos4.w;
-
-    vec4 worldPos4 = invView * viewPos4;
-    return worldPos4.xyz;
+    return (invView * viewPos4).xyz;
 }
 
 vec3 ReconstructWorldRay(vec2 uv)
 {
-    // Clip space (far plane)
     vec4 clip = vec4(uv * 2.0 - 1.0, 1.0, 1.0);
-
-    // View space
     vec4 viewRay = invProjection * clip;
     viewRay /= viewRay.w;
-
-    // World space (direction → w = 0)
-    vec3 worldRay = (invView * vec4(viewRay.xyz, 0.0)).xyz;
-    return normalize(worldRay);
+    return normalize((invView * vec4(viewRay.xyz, 0.0)).xyz);
 }
 
+vec3 SampleSky(vec3 dir)
+{
+    const float PI = 3.14159265359;
+    float phi   = atan(dir.z, dir.x);
+    float theta = asin(dir.y);
+    vec2 uv = vec2(phi / (2.0 * PI) + 0.5,
+    theta / PI + 0.5);
+    return texture(skybox, uv).rgb;
+}
 
 /* ---------- Shadows ---------- */
 
 int GetCascadeLayer(vec3 fragPosWorldSpace)
 {
-    vec4 fragPosViewSpace = view * vec4(fragPosWorldSpace, 1.0);
-    float depthValue = abs(fragPosViewSpace.z);
-
+    float depthValue = abs((view * vec4(fragPosWorldSpace, 1.0)).z);
     for (int i = 0; i < cascadeCount; ++i)
     if (depthValue < cascadePlaneDistances[i])
     return i;
-
     return cascadeCount - 1;
 }
 
@@ -74,90 +71,104 @@ float ShadowCalculation(vec3 fragPosWorldSpace, int layer, vec3 normal)
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
 
-    if (projCoords.z > 1.0)
-    return 0.0;
+    if (projCoords.z > 1.0) return 0.0;
 
     float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
-    bias *= 1.0 / ((layer == cascadeCount ? farPlane : cascadePlaneDistances[layer]) * 0.5);
-
     float shadow = 0.0;
     vec2 texelSize = 1.0 / vec2(textureSize(shadowMap, 0));
 
     for (int x = -1; x <= 1; ++x)
     for (int y = -1; y <= 1; ++y)
     {
-        float pcfDepth = texture(shadowMap,
-                                 vec3(projCoords.xy + vec2(x, y) * texelSize, layer)).r;
+        float pcf = texture(shadowMap,
+                            vec3(projCoords.xy + vec2(x, y) * texelSize, layer)).r;
+        shadow += (projCoords.z - bias) > pcf ? 1.0 : 0.0;
+    }
+    shadow /= 9.0;
 
-        shadow += (projCoords.z - bias) > pcfDepth ? 1.0 : 0.0;
+    // Fade out shadow strength smoothly near far cascade
+    float viewDepth = abs((view * vec4(fragPosWorldSpace, 1.0)).z);
+    if (layer == cascadeCount - 1) {
+        float fadeStart = cascadePlaneDistances[cascadeCount - 2];
+        float fadeEnd = cascadePlaneDistances[cascadeCount - 1];
+        float fade = clamp((fadeEnd - viewDepth) / (fadeEnd - fadeStart), 0.0, 1.0);
+        shadow *= fade;
     }
 
-    return shadow / 9.0;
+    return shadow;
 }
-
-/* ---------- Skybox ---------- */
-
-vec3 SampleSky(vec3 dir)
-{
-    const float PI = 3.14159265359;
-
-    float phi   = atan(dir.z, dir.x);
-    float theta = asin(dir.y);
-
-    vec2 uv = vec2(
-    phi / (2.0 * PI) + 0.5,
-    theta / PI + 0.5
-    );
-
-    return texture(skybox, uv).rgb;
-}
-
-
 
 /* ---------- Main ---------- */
 
 void main()
 {
-
     float depth = texture(gDepth, TexCoords).r;
 
+/* SKY */
     if (depth >= 0.9999)
     {
         vec3 ray = ReconstructWorldRay(TexCoords);
-        vec3 sky = SampleSky(ray);
-        FragColor = vec4(sky, 1.0);
+        FragColor = vec4(SampleSky(ray), 1.0);
         return;
     }
 
     vec3 FragPos = ReconstructWorldPos(TexCoords, depth);
-    vec3 Normal  = normalize(texture(gNormal, TexCoords).rgb);
-    vec3 Albedo  = texture(gAlbedo, TexCoords).rgb;
+    vec3 N = normalize(texture(gNormal, TexCoords).rgb);
+    vec3 V = normalize(viewPos - FragPos);
+    vec3 L = normalize(lightDir);
+    vec3 H = normalize(L + V);
+    vec3 Albedo = texture(gAlbedo, TexCoords).rgb;
 
     vec2 material = texture(gMaterial, TexCoords).rg;
     float specStrength = material.r;
     float shininess = material.g * 256.0;
 
-    // Ambient
-    vec3 ambient = 0.1 * Albedo;
+/* -------- Super Strong SSAO-like AO (for testing) -------- */
+    // Approximate AO by darkening based on angle between normal and view direction
+    // Clamp to [0,1] and multiply strongly to emphasize shadows
+    float ao = clamp(dot(N, V), 0.0, 1.0);
+    ao = pow(ao, 6.0); // increase contrast, so near grazing angles are very dark
+    ao = 0.2 + 0.8 * ao; // remap so minimum is 0.2 (not pure black)
+    ao = clamp(ao * 1.8, 0.0, 1.0); // amplify AO strength to be very strong
 
-    // Diffuse
-    float diff = max(dot(Normal, lightDir), 0.0);
+/* -------- Ambient (stable, opaque) -------- */
+    vec3 ambient = 0.05 * Albedo;
+
+/* -------- Diffuse + wrap -------- */
+    float wrap = 0.4;
+    float diff = max((dot(N, L) + wrap) / (1.0 + wrap), 0.0);
     vec3 diffuse = diff * Albedo;
 
-    // Specular
-    vec3 viewDir = normalize(viewPos - FragPos);
-    vec3 halfDir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(Normal, halfDir), 0.0), shininess);
-    vec3 specular = vec3(spec * specStrength);
+/* -------- Specular (AA + Fresnel) -------- */
+    float specAA = shininess / (1.0 + fwidth(dot(N, H)) * shininess);
+    float spec = pow(max(dot(N, H), 0.0), specAA);
 
-    // Shadows
-    int layer = GetCascadeLayer(FragPos);
-    float shadow = ShadowCalculation(FragPos, layer, Normal);
+    float F = pow(1.0 - max(dot(N, V), 0.0), 5.0);
+    vec3 specular = spec * mix(vec3(0.04), vec3(1.0), F) * specStrength;
 
-    vec3 lighting = ambient + (1.0 - shadow) * (diffuse + specular);
+/* -------- Energy conservation -------- */
+    diffuse *= (1.0 - specStrength);
+
+/* -------- Sky IBL (tone down intensity) -------- */
+    vec3 skyDiffuse = SampleSky(N) * 0.15;
+    vec3 R = reflect(-V, N);
+    vec3 skySpec = SampleSky(R) * specStrength * 0.2;
+
+/* -------- Shadows -------- */
+    float shadow = ShadowCalculation(FragPos, GetCascadeLayer(FragPos), N);
+
+    vec3 lighting =
+    ao * (ambient + skyDiffuse) +
+    (1.0 - shadow) * (diffuse + specular + skySpec);
+
+/* -------- Fog (constant color + distance start) -------- */
+    float fogStart = 30.0;
+    float fogEnd = 300.0;
+    float dist = length(viewPos - FragPos);
+    float fogFactor = clamp((dist - fogStart) / (fogEnd - fogStart), 0.0, 1.0);
+
+    vec3 fogColor = vec3(0.6, 0.7, 0.8); // soft atmospheric color
+    lighting = mix(lighting, fogColor, fogFactor);
 
     FragColor = vec4(lighting, 1.0);
-
-
-
 }

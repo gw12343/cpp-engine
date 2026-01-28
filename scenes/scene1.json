@@ -17,13 +17,6 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
-                            "key": "CAMERA_Y_OFFSET",
-                            "value": {
-                                "index": 0,
-                                "data": 1.100000023841858
-                            }
-                        },
-                        {
                             "key": "BULLET_PARENT",
                             "value": {
                                 "index": 12,
@@ -40,17 +33,17 @@
                             }
                         },
                         {
-                            "key": "MOUSE_SENSITIVITY",
-                            "value": {
-                                "index": 0,
-                                "data": 0.10000000149011612
-                            }
-                        },
-                        {
                             "key": "WALK_SPEED",
                             "value": {
                                 "index": 0,
                                 "data": 7.0
+                            }
+                        },
+                        {
+                            "key": "MOUSE_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.10000000149011612
                             }
                         },
                         {
@@ -70,22 +63,6 @@
                             }
                         },
                         {
-                            "key": "GRAVITY_SCALE",
-                            "value": {
-                                "index": 0,
-                                "data": 2.0
-                            }
-                        },
-                        {
-                            "key": "shootSound",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
-                                }
-                            }
-                        },
-                        {
                             "key": "SHOOT_POWER",
                             "value": {
                                 "index": 0,
@@ -100,6 +77,29 @@
                                     "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
                                 }
                             }
+                        },
+                        {
+                            "key": "shootSound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
+                                }
+                            }
+                        },
+                        {
+                            "key": "CAMERA_Y_OFFSET",
+                            "value": {
+                                "index": 0,
+                                "data": 1.100000023841858
+                            }
+                        },
+                        {
+                            "key": "GRAVITY_SCALE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
+                            }
                         }
                     ]
                 }
@@ -112,9 +112,9 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": 60.913516998291019,
-                        "y": 16.097660064697267,
-                        "z": 2.2202939987182619
+                        "x": 60.91352081298828,
+                        "y": 14.121304512023926,
+                        "z": 5.610670566558838
                     },
                     "rotation": {
                         "x": 0.0,
@@ -304,175 +304,175 @@
                     "backfaceCulling": true,
                     "materialOverrides": [
                         {
-                            "guid": ""
+                            "guid": "e957f8cc01d2c18627253acb3f9a96b3"
                         },
                         {
-                            "guid": ""
+                            "guid": "e957f8cc01d2c18627253acb3f9a96b3"
                         },
                         {
-                            "guid": "07a2fa34f04aedee276ed010707d44c3"
+                            "guid": "edcf4b5b5cf406b138fcb313859193e9"
                         },
                         {
-                            "guid": ""
+                            "guid": "f7dd9ae3c97c611c8cf3cb3778ea7ded"
                         },
                         {
-                            "guid": ""
+                            "guid": "a31eb83df785b138ba3f25b0b8789f33"
                         },
                         {
-                            "guid": "760dea3099165fcb87accd80d9df36be"
+                            "guid": "999159962c7a2070590bca222b391d2f"
                         },
                         {
-                            "guid": "07a2fa34f04aedee276ed010707d44c3"
+                            "guid": "e957f8cc01d2c18627253acb3f9a96b3"
                         },
                         {
-                            "guid": "f474b376ddeab38cc693c76d29e4d3a4"
+                            "guid": "005d735115ff67b5ea945ded06b42d60"
                         },
                         {
-                            "guid": "86d97f79ce43148363dcdc1461170b38"
+                            "guid": "30ada653f31d58daea1305fae32907c5"
                         },
                         {
-                            "guid": ""
+                            "guid": "6abc0975f0161e15f80e978d2d588ee1"
                         },
                         {
-                            "guid": ""
+                            "guid": "74ed292ef43364aa0aa169c8f672e702"
                         },
                         {
-                            "guid": ""
+                            "guid": "e957f8cc01d2c18627253acb3f9a96b3"
                         },
                         {
-                            "guid": "86d97f79ce43148363dcdc1461170b38"
+                            "guid": "abedd80a91c3381ce9d095cb6a2c520b"
                         },
                         {
-                            "guid": ""
+                            "guid": "a296259a45a715bd7eac2a8898b8ad31"
                         },
                         {
-                            "guid": ""
+                            "guid": "5700c898c63618cc64138fcdd5226961"
                         },
                         {
-                            "guid": "1073bbb67f1bb720680b7a93dd2c6e3b"
+                            "guid": "74ed292ef43364aa0aa169c8f672e702"
                         },
                         {
-                            "guid": ""
+                            "guid": "1b9940949ce570968a901a87414e404f"
                         },
                         {
-                            "guid": ""
+                            "guid": "e71675432b727a862f6eb1fd48edf512"
                         },
                         {
-                            "guid": "1073bbb67f1bb720680b7a93dd2c6e3b"
+                            "guid": "74ed292ef43364aa0aa169c8f672e702"
                         },
                         {
-                            "guid": "c65e206dfc749371e59f05aa1e2eda9c"
+                            "guid": "781262445c7ca419edc81313407db299"
                         },
                         {
-                            "guid": ""
+                            "guid": "71b50c20cd61bd550336a10bc24d1950"
                         },
                         {
-                            "guid": ""
+                            "guid": "9a6d676a72e975bcadff4222cf568d2e"
                         },
                         {
-                            "guid": ""
+                            "guid": "0c6a18f1442e5f813e82200680030d8a"
                         },
                         {
-                            "guid": ""
+                            "guid": "448b14b1a0963a6935407e0c99fce35a"
                         },
                         {
-                            "guid": ""
+                            "guid": "9615f399dedd17ac5b7d679201a3cbd4"
                         },
                         {
-                            "guid": ""
+                            "guid": "b2499ee49e13ca3e67e76f64872362f8"
                         },
                         {
-                            "guid": "2261d34393e29322e5947d273a893382"
+                            "guid": "526eed49a2ee309125728247a4205553"
                         },
                         {
-                            "guid": ""
+                            "guid": "97f17c922b93a59f23dc56cad008075d"
                         },
                         {
-                            "guid": "c65e206dfc749371e59f05aa1e2eda9c"
+                            "guid": "6b546883a070a5c5074e0bf5ca6238c8"
                         },
                         {
-                            "guid": ""
+                            "guid": "5700c898c63618cc64138fcdd5226961"
                         },
                         {
-                            "guid": ""
+                            "guid": "48c41f1019bd3d019a24361af192b62f"
                         },
                         {
-                            "guid": ""
+                            "guid": "da20f55e4539a8cf4b53d8d87976f407"
                         },
                         {
-                            "guid": ""
+                            "guid": "e9ef786618399996efd13e265f1215a8"
                         },
                         {
-                            "guid": "c65e206dfc749371e59f05aa1e2eda9c"
+                            "guid": "6b546883a070a5c5074e0bf5ca6238c8"
                         },
                         {
-                            "guid": ""
+                            "guid": "5830342907b1e91e341a2c46da8ed305"
                         },
                         {
-                            "guid": ""
+                            "guid": "5825499971b713fdcaf54521e7ba6b72"
                         },
                         {
-                            "guid": ""
+                            "guid": "6148689a19b170cc862705cf61929339"
                         },
                         {
-                            "guid": ""
+                            "guid": "3c9995f36aa10d6b9316dbc095ece98b"
                         },
                         {
-                            "guid": "07a2fa34f04aedee276ed010707d44c3"
+                            "guid": "512f8ee8b0fba67d3f623901f030d8f1"
                         },
                         {
-                            "guid": ""
+                            "guid": "a3f49251f79f2135c208c025edba5787"
                         },
                         {
-                            "guid": "c65e206dfc749371e59f05aa1e2eda9c"
+                            "guid": "6b546883a070a5c5074e0bf5ca6238c8"
                         },
                         {
-                            "guid": ""
+                            "guid": "b6cfe64309b054dc1c70fbfaeeb0f373"
                         },
                         {
-                            "guid": ""
+                            "guid": "b6cfe64309b054dc1c70fbfaeeb0f373"
                         },
                         {
-                            "guid": ""
+                            "guid": "6b546883a070a5c5074e0bf5ca6238c8"
                         },
                         {
-                            "guid": "9d47718ceee1b16bc66fa294bc7ad47d"
+                            "guid": "da20f55e4539a8cf4b53d8d87976f407"
                         },
                         {
-                            "guid": ""
+                            "guid": "54e493c1f5e1e311b90e03a122223aa1"
                         },
                         {
-                            "guid": "b17b808bb6c1e3a991974a6a482a140a"
+                            "guid": "9a65e7fe346489fd32a4dea13d0b58ba"
                         },
                         {
-                            "guid": "f64970eb123683732f390fa34714093c"
+                            "guid": "35e8489d337e765d97224de5404dd05a"
                         },
                         {
-                            "guid": "86d97f79ce43148363dcdc1461170b38"
+                            "guid": "c8b7d4c3c43b2da9ebd28d83441e7945"
                         },
                         {
-                            "guid": "86d97f79ce43148363dcdc1461170b38"
+                            "guid": "c8b7d4c3c43b2da9ebd28d83441e7945"
                         },
                         {
-                            "guid": "4642d4e4651dd7587c83391f14c067ef"
+                            "guid": "81235794c0b670bb1a8a56d8a9abcc19"
                         },
                         {
-                            "guid": ""
+                            "guid": "197342ea3610c99b9b53d03bf8dad2e2"
                         },
                         {
-                            "guid": ""
+                            "guid": "86627aef88d62353af4cb8a6299e87ec"
                         },
                         {
-                            "guid": ""
+                            "guid": "1ecf44c2bc0fbd30a8a5d362bb202a7c"
                         },
                         {
-                            "guid": "1073bbb67f1bb720680b7a93dd2c6e3b"
+                            "guid": "74ed292ef43364aa0aa169c8f672e702"
                         },
                         {
-                            "guid": ""
+                            "guid": "a57d830cf6462ad7013f35c70ce21c21"
                         },
                         {
-                            "guid": ""
+                            "guid": "32cb6ad687566a3744401f16c9ffa8cd"
                         }
                     ]
                 }
@@ -817,9 +817,9 @@
                         "w": 1.0
                     },
                     "scale": {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
+                        "x": 0.9999912977218628,
+                        "y": 0.9999831318855286,
+                        "z": 0.9999998211860657
                     }
                 }
             },
