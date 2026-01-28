@@ -28,10 +28,8 @@ namespace Engine {
 
         void RenderLightingPass();
 		void RenderEntitiesMousePicking();
-		void RenderEntities();
 		void RenderEntitiesGBuffer();
 		void RenderShadowMaps();
-		void RenderSkybox();
 
 		Shader& GetShader() { return m_shader; }
 		Shader& GetLightingShader() { return m_lightingShader; }
@@ -51,7 +49,6 @@ namespace Engine {
 		Engine::Shader          m_modelPreviewShader;
 		Engine::Shader          m_materialPreviewShader;
 		Engine::Shader          m_terrainShader;
-		Engine::Shader          m_skyboxShader;
 		Engine::Shader          m_gbufferShader;
 		Engine::Shader          m_lightingShader;
 

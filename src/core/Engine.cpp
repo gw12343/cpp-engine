@@ -142,6 +142,7 @@ namespace Engine {
                 {".obj",      [this](const std::string &p) { GetAssetManager().Load<Rendering::Model>(p); }},
                 {".wav",      [this](const std::string &p) { GetAssetManager().Load<Audio::SoundBuffer>(p); }},
                 {".anim",     [this](const std::string &p) { GetAssetManager().Load<Animation>(p); }},
+                {".bin",     [this](const std::string &p) { GetAssetManager().Load<Terrain::TerrainTile>(p); }},
         };
 
         auto loadFromAssetSubfolder = [&](const std::string &assetSubfolder) {
