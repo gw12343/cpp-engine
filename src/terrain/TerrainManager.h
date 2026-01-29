@@ -21,6 +21,7 @@ namespace Engine::Terrain {
 	class TerrainManager : public Module {
 	  public:
 		void Render();
+		void RenderGBuffer();
 
 		void                      onInit() override;
 		void                      onUpdate(float dt) override;

@@ -8,6 +8,7 @@
 #include "components/impl/EntityMetadataComponent.h"
 #include "components/impl/TransformComponent.h"
 #include "components/impl/TerrainRendererComponent.h"
+#include "utils/Utils.h"
 
 namespace Engine::Terrain {
 
@@ -38,7 +39,91 @@ namespace Engine::Terrain {
 		}
 	}
 
-	void TerrainManager::Render()
+
+//        Shader& gbufferShader = GetGBufferShader();
+//
+//        gbufferShader.Bind();
+//
+//        // View / projection matricies
+//
+//        glm::mat4 V = GetCamera().GetViewMatrix();
+//        gbufferShader.SetMat4("view", &V);
+//        glm::mat4 proj = GetCamera().GetProjectionMatrix();
+//        gbufferShader.SetMat4("projection", &proj);
+//
+//        ENGINE_GLCheckError();
+//
+//        auto view = GetCurrentSceneRegistry().view<
+//                Engine::Components::EntityMetadata,
+//                Engine::Components::Transform,
+//                Engine::Components::ModelRenderer
+//        >();
+//
+//        for (auto [entity, metadata, transform, renderer] : view.each()) {
+//            if (!renderer.visible)
+//                continue;
+//
+//            renderer.Draw(gbufferShader, transform, true);
+//        }
+
+	void TerrainManager::RenderGBuffer()
+	{
+        ZoneScopedN("Render terrain GBuffer");
+
+        glDisable(GL_CULL_FACE);
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
+        glDisable(GL_BLEND);
+
+        ENGINE_GLCheckError();
+
+
+
+		auto view = GetCurrentSceneRegistry().view<Components::EntityMetadata, Components::Transform, Components::TerrainRenderer>();
+		for (auto [entity, metadata, transform, renderer] : view.each()) {
+
+            if (!renderer.visible) continue;
+            if (!renderer.terrainTile.IsValid()) continue;
+			auto tile = GetAssetManager().Get(renderer.terrainTile);
+			if (tile == nullptr) continue;
+
+
+			glm::mat4 viewM            = GetCamera().GetViewMatrix();
+			glm::mat4 terrainTransform = transform.GetWorldMatrix();
+
+
+            auto gbufferShader = tile->terrainShader;
+
+			gbufferShader->Bind();
+			gbufferShader->SetMat4("model", &terrainTransform);
+
+
+            glm::mat4 V = GetCamera().GetViewMatrix();
+            gbufferShader->SetMat4("view", &V);
+            glm::mat4 proj = GetCamera().GetProjectionMatrix();
+            gbufferShader->SetMat4("projection", &proj);
+
+
+            gbufferShader->SetVec2("textureScale", glm::vec2(1.0, 1.0));
+
+            ENGINE_GLCheckError();
+
+
+			for (size_t i = 0; i < tile->splatTextures.size(); ++i)
+				glBindTextureUnit(static_cast<GLuint>(i), tile->splatTextures[i]);
+
+			size_t base = tile->splatTextures.size();
+			for (size_t i = 0; i < tile->diffuseTextures.size(); ++i) {
+				GetAssetManager().Get(tile->diffuseTextures[i])->Bind(base + i);
+			}
+
+			glBindVertexArray(tile->vao);
+			glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(tile->indexCount), GL_UNSIGNED_INT, nullptr);
+			glBindVertexArray(0);
+		}
+	}
+
+    void TerrainManager::Render()
 	{
 		auto view = GetCurrentSceneRegistry().view<Components::EntityMetadata, Components::Transform, Components::TerrainRenderer>();
 		for (auto [entity, metadata, transform, renderer] : view.each()) {

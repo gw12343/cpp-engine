@@ -174,10 +174,7 @@ namespace Engine {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             RenderEntitiesGBuffer();
-
-
-
-            // TODO -- GetTerrainManager().RenderGBuffer();
+            GetTerrainManager().RenderGBuffer();
 
             GetWindow().GetGBuffer()->Unbind();
         }
@@ -199,10 +196,6 @@ namespace Engine {
 //			GetAnimationManager().Render();
 //		}
 
-		{
-			ZoneScopedN("Render Terrains");
-			GetTerrainManager().Render();
-		}
 //		{
 //			ZoneScopedN("Render Particles");
 //			GetParticleManager().Render();
