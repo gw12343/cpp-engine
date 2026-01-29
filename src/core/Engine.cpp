@@ -177,8 +177,6 @@ namespace Engine {
 
                     std::string finalPath = relativeToProjectRoot.generic_string();
 
-                    GetDefaultLogger()->critical("relative path: {}", finalPath);
-
                     try {
                         it->second(finalPath);
                         loadedCount++;
@@ -186,9 +184,7 @@ namespace Engine {
                         GetDefaultLogger()->warn("Failed to load asset {}: {}", finalPath, e.what());
                     }
                 }
-
-                GetDefaultLogger()->info("Loaded {} assets from {}", loadedCount, assetSubfolder);
-            } catch (const std::exception &e) {
+                } catch (const std::exception &e) {
                 GetDefaultLogger()->error("Error reading asset folder {}: {}", assetSubfolder, e.what());
             }
         };
