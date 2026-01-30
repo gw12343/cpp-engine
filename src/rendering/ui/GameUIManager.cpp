@@ -1,3 +1,4 @@
+#include "glad/glad.h"
 #include "GameUIManager.h"
 #include "components/impl/RmlUIComponent.h"
 #include "core/Input.h"
@@ -139,7 +140,10 @@ namespace Engine {
 
 	void GameUIManager::Render() {
 		ZoneScoped;
-		if (m_rmlContext) {
+
+
+
+        if (m_rmlContext) {
 			m_rmlContext->Render();
 		}
 	}
