@@ -70,9 +70,9 @@ namespace Engine::Terrain {
 	{
         ZoneScopedN("Render terrain GBuffer");
 
-        glDisable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_TRUE);
+        glDisable(GL_BLEND);
         glDisable(GL_BLEND);
 
         ENGINE_GLCheckError();
@@ -104,7 +104,7 @@ namespace Engine::Terrain {
             gbufferShader->SetMat4("projection", &proj);
 
 
-            gbufferShader->SetVec2("textureScale", glm::vec2(1.0, 1.0));
+            gbufferShader->SetVec2("textureScale", glm::vec2(100.0, 100.0));
 
             ENGINE_GLCheckError();
 
@@ -121,6 +121,7 @@ namespace Engine::Terrain {
 			glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(tile->indexCount), GL_UNSIGNED_INT, nullptr);
 			glBindVertexArray(0);
 		}
+        glEnable(GL_BLEND);
 	}
 
     void TerrainManager::Render()

@@ -74,6 +74,9 @@ namespace Engine::Terrain {
 
 
         ss << "gAlbedo = baseColor;\n";
+        ss << "gNormal = normalize(fs_in.Normal);\n";
+        ss << "gMaterial = vec4(0);";
+        ss << "gEmissive = vec3(0);";
 
 
         ss << "}\n";

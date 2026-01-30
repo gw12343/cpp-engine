@@ -52,7 +52,7 @@ namespace Engine {
         if (quadVAO != 0) return;
 
         float quadVertices[] = {
-                // positions   // tex
+                // positions   // tex coords
                 -1.0f, -1.0f,  0.0f, 0.0f,
                 1.0f, -1.0f,  1.0f, 0.0f,
                 1.0f,  1.0f,  1.0f, 1.0f,
@@ -174,7 +174,10 @@ namespace Engine {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             RenderEntitiesGBuffer();
-            GetTerrainManager().RenderGBuffer();
+
+
+
+            // TODO -- GetTerrainManager().RenderGBuffer();
 
             GetWindow().GetGBuffer()->Unbind();
         }
@@ -195,11 +198,23 @@ namespace Engine {
 //			ZoneScopedN("Render Animations");
 //			GetAnimationManager().Render();
 //		}
-
 //		{
-//			ZoneScopedN("Render Particles");
-//			GetParticleManager().Render();
+//			ZoneScopedN("Render Entities");
+//			RenderEntities();
 //		}
+//		{
+//			ZoneScopedN("Render Terrains");
+//			GetTerrainManager().Render();
+//		}
+//		{
+//			ZoneScopedN("Render Skybox");
+//			RenderSkybox();
+//		}
+
+		{
+			ZoneScopedN("Render Particles");
+			GetParticleManager().Render();
+		}
 		{
 			ZoneScopedN("Render RmlUi");
 			// Render RmlUi into the framebuffer
@@ -276,6 +291,7 @@ namespace Engine {
         //TODO add unbind??
         //gbufferShader.Unbind();
     }
+
 
 
 	glm::vec3 EncodeEntityID(entt::entity entityID)
