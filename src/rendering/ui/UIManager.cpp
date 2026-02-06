@@ -697,9 +697,19 @@ namespace Engine::UI {
     {
         ImGui::Begin("GBuffer Debug", &gbufferDebug);
 
-        const float previewSize = 200.0f;
+        const float previewSize = 400.0f;
 
-        ImGui::Text("Albedo");
+        ImGui::Text("SSAO");
+        ImGui::Image((ImTextureID)(intptr_t)GetWindow().GetSSAOBuffer()->ssaoTex,
+                     ImVec2(previewSize, previewSize));
+
+        ImGui::Text("SSAO BLUR");
+        ImGui::Image((ImTextureID)(intptr_t)GetWindow().GetSSAOBuffer()->blurTex,
+                     ImVec2(previewSize, previewSize));
+
+
+
+                     ImGui::Text("Albedo");
         ImGui::Image((ImTextureID)(intptr_t)gbuffer->GetAlbedo(),
                      ImVec2(previewSize, previewSize));
 

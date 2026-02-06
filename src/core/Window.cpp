@@ -20,6 +20,7 @@ namespace Engine {
 
 	std::map<Window::FramebufferID, std::shared_ptr<Framebuffer>> Window::m_frameBuffers;
     std::shared_ptr<GBuffer> Window::m_gbuffer;
+    std::shared_ptr<SSAOBuffer> Window::m_ssaobuffer;
 
 
 	Window::Window(int width, int height, std::string title) : m_window(nullptr), m_width(width), m_height(height), m_title(std::move(title))
@@ -27,8 +28,7 @@ namespace Engine {
 		m_frameBuffers[Window::FramebufferID::GAME_OUT]      = std::make_shared<Framebuffer>(GL_LINEAR, GL_LINEAR);
 		m_frameBuffers[Window::FramebufferID::MOUSE_PICKING] = std::make_shared<Framebuffer>(GL_NEAREST, GL_NEAREST);
         m_gbuffer = std::make_shared<GBuffer>();
-
-
+        m_ssaobuffer = std::make_shared<SSAOBuffer>();
 	}
 
 	// Explicit destructor needed for unique_ptr with forward-declared types
@@ -254,6 +254,7 @@ void Window::onGameStart()
 			fb->Resize(render_width, render_height);
 		}
         m_gbuffer->Resize(render_width, render_height);
+        m_ssaobuffer->Resize(render_width, render_height, false);
 	}
 
 

@@ -126,7 +126,6 @@ namespace Engine {
 
 				std::filesystem::path oldPath(rawStr);
 
-                GetDefaultLogger()->info("loading from: {}", directory);
 				std::filesystem::path fullPath1 = std::filesystem::path("resources/textures") / oldPath.filename();
 				std::filesystem::path fullPath2 = std::filesystem::path(directory) / oldPath.filename();
 

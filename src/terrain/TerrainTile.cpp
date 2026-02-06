@@ -144,7 +144,7 @@ namespace Engine::Terrain {
 		std::string fragmentCode = GenerateGLSLShader();
 
 
-		 spdlog::info("VERTEX CODE: \n{}\n FRAGMENT CODE: \n{}", vertexCode, fragmentCode);
+        //spdlog::info("VERTEX CODE: \n{}\n FRAGMENT CODE: \n{}", vertexCode, fragmentCode);
 
 		terrainShader = std::make_shared<Engine::Shader>();
 		bool success  = terrainShader->LoadFromSource(vertexCode, fragmentCode);

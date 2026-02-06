@@ -24,6 +24,29 @@
                             }
                         },
                         {
+                            "key": "SHOOT_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 10.0
+                            }
+                        },
+                        {
+                            "key": "RUN_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 12.0
+                            }
+                        },
+                        {
+                            "key": "BULLET_PARENT",
+                            "value": {
+                                "index": 12,
+                                "data": {
+                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
+                                }
+                            }
+                        },
+                        {
                             "key": "WALK_SPEED",
                             "value": {
                                 "index": 0,
@@ -38,10 +61,12 @@
                             }
                         },
                         {
-                            "key": "JUMP_POWER",
+                            "key": "victorySound",
                             "value": {
-                                "index": 0,
-                                "data": 8.0
+                                "index": 11,
+                                "data": {
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                }
                             }
                         },
                         {
@@ -54,10 +79,10 @@
                             }
                         },
                         {
-                            "key": "GRAVITY_SCALE",
+                            "key": "JUMP_POWER",
                             "value": {
                                 "index": 0,
-                                "data": 2.0
+                                "data": 8.0
                             }
                         },
                         {
@@ -70,35 +95,10 @@
                             }
                         },
                         {
-                            "key": "BULLET_PARENT",
-                            "value": {
-                                "index": 12,
-                                "data": {
-                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
-                                }
-                            }
-                        },
-                        {
-                            "key": "RUN_SPEED",
+                            "key": "GRAVITY_SCALE",
                             "value": {
                                 "index": 0,
-                                "data": 12.0
-                            }
-                        },
-                        {
-                            "key": "victorySound",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
-                                }
-                            }
-                        },
-                        {
-                            "key": "SHOOT_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 10.0
+                                "data": 2.0
                             }
                         }
                     ]

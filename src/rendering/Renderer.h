@@ -29,6 +29,8 @@ namespace Engine {
         void RenderLightingPass();
 		void RenderEntitiesMousePicking();
 		void RenderEntitiesGBuffer();
+		void RenderSSAO();
+		void RenderSSAOBlur();
 		void RenderShadowMaps();
 
 		Shader& GetShader() { return m_shader; }
@@ -51,6 +53,9 @@ namespace Engine {
 		Engine::Shader          m_terrainShader;
 		Engine::Shader          m_gbufferShader;
 		Engine::Shader          m_lightingShader;
+
+        Engine::Shader          m_ssaoShader;
+        Engine::Shader          m_ssaoBlurShader;
 
 
 		std::unique_ptr<Skybox> m_skybox;
