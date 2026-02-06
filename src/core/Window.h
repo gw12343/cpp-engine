@@ -7,6 +7,7 @@
 #include "rendering/Framebuffer.h"
 #include "core/module/Module.h"
 #include "rendering/GBuffer.h"
+#include "rendering/SSAOBuffer.h"
 
 namespace Engine {
 	class Window : public Module {
@@ -43,8 +44,10 @@ namespace Engine {
 		static std::map<FramebufferID, std::shared_ptr<Framebuffer>> m_frameBuffers;
 
         static std::shared_ptr<GBuffer> m_gbuffer;
+        static std::shared_ptr<SSAOBuffer> m_ssaobuffer;
 
         std::shared_ptr<GBuffer> GetGBuffer() { return m_gbuffer; }
+        std::shared_ptr<SSAOBuffer> GetSSAOBuffer() { return m_ssaobuffer; }
 
 		int targetWidth;
 		int targetHeight;

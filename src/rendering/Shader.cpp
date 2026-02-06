@@ -7,7 +7,7 @@
 #include <sstream>
 #include <glad/glad.h>
 #include "core/EngineData.h"
-
+#include <regex>
 namespace Engine {
 	Shader::Shader() : programID(0)
 	{
@@ -224,6 +224,16 @@ namespace Engine {
 
 		std::stringstream buffer;
 		buffer << file.rdbuf();
-		return buffer.str();
+
+        std::string buff = buffer.str();
+
+        std::regex re(R"(////$include .*)");
+        std::cmatch m;
+        if(std::regex_match(buff.c_str(), m, re)){
+            GetDefaultLogger()->warn("HAS INCLUDE STATEMENT:");
+            GetDefaultLogger()->critical("HAS INCLUDE STATEMENT: {} {}", m[0].first, m[0].second);
+        }
+
+		return buff;
 	}
 } // namespace Engine

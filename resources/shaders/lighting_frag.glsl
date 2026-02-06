@@ -8,7 +8,8 @@ layout (binding = 1) uniform sampler2D gNormal;
 layout (binding = 2) uniform sampler2D gAlbedo;
 layout (binding = 3) uniform sampler2D gMaterial;
 layout (binding = 4) uniform sampler2D skybox;
-layout (binding = 5) uniform sampler2DArray shadowMap;
+layout (binding = 5) uniform sampler2D ssaoBlurTex;
+layout (binding = 6) uniform sampler2DArray shadowMap;
 
 uniform vec3 lightDir;
 uniform vec3 viewPos;
@@ -17,6 +18,8 @@ uniform mat4 view;
 uniform mat4 invView;
 uniform mat4 invProjection;
 uniform float farPlane;
+
+////$include resources/shaders/common
 
 /* ---------- CSM ---------- */
 layout (std140) uniform LightSpaceMatrices {
