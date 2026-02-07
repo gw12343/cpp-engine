@@ -146,18 +146,14 @@ void main()
     float shininess = material.g * 256.0;
 
 /* -------- Super Strong SSAO-like AO (testing) -------- */
-    float ao = clamp(dot(N, V), 0.0, 1.0);
-    ao = pow(ao, 6.0);
-    ao = 0.2 + 0.8 * ao;
-    ao = clamp(ao * 1.8, 0.0, 1.0);
-
+    float ao = min(texture(ssaoBlurTex, TexCoords).r, 0.65);
 /* -------- Ambient -------- */
-    vec3 ambient = 0.05 * Albedo;
+    vec3 ambient = 0.45 * Albedo * ao;
 
 /* -------- Diffuse + wrap -------- */
     float wrap = 0.4;
     float diff = max((dot(N, L) + wrap) / (1.0 + wrap), 0.0);
-    vec3 diffuse = diff * Albedo;
+    vec3 diffuse = diff * Albedo*0.58;
 
 /* -------- Specular (AA + Fresnel) -------- */
     float specAA = shininess / (1.0 + fwidth(dot(N, H)) * shininess);
