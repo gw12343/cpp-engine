@@ -218,7 +218,7 @@ namespace Engine {
         Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->Bind();
 #else
         // Just draw to the screen
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        Engine::Framebuffer::Unbind();
 #endif
 
         {
@@ -270,6 +270,7 @@ namespace Engine {
 
 
         Engine::Framebuffer::Unbind();
+
         {
             ZoneScopedN("Post Render");
             PostRender();

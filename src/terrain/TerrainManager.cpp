@@ -14,29 +14,30 @@ namespace Engine::Terrain {
 
 	void TerrainManager::onInit()
 	{
+        for (auto& terrPairs : GetAssetManager().GetStorage<TerrainTile>().guidToAsset) {
+            auto& tile = terrPairs.second;
+
+            // todo move!!
+            AssetHandle<Texture> tex1 = GetAssetManager().Load<Texture>("resources/textures/Terrain Grass.png");
+            AssetHandle<Texture> tex2 = GetAssetManager().Load<Texture>("resources/textures/Terrain Dirt.png");
+            AssetHandle<Texture> tex3 = GetAssetManager().Load<Texture>("resources/textures/Terrain Sand.png");
+            AssetHandle<Texture> tex4 = GetAssetManager().Load<Texture>("resources/textures/Terrain Rock.png");
+            AssetHandle<Texture> tex5 = GetAssetManager().Load<Texture>("resources/textures/white.png");
+
+
+            tile->diffuseTextures.clear();
+            tile->diffuseTextures.push_back(tex1);
+            tile->diffuseTextures.push_back(tex2);
+            tile->diffuseTextures.push_back(tex3);
+            tile->diffuseTextures.push_back(tex4);
+            tile->diffuseTextures.push_back(tex5);
+        }
 	}
 
 	void TerrainManager::onUpdate(float dt)
 	{
 		ZoneScoped;
-		for (auto& terrPairs : GetAssetManager().GetStorage<TerrainTile>().guidToAsset) {
-			auto& tile = terrPairs.second;
 
-			// todo move!!
-			AssetHandle<Texture> tex1 = GetAssetManager().Load<Texture>("resources/textures/Terrain Grass.png");
-			AssetHandle<Texture> tex2 = GetAssetManager().Load<Texture>("resources/textures/Terrain Dirt.png");
-			AssetHandle<Texture> tex3 = GetAssetManager().Load<Texture>("resources/textures/Terrain Sand.png");
-			AssetHandle<Texture> tex4 = GetAssetManager().Load<Texture>("resources/textures/Terrain Rock.png");
-			AssetHandle<Texture> tex5 = GetAssetManager().Load<Texture>("resources/textures/white.png");
-
-
-			tile->diffuseTextures.clear();
-			tile->diffuseTextures.push_back(tex1);
-			tile->diffuseTextures.push_back(tex2);
-			tile->diffuseTextures.push_back(tex3);
-			tile->diffuseTextures.push_back(tex4);
-			tile->diffuseTextures.push_back(tex5);
-		}
 	}
 
 

@@ -26,6 +26,14 @@ vec3 ReconstructViewPos(vec2 uv)
 
 void main()
 {
+    float depth = texture(gDepth, TexCoords).r;
+    /* SKY */
+    if (depth >= 0.9999)
+    {
+        FragColor = 0.0;
+        return;
+    }
+
     vec3 posVS = ReconstructViewPos(TexCoords);
 
     vec3 normalWS = texture(gNormal, TexCoords).xyz * 2.0 - 1.0;
@@ -63,8 +71,6 @@ void main()
 
     occlusion = 1.0 - (occlusion / 32.0);
     FragColor = (occlusion * occlusion * occlusion);
-
-
 }
 
 
