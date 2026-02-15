@@ -60,6 +60,7 @@ namespace Engine {
     GEngine::GEngine(int width, int height, const char *title) : m_deltaTime(0.0f), m_lastFrame(0.0f) {
         SetState(EDITOR);
         Get().manager = &manager;
+        Get().renderSettings = new RenderSettings();
         // Initialize asset loaders
         Get().assetManager = std::make_shared<AssetManager>();
         GetAssetManager().RegisterLoader<Texture>(std::make_unique<TextureLoader>());

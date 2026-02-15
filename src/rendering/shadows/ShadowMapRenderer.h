@@ -22,13 +22,6 @@ namespace Engine {
 		void UploadShadowMatrices(Engine::Shader& shader, glm::mat4& V, int textureSlot = 1);
 
 	  private:
-		///////////////////////////////////////// SHADOW MAPPING CONSTANTS
-		const static unsigned int depthMapResolution = 4096;
-		const glm::vec3           lightDir           = glm::normalize(glm::vec3(2.0f, 20, 2.0f));
-		const float               CAMERA_NEAR_PLANE  = 0.1f;
-		const float               CAMERA_FAR_PLANE   = 1500.0f;
-		std::vector<float>        shadowCascadeLevels{CAMERA_FAR_PLANE / 100.0f, CAMERA_FAR_PLANE / 50.0f, CAMERA_FAR_PLANE / 25.0f, CAMERA_FAR_PLANE / 10.0f, CAMERA_FAR_PLANE / 2.0f};
-
 
 		std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& projview);
 		std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& proj, const glm::mat4& view);

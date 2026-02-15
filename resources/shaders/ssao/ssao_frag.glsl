@@ -49,7 +49,7 @@ void main()
     vec3 bitangent = cross(normalVS, tangent);
     mat3 TBN = mat3(tangent, bitangent, normalVS);
 
-    float occlusion = 0.0;   // <-- THIS WAS MISSING
+    float occlusion = 0.0;
 
     for (int i = 0; i < 32; i++)
     {
@@ -72,8 +72,3 @@ void main()
     occlusion = 1.0 - (occlusion / 32.0);
     FragColor = (occlusion * occlusion * occlusion);
 }
-
-
-
-//    FragColor = clamp((-posVS.z) / 50.0, 0.0, 1.0);
-    //FragColor = normalWS.x;
