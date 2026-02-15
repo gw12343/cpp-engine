@@ -13,7 +13,7 @@
 #include "rendering/ui/UIManager.h"
 namespace Engine {
 
-	Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) : m_front(glm::vec3(0.0f, 0.0f, -1.0f)), m_movementSpeed(2.5f), m_mouseSensitivity(0.1f), m_fov(90.0f), m_nearPlane(0.1f), m_farPlane(1500.0f)
+	Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) : m_front(glm::vec3(0.0f, 0.0f, -1.0f)), m_movementSpeed(2.5f), m_mouseSensitivity(0.1f), m_fov(90.0f)
 	{
 		m_position = position;
 		m_worldUp  = up;
@@ -72,7 +72,7 @@ namespace Engine {
 		float aspect = GetWindow().GetTargetAspectRatio();
 		ENGINE_VERIFY(aspect > 0.0f, "Camera::view_proj: aspect ratio is non-positive");
 
-		m_proj = glm::perspective(glm::radians(m_fov), aspect, m_nearPlane, m_farPlane);
+		m_proj = glm::perspective(glm::radians(m_fov), aspect, GetRenderSettings()->CAMERA_NEAR_PLANE, GetRenderSettings()->CAMERA_FAR_PLANE);
 
 		m_view = glm::lookAt(m_position, m_position + m_front, m_up);
 
@@ -159,10 +159,7 @@ namespace Engine {
 		                                            &Camera::m_movementSpeed,
 		                                            "mouseSensitivity",
 		                                            &Camera::m_mouseSensitivity,
-		                                            "nearPlane",
-		                                            &Camera::m_nearPlane,
-		                                            "farPlane",
-		                                            &Camera::m_farPlane,
+
 		                                            "yaw",
 		                                            &Camera::m_yaw,
 		                                            "pitch",

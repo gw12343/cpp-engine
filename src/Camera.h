@@ -53,8 +53,6 @@ namespace Engine {
 		float m_movementSpeed;
 		float m_mouseSensitivity;
 
-		float m_nearPlane;
-		float m_farPlane;
 
 		// Euler Angles
 		float m_yaw;
