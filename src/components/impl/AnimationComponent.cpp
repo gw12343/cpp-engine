@@ -18,7 +18,6 @@
 
 #include "rendering/ui/InspectorUI.h"
 #include "animation/Animation.h"
-#include "AnimationPoseComponent.h"
 #include "SkeletonComponent.h"
 
 namespace Engine::Components {
@@ -36,6 +35,21 @@ namespace Engine::Components {
 
 	void AnimationComponent::OnAdded(Entity& entity)
 	{
+
+        ENGINE_VERIFY(entity.HasComponent<SkeletonComponent>(), "AnimationComponent::OnAdded: Missing SkeletonComponent");
+        auto& skeletonComponent = entity.GetComponent<SkeletonComponent>();
+        ENGINE_VERIFY(skeletonComponent.skeleton != nullptr, "AnimationComponent::OnAdded: SkeletonComponent has null skeleton");
+
+
+        // Allocate pose data
+        local_pose = AnimationManager::AllocateLocalPose(skeletonComponent.skeleton);
+        model_pose = AnimationManager::AllocateModelPose(skeletonComponent.skeleton);
+
+        if (!local_pose || !model_pose) {
+            spdlog::error("Failed to allocate pose data for entity");
+        }
+
+
 		context = new ozz::animation::SamplingJob::Context();
 
 		s_contexts.insert(context);
@@ -59,6 +73,18 @@ namespace Engine::Components {
 
 	void AnimationComponent::OnRemoved(Entity& entity)
 	{
+        GetDefaultLogger()->info("DELETING ANIMATION POSES");
+        if (local_pose) {
+            delete local_pose;
+            local_pose = nullptr;
+        }
+
+        if (model_pose) {
+            delete model_pose;
+            model_pose = nullptr;
+        }
+
+
 		s_contexts.erase(context);
 		delete context;
 		context = nullptr;
@@ -67,6 +93,10 @@ namespace Engine::Components {
 
 	void AnimationComponent::RenderInspector(Entity& entity)
 	{
+        ImGui::Text("Local Pose: %s", local_pose ? std::to_string(local_pose->size()).c_str() : "Null");
+        ImGui::Text("Model Pose: %s", model_pose ? std::to_string(model_pose->size()).c_str() : "Null");
+
+
 		{
 			Animation* anim = GetAssetManager().Get(animation);
 
@@ -78,8 +108,7 @@ namespace Engine::Components {
 
 
 		if (LeftLabelSliderFloat("Time scale", &timescale, 0.0, 1.0)) {
-			if (entity.HasComponent<Components::AnimationPoseComponent>() && entity.HasComponent<Components::SkeletonComponent>()) {
-				auto& animationPoseComponent = entity.GetComponent<Components::AnimationPoseComponent>();
+			if (entity.HasComponent<Components::SkeletonComponent>()) {
 				auto& skeletonComponent      = entity.GetComponent<Components::SkeletonComponent>();
 
 				// Samples optimized animation at t = animation_time_
@@ -88,7 +117,7 @@ namespace Engine::Components {
 
 				sampling_job.context = context;
 				sampling_job.ratio   = timescale;
-				sampling_job.output  = ozz::make_span(*animationPoseComponent.local_pose);
+				sampling_job.output  = ozz::make_span(*local_pose);
 				if (!sampling_job.Run()) {
 					GetAnimationManager().log->error("Failed to sample animation");
 					return;
@@ -96,8 +125,8 @@ namespace Engine::Components {
 
 				ozz::animation::LocalToModelJob ltm_job;
 				ltm_job.skeleton = skeletonComponent.skeleton;
-				ltm_job.input    = ozz::make_span(*animationPoseComponent.local_pose);
-				ltm_job.output   = ozz::make_span(*animationPoseComponent.model_pose);
+				ltm_job.input    = ozz::make_span(*local_pose);
+				ltm_job.output   = ozz::make_span(*model_pose);
 				if (!ltm_job.Run()) {
 					GetAnimationManager().log->error("Failed to convert to model space");
 					return;
