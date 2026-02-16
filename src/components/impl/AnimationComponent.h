@@ -46,6 +46,9 @@ namespace Engine::Components {
 		ozz::animation::SamplingJob::Context* context   = nullptr;
 		float                                 timescale = 0.0;
 
+        std::vector<ozz::math::SoaTransform>* local_pose = nullptr;
+        std::vector<ozz::math::Float4x4>*     model_pose = nullptr;
+
 		template <class Archive>
 		void serialize(Archive& ar)
 		{

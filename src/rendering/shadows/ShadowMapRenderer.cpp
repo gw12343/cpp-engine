@@ -13,9 +13,9 @@
 #include "components/impl/ModelRendererComponent.h"
 #include "components/impl/ShadowCasterComponent.h"
 #include "components/impl/SkinnedMeshComponent.h"
-#include "components/impl/AnimationPoseComponent.h"
 #include <glad/glad.h>
 #include "animation/AnimationManager.h"
+#include "components/impl/AnimationComponent.h"
 
 namespace Engine {
 
@@ -206,7 +206,7 @@ namespace Engine {
 		for (auto entity : viewAnim) {
 			Entity e(entity, GetCurrentScene());
 			auto&  skinnedMeshComponent   = e.GetComponent<Components::SkinnedMeshComponent>();
-			auto&  animationPoseComponent = e.GetComponent<Components::AnimationPoseComponent>();
+			auto&  animationComponent = e.GetComponent<Components::AnimationComponent>();
 
 			const ozz::math::Float4x4 model = FromMatrix(e.GetComponent<Components::Transform>().GetWorldMatrix());
 
@@ -220,7 +220,7 @@ namespace Engine {
 				// use the joint remapping table (available from the mesh object) to
 				// reorder model-space matrices and build skinning ones
 				for (size_t i = 0; i < mesh.joint_remaps.size(); ++i) {
-					(*skinnedMeshComponent.skinning_matrices)[i] = (*animationPoseComponent.model_pose)[mesh.joint_remaps[i]] * mesh.inverse_bind_poses[i];
+					(*skinnedMeshComponent.skinning_matrices)[i] = (*animationComponent.model_pose)[mesh.joint_remaps[i]] * mesh.inverse_bind_poses[i];
 				}
 
 				GetAnimationManager().renderer_->DrawSkinnedMeshShadows(&m_animationDepthShader, mesh, ozz::make_span(*skinnedMeshComponent.skinning_matrices), model);

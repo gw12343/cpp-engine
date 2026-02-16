@@ -6,7 +6,6 @@
 #define CPP_ENGINE_ALLCOMPONENTS_H
 
 #include "impl/AnimationComponent.h"
-#include "impl/AnimationPoseComponent.h"
 #include "impl/AudioSourceComponent.h"
 #include "impl/EntityMetadataComponent.h"
 #include "impl/LuaScriptComponent.h"
@@ -32,7 +31,6 @@
 	X(Components::AudioSource, AudioSource, ICON_FA_VOLUME_HIGH " Audio Source")                                                                                                                                                               \
 	X(Components::SkeletonComponent, SkeletonComponent, "Skeleton")                                                                                                                                                                            \
 	X(Components::AnimationComponent, AnimationComponent, "Animation")                                                                                                                                                                         \
-	X(Components::AnimationPoseComponent, AnimationPoseComponent, "Animation Pose")                                                                                                                                                            \
 	X(Components::SkinnedMeshComponent, SkinnedMeshComponent, "Skinned Mesh")                                                                                                                                                                  \
 	X(Components::ParticleSystem, ParticleSystem, ICON_FA_STAR_HALF_STROKE " Particle System")                                                                                                                                                 \
 	X(Components::PlayerControllerComponent, PlayerControllerComponent, "Player Controller")                                                                                                                                                   \

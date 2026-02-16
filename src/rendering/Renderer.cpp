@@ -12,7 +12,6 @@
 #include "components/impl/TransformComponent.h"
 #include "components/impl/ModelRendererComponent.h"
 #include "components/impl/SkinnedMeshComponent.h"
-#include "components/impl/AnimationPoseComponent.h"
 #include "components/impl/GizmoComponent.h"
 #include <spdlog/spdlog.h>
 #include <tracy/Tracy.hpp>
@@ -23,6 +22,7 @@
 #include "DebugGroup.h"
 #include "glm/gtc/random.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include "components/impl/AnimationComponent.h"
 
 
 namespace Engine {
@@ -433,7 +433,7 @@ namespace Engine {
             for (auto entity: view) {
                 Entity e(entity, GetCurrentScene());
                 auto &skinnedMeshComponent = e.GetComponent<Components::SkinnedMeshComponent>();
-                auto &animationPoseComponent = e.GetComponent<Components::AnimationPoseComponent>();
+                auto &animationComponent = e.GetComponent<Components::AnimationComponent>();
                 const ozz::math::Float4x4 transform = FromMatrix(
                         e.GetComponent<Components::Transform>().GetWorldMatrix());
 
@@ -449,7 +449,7 @@ namespace Engine {
                     // reorder model-space matrices and build skinning ones
                     for (size_t i = 0; i < mesh.joint_remaps.size(); ++i) {
                         (*skinnedMeshComponent.skinning_matrices)[i] =
-                                (*animationPoseComponent.model_pose)[mesh.joint_remaps[i]] * mesh.inverse_bind_poses[i];
+                                (*animationComponent.model_pose)[mesh.joint_remaps[i]] * mesh.inverse_bind_poses[i];
                     }
                     GetAnimationManager().renderer_->DrawSkinnedMeshMousePicking(encodedColor, mesh, ozz::make_span(
                             *skinnedMeshComponent.skinning_matrices), transform);

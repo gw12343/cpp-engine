@@ -2,6 +2,107 @@
     "entities": [
         {
             "EntityMetadata": {
+                "name": "New Model",
+                "tag": "",
+                "active": true,
+                "guid": "0b0a9dd7fd21fded195f0fd91999d94f",
+                "parentEntity": {
+                    "guid": "77b9ef246028ea5757c8bd10a7a21f9b"
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 40.0,
+                        "y": 1.0,
+                        "z": 40.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "e319e2b8747bee49f54e67e706d42f67"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "48ac579eaa8ac969e99c1fca5ab57c90"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 1,
+                    "mass": 1.0,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 0.0,
+                    "shapeType": "Box",
+                    "shapeSize": {
+                        "x": 20.0,
+                        "y": 0.5,
+                        "z": 20.0
+                    },
+                    "meshSelection": [],
+                    "colliderModel": {
+                        "guid": ""
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "SkeletonComponent": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
                 "name": "Player",
                 "tag": "",
                 "active": true,
@@ -17,6 +118,27 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
+                            "key": "CAMERA_Y_OFFSET",
+                            "value": {
+                                "index": 0,
+                                "data": 1.100000023841858
+                            }
+                        },
+                        {
+                            "key": "WALK_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 7.0
+                            }
+                        },
+                        {
+                            "key": "MOUSE_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.10000000149011612
+                            }
+                        },
+                        {
                             "key": "GRAVITY_SCALE",
                             "value": {
                                 "index": 0,
@@ -24,12 +146,10 @@
                             }
                         },
                         {
-                            "key": "shootSound",
+                            "key": "SHOOT_POWER",
                             "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
-                                }
+                                "index": 0,
+                                "data": 10.0
                             }
                         },
                         {
@@ -39,29 +159,6 @@
                                 "data": {
                                     "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
                                 }
-                            }
-                        },
-                        {
-                            "key": "RUN_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 12.0
-                            }
-                        },
-                        {
-                            "key": "BULLET_PARENT",
-                            "value": {
-                                "index": 12,
-                                "data": {
-                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
-                                }
-                            }
-                        },
-                        {
-                            "key": "CAMERA_Y_OFFSET",
-                            "value": {
-                                "index": 0,
-                                "data": 1.100000023841858
                             }
                         },
                         {
@@ -81,24 +178,28 @@
                             }
                         },
                         {
-                            "key": "SHOOT_POWER",
+                            "key": "BULLET_PARENT",
                             "value": {
-                                "index": 0,
-                                "data": 10.0
+                                "index": 12,
+                                "data": {
+                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
+                                }
                             }
                         },
                         {
-                            "key": "WALK_SPEED",
+                            "key": "RUN_SPEED",
                             "value": {
                                 "index": 0,
-                                "data": 7.0
+                                "data": 12.0
                             }
                         },
                         {
-                            "key": "MOUSE_SENSITIVITY",
+                            "key": "shootSound",
                             "value": {
-                                "index": 0,
-                                "data": 0.10000000149011612
+                                "index": 11,
+                                "data": {
+                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
+                                }
                             }
                         }
                     ]
@@ -112,8 +213,8 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": 61.79624938964844,
-                        "y": 13.935158729553223,
+                        "x": -1.975670337677002,
+                        "y": 2.802952289581299,
                         "z": 5.464488983154297
                     },
                     "rotation": {
@@ -172,9 +273,6 @@
             "AnimationComponent": {
                 "nullopt": true
             },
-            "AnimationPoseComponent": {
-                "nullopt": true
-            },
             "SkinnedMeshComponent": {
                 "nullopt": true
             },
@@ -230,268 +328,6 @@
             "AnimationComponent": {
                 "nullopt": true
             },
-            "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "SkinnedMeshComponent": {
-                "nullopt": true
-            },
-            "ParticleSystem": {
-                "nullopt": true
-            },
-            "PlayerControllerComponent": {
-                "nullopt": true
-            },
-            "RmlUIComponent": {
-                "nullopt": true
-            },
-            "GizmoComponent": {
-                "nullopt": true
-            }
-        },
-        {
-            "EntityMetadata": {
-                "name": "KARTTRACK",
-                "tag": "",
-                "active": true,
-                "guid": "652ea52f75b6e8215a7b07d953df4e13",
-                "parentEntity": {
-                    "guid": "77b9ef246028ea5757c8bd10a7a21f9b"
-                },
-                "children": [
-                    {
-                        "guid": "beb34d1fefa7e8d1d1878d4d72bdfb9b"
-                    }
-                ]
-            },
-            "LuaScript": {
-                "nullopt": true
-            },
-            "ShadowCaster": {
-                "nullopt": true
-            },
-            "Transform": {
-                "nullopt": false,
-                "data": {
-                    "position": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "rotation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0,
-                        "w": 1.0
-                    },
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    }
-                }
-            },
-            "TerrainRenderer": {
-                "nullopt": true
-            },
-            "ModelRenderer": {
-                "nullopt": false,
-                "data": {
-                    "visible": true,
-                    "model": {
-                        "guid": "f2b7da1d6fe8d8ab484f75ffb08cc75b"
-                    },
-                    "backfaceCulling": true,
-                    "materialOverrides": [
-                        {
-                            "guid": "e957f8cc01d2c18627253acb3f9a96b3"
-                        },
-                        {
-                            "guid": "e957f8cc01d2c18627253acb3f9a96b3"
-                        },
-                        {
-                            "guid": "edcf4b5b5cf406b138fcb313859193e9"
-                        },
-                        {
-                            "guid": "f7dd9ae3c97c611c8cf3cb3778ea7ded"
-                        },
-                        {
-                            "guid": "a31eb83df785b138ba3f25b0b8789f33"
-                        },
-                        {
-                            "guid": "999159962c7a2070590bca222b391d2f"
-                        },
-                        {
-                            "guid": "e957f8cc01d2c18627253acb3f9a96b3"
-                        },
-                        {
-                            "guid": "005d735115ff67b5ea945ded06b42d60"
-                        },
-                        {
-                            "guid": "30ada653f31d58daea1305fae32907c5"
-                        },
-                        {
-                            "guid": "6abc0975f0161e15f80e978d2d588ee1"
-                        },
-                        {
-                            "guid": "74ed292ef43364aa0aa169c8f672e702"
-                        },
-                        {
-                            "guid": "e957f8cc01d2c18627253acb3f9a96b3"
-                        },
-                        {
-                            "guid": "abedd80a91c3381ce9d095cb6a2c520b"
-                        },
-                        {
-                            "guid": "a296259a45a715bd7eac2a8898b8ad31"
-                        },
-                        {
-                            "guid": "5700c898c63618cc64138fcdd5226961"
-                        },
-                        {
-                            "guid": "74ed292ef43364aa0aa169c8f672e702"
-                        },
-                        {
-                            "guid": "1b9940949ce570968a901a87414e404f"
-                        },
-                        {
-                            "guid": "e71675432b727a862f6eb1fd48edf512"
-                        },
-                        {
-                            "guid": "74ed292ef43364aa0aa169c8f672e702"
-                        },
-                        {
-                            "guid": "781262445c7ca419edc81313407db299"
-                        },
-                        {
-                            "guid": "71b50c20cd61bd550336a10bc24d1950"
-                        },
-                        {
-                            "guid": "9a6d676a72e975bcadff4222cf568d2e"
-                        },
-                        {
-                            "guid": "0c6a18f1442e5f813e82200680030d8a"
-                        },
-                        {
-                            "guid": "448b14b1a0963a6935407e0c99fce35a"
-                        },
-                        {
-                            "guid": "9615f399dedd17ac5b7d679201a3cbd4"
-                        },
-                        {
-                            "guid": "b2499ee49e13ca3e67e76f64872362f8"
-                        },
-                        {
-                            "guid": "526eed49a2ee309125728247a4205553"
-                        },
-                        {
-                            "guid": "97f17c922b93a59f23dc56cad008075d"
-                        },
-                        {
-                            "guid": "6b546883a070a5c5074e0bf5ca6238c8"
-                        },
-                        {
-                            "guid": "5700c898c63618cc64138fcdd5226961"
-                        },
-                        {
-                            "guid": "48c41f1019bd3d019a24361af192b62f"
-                        },
-                        {
-                            "guid": "da20f55e4539a8cf4b53d8d87976f407"
-                        },
-                        {
-                            "guid": "e9ef786618399996efd13e265f1215a8"
-                        },
-                        {
-                            "guid": "6b546883a070a5c5074e0bf5ca6238c8"
-                        },
-                        {
-                            "guid": "5830342907b1e91e341a2c46da8ed305"
-                        },
-                        {
-                            "guid": "5825499971b713fdcaf54521e7ba6b72"
-                        },
-                        {
-                            "guid": "6148689a19b170cc862705cf61929339"
-                        },
-                        {
-                            "guid": "3c9995f36aa10d6b9316dbc095ece98b"
-                        },
-                        {
-                            "guid": "512f8ee8b0fba67d3f623901f030d8f1"
-                        },
-                        {
-                            "guid": "a3f49251f79f2135c208c025edba5787"
-                        },
-                        {
-                            "guid": "6b546883a070a5c5074e0bf5ca6238c8"
-                        },
-                        {
-                            "guid": "b6cfe64309b054dc1c70fbfaeeb0f373"
-                        },
-                        {
-                            "guid": "b6cfe64309b054dc1c70fbfaeeb0f373"
-                        },
-                        {
-                            "guid": "6b546883a070a5c5074e0bf5ca6238c8"
-                        },
-                        {
-                            "guid": "da20f55e4539a8cf4b53d8d87976f407"
-                        },
-                        {
-                            "guid": "54e493c1f5e1e311b90e03a122223aa1"
-                        },
-                        {
-                            "guid": "9a65e7fe346489fd32a4dea13d0b58ba"
-                        },
-                        {
-                            "guid": "35e8489d337e765d97224de5404dd05a"
-                        },
-                        {
-                            "guid": "c8b7d4c3c43b2da9ebd28d83441e7945"
-                        },
-                        {
-                            "guid": "c8b7d4c3c43b2da9ebd28d83441e7945"
-                        },
-                        {
-                            "guid": "81235794c0b670bb1a8a56d8a9abcc19"
-                        },
-                        {
-                            "guid": "197342ea3610c99b9b53d03bf8dad2e2"
-                        },
-                        {
-                            "guid": "86627aef88d62353af4cb8a6299e87ec"
-                        },
-                        {
-                            "guid": "1ecf44c2bc0fbd30a8a5d362bb202a7c"
-                        },
-                        {
-                            "guid": "74ed292ef43364aa0aa169c8f672e702"
-                        },
-                        {
-                            "guid": "a57d830cf6462ad7013f35c70ce21c21"
-                        },
-                        {
-                            "guid": "32cb6ad687566a3744401f16c9ffa8cd"
-                        }
-                    ]
-                }
-            },
-            "RigidBodyComponent": {
-                "nullopt": true
-            },
-            "AudioSource": {
-                "nullopt": true
-            },
-            "SkeletonComponent": {
-                "nullopt": true
-            },
-            "AnimationComponent": {
-                "nullopt": true
-            },
-            "AnimationPoseComponent": {
-                "nullopt": true
-            },
             "SkinnedMeshComponent": {
                 "nullopt": true
             },
@@ -519,10 +355,7 @@
                 },
                 "children": [
                     {
-                        "guid": "652ea52f75b6e8215a7b07d953df4e13"
-                    },
-                    {
-                        "guid": "800df26ba3690ad3bde5fc05e85b0996"
+                        "guid": "0b0a9dd7fd21fded195f0fd91999d94f"
                     }
                 ]
             },
@@ -569,90 +402,6 @@
                 "nullopt": true
             },
             "AnimationComponent": {
-                "nullopt": true
-            },
-            "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "SkinnedMeshComponent": {
-                "nullopt": true
-            },
-            "ParticleSystem": {
-                "nullopt": true
-            },
-            "PlayerControllerComponent": {
-                "nullopt": true
-            },
-            "RmlUIComponent": {
-                "nullopt": true
-            },
-            "GizmoComponent": {
-                "nullopt": true
-            }
-        },
-        {
-            "EntityMetadata": {
-                "name": "New Entity",
-                "tag": "",
-                "active": true,
-                "guid": "800df26ba3690ad3bde5fc05e85b0996",
-                "parentEntity": {
-                    "guid": "77b9ef246028ea5757c8bd10a7a21f9b"
-                },
-                "children": []
-            },
-            "LuaScript": {
-                "nullopt": true
-            },
-            "ShadowCaster": {
-                "nullopt": true
-            },
-            "Transform": {
-                "nullopt": false,
-                "data": {
-                    "position": {
-                        "x": 0.0,
-                        "y": -179.5039520263672,
-                        "z": 0.0
-                    },
-                    "rotation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0,
-                        "w": 1.0
-                    },
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    }
-                }
-            },
-            "TerrainRenderer": {
-                "nullopt": false,
-                "data": {
-                    "visible": true,
-                    "terrainTile": {
-                        "guid": "08d79874f4071a0b863432f509a9d70a"
-                    }
-                }
-            },
-            "ModelRenderer": {
-                "nullopt": true
-            },
-            "RigidBodyComponent": {
-                "nullopt": true
-            },
-            "AudioSource": {
-                "nullopt": true
-            },
-            "SkeletonComponent": {
-                "nullopt": true
-            },
-            "AnimationComponent": {
-                "nullopt": true
-            },
-            "AnimationPoseComponent": {
                 "nullopt": true
             },
             "SkinnedMeshComponent": {
@@ -725,159 +474,6 @@
             "AnimationComponent": {
                 "nullopt": true
             },
-            "AnimationPoseComponent": {
-                "nullopt": true
-            },
-            "SkinnedMeshComponent": {
-                "nullopt": true
-            },
-            "ParticleSystem": {
-                "nullopt": true
-            },
-            "PlayerControllerComponent": {
-                "nullopt": true
-            },
-            "RmlUIComponent": {
-                "nullopt": true
-            },
-            "GizmoComponent": {
-                "nullopt": true
-            }
-        },
-        {
-            "EntityMetadata": {
-                "name": "TrackCollider",
-                "tag": "",
-                "active": true,
-                "guid": "beb34d1fefa7e8d1d1878d4d72bdfb9b",
-                "parentEntity": {
-                    "guid": "652ea52f75b6e8215a7b07d953df4e13"
-                },
-                "children": []
-            },
-            "LuaScript": {
-                "nullopt": true
-            },
-            "ShadowCaster": {
-                "nullopt": true
-            },
-            "Transform": {
-                "nullopt": false,
-                "data": {
-                    "position": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "rotation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0,
-                        "w": 1.0
-                    },
-                    "scale": {
-                        "x": 4.0,
-                        "y": 4.0,
-                        "z": 4.0
-                    }
-                }
-            },
-            "TerrainRenderer": {
-                "nullopt": true
-            },
-            "ModelRenderer": {
-                "nullopt": true
-            },
-            "RigidBodyComponent": {
-                "nullopt": false,
-                "data": {
-                    "motionType": 1,
-                    "mass": 1.0,
-                    "friction": 0.5,
-                    "restitution": 0.0,
-                    "gravityFactor": 1.0,
-                    "shapeType": "Mesh",
-                    "shapeSize": {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    },
-                    "meshSelection": [
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true,
-                        true
-                    ],
-                    "colliderModel": {
-                        "guid": "f2b7da1d6fe8d8ab484f75ffb08cc75b"
-                    }
-                }
-            },
-            "AudioSource": {
-                "nullopt": true
-            },
-            "SkeletonComponent": {
-                "nullopt": true
-            },
-            "AnimationComponent": {
-                "nullopt": true
-            },
-            "AnimationPoseComponent": {
-                "nullopt": true
-            },
             "SkinnedMeshComponent": {
                 "nullopt": true
             },
@@ -936,9 +532,6 @@
             "AnimationComponent": {
                 "nullopt": true
             },
-            "AnimationPoseComponent": {
-                "nullopt": true
-            },
             "SkinnedMeshComponent": {
                 "nullopt": true
             },
@@ -995,9 +588,6 @@
                 "nullopt": true
             },
             "AnimationComponent": {
-                "nullopt": true
-            },
-            "AnimationPoseComponent": {
                 "nullopt": true
             },
             "SkinnedMeshComponent": {
