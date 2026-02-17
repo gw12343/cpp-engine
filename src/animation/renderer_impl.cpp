@@ -1221,7 +1221,7 @@ bool RendererImpl::DrawSkinnedMesh(const Engine::Mesh& _mesh, const ozz::span<oz
 		}
 
 		// Renders debug normals.
-		if (_options.normals && skinning_job.out_normals.size() > 0) {
+		if (_options.normals && skinning_job.out_normals.size() > 0 || true) {
 			DrawVectors(skinning_job.out_positions, skinning_job.out_positions_stride, skinning_job.out_normals, skinning_job.out_normals_stride, skinning_job.vertex_count, .03f, Engine::kGreen, _transform);
 		}
 

@@ -5,7 +5,6 @@
 
 #include "components/impl/AnimationComponent.h"
 #include "components/impl/TransformComponent.h"
-#include "components/impl/SkeletonComponent.h"
 #include "components/impl/SkinnedMeshComponent.h"
 
 
@@ -73,7 +72,6 @@ namespace Engine {
 			for (auto entity : animationView) {
 				Entity e(entity, GetCurrentScene());
 				auto&  animationComponent     = e.GetComponent<Components::AnimationComponent>();
-				auto&  skeletonComponent      = e.GetComponent<Components::SkeletonComponent>();
 
 				// Update animation time
 				if (GetState() == PLAYING) {
@@ -97,7 +95,7 @@ namespace Engine {
 					}
 
 					ozz::animation::LocalToModelJob ltm_job;
-					ltm_job.skeleton = skeletonComponent.skeleton;
+					ltm_job.skeleton = animationComponent.skeleton;
 					ltm_job.input    = ozz::make_span(*animationComponent.local_pose);
 					ltm_job.output   = ozz::make_span(*animationComponent.model_pose);
 					if (!ltm_job.Run()) {

@@ -18,7 +18,6 @@
 
 #include "rendering/ui/InspectorUI.h"
 #include "animation/Animation.h"
-#include "SkeletonComponent.h"
 
 namespace Engine::Components {
 
@@ -35,29 +34,67 @@ namespace Engine::Components {
 
 	void AnimationComponent::OnAdded(Entity& entity)
 	{
-
-        ENGINE_VERIFY(entity.HasComponent<SkeletonComponent>(), "AnimationComponent::OnAdded: Missing SkeletonComponent");
-        auto& skeletonComponent = entity.GetComponent<SkeletonComponent>();
-        ENGINE_VERIFY(skeletonComponent.skeleton != nullptr, "AnimationComponent::OnAdded: SkeletonComponent has null skeleton");
-
-
-        // Allocate pose data
-        local_pose = AnimationManager::AllocateLocalPose(skeletonComponent.skeleton);
-        model_pose = AnimationManager::AllocateModelPose(skeletonComponent.skeleton);
-
-        if (!local_pose || !model_pose) {
-            spdlog::error("Failed to allocate pose data for entity");
+        if (!skeletonPath.empty()) {
+            skeleton = GetAnimationManager().LoadSkeletonFromPath(skeletonPath);
+            if (!skeleton) {
+                spdlog::error("Failed to load skeleton from path: {}", skeletonPath);
+            }
+            else {
+                GetDefaultLogger()->info("Loaded skeleton from path: {}", skeletonPath);
+            }
         }
 
+        //ENGINE_VERIFY(skeleton != nullptr, "AnimationComponent has null skeleton");
 
-		context = new ozz::animation::SamplingJob::Context();
+        if(skeleton != nullptr) {
+            // Allocate pose data
+            local_pose = AnimationManager::AllocateLocalPose(skeleton);
+            model_pose = AnimationManager::AllocateModelPose(skeleton);
 
-		s_contexts.insert(context);
-		SetAnimation(animation);
+            if (!local_pose || !model_pose) {
+                spdlog::error("Failed to allocate pose data for entity");
+            }
+
+
+            context = new ozz::animation::SamplingJob::Context();
+
+            s_contexts.insert(context);
+            SetAnimation(animation);
+        }
 	}
 
 
-	void AnimationComponent::SetAnimation(AssetHandle<Animation> animation)
+    void AnimationComponent::SetSkeleton(const std::string &path) {
+        this->skeletonPath = path;
+
+        if (!skeletonPath.empty()) {
+            skeleton = GetAnimationManager().LoadSkeletonFromPath(skeletonPath);
+            if (!skeleton) {
+                spdlog::error("Failed to load skeleton from path: {}", skeletonPath);
+            }
+            else {
+                GetDefaultLogger()->info("Loaded skeleton from path: {}", skeletonPath);
+            }
+        }
+
+        if(skeleton != nullptr) {
+            // Allocate pose data
+            local_pose = AnimationManager::AllocateLocalPose(skeleton);
+            model_pose = AnimationManager::AllocateModelPose(skeleton);
+
+            if (!local_pose || !model_pose) {
+                spdlog::error("Failed to allocate pose data for entity");
+            }
+
+
+            context = new ozz::animation::SamplingJob::Context();
+
+            s_contexts.insert(context);
+            SetAnimation(animation);
+        }
+    }
+
+	void AnimationComponent::SetAnimation(const AssetHandle<Animation>& animation)
 	{
 		this->animation = animation;
 
@@ -69,6 +106,16 @@ namespace Engine::Components {
 				GetDefaultLogger()->info("Resized context for {} tracks", anim->source->num_tracks());
 			}
 		}
+
+        delete local_pose;
+        delete model_pose;
+        // Allocate pose data
+        local_pose = AnimationManager::AllocateLocalPose(skeleton);
+        model_pose = AnimationManager::AllocateModelPose(skeleton);
+
+        if (!local_pose || !model_pose) {
+            spdlog::error("Failed to allocate pose data for entity");
+        }
 	}
 
 	void AnimationComponent::OnRemoved(Entity& entity)
@@ -93,9 +140,23 @@ namespace Engine::Components {
 
 	void AnimationComponent::RenderInspector(Entity& entity)
 	{
+        ImGui::Text("Skeleton Information:");
+        ImGui::Separator();
+
+        ImGui::Text("Skeleton: %s", skeleton ? "Loaded" : "Null");
+        ImGui::Text("Joints: %d", skeleton ? skeleton->num_joints() : 0);
+        ImGui::Text("SOA Joints: %d", skeleton ? skeleton->num_soa_joints() : 0);
+
+        ImGui::NewLine();
+        ImGui::Text("Pose Information:");
+        ImGui::Separator();
+
         ImGui::Text("Local Pose: %s", local_pose ? std::to_string(local_pose->size()).c_str() : "Null");
         ImGui::Text("Model Pose: %s", model_pose ? std::to_string(model_pose->size()).c_str() : "Null");
 
+        ImGui::NewLine();
+        ImGui::Text("Animation Information:");
+        ImGui::Separator();
 
 		{
 			Animation* anim = GetAssetManager().Get(animation);
@@ -108,8 +169,7 @@ namespace Engine::Components {
 
 
 		if (LeftLabelSliderFloat("Time scale", &timescale, 0.0, 1.0)) {
-			if (entity.HasComponent<Components::SkeletonComponent>()) {
-				auto& skeletonComponent      = entity.GetComponent<Components::SkeletonComponent>();
+			//if (entity.HasComponent<Components::SkeletonComponent>()) {
 
 				// Samples optimized animation at t = animation_time_
 				ozz::animation::SamplingJob sampling_job;
@@ -124,14 +184,14 @@ namespace Engine::Components {
 				}
 
 				ozz::animation::LocalToModelJob ltm_job;
-				ltm_job.skeleton = skeletonComponent.skeleton;
+				ltm_job.skeleton = skeleton;
 				ltm_job.input    = ozz::make_span(*local_pose);
 				ltm_job.output   = ozz::make_span(*model_pose);
 				if (!ltm_job.Run()) {
 					GetAnimationManager().log->error("Failed to convert to model space");
 					return;
 				}
-			}
+			//}
 		}
 
 
@@ -146,6 +206,8 @@ namespace Engine::Components {
 			//			}
 		}
 	}
+
+
 
 
 } // namespace Engine::Components

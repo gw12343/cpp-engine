@@ -49,10 +49,14 @@ namespace Engine::Components {
         std::vector<ozz::math::SoaTransform>* local_pose = nullptr;
         std::vector<ozz::math::Float4x4>*     model_pose = nullptr;
 
+        ozz::animation::Skeleton* skeleton = nullptr;
+        std::string               skeletonPath;
+
 		template <class Archive>
 		void serialize(Archive& ar)
 		{
 			ar(CEREAL_NVP(animation));
+            ar(CEREAL_NVP(skeletonPath));
 		}
 
 		AnimationComponent() = default;
@@ -60,7 +64,8 @@ namespace Engine::Components {
 		void OnRemoved(Entity& entity) override;
 		void RenderInspector(Entity& entity) override;
 
-		void SetAnimation(AssetHandle<Animation> animation);
+		void SetSkeleton(const std::string&  path);
+		void SetAnimation(const AssetHandle<Animation>& animation);
 
 		static void CleanAnimationContexts();
 

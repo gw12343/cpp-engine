@@ -4,7 +4,6 @@
 #include "Model.h"
 #include "Shader.h"
 #include "Skybox.h"
-#include "Texture.h"
 #include "core/Window.h"
 #include "rendering/shadows/ShadowMapRenderer.h"
 

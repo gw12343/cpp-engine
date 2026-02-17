@@ -13,7 +13,6 @@
 #include "impl/ParticleSystemComponent.h"
 #include "impl/RigidBodyComponent.h"
 #include "impl/ShadowCasterComponent.h"
-#include "impl/SkeletonComponent.h"
 #include "impl/SkinnedMeshComponent.h"
 #include "impl/TerrainRendererComponent.h"
 #include "impl/TransformComponent.h"
@@ -29,7 +28,6 @@
 	X(Components::ModelRenderer, ModelRenderer, ICON_FA_CUBE " Model Renderer")                                                                                                                                                                \
 	X(Components::RigidBodyComponent, RigidBodyComponent, ICON_FA_CUBES_STACKED " Rigid Body")                                                                                                                                                 \
 	X(Components::AudioSource, AudioSource, ICON_FA_VOLUME_HIGH " Audio Source")                                                                                                                                                               \
-	X(Components::SkeletonComponent, SkeletonComponent, "Skeleton")                                                                                                                                                                            \
 	X(Components::AnimationComponent, AnimationComponent, "Animation")                                                                                                                                                                         \
 	X(Components::SkinnedMeshComponent, SkinnedMeshComponent, "Skinned Mesh")                                                                                                                                                                  \
 	X(Components::ParticleSystem, ParticleSystem, ICON_FA_STAR_HALF_STROKE " Particle System")                                                                                                                                                 \
