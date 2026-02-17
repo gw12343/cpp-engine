@@ -23,6 +23,7 @@
 #include "glm/gtc/random.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "components/impl/AnimationComponent.h"
+#include "Texture.h"
 
 
 namespace Engine {
