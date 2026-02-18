@@ -1,6 +1,7 @@
 #include "renderer_impl.h"
 
 #include "animation/AnimatedMesh.h"
+#include "core/Window.h"
 #include "animation/AnimationShader.h"
 #include "animation/icosphere.h"
 #include "animation/immediate.h"
@@ -1319,6 +1320,14 @@ bool RendererImpl::DrawSkinnedMesh(const Engine::Mesh& _mesh, const ozz::span<oz
 		GL(BindBuffer(GL_ELEMENT_ARRAY_BUFFER, dynamic_index_bo_));
 		const Mesh::TriangleIndices& indices = _mesh.triangle_indices;
 		GL(BufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(Mesh::TriangleIndices::value_type), array_begin(indices), GL_STREAM_DRAW));
+
+        GLenum attachments[] = {
+                GL_COLOR_ATTACHMENT0,
+                GL_COLOR_ATTACHMENT1,
+                GL_COLOR_ATTACHMENT2,
+                GL_COLOR_ATTACHMENT3
+        };
+        glDrawBuffers(4, attachments);
 
 		// Draws the mesh.
 		static_assert(sizeof(Mesh::TriangleIndices::value_type) == 2, "Expects 2 bytes indices.");
