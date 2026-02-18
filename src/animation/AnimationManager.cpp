@@ -111,12 +111,13 @@ namespace Engine {
 	void AnimationManager::Render()
 	{
 		// Get all entities with a SkinnedMeshComponent and transform and AnimationComponent
-		auto view = GetCurrentSceneRegistry().view<Components::SkinnedMeshComponent, Components::Transform>();
+		auto view = GetCurrentSceneRegistry().view<Components::SkinnedMeshComponent, Components::AnimationComponent, Components::Transform>();
 		for (auto entity : view) {
 			Entity                    e(entity, GetCurrentScene());
 			auto&                     skinnedMeshComponent   = e.GetComponent<Components::SkinnedMeshComponent>();
 			auto&                     animationComponent = e.GetComponent<Components::AnimationComponent>();
 			const ozz::math::Float4x4 transform              = FromMatrix(e.GetComponent<Components::Transform>().GetWorldMatrix());
+
 
 			// Render each mesh
 			for (const Engine::Mesh& mesh : *skinnedMeshComponent.meshes) {

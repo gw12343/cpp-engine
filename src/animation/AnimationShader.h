@@ -166,7 +166,7 @@ class AmbientShader : public AnimationShader {
 
 	// Binds the shader.
 	void
-	Bind(const ozz::math::Float4x4& _model, const ozz::math::Float4x4& _view_proj, GLsizei _pos_stride, GLsizei _pos_offset, GLsizei _normal_stride, GLsizei _normal_offset, GLsizei _color_stride, GLsizei _color_offset, bool _color_float);
+	Bind(const ozz::math::Float4x4& _model, const ozz::math::Float4x4& _viewProj, GLsizei _pos_stride, GLsizei _pos_offset, GLsizei _normal_stride, GLsizei _normal_offset, GLsizei _color_stride, GLsizei _color_offset, bool _color_float);
 
   protected:
 	bool InternalBuild(int _vertex_count, const char** _vertex, int _fragment_count, const char** _fragment);
@@ -199,7 +199,8 @@ class AmbientTexturedShader : public AmbientShader {
 
 	// Binds the shader.
 	void Bind(const ozz::math::Float4x4& _model,
-	          const ozz::math::Float4x4& _view_proj,
+	          const ozz::math::Float4x4& _view,
+	          const ozz::math::Float4x4& _proj,
 	          GLsizei                    _pos_stride,
 	          GLsizei                    _pos_offset,
 	          GLsizei                    _normal_stride,

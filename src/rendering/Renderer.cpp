@@ -193,6 +193,11 @@ namespace Engine {
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
+            {
+                ZoneScopedN("Render Animations");
+                GetAnimationManager().Render();
+            }
             RenderEntitiesGBuffer();
             GetTerrainManager().RenderGBuffer();
 
@@ -229,10 +234,7 @@ namespace Engine {
             glDisable(GL_CULL_FACE);
             RenderLightingPass();
         }
-//		{
-//			ZoneScopedN("Render Animations");
-//			GetAnimationManager().Render();
-//		}
+
 
 //		{
 //			ZoneScopedN("Render Terrains");

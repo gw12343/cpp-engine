@@ -436,6 +436,97 @@ namespace {
 	                                       "                 v_vertex_color *\n"
 	                                       "                 texture(u_texture, v_vertex_uv);\n"
 	                                       "}\n";
+
+    const char* kGBufferShaderAmbientTexturedVS = "#version 420 core\n"
+                                                  "\n"
+                                                  "layout (location = 0) in vec3 a_position;\n"
+                                                  "layout (location = 1) in vec3 a_normal;\n"
+                                                  "layout (location = 2) in vec2 a_uv;\n"
+                                                  "layout (location = 3) in vec4 a_color;\n"
+                                                  "\n"
+                                                  "out VS_OUT {\n"
+                                                  "    vec3 FragPos;\n"
+                                                  "    vec3 Normal;\n"
+                                                  "    vec2 TexCoords;\n"
+                                                  "    vec4 VertexColor;\n"
+                                                  "} vs_out;\n"
+                                                  "\n"
+                                                  "uniform mat4 u_model;\n"
+                                                  "uniform mat4 u_view;\n"
+                                                  "uniform mat4 u_projection;\n"
+                                                  "\n"
+                                                  "void main()\n"
+                                                  "{\n"
+                                                  "    // World position\n"
+                                                  "    vec4 worldPos = u_model * vec4(a_position, 1.0);\n"
+                                                  "    vs_out.FragPos = worldPos.xyz;\n"
+                                                  "\n"
+                                                  "    // Correct normal transform\n"
+                                                  "    mat3 normalMatrix = transpose(inverse(mat3(u_model)));\n"
+                                                  "    vs_out.Normal = normalize(normalMatrix * a_normal);\n"
+                                                  "\n"
+                                                  "    vs_out.TexCoords = a_uv;\n"
+                                                  "    vs_out.VertexColor = a_color;\n"
+                                                  "\n"
+                                                  "    gl_Position = u_projection * u_view * worldPos;\n"
+                                                  "}";
+
+
+    const char* kGBufferShaderAmbientTexturedFS = "#version 420 core\n"
+                                                  "\n"
+                                                  "layout (location = 0) out vec4 gAlbedo;\n"
+                                                  "layout (location = 1) out vec3 gNormal;\n"
+                                                  "layout (location = 2) out vec4 gMaterial;\n"
+                                                  "layout (location = 3) out vec3 gEmissive;\n"
+                                                  "\n"
+                                                  "in VS_OUT {\n"
+                                                  "    vec3 FragPos;\n"
+                                                  "    vec3 Normal;\n"
+                                                  "    vec2 TexCoords;\n"
+                                                  "    vec4 VertexColor;\n"
+                                                  "} fs_in;\n"
+                                                  "\n"
+                                                  "layout (binding = 0) uniform sampler2D u_texture;\n"
+                                                  "\n"
+                                                  "uniform int hasTexture;\n"
+                                                  "uniform float uSpecularStrength;\n"
+                                                  "uniform vec3 uEmissiveColor;\n"
+                                                  "\n"
+                                                  "void main()\n"
+                                                  "{\n"
+                                                  "    // ---------------------------\n"
+                                                  "    // Albedo (texture * vertex color)\n"
+                                                  "\n"
+                                                  "    vec4 texColor = hasTexture == 1\n"
+                                                  "        ? texture(u_texture, fs_in.TexCoords)\n"
+                                                  "        : vec4(1.0);\n"
+                                                  "\n"
+                                                  "    vec4 baseColor = texColor * fs_in.VertexColor;\n"
+                                                  "\n"
+                                                  "    // Optional alpha discard (like foliage)\n"
+                                                  "    if (baseColor.a < 0.5)\n"
+                                                  "        discard;\n"
+                                                  "\n"
+                                                  "    gAlbedo = baseColor;\n"
+                                                  "\n"
+                                                  "    // ---------------------------\n"
+                                                  "    // World-space normal\n"
+                                                  "\n"
+                                                  "    gNormal = normalize(fs_in.Normal);\n"
+                                                  "\n"
+                                                  "    // ---------------------------\n"
+                                                  "    // Specular strength\n"
+                                                  "\n"
+                                                  "    gMaterial = vec4(uSpecularStrength, 0.0, 0.0, 0.0);\n"
+                                                  "\n"
+                                                  "    // ---------------------------\n"
+                                                  "    // Emissive\n"
+                                                  "\n"
+                                                  "    gEmissive = uEmissiveColor;\n"
+                                                  "}";
+
+
+
 } // namespace
 
 void SkeletonShader::Bind(const ozz::math::Float4x4& _model, const ozz::math::Float4x4& _view_proj, GLsizei _pos_stride, GLsizei _pos_offset, GLsizei _normal_stride, GLsizei _normal_offset, GLsizei _color_stride, GLsizei _color_offset)
@@ -603,7 +694,7 @@ bool AmbientShader::InternalBuild(int _vertex_count, const char** _vertex, int _
 }
 
 void AmbientShader::Bind(
-    const ozz::math::Float4x4& _model, const ozz::math::Float4x4& _view_proj, GLsizei _pos_stride, GLsizei _pos_offset, GLsizei _normal_stride, GLsizei _normal_offset, GLsizei _color_stride, GLsizei _color_offset, bool _color_float)
+    const ozz::math::Float4x4& _model, const ozz::math::Float4x4& _viewProj, GLsizei _pos_stride, GLsizei _pos_offset, GLsizei _normal_stride, GLsizei _normal_offset, GLsizei _color_stride, GLsizei _color_offset, bool _color_float)
 {
 	GL(UseProgram(program()));
 
@@ -623,7 +714,7 @@ void AmbientShader::Bind(
 	glUniformMat4(_model, uniform(0));
 
 	// Binds mvp uniform
-	glUniformMat4(_view_proj, uniform(1));
+	glUniformMat4(_viewProj, uniform(1));
 }
 
 ozz::unique_ptr<AmbientShaderInstanced> AmbientShaderInstanced::Build()
@@ -710,11 +801,25 @@ void AmbientShaderInstanced::Unbind()
 
 ozz::unique_ptr<AmbientTexturedShader> AmbientTexturedShader::Build()
 {
-	const char* vs[] = {kPlatformSpecificVSHeader, kPassUv, "uniform mat4 u_model;\n mat4 GetWorldMatrix() {return u_model;}\n", kShaderUberVS};
-	const char* fs[] = {kPlatformSpecificFSHeader, kShaderAmbientFct, kShaderAmbientTexturedFS};
+	const char* vs[] = {kGBufferShaderAmbientTexturedVS};
+
+
+    const char* fs[] = {kGBufferShaderAmbientTexturedFS};
 
 	ozz::unique_ptr<AmbientTexturedShader> shader  = ozz::make_unique<AmbientTexturedShader>();
-	bool                                   success = shader->InternalBuild(OZZ_ARRAY_SIZE(vs), vs, OZZ_ARRAY_SIZE(fs), fs);
+	bool                                   success = true;
+    success &= shader->BuildFromSource(OZZ_ARRAY_SIZE(vs), vs, OZZ_ARRAY_SIZE(fs), fs);
+
+    // Binds default attributes
+    success &= shader->FindAttrib("a_position");
+    success &= shader->FindAttrib("a_normal");
+    success &= shader->FindAttrib("a_color");
+
+    // Binds default uniforms
+    success &= shader->BindUniform("u_model");
+    success &= shader->BindUniform("u_view");
+    success &= shader->BindUniform("u_projection");
+
 
 	success &= shader->FindAttrib("a_uv");
 
@@ -726,7 +831,8 @@ ozz::unique_ptr<AmbientTexturedShader> AmbientTexturedShader::Build()
 }
 
 void AmbientTexturedShader::Bind(const ozz::math::Float4x4& _model,
-                                 const ozz::math::Float4x4& _view_proj,
+                                 const ozz::math::Float4x4& _view,
+                                 const ozz::math::Float4x4& _proj,
                                  GLsizei                    _pos_stride,
                                  GLsizei                    _pos_offset,
                                  GLsizei                    _normal_stride,
@@ -737,7 +843,29 @@ void AmbientTexturedShader::Bind(const ozz::math::Float4x4& _model,
                                  GLsizei                    _uv_stride,
                                  GLsizei                    _uv_offset)
 {
-	AmbientShader::Bind(_model, _view_proj, _pos_stride, _pos_offset, _normal_stride, _normal_offset, _color_stride, _color_offset, _color_float);
+	//AmbientShader::Bind(_model, _view_proj, _pos_stride, _pos_offset, _normal_stride, _normal_offset, _color_stride, _color_offset, _color_float);
+
+    GL(UseProgram(program()));
+
+    const GLint position_attrib = attrib(0);
+    GL(EnableVertexAttribArray(position_attrib));
+    GL(VertexAttribPointer(position_attrib, 3, GL_FLOAT, GL_FALSE, _pos_stride, GL_PTR_OFFSET(_pos_offset)));
+
+    const GLint normal_attrib = attrib(1);
+    GL(EnableVertexAttribArray(normal_attrib));
+    GL(VertexAttribPointer(normal_attrib, 3, GL_FLOAT, GL_FALSE, _normal_stride, GL_PTR_OFFSET(_normal_offset)));
+
+    const GLint color_attrib = attrib(2);
+    GL(EnableVertexAttribArray(color_attrib));
+    GL(VertexAttribPointer(color_attrib, 4, _color_float ? GL_FLOAT : GL_UNSIGNED_BYTE, !_color_float, _color_stride, GL_PTR_OFFSET(_color_offset)));
+
+    // Binds mw uniform
+    glUniformMat4(_model, uniform(0));
+
+    // Binds mvp uniform
+    glUniformMat4(_view, uniform(1));
+
+    glUniformMat4(_proj, uniform(2));
 
 	const GLint uv_attrib = attrib(3);
 	GL(EnableVertexAttribArray(uv_attrib));
