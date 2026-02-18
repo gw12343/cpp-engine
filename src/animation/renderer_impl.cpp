@@ -27,6 +27,8 @@
 #include <utility>
 
 #include "AnimationManager.h"
+#include "utils/Utils.h"
+
 namespace {
 	// A vertex made of positions and normals.
 	struct VertexPNC {
@@ -996,12 +998,13 @@ bool RendererImpl::DrawMesh(const Mesh& _mesh, const ozz::math::Float4x4& _trans
 		// Binds shader with this array buffer, depending on rendering options.
 		AnimationShader* shader = nullptr;
 		if (_options.texture) {
-			ambient_textured_shader->Bind(_transform, GetCamera().view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false, uvs_stride, uvs_offset);
+			ambient_textured_shader->Bind(_transform, Engine::FromMatrix(GetCamera().GetViewMatrix()), Engine::FromMatrix(GetCamera().GetProjectionMatrix()), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false, uvs_stride, uvs_offset);
 			shader = ambient_textured_shader.get();
 			
 			if (valid_material) {
 				// Binds default texture
 				if (GetAssetManager().Get(material->GetDiffuseTexture())) {
+                    glActiveTexture(GL_TEXTURE0);
 					GL(BindTexture(GL_TEXTURE_2D, GetAssetManager().Get(material->GetDiffuseTexture())->GetID()));
 				}
 			}
@@ -1221,7 +1224,7 @@ bool RendererImpl::DrawSkinnedMesh(const Engine::Mesh& _mesh, const ozz::span<oz
 		}
 
 		// Renders debug normals.
-		if (_options.normals && skinning_job.out_normals.size() > 0 || true) {
+		if (_options.normals && skinning_job.out_normals.size() > 0) {
 			DrawVectors(skinning_job.out_positions, skinning_job.out_positions_stride, skinning_job.out_normals, skinning_job.out_normals_stride, skinning_job.vertex_count, .03f, Engine::kGreen, _transform);
 		}
 
@@ -1295,7 +1298,8 @@ bool RendererImpl::DrawSkinnedMesh(const Engine::Mesh& _mesh, const ozz::span<oz
 		AnimationShader* shader = nullptr;
 		if (_options.texture) {
 			shader = ambient_textured_shader.get();
-			ambient_textured_shader->Bind(_transform, GetCamera().view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false, uvs_stride, uvs_offset);
+
+			ambient_textured_shader->Bind(_transform, Engine::FromMatrix(GetCamera().GetViewMatrix()), Engine::FromMatrix(GetCamera().GetProjectionMatrix()), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false, uvs_stride, uvs_offset);
 
 			// Binds default texture
 			if (valid_material) {
@@ -1306,7 +1310,8 @@ bool RendererImpl::DrawSkinnedMesh(const Engine::Mesh& _mesh, const ozz::span<oz
 			}
 		}
 		else {
-			ambient_shader->Bind(_transform, GetCamera().view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false);
+			GetAnimationManager().log->error("unimpl"); //TODO impl
+            //ambient_shader->Bind(_transform, GetCamera().view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false);
 			shader = ambient_shader.get();
 		}
 

@@ -115,19 +115,24 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
-                            "key": "BULLET_PARENT",
+                            "key": "SHOOT_POWER",
                             "value": {
-                                "index": 12,
-                                "data": {
-                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
-                                }
+                                "index": 0,
+                                "data": 10.0
                             }
                         },
                         {
-                            "key": "RUN_SPEED",
+                            "key": "CAMERA_Y_OFFSET",
                             "value": {
                                 "index": 0,
-                                "data": 12.0
+                                "data": 1.100000023841858
+                            }
+                        },
+                        {
+                            "key": "GRAVITY_SCALE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
                             }
                         },
                         {
@@ -144,22 +149,6 @@
                                 "data": {
                                     "guid": "a9dfb812233c1829cad774e7b2670a02"
                                 }
-                            }
-                        },
-                        {
-                            "key": "victorySound",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
-                                }
-                            }
-                        },
-                        {
-                            "key": "SHOOT_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 10.0
                             }
                         },
                         {
@@ -186,25 +175,35 @@
                             }
                         },
                         {
-                            "key": "GRAVITY_SCALE",
+                            "key": "victorySound",
                             "value": {
-                                "index": 0,
-                                "data": 2.0
+                                "index": 11,
+                                "data": {
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                }
                             }
                         },
                         {
-                            "key": "CAMERA_Y_OFFSET",
+                            "key": "RUN_SPEED",
                             "value": {
                                 "index": 0,
-                                "data": 1.100000023841858
+                                "data": 12.0
+                            }
+                        },
+                        {
+                            "key": "BULLET_PARENT",
+                            "value": {
+                                "index": 12,
+                                "data": {
+                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
+                                }
                             }
                         }
                     ]
                 }
             },
             "ShadowCaster": {
-                "nullopt": false,
-                "data": {}
+                "nullopt": true
             },
             "Transform": {
                 "nullopt": false,
@@ -233,7 +232,7 @@
             "ModelRenderer": {
                 "nullopt": false,
                 "data": {
-                    "visible": true,
+                    "visible": false,
                     "model": {
                         "guid": "8f4859e3ac89632544374bc702a531e9"
                     },
@@ -276,9 +275,9 @@
             "SkinnedMeshComponent": {
                 "nullopt": false,
                 "data": {
-                    "meshPath": "resources/animations/dodge.fbx",
+                    "meshPath": "resources/animations/s.ozz",
                     "meshMaterial": {
-                        "guid": "c65e206dfc749371e59f05aa1e2eda9c"
+                        "guid": "4f843329315c8297e0905d030736e961"
                     }
                 }
             },
