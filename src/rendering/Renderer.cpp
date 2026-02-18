@@ -194,11 +194,11 @@ namespace Engine {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
+            RenderEntitiesGBuffer();
             {
                 ZoneScopedN("Render Animations");
                 GetAnimationManager().Render();
             }
-            RenderEntitiesGBuffer();
             GetTerrainManager().RenderGBuffer();
 
             GetWindow().GetGBuffer()->Unbind();

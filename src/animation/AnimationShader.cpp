@@ -859,9 +859,15 @@ void AmbientTexturedShader::Bind(const ozz::math::Float4x4& _model,
     GL(EnableVertexAttribArray(normal_attrib));
     GL(VertexAttribPointer(normal_attrib, 3, GL_FLOAT, GL_FALSE, _normal_stride, GL_PTR_OFFSET(_normal_offset)));
 
+
+	const GLint uv_attrib = attrib(3);
+	GL(EnableVertexAttribArray(uv_attrib));
+	GL(VertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, _uv_stride, GL_PTR_OFFSET(_uv_offset)));
+
     const GLint color_attrib = attrib(2);
     GL(EnableVertexAttribArray(color_attrib));
     GL(VertexAttribPointer(color_attrib, 4, _color_float ? GL_FLOAT : GL_UNSIGNED_BYTE, !_color_float, _color_stride, GL_PTR_OFFSET(_color_offset)));
+
 
     // Binds mw uniform
     glUniformMat4(_model, uniform(0));
@@ -872,11 +878,8 @@ void AmbientTexturedShader::Bind(const ozz::math::Float4x4& _model,
     glUniformMat4(_proj, uniform(2));
 
     glUniform1i(uniform(3), 1);
-    glUniform1f(uniform(4), 1.0f);
-    glUniform3f(uniform(5), 1.0f, 1.0f, 1.0f);
+    glUniform1f(uniform(4), 0.05f);
+    glUniform3f(uniform(5), 0.0f, 0.0f, 0.0f);
 
 
-	const GLint uv_attrib = attrib(3);
-	GL(EnableVertexAttribArray(uv_attrib));
-	GL(VertexAttribPointer(uv_attrib, 2, GL_FLOAT, GL_FALSE, _uv_stride, GL_PTR_OFFSET(_uv_offset)));
 }
