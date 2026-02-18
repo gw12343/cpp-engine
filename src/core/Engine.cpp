@@ -58,6 +58,7 @@ namespace Engine {
 
 
     GEngine::GEngine(int width, int height, const char *title) : m_deltaTime(0.0f), m_lastFrame(0.0f) {
+        ZoneScopedN("Engine Awake");
         SetState(EDITOR);
         Get().manager = &manager;
         Get().renderSettings = new RenderSettings();
@@ -115,15 +116,29 @@ namespace Engine {
     GEngine::~GEngine() = default;
 
     bool GEngine::Initialize() {
+        ZoneScopedN("Engine Init");
         GetDefaultLogger()->info("Starting Engine");
-        Components::RegisterAllComponentBindings();
-        manager.InitAllLuaBindings();
-        manager.InitAll();
-
+        {
+            ZoneScopedN("RegisterAllComponentBindings");
+            Components::RegisterAllComponentBindings();
+        }
+        {
+            ZoneScopedN("InitAllLuaBindings");
+            manager.InitAllLuaBindings();
+        }
+        {
+            ZoneScopedN("Init All Modules");
+            manager.InitAll();
+        }
         //AssetHandle<Particle> testParticle = GetAssetManager().Load<Particle>("resources/particles/testleaf.efk");
-        LoadGameAssets();
-        GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>(SCENE1));
-
+        {
+            ZoneScopedN("Load Game Assets");
+            LoadGameAssets();
+        }
+        {
+            ZoneScopedN("Load Scene 1");
+            GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>(SCENE1));
+        }
 
 #ifdef GAME_BUILD
         SetState(PLAYING);

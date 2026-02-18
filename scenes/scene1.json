@@ -115,34 +115,6 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
-                            "key": "SHOOT_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 10.0
-                            }
-                        },
-                        {
-                            "key": "CAMERA_Y_OFFSET",
-                            "value": {
-                                "index": 0,
-                                "data": 1.100000023841858
-                            }
-                        },
-                        {
-                            "key": "GRAVITY_SCALE",
-                            "value": {
-                                "index": 0,
-                                "data": 2.0
-                            }
-                        },
-                        {
-                            "key": "JUMP_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 8.0
-                            }
-                        },
-                        {
                             "key": "BULLET_MATERIAL",
                             "value": {
                                 "index": 7,
@@ -152,17 +124,10 @@
                             }
                         },
                         {
-                            "key": "MOUSE_SENSITIVITY",
+                            "key": "JUMP_POWER",
                             "value": {
                                 "index": 0,
-                                "data": 0.10000000149011612
-                            }
-                        },
-                        {
-                            "key": "WALK_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 7.0
+                                "data": 8.0
                             }
                         },
                         {
@@ -175,11 +140,11 @@
                             }
                         },
                         {
-                            "key": "victorySound",
+                            "key": "BULLET_PARENT",
                             "value": {
-                                "index": 11,
+                                "index": 12,
                                 "data": {
-                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
                                 }
                             }
                         },
@@ -191,12 +156,47 @@
                             }
                         },
                         {
-                            "key": "BULLET_PARENT",
+                            "key": "WALK_SPEED",
                             "value": {
-                                "index": 12,
+                                "index": 0,
+                                "data": 7.0
+                            }
+                        },
+                        {
+                            "key": "MOUSE_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.10000000149011612
+                            }
+                        },
+                        {
+                            "key": "GRAVITY_SCALE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
+                            }
+                        },
+                        {
+                            "key": "victorySound",
+                            "value": {
+                                "index": 11,
                                 "data": {
-                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
                                 }
+                            }
+                        },
+                        {
+                            "key": "SHOOT_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 10.0
+                            }
+                        },
+                        {
+                            "key": "CAMERA_Y_OFFSET",
+                            "value": {
+                                "index": 0,
+                                "data": 1.100000023841858
                             }
                         }
                     ]
@@ -595,6 +595,105 @@
                     "documentPath": "resources/ui/crosshair.rml",
                     "isVisible": true
                 }
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Copy of New Model",
+                "tag": "",
+                "active": true,
+                "guid": "e92787f73a8a97366d0fc9acd960ded4",
+                "parentEntity": {
+                    "guid": ""
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": false,
+                "data": {}
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 0.0,
+                        "y": 11.273355484008789,
+                        "z": -13.77267837524414
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 40.0,
+                        "y": 1.0,
+                        "z": 40.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "e319e2b8747bee49f54e67e706d42f67"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "48ac579eaa8ac969e99c1fca5ab57c90"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 1,
+                    "mass": 1.0,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 0.0,
+                    "shapeType": "Box",
+                    "shapeSize": {
+                        "x": 20.0,
+                        "y": 0.5,
+                        "z": 20.0
+                    },
+                    "meshSelection": [],
+                    "colliderModel": {
+                        "guid": ""
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
             },
             "GizmoComponent": {
                 "nullopt": true
