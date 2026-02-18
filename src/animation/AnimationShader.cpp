@@ -820,6 +820,10 @@ ozz::unique_ptr<AmbientTexturedShader> AmbientTexturedShader::Build()
     success &= shader->BindUniform("u_view");
     success &= shader->BindUniform("u_projection");
 
+    success &= shader->BindUniform("hasTexture");
+    success &= shader->BindUniform("uSpecularStrength");
+    success &= shader->BindUniform("uEmissiveColor");
+
 
 	success &= shader->FindAttrib("a_uv");
 
@@ -866,6 +870,11 @@ void AmbientTexturedShader::Bind(const ozz::math::Float4x4& _model,
     glUniformMat4(_view, uniform(1));
 
     glUniformMat4(_proj, uniform(2));
+
+    glUniform1i(uniform(3), 1);
+    glUniform1f(uniform(4), 1.0f);
+    glUniform3f(uniform(5), 1.0f, 1.0f, 1.0f);
+
 
 	const GLint uv_attrib = attrib(3);
 	GL(EnableVertexAttribArray(uv_attrib));
