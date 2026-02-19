@@ -160,6 +160,8 @@ void main()
     float spec = pow(max(dot(N, H), 0.0), specAA);
 
     float F = pow(1.0 - max(dot(N, V), 0.0), 5.0);
+
+
     vec3 specular = spec * mix(vec3(0.04), vec3(1.0), F) * specStrength;
 
 /* -------- Energy conservation -------- */

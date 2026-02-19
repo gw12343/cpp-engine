@@ -115,42 +115,19 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
-                            "key": "CAMERA_Y_OFFSET",
+                            "key": "shootSound",
                             "value": {
-                                "index": 0,
-                                "data": 1.100000023841858
-                            }
-                        },
-                        {
-                            "key": "JUMP_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 8.0
-                            }
-                        },
-                        {
-                            "key": "BULLET_MATERIAL",
-                            "value": {
-                                "index": 7,
+                                "index": 11,
                                 "data": {
-                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
+                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
                                 }
                             }
                         },
                         {
-                            "key": "RUN_SPEED",
+                            "key": "WALK_SPEED",
                             "value": {
                                 "index": 0,
-                                "data": 12.0
-                            }
-                        },
-                        {
-                            "key": "BULLET_PARENT",
-                            "value": {
-                                "index": 12,
-                                "data": {
-                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
-                                }
+                                "data": 7.0
                             }
                         },
                         {
@@ -161,10 +138,10 @@
                             }
                         },
                         {
-                            "key": "WALK_SPEED",
+                            "key": "GRAVITY_SCALE",
                             "value": {
                                 "index": 0,
-                                "data": 7.0
+                                "data": 2.0
                             }
                         },
                         {
@@ -177,12 +154,42 @@
                             }
                         },
                         {
-                            "key": "shootSound",
+                            "key": "BULLET_MATERIAL",
                             "value": {
-                                "index": 11,
+                                "index": 7,
                                 "data": {
-                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
+                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
                                 }
+                            }
+                        },
+                        {
+                            "key": "JUMP_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 8.0
+                            }
+                        },
+                        {
+                            "key": "BULLET_PARENT",
+                            "value": {
+                                "index": 12,
+                                "data": {
+                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
+                                }
+                            }
+                        },
+                        {
+                            "key": "RUN_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 12.0
+                            }
+                        },
+                        {
+                            "key": "CAMERA_Y_OFFSET",
+                            "value": {
+                                "index": 0,
+                                "data": 1.100000023841858
                             }
                         },
                         {
@@ -190,13 +197,6 @@
                             "value": {
                                 "index": 0,
                                 "data": 48.20000076293945
-                            }
-                        },
-                        {
-                            "key": "GRAVITY_SCALE",
-                            "value": {
-                                "index": 0,
-                                "data": 2.0
                             }
                         }
                     ]

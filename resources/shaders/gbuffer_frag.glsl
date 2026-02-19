@@ -22,6 +22,7 @@ uniform int hasSpecularTexture;
 
 uniform vec2 textureScale;
 
+uniform float uShininess;// 32.0
 uniform vec3 uDiffuseColor;
 uniform vec3 uEmissiveColor;
 
@@ -58,7 +59,7 @@ void main()
     ? texture(specularTexture, fs_in.TexCoords * textureScale).r
     : 0.0;
 
-    gMaterial = vec4(specStrength, 0.0, 0.0, 0.0);
+    gMaterial = vec4(specStrength, uShininess / 256.0, 0.0, 0.0);
 
     // -------------------------------
     // Emissive

@@ -700,35 +700,48 @@ namespace Engine::UI {
 
         const float previewSize = 400.0f;
 
-        ImGui::Text("SSAO");
-        ImGui::Image((ImTextureID)(intptr_t)GetWindow().GetSSAOBuffer()->ssaoTex,
-                     ImVec2(previewSize, previewSize));
+        ImVec2 uv0 = ImVec2(0, 1);
+        ImVec2 uv1 = ImVec2(1, 0);
 
-        ImGui::Text("SSAO BLUR");
-        ImGui::Image((ImTextureID)(intptr_t)GetWindow().GetSSAOBuffer()->blurTex,
-                     ImVec2(previewSize, previewSize));
+        if(ImGui::CollapsingHeader("SSAO")) {
+            ImGui::Indent();
+            ImGui::Text("SSAO");
+            ImGui::Image((ImTextureID) (intptr_t) GetWindow().GetSSAOBuffer()->ssaoTex,
+                         ImVec2(previewSize, previewSize),
+                         uv0, uv1);
 
+            ImGui::Text("SSAO BLUR");
+            ImGui::Image((ImTextureID) (intptr_t) GetWindow().GetSSAOBuffer()->blurTex,
+                         ImVec2(previewSize, previewSize),
+                         uv0, uv1);
 
+            ImGui::Unindent();
+        }
 
-                     ImGui::Text("Albedo");
+        ImGui::Text("Albedo");
         ImGui::Image((ImTextureID)(intptr_t)gbuffer->GetAlbedo(),
-                     ImVec2(previewSize, previewSize));
+                     ImVec2(previewSize, previewSize),
+                     uv0, uv1);
 
         ImGui::Text("Normal");
         ImGui::Image((ImTextureID)(intptr_t)gbuffer->GetNormal(),
-                     ImVec2(previewSize, previewSize));
+                     ImVec2(previewSize, previewSize),
+                     uv0, uv1);
 
         ImGui::Text("Material");
         ImGui::Image((ImTextureID)(intptr_t)gbuffer->GetMaterial(),
-                     ImVec2(previewSize, previewSize));
+                     ImVec2(previewSize, previewSize),
+                     uv0, uv1);
 
         ImGui::Text("Emissive");
         ImGui::Image((ImTextureID)(intptr_t)gbuffer->GetEmissive(),
-                     ImVec2(previewSize, previewSize));
+                     ImVec2(previewSize, previewSize),
+                     uv0, uv1);
 
         ImGui::Text("Depth");
         ImGui::Image((ImTextureID)(intptr_t)gbuffer->GetDepth(),
-                     ImVec2(previewSize, previewSize));
+                     ImVec2(previewSize, previewSize),
+                     uv0, uv1);
 
         ImGui::End();
     }
