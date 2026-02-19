@@ -16,6 +16,7 @@ namespace Engine {
 	// Module overrides
 	void SceneManager::onInit()
 	{
+        ZoneScopedN("Initialize SceneManager");
 		log->info("SceneManager initialized.");
 	}
 

@@ -302,6 +302,7 @@ namespace Engine::Audio {
 
 	void SoundManager::onInit()
 	{
+        ZoneScopedN("Initialize SoundManager");
 		// Open the default audio device
 		m_device = alcOpenDevice(nullptr);
 		if (!m_device) {

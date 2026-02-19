@@ -24,8 +24,10 @@ namespace Engine {
 
 	void Camera::onInit()
 	{
+        ZoneScopedN("Initialize Camera");
 		UpdateCameraVectors();
 	}
+
 	void Camera::onUpdate(float dt)
 	{
 		ZoneScoped;

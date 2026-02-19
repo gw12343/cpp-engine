@@ -182,6 +182,7 @@ namespace Engine {
                         continue;
 
                     std::string ext = path.extension().string();
+
                     auto it = loaders.find(ext);
                     if (it == loaders.end())
                         continue;
@@ -192,12 +193,22 @@ namespace Engine {
                     fs::path relativeToProjectRoot = fs::relative(assetCanonical, projectRootCanonical);
 
                     std::string finalPath = relativeToProjectRoot.generic_string();
+                    GetDefaultLogger()->info("loading asset: {}", finalPath.c_str());
 
-                    try {
-                        it->second(finalPath);
-                        loadedCount++;
-                    } catch (const std::exception &e) {
-                        GetDefaultLogger()->warn("Failed to load asset {}: {}", finalPath, e.what());
+                    {
+                        ZoneScoped;
+                        char* buff = new char[150];
+                        sprintf_s(buff, 150, "Load: %s", finalPath.c_str());
+                        ZoneName(buff, strlen(buff));
+
+
+
+                        try {
+                            it->second(finalPath);
+                            loadedCount++;
+                        } catch (const std::exception &e) {
+                            GetDefaultLogger()->warn("Failed to load asset {}: {}", finalPath, e.what());
+                        }
                     }
                 }
                 } catch (const std::exception &e) {

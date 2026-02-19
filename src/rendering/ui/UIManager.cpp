@@ -70,6 +70,7 @@ namespace Engine::UI {
 
 	void UIManager::onInit()
 	{
+        ZoneScopedN("Initialize Editor UI");
 		SetThemeColors(0);
 
 		m_uiAssetRenderer   = std::make_unique<AssetUIRenderer>();
@@ -375,7 +376,7 @@ namespace Engine::UI {
 
 	void UIManager::onUpdate(float dt)
 	{
-		ZoneScoped;
+        ZoneScopedN("OnUpdate UI manager");
 		m_selectedTheme = GetState() == EDITOR ? 2 : 0;
 		GetRenderer().PreRender();
 		float h      = RenderMainMenuBar();

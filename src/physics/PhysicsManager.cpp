@@ -53,6 +53,7 @@ namespace Engine {
 
 	void PhysicsManager::onInit()
 	{
+        ZoneScopedN("Initialize PhysicsManager");
 		RegisterDefaultAllocator();
 		Trace = PhysicsManager::TraceImpl;
 		JPH_IF_ENABLE_ASSERTS(AssertFailed = AssertFailedImpl;)

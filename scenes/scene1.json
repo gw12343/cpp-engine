@@ -115,12 +115,10 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
-                            "key": "BULLET_MATERIAL",
+                            "key": "CAMERA_Y_OFFSET",
                             "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
-                                }
+                                "index": 0,
+                                "data": 1.100000023841858
                             }
                         },
                         {
@@ -131,12 +129,19 @@
                             }
                         },
                         {
-                            "key": "shootSound",
+                            "key": "BULLET_MATERIAL",
                             "value": {
-                                "index": 11,
+                                "index": 7,
                                 "data": {
-                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
+                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
                                 }
+                            }
+                        },
+                        {
+                            "key": "RUN_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 12.0
                             }
                         },
                         {
@@ -149,20 +154,6 @@
                             }
                         },
                         {
-                            "key": "RUN_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 12.0
-                            }
-                        },
-                        {
-                            "key": "WALK_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 7.0
-                            }
-                        },
-                        {
                             "key": "MOUSE_SENSITIVITY",
                             "value": {
                                 "index": 0,
@@ -170,10 +161,10 @@
                             }
                         },
                         {
-                            "key": "GRAVITY_SCALE",
+                            "key": "WALK_SPEED",
                             "value": {
                                 "index": 0,
-                                "data": 2.0
+                                "data": 7.0
                             }
                         },
                         {
@@ -186,32 +177,42 @@
                             }
                         },
                         {
-                            "key": "SHOOT_POWER",
+                            "key": "shootSound",
                             "value": {
-                                "index": 0,
-                                "data": 10.0
+                                "index": 11,
+                                "data": {
+                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
+                                }
                             }
                         },
                         {
-                            "key": "CAMERA_Y_OFFSET",
+                            "key": "SHOOT_POWER",
                             "value": {
                                 "index": 0,
-                                "data": 1.100000023841858
+                                "data": 48.20000076293945
+                            }
+                        },
+                        {
+                            "key": "GRAVITY_SCALE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
                             }
                         }
                     ]
                 }
             },
             "ShadowCaster": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {}
             },
             "Transform": {
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": -1.975670337677002,
-                        "y": 2.802952289581299,
-                        "z": 5.464488983154297
+                        "x": -1.9756698608398438,
+                        "y": 3.8682162761688234,
+                        "z": 9.081575393676758
                     },
                     "rotation": {
                         "x": 0.0,
@@ -232,7 +233,7 @@
             "ModelRenderer": {
                 "nullopt": false,
                 "data": {
-                    "visible": false,
+                    "visible": true,
                     "model": {
                         "guid": "8f4859e3ac89632544374bc702a531e9"
                     },
@@ -264,22 +265,10 @@
                 }
             },
             "AnimationComponent": {
-                "nullopt": false,
-                "data": {
-                    "animation": {
-                        "guid": "8b168a2fd5398effa236138ab90dbfb9"
-                    },
-                    "skeletonPath": "resources/animations/skeleton.ozz"
-                }
+                "nullopt": true
             },
             "SkinnedMeshComponent": {
-                "nullopt": false,
-                "data": {
-                    "meshPath": "resources/animations/s.ozz",
-                    "meshMaterial": {
-                        "guid": "4f843329315c8297e0905d030736e961"
-                    }
-                }
+                "nullopt": true
             },
             "ParticleSystem": {
                 "nullopt": true
@@ -622,9 +611,9 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": 0.0,
-                        "y": 11.273355484008789,
-                        "z": -13.77267837524414
+                        "x": -4.384573936462402,
+                        "y": 3.0,
+                        "z": 0.36615872383117678
                     },
                     "rotation": {
                         "x": 0.0,
@@ -633,9 +622,9 @@
                         "w": 1.0
                     },
                     "scale": {
-                        "x": 40.0,
-                        "y": 1.0,
-                        "z": 40.0
+                        "x": 5.0,
+                        "y": 5.0,
+                        "z": 5.0
                     }
                 }
             },
@@ -652,7 +641,7 @@
                     "backfaceCulling": true,
                     "materialOverrides": [
                         {
-                            "guid": "48ac579eaa8ac969e99c1fca5ab57c90"
+                            "guid": "4f843329315c8297e0905d030736e961"
                         }
                     ]
                 }
@@ -667,9 +656,9 @@
                     "gravityFactor": 0.0,
                     "shapeType": "Box",
                     "shapeSize": {
-                        "x": 20.0,
-                        "y": 0.5,
-                        "z": 20.0
+                        "x": 2.5,
+                        "y": 2.5,
+                        "z": 2.5
                     },
                     "meshSelection": [],
                     "colliderModel": {
