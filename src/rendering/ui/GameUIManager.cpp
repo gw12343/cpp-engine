@@ -13,6 +13,7 @@ namespace Engine {
 	GameUIManager::~GameUIManager() = default;
 
 	void GameUIManager::onInit() {
+        ZoneScopedN("Initialize GameUIManager");
 		auto& window = GetWindow();
 		int width = window.GetWidth();
 		int height = window.GetHeight();

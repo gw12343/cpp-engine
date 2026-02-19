@@ -46,6 +46,7 @@ namespace Engine {
 
 	void ScriptManager::onInit()
 	{
+        ZoneScopedN("Initialize ScriptManager");
 		log->info("Initializing Lua scripting...");
 		lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::table, sol::lib::os);
 

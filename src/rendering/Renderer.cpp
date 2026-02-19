@@ -31,15 +31,23 @@ namespace Engine {
 
 
     void Renderer::onInit() {
+        ZoneScopedN("Initialize Renderer");
+
         m_shadowRenderer = std::make_shared<ShadowMapRenderer>();
 
-        ReloadShaders();
+        {
+            ZoneScopedN("Load Shaders");
+            ReloadShaders();
+        }
+        {
+            ZoneScopedN("Load Skybox");
+            m_skybox = std::make_unique<Skybox>();
 
-        m_skybox = std::make_unique<Skybox>();
-        const std::string p = "resources/textures/output.hdr";
-        if (!m_skybox->LoadFromFile(p)) {
-            log->error("Failed to load skybox");
-            return;
+            const std::string p = "resources/textures/output2.hdr";
+            if (!m_skybox->LoadFromFile(p)) {
+                log->error("Failed to load skybox");
+                return;
+            }
         }
 
         // Enable depth testing so closer fragments obscure farther ones
@@ -47,29 +55,36 @@ namespace Engine {
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
 
-        m_shadowRenderer->Initalize();
-        InitFullscreenQuad();
-
-
-        // Generate ssao kernel
-        ssaoKernel.clear();
-        ssaoKernel.reserve(32);
-
-        for (int i = 0; i < 32; i++)
         {
-            // Random hemisphere vector
-            glm::vec3 sample = glm::normalize(glm::vec3(
-                    glm::linearRand(-1.0f, 1.0f),
-                    glm::linearRand(-1.0f, 1.0f),
-                    glm::linearRand(0.0f, 1.0f)
-            ));
+            ZoneScopedN("Initialize ShadowMapRenderer");
+            m_shadowRenderer->Initalize();
+        }
+        {
+            ZoneScopedN("Create fullscreen quad");
+            InitFullscreenQuad();
+        }
 
-            // Scale samples so more are near origin
-            float scale = (float)i / 32.0f;
-            scale = glm::mix(0.1f, 1.0f, scale * scale);
+        {
+            ZoneScopedN("Generate SSAO kernel");
+            // Generate ssao kernel
+            ssaoKernel.clear();
+            ssaoKernel.reserve(32);
 
-            sample *= scale;
-            ssaoKernel.push_back(sample);
+            for (int i = 0; i < 32; i++) {
+                // Random hemisphere vector
+                glm::vec3 sample = glm::normalize(glm::vec3(
+                        glm::linearRand(-1.0f, 1.0f),
+                        glm::linearRand(-1.0f, 1.0f),
+                        glm::linearRand(0.0f, 1.0f)
+                ));
+
+                // Scale samples so more are near origin
+                float scale = (float) i / 32.0f;
+                scale = glm::mix(0.1f, 1.0f, scale * scale);
+
+                sample *= scale;
+                ssaoKernel.push_back(sample);
+            }
         }
     }
 

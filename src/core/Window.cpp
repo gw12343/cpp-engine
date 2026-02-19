@@ -51,6 +51,7 @@ namespace Engine {
 
 	void Window::onInit()
 	{
+        ZoneScopedN("Initialize Window");
 		targetWidth  = 800;
 		targetHeight = 600;
 

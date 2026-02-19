@@ -14,6 +14,7 @@ namespace Engine::Terrain {
 
 	void TerrainManager::onInit()
 	{
+        ZoneScopedN("Initialize Terrain Manager");
         for (auto& terrPairs : GetAssetManager().GetStorage<TerrainTile>().guidToAsset) {
             auto& tile = terrPairs.second;
 
