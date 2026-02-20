@@ -2,7 +2,7 @@
 // Created by gabe on 6/23/25.
 //
 
-#include <tracy/Tracy.hpp>
+
 #include "ScriptManager.h"
 
 #include "core/Entity.h"
@@ -14,9 +14,6 @@
 #include "components/impl/ModelRendererComponent.h"
 #include "components/impl/RigidBodyComponent.h"
 #include "components/impl/AudioSourceComponent.h"
-#include "components/impl/SkeletonComponent.h"
-#include "components/impl/AnimationPoseComponent.h"
-
 #include "components/impl/SkinnedMeshComponent.h"
 #include "components/impl/ParticleSystemComponent.h"
 #include "components/AllComponents.h"
@@ -38,6 +35,7 @@ namespace Engine {
 			if (filename.size() > 4 && filename.substr(filename.size() - 4) == ".lua") {
 				// TODO editor script folder? not hard code random file ... tsk tsk
 				if (filename != "init.lua") return;
+                GetScriptManager().log->info("Reloading editor script");
 				GetScriptManager().ReloadEditorScript();
 			}
 		}
@@ -48,11 +46,13 @@ namespace Engine {
 
 	void ScriptManager::onInit()
 	{
+        ZoneScopedN("Initialize ScriptManager");
 		log->info("Initializing Lua scripting...");
 		lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::table, sol::lib::os);
 
 
-		try {
+
+        try {
 #define X(type, name, fancy) COMPONENT_METHODS(type, name),
 			// Bind Entity
 			lua.new_usertype<Engine::Entity>(
@@ -141,7 +141,9 @@ namespace Engine {
 			                               [this](const std::string& eventName, const glm::vec3& data) { eventBus.Publish(eventName, data); },
 			                               [this](const std::string& eventName, Entity& entity) { eventBus.PublishEntityEvent(eventName, entity); }));
 
-			log->info("Event bus Lua bindings registered");
+
+
+            log->info("Event bus Lua bindings registered");
 
 			ReloadEditorScript();
 		}
@@ -188,17 +190,7 @@ namespace Engine {
 		scriptDeltaTime = dt;
 
 		if (GetState() == EDITOR) {
-#ifndef GAME_BUILD
-			// Editor script
-			if (luaUpdate.valid()) {
-				try {
-					luaUpdate(dt);
-				}
-				catch (const sol::error& e) {
-					log->error("Lua error in onUpdate: {}", e.what());
-				}
-			}
-#endif
+
 		}
 		else if (GetState() == PLAYING) {
 			// Dispatch all queued events before processing scripts
@@ -320,5 +312,22 @@ namespace Engine {
 			}
 		});
 	}
+
+    void ScriptManager::EditorScriptUpdate(float dt) {
+#ifndef GAME_BUILD
+        // Editor script
+        if (luaUpdate.valid()) {
+            try {
+                luaUpdate(dt);
+            }
+            catch (const sol::error& e) {
+                log->error("Lua error in onUpdate: {}", e.what());
+            }
+        }
+#endif
+    }
+
+
+
 
 } // namespace Engine

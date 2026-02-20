@@ -1,13 +1,12 @@
 #include "ModelLoader.h"
 
 #include "rendering/Texture.h"
-#include "utils/Utils.h"
 #include "core/EngineData.h"
-#include "glm/gtc/type_ptr.hpp"
 
-#include <filesystem>
-#include <iostream>
-#include "assets/AssetManager.h"
+
+
+
+
 
 namespace Engine {
 	namespace Rendering {
@@ -125,9 +124,12 @@ namespace Engine {
 				std::replace(rawStr.begin(), rawStr.end(), '\\', '/');
 
 				std::filesystem::path oldPath(rawStr);
-				std::filesystem::path fullPath = std::filesystem::path("resources/textures") / oldPath.filename();
 
-				std::string fullPathStr = fullPath.string();
+				std::filesystem::path fullPath1 = std::filesystem::path("resources/textures") / oldPath.filename();
+				std::filesystem::path fullPath2 = std::filesystem::path(directory) / oldPath.filename();
+
+				std::string fullPathStr = std::filesystem::exists(fullPath2) ? fullPath2.string() : fullPath1.string();
+
 
 				auto handle = GetAssetManager().Load<Texture>(fullPathStr);
 				if (handle.IsValid()) {

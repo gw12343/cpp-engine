@@ -8,7 +8,7 @@
 #include <spdlog/sinks/base_sink.h>
 #include <mutex>
 #include <deque>
-#include <string>
+
 
 class ImGuiLogSink : public spdlog::sinks::base_sink<std::mutex> {
   public:

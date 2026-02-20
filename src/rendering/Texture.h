@@ -2,7 +2,7 @@
 
 
 #include <spdlog/spdlog.h>
-#include <string>
+
 #include <unordered_set>
 
 typedef unsigned int GLuint;

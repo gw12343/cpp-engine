@@ -34,4 +34,4 @@ void main()
     vec3 B = normalize(vec3(model * vec4(vs_out.Bitangent, 0.0)));
     vec3 N = normalize(vec3(model * vec4(vs_out.Normal, 0.0)));
     vs_out.TBN = mat3(T, B, N);
-} 
+}

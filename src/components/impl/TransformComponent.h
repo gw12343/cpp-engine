@@ -7,9 +7,7 @@
 
 
 #include "components/Components.h"
-#include "glm/detail/type_quat.hpp"
-#include "glm/gtc/quaternion.hpp"
-#include "glm/gtx/quaternion.hpp"
+
 
 #include <cereal/cereal.hpp>
 #include <cereal/types/vector.hpp>

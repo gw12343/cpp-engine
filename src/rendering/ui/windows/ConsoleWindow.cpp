@@ -3,7 +3,7 @@
 //
 
 #include "ConsoleWindow.h"
-#include "imgui.h"
+
 
 namespace Engine {
 	static bool                      autoScroll  = true;

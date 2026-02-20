@@ -7,16 +7,15 @@
 
 
 #include "core/Entity.h"
-#include "utils/Utils.h"
-#include "imgui.h"
+
 
 #include "ozz/animation/runtime/track.h"
 #include "rendering/particles/ParticleManager.h"
-#include "rendering/ui/InspectorUI.h"
+
 #include "animation/AnimationManager.h"
 #include "scripting/ScriptManager.h"
 #include "misc/cpp/imgui_stdlib.h"
-#include "assets/AssetManager.h"
+
 
 namespace Engine::Components {
 	void AudioSource::OnRemoved(Entity& entity)

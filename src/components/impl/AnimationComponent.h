@@ -5,8 +5,8 @@
 #ifndef CPP_ENGINE_ANIMATIONCOMPONENT_H
 #define CPP_ENGINE_ANIMATIONCOMPONENT_H
 
-#include <memory>
-#include <string>
+
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include "Jolt/Jolt.h"
 #include "Jolt/Physics/Body/BodyActivationListener.h"
@@ -23,8 +23,8 @@
 #include "Jolt/Physics/Collision/Shape/TriangleShape.h"
 
 #include <Effekseer.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+
+
 #include <glm/gtx/quaternion.hpp>
 #include <ozz/animation/runtime/sampling_job.h>
 #include <ozz/base/containers/vector.h>
@@ -46,10 +46,17 @@ namespace Engine::Components {
 		ozz::animation::SamplingJob::Context* context   = nullptr;
 		float                                 timescale = 0.0;
 
+        std::vector<ozz::math::SoaTransform>* local_pose = nullptr;
+        std::vector<ozz::math::Float4x4>*     model_pose = nullptr;
+
+        ozz::animation::Skeleton* skeleton = nullptr;
+        std::string               skeletonPath;
+
 		template <class Archive>
 		void serialize(Archive& ar)
 		{
 			ar(CEREAL_NVP(animation));
+            ar(CEREAL_NVP(skeletonPath));
 		}
 
 		AnimationComponent() = default;
@@ -57,7 +64,8 @@ namespace Engine::Components {
 		void OnRemoved(Entity& entity) override;
 		void RenderInspector(Entity& entity) override;
 
-		void SetAnimation(AssetHandle<Animation> animation);
+		void SetSkeleton(const std::string&  path);
+		void SetAnimation(const AssetHandle<Animation>& animation);
 
 		static void CleanAnimationContexts();
 

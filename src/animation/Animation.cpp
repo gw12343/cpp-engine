@@ -4,7 +4,7 @@
 
 #include "Animation.h"
 
-#include <iostream>
+
 namespace Engine {
 	Engine::Animation::~Animation()
 	{

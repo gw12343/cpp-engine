@@ -5,13 +5,13 @@
 #ifndef CPP_ENGINE_INSPECTORUI_H
 #define CPP_ENGINE_INSPECTORUI_H
 
-#include "imgui.h"
-#include "assets/AssetHandle.h"
+
+
 #include "core/EntityHandle.h"
 #include "ozz/animation/runtime/animation.h"
 #include "animation/Animation.h"
-#include <string>
-#include <vector>
+
+
 
 namespace Engine {
 

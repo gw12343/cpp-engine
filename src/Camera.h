@@ -1,11 +1,9 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
 #include "ozz/base/maths/simd_math.h"
 #include "ozz/base/platform.h"
 #include "core/module/Module.h"
+
 
 namespace Engine {
 
@@ -53,8 +51,6 @@ namespace Engine {
 		float m_movementSpeed;
 		float m_mouseSensitivity;
 
-		float m_nearPlane;
-		float m_farPlane;
 
 		// Euler Angles
 		float m_yaw;

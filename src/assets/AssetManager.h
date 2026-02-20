@@ -7,17 +7,16 @@
 
 #include <unordered_map>
 #include <typeindex>
-#include <memory>
-#include <string>
+
+
 #include <cassert>
 #include <random>
 #include <mutex>
-#include <vector>
+#include <sstream>
 
 #include "AssetHandle.h"
 #include "IAssetLoader.h"
 
-#include "rendering/ui/UIManager.h"
 
 namespace Engine {
 
@@ -76,7 +75,6 @@ namespace Engine {
 		std::string EnsureMetaFile(const std::string& assetPath);
 
 
-	  private:
 		static std::string GenerateGUID()
 		{
 			std::stringstream               ss;
@@ -94,9 +92,7 @@ namespace Engine {
 		
 		std::vector<AssetAction> m_pendingActions;
 		std::mutex               m_actionMutex;
-
-		friend class UI::UIManager;
-	};
+    };
 
 } // namespace Engine
 

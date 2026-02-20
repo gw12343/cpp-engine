@@ -4,56 +4,88 @@
 
 
 #include "Builder.h"
-#include <string>
-#include <iostream>
-#include <filesystem>
+
+
+
 #include <cstdlib>
 #include "core/EngineData.h"
 #include "assets/impl/BinarySceneLoader.h"
 #include <sol/sol.hpp>
 #include <fstream>
-#include <vector>
+
 #include "core/SceneManager.h"
 
 namespace Engine {
 	namespace fs = std::filesystem;
 
 
-	void CopyResources(const fs::path& sourceRoot, const fs::path& outRoot)
+	void CopyResourcesAssets(const fs::path& sourceRoot, const fs::path& outRoot)
 	{
-		fs::path sourceResources = sourceRoot / "resources";
+        fs::path sourceResources = sourceRoot / "resources";
 		fs::path outResources    = outRoot / "resources";
+        fs::path sourceAssets = sourceRoot / "assets";
+        fs::path outAssets    = outRoot / "assets";
 
 		if (!fs::exists(sourceResources) || !fs::is_directory(sourceResources)) {
 			std::cerr << "Source resources folder does not exist!\n";
-			return;
-		}
+		}else{
+            try {
+                // Create out/resources folder if it doesn't exist
+                fs::create_directories(outResources);
 
-		try {
-			// Create out/resources folder if it doesn't exist
-			fs::create_directories(outResources);
+                for (auto& entry : fs::recursive_directory_iterator(sourceResources)) {
+                    fs::path relativePath = fs::relative(entry.path(), sourceResources);
 
-			for (auto& entry : fs::recursive_directory_iterator(sourceResources)) {
-				fs::path relativePath = fs::relative(entry.path(), sourceResources);
+                    // Skip anything under "engine" folder
+                    if (!relativePath.empty() && relativePath.begin()->string() == "engine") continue;
 
-				// Skip anything under "engine" folder
-				if (!relativePath.empty() && relativePath.begin()->string() == "engine") continue;
+                    fs::path destPath = outResources / relativePath;
 
-				fs::path destPath = outResources / relativePath;
+                    if (fs::is_directory(entry.status())) {
+                        fs::create_directories(destPath);
+                    }
+                    else if (fs::is_regular_file(entry.status())) {
+                        fs::copy_file(entry.path(), destPath, fs::copy_options::overwrite_existing);
+                    }
+                }
 
-				if (fs::is_directory(entry.status())) {
-					fs::create_directories(destPath);
-				}
-				else if (fs::is_regular_file(entry.status())) {
-					fs::copy_file(entry.path(), destPath, fs::copy_options::overwrite_existing);
-				}
-			}
+                std::cout << "Resources copied successfully to: " << outResources << "\n";
+            }
+            catch (const fs::filesystem_error& e) {
+                std::cerr << "Error copying resources: " << e.what() << "\n";
+            }
+        }
+        if (!fs::exists(sourceAssets) || !fs::is_directory(sourceAssets)) {
+			std::cerr << "Source assets folder does not exist!\n";
+		}else {
+            try {
+                // Create out/resources folder if it doesn't exist
+                fs::create_directories(outAssets);
 
-			std::cout << "Resources copied successfully to: " << outResources << "\n";
-		}
-		catch (const fs::filesystem_error& e) {
-			std::cerr << "Error copying resources: " << e.what() << "\n";
-		}
+                for (auto& entry : fs::recursive_directory_iterator(sourceAssets)) {
+                    fs::path relativePath = fs::relative(entry.path(), sourceAssets);
+
+                    // Skip anything under "engine" folder
+                    if (!relativePath.empty() && relativePath.begin()->string() == "engine") continue;
+
+                    fs::path destPath = outAssets / relativePath;
+
+                    if (fs::is_directory(entry.status())) {
+                        fs::create_directories(destPath);
+                    }
+                    else if (fs::is_regular_file(entry.status())) {
+                        fs::copy_file(entry.path(), destPath, fs::copy_options::overwrite_existing);
+                    }
+                }
+
+                std::cout << "Resources copied successfully to: " << outAssets << "\n";
+            }
+            catch (const fs::filesystem_error& e) {
+                std::cerr << "Error copying resources: " << e.what() << "\n";
+            }
+        }
+
+
 	}
 
 
@@ -88,7 +120,7 @@ namespace Engine {
 		CreateOutputDirectory(outPath);
 
 		// Copy resources
-		CopyResources(fs::current_path(), outPath);
+        CopyResourcesAssets(fs::current_path(), outPath);
 
 		// Pre-compile scripts
 

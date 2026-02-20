@@ -3,7 +3,7 @@
 
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
-#include <tracy/Tracy.hpp>
+
 #include "Window.h"
 
 #include "scripting/ScriptManager.h"
@@ -18,6 +18,7 @@ namespace Engine {
 
 	void Input::onInit()
 	{
+        ZoneScopedN("Initialize Input");
 		//glfwSetScrollCallback(GetWindow().GetNativeWindow(), ScrollCallback);
 
 		// Prime the last-mouse position so GetMouseDelta is zero on first frame

@@ -1,7 +1,7 @@
 #pragma once
-#include <glm/glm.hpp>
+
 #include <spdlog/spdlog.h>
-#include <string>
+
 #include <optional>
 
 typedef unsigned int GLuint;

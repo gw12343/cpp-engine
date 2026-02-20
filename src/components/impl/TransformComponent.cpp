@@ -3,18 +3,18 @@
 //
 #include "components/Components.h"
 #include "core/Entity.h"
-#include "utils/Utils.h"
-#include "imgui.h"
+
+
 #include "ozz/animation/runtime/track.h"
 #include "rendering/particles/ParticleManager.h"
 #include "animation/AnimationManager.h"
 #include "scripting/ScriptManager.h"
-#include "glm/gtc/type_ptr.hpp"
+
 #include "physics/PhysicsManager.h"
 #include "TransformComponent.h"
 #include "RigidBodyComponent.h"
 #include "PlayerControllerComponent.h"
-#include "rendering/ui/InspectorUI.h"
+
 #include "EntityMetadataComponent.h"
 #include "glm/gtx/matrix_decompose.inl"
 
@@ -70,7 +70,9 @@ namespace Engine::Components {
 		}
 
 
-		LeftLabelDragFloat3("Scale", glm::value_ptr(localScale), 0.1f);
+		if(LeftLabelDragFloat3("Scale", glm::value_ptr(localScale), 0.1f)){
+            updatePhysicsPositionManually = true;
+        }
 
 		if (updatePhysicsPositionManually) {
 			auto& em           = entity.GetComponent<EntityMetadata>();

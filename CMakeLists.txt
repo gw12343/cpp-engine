@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 project(cpp-engine VERSION 0.1.0 LANGUAGES C CXX)
 
-# ----------------- Build Options -----------------
+# ----------------- Build Options ----------------
 # Compiler settings
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -10,6 +10,7 @@ option(ENABLE_ALL_WARNINGS "Enable all warnings and warnings as errors" OFF)
 set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE INTERNAL "No dev warnings")
 
 add_compile_options(-w)
+
 
 if (WIN32)
     add_compile_definitions(NOMINMAX)
@@ -20,9 +21,15 @@ endif ()
 # Global dependency flags
 set(SPDLOG_BUILD_WARNINGS OFF CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-set(JPH_USE_STATIC_RUNTIME OFF CACHE BOOL "" FORCE)
+
+
 set(JPH_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+set(JPH_BUILD_UNIT_TESTS OFF CACHE BOOL "" FORCE)
 set(JPH_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(JPH_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(JPH_USE_VK OFF CACHE BOOL "" FORCE)
+
+
 set(ozz_build_samples OFF CACHE BOOL "" FORCE)
 set(ozz_build_tests OFF CACHE BOOL "" FORCE)
 set(ozz_build_tools OFF CACHE BOOL "" FORCE)
@@ -90,6 +97,8 @@ FetchContent_Declare(
         GIT_SHALLOW TRUE
         GIT_PROGRESS TRUE
 )
+
+
 
 FetchContent_Declare(
         jolt
@@ -252,6 +261,7 @@ file(GLOB_RECURSE SOURCES "lib/src/*.cpp" "lib/src/*.c" "src/*.cpp" "src/*.inl")
 function(setup_executable TARGET_NAME GAME_BUILD_FLAG)
     add_executable(${TARGET_NAME} ${SOURCES})
 
+
     if (GAME_BUILD_FLAG)
         target_compile_definitions(${TARGET_NAME} PRIVATE GAME_BUILD)
         message(STATUS "Configuring ${TARGET_NAME} with GAME_BUILD")
@@ -343,6 +353,12 @@ function(setup_executable TARGET_NAME GAME_BUILD_FLAG)
         target_link_directories(${TARGET_NAME} PRIVATE ${SNDFILE_LIBRARY_DIRS})
         target_link_libraries(${TARGET_NAME} PRIVATE ${SNDFILE_LIBRARIES})
     endif ()
+
+    target_precompile_headers(${TARGET_NAME}
+            PRIVATE
+            "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h>"
+    )
+
 
     # Link all libraries
     target_link_libraries(${TARGET_NAME} PRIVATE

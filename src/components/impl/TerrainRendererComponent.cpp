@@ -17,9 +17,10 @@ namespace Engine {
 	void Components::TerrainRenderer::RenderInspector(Entity& entity)
 	{
 		std::string newID = terrainTile.GetID();
-		if (ImGui::InputText("Terrain Tile", &newID)) {
-			terrainTile = AssetHandle<Terrain::TerrainTile>(newID);
-		}
+
+        LeftLabelAssetTerrain("Terrain Tile", &terrainTile);
+
+
 
 		if (!terrainTile.IsValid()) {
 			ImGui::TextColored(ImVec4(1, 0, 0, 1), "Invalid terrain tile!");

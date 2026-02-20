@@ -6,7 +6,7 @@
 #include "core/EngineData.h"
 #include "animation/AnimationManager.h"
 
-#include <iostream>
+
 
 namespace Engine {
 	std::unique_ptr<Animation> AnimationLoader::LoadFromFile(const std::string& path)

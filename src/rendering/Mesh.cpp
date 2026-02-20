@@ -3,9 +3,9 @@
 #include "Shader.h"
 #include "core/Engine.h"
 #include "terrain/TerrainManager.h"
-#include "utils/Utils.h"
+
 #include "core/EngineData.h"
-#include "assets/AssetManager.h"
+
 
 #include <glad/glad.h>
 #include <spdlog/spdlog.h>
@@ -101,7 +101,10 @@ namespace Engine {
 					shader.SetInt("hasDiffuseTexture", 0);
 					shader.SetInt("hasNormalTexture", 0);
 					shader.SetInt("hasSpecularTexture", 0);
-				}
+					shader.SetFloat("uShininess", 32);
+                    shader.SetVec3("uAmbientColor", glm::vec3(1.0f, 1.0f, 1.0f));
+                    shader.SetVec3("uEmissiveColor", glm::vec3(0.0f));
+                }
 			}
 			if (cullBackfaces)
 				glEnable(GL_CULL_FACE);

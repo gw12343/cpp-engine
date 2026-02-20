@@ -5,17 +5,18 @@
 #include "SceneManager.h"
 
 #include <utility>
-#include <tracy/Tracy.hpp>
+
 #include "physics/PhysicsManager.h"
 #include "scripting/ScriptManager.h"
 #include "components/impl/RigidBodyComponent.h"
-#include "assets/AssetManager.h"
+
 #include "components/impl/EntityMetadataComponent.h"
 namespace Engine {
 
 	// Module overrides
 	void SceneManager::onInit()
 	{
+        ZoneScopedN("Initialize SceneManager");
 		log->info("SceneManager initialized.");
 	}
 

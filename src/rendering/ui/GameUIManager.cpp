@@ -1,10 +1,11 @@
+#include "glad/glad.h"
 #include "GameUIManager.h"
 #include "components/impl/RmlUIComponent.h"
 #include "core/Input.h"
 #include "core/Window.h"
 #include "core/EngineData.h"
 #include "scripting/ScriptManager.h"
-#include <tracy/Tracy.hpp>
+
 
 namespace Engine {
 
@@ -12,6 +13,7 @@ namespace Engine {
 	GameUIManager::~GameUIManager() = default;
 
 	void GameUIManager::onInit() {
+        ZoneScopedN("Initialize GameUIManager");
 		auto& window = GetWindow();
 		int width = window.GetWidth();
 		int height = window.GetHeight();
@@ -139,7 +141,10 @@ namespace Engine {
 
 	void GameUIManager::Render() {
 		ZoneScoped;
-		if (m_rmlContext) {
+
+
+
+        if (m_rmlContext) {
 			m_rmlContext->Render();
 		}
 	}

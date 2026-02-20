@@ -4,7 +4,7 @@
 #include "rendering/ui/GameUIManager.h"
 #include "rendering/ui/GameUIManager.h"
 #include <RmlUi/Core.h>
-#include <glm/gtc/matrix_transform.hpp>
+
 #include <glm/gtc/type_ptr.hpp>
 
 // stb_image is already used elsewhere in the project

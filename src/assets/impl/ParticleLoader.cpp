@@ -4,7 +4,7 @@
 
 #include "ParticleLoader.h"
 
-#include <iostream>
+
 
 namespace Engine {
 	std::unique_ptr<Particle> ParticleLoader::LoadFromFile(const std::string& path)

@@ -8,7 +8,7 @@
 #include "assimp/Importer.hpp"
 #include "assimp/postprocess.h"
 #include "assimp/scene.h"
-#include <string>
+
 #include <unordered_map>
 
 namespace Engine {

@@ -3,16 +3,18 @@
 //
 
 #include "AssetUIRenderer.h"
-#include "imgui.h"
+
 #include "imgui_internal.h"
 #include "functional"
 #include "terrain/TerrainTile.h"
 #include "rendering/Renderer.h"
 #include "efsw/efsw.hpp"
-#include "utils/Utils.h"
+
 #include "rendering/particles/Particle.h"
 #include "animation/Animation.h"
-#include <filesystem>
+#include "rendering/ui/UIManager.h"
+
+
 #include <functional>
 #include <algorithm>
 #include <cstring>
@@ -131,6 +133,7 @@ namespace Engine {
 		// Render root folders
 		RenderDirectoryTreeNode("resources", "resources");
 		RenderDirectoryTreeNode("scripts", "scripts");
+		RenderDirectoryTreeNode("assets", "assets");
 	}
 
 	void AssetUIRenderer::RenderDirectoryTreeNode(const std::string& dirPath, const std::string& dirName)
@@ -334,6 +337,11 @@ namespace Engine {
 				auto handle = GetAssetManager().Load<Material>(path);
 				GetUI().m_selectedMaterial = handle;
 			}
+
+            if (ext == ".obj") {
+                auto handle = GetAssetManager().Load<Rendering::Model>(path);
+                GetUI().m_selectedModel = handle;
+            }
 		}
 
 		// Draw icon
@@ -462,6 +470,7 @@ namespace Engine {
 		else if (extension == ".material") {
 			// For materials, render preview on sphere with error handling
 			// Check if we've already tried to load this material
+
 			if (m_loadedMaterialPaths.find(path) == m_loadedMaterialPaths.end()) {
 				// First time seeing this material, try to load it
 				m_loadedMaterialPaths.insert(path);
@@ -487,6 +496,7 @@ namespace Engine {
 					return reinterpret_cast<void*>(static_cast<intptr_t>(it->second.texture));
 				}
 			}
+            GetDefaultLogger()->warn("got here");
 			return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_materialIconTexture->GetID()));
 		}
 		else if (extension == ".wav" || extension == ".mp3" || extension == ".ogg") {

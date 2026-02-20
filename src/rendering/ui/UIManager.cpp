@@ -5,37 +5,39 @@
 
 #include "rendering/Renderer.h"
 #include "rendering/ui/GameUIManager.h"
-#include "rendering/ui/IconsFontAwesome6.h"
-#include "rendering/ui/windows/SceneViewWindow.h"
 
+#include "rendering/ui/IconsFontAwesome6.h"
+#include "rendering/ui/Themes.h"
+
+#include "rendering/ui/windows/SceneViewWindow.h"
+#include "rendering/particles/ParticleManager.h"
 #include "components/impl/EntityMetadataComponent.h"
 #include "components/impl/TerrainRendererComponent.h"
-#include "rendering/particles/ParticleManager.h"
 
-#include "rendering/ui/Themes.h"
 
 #include "assets/impl/JSONSceneLoader.h"
 
 #include "physics/PhysicsManager.h"
-#include "core/Input.h"
 
+#include "core/Input.h"
 #include "core/SceneManager.h"
-#include "scripting/ScriptManager.h"
 #include "core/module/ModuleManager.h"
+#include "scripting/ScriptManager.h"
 
 #include "windows/ConsoleWindow.h"
 #include "windows/AudioDebugWindow.h"
 #include "windows/SceneViewWindow.h"
 #include "windows/AnimationWindow.h"
+
 #include "utils/Builder.h"
 #include "components/impl/ModelRendererComponent.h"
 #include "rendering/particles/Particle.h"
 #include "components/impl/ParticleSystemComponent.h"
+#include "assets/impl/MaterialLoader.h"
+
 
 #include <nfd.h>
-#include <string>
-#include <iostream>
-#include <tracy/Tracy.hpp>
+
 #include <RmlUi/Core.h>
 
 std::string SelectFolder()
@@ -68,6 +70,7 @@ namespace Engine::UI {
 
 	void UIManager::onInit()
 	{
+        ZoneScopedN("Initialize Editor UI");
 		SetThemeColors(0);
 
 		m_uiAssetRenderer   = std::make_unique<AssetUIRenderer>();
@@ -373,7 +376,7 @@ namespace Engine::UI {
 
 	void UIManager::onUpdate(float dt)
 	{
-		ZoneScoped;
+        ZoneScopedN("OnUpdate UI manager");
 		m_selectedTheme = GetState() == EDITOR ? 2 : 0;
 		GetRenderer().PreRender();
 		float h      = RenderMainMenuBar();
@@ -387,6 +390,8 @@ namespace Engine::UI {
 
 		DrawAnimationWindow();
 		DrawAudioDebugWindow();
+        RenderModelDebug(m_selectedModel);
+        RenderGBufferDebug(GetWindow().GetGBuffer());
 		DrawConsoleWindow(Logger::getImGuiSink(), &consoleOpen);
 
 		m_uiAssetRenderer->RenderAssetWindow();
@@ -616,10 +621,176 @@ namespace Engine::UI {
 		ImGui::End();
 	}
 
+    void UIManager::RenderModelDebug(AssetHandle<Engine::Rendering::Model> handle) {
+        ImGui::Begin("Model Debug");
+
+
+        if (!handle.IsValid()) {
+            ImGui::Text("Invalid model selected.");
+        }
+        else {
+            Rendering::Model* model = GetAssetManager().Get(handle);
+
+            std::string name = model->m_name;
+            ImGui::Text("Model: %s", name.c_str());
+            ImGui::Text("Meshes: %d", model->GetMeshes().size());
+
+            if(ImGui::TreeNode("Meshes")) {
+
+                for (int i = 0; i < model->GetMeshes().size(); i++) {
+                    char buff[256];
+                    sprintf(buff, "Mesh %d", i);
+
+                    if (ImGui::TreeNode(buff)) {
+                        auto m = model->GetMeshes()[i];
+                        ImGui::Text("VAO: %i", m->GetVAO());
+                        ImGui::Text("VBO: %i", m->GetVBO());
+                        ImGui::Text("EBO: %i", m->GetEBO());
+
+                        ImGui::TreePop();
+                    }
+
+                }
+                ImGui::TreePop();
+            }
+
+
+            ImGui::Separator();
+
+            if(ImGui::Button("Extract Materials")) {
+                auto exportPath = SelectFolder();
+
+                if(!exportPath.empty()) {
+                    log->info("Materials being extracted to: {}", exportPath);
+
+                    auto loader = ((MaterialLoader*) (GetAssetManager().GetStorage<Material>().loader.get()));
+                    int n = 0;
+                    for(auto mesh : model->GetMeshes()) {
+                        auto mat = mesh->GetMaterial();
+
+                        log->info("Mat name {}", mat->GetName());
+                        log->info("--> albedo {}", mat->GetDiffuseTexture().GetID());
+                        Material mt = *mat.get();
+                        loader->SaveMaterial(mt, exportPath + "/material-" + mat->GetName() + "#" + (std::to_string(n++))+".material");
+                    }
+
+
+                }else {
+                    log->warn("No path selected, so materials won't be extracted!");
+                }
+            }
+
+
+            // Right column: Preview
+            ImGui::SameLine();
+        }
+
+
+
+
+        ImGui::End();
+    }
+
+
+    static bool gbufferDebug = true;
+
+    void UIManager::RenderGBufferDebug(std::shared_ptr<GBuffer> gbuffer)
+    {
+        ImGui::Begin("GBuffer Debug", &gbufferDebug);
+
+        const float previewSize = 400.0f;
+
+        ImVec2 uv0 = ImVec2(0, 1);
+        ImVec2 uv1 = ImVec2(1, 0);
+
+        if(ImGui::CollapsingHeader("SSAO")) {
+            ImGui::Indent();
+            ImGui::Text("SSAO");
+            ImGui::Image((ImTextureID) (intptr_t) GetWindow().GetSSAOBuffer()->ssaoTex,
+                         ImVec2(previewSize, previewSize),
+                         uv0, uv1);
+
+            ImGui::Text("SSAO BLUR");
+            ImGui::Image((ImTextureID) (intptr_t) GetWindow().GetSSAOBuffer()->blurTex,
+                         ImVec2(previewSize, previewSize),
+                         uv0, uv1);
+
+            ImGui::Unindent();
+        }
+
+        if(ImGui::CollapsingHeader("BLOOM")) {
+            ImGui::Indent();
+
+            ImGui::SliderFloat("Threshold", &GetRenderSettings()->bloom_threshold, 0.1, 2.0);
+            ImGui::SliderFloat("Knee", &GetRenderSettings()->bloom_knee, 0.1,0.5);
+
+            auto br = GetRenderer().GetBloomRenderer();
+
+            int i = 0;
+            for(auto bm : br->GetBloomMips()) {
+                ImGui::Text("MIP %d   ( %f x %f )", (++i), bm.size.x, bm.size.y);
+
+                ImGui::Image((ImTextureID) (intptr_t) bm.fb.texture,
+                             ImVec2(previewSize, previewSize),
+                             uv0, uv1);
+                }
+
+
+
+            ImGui::Unindent();
+        }
+
+        ImGui::Text("Albedo");
+        ImGui::Image((ImTextureID)(intptr_t)gbuffer->GetAlbedo(),
+                     ImVec2(previewSize, previewSize),
+                     uv0, uv1);
+
+        ImGui::Text("Normal");
+        ImGui::Image((ImTextureID)(intptr_t)gbuffer->GetNormal(),
+                     ImVec2(previewSize, previewSize),
+                     uv0, uv1);
+
+        ImGui::Text("Material");
+        ImGui::Image((ImTextureID)(intptr_t)gbuffer->GetMaterial(),
+                     ImVec2(previewSize, previewSize),
+                     uv0, uv1);
+
+        ImGui::Text("Emissive");
+        ImGui::Image((ImTextureID)(intptr_t)gbuffer->GetEmissive(),
+                     ImVec2(previewSize, previewSize),
+                     uv0, uv1);
+
+        ImGui::Text("Depth");
+        ImGui::Image((ImTextureID)(intptr_t)gbuffer->GetDepth(),
+                     ImVec2(previewSize, previewSize),
+                     uv0, uv1);
+
+
+
+        ImGui::End();
+    }
+
 	bool UIManager::isOverSceneView() const
 	{
 		return m_overSceneView;
 	}
+
+
+
+    void UIManager::setLuaBindings() {
+
+        // Input binding
+        GetScriptManager().lua.new_usertype<UIManager>("UI",
+                                                   "getSelectedEntity",
+                                                   &UIManager::getSelectedEntity
+        );
+
+
+        // Global accessor
+        GetScriptManager().lua.set_function("getUI", []() -> UIManager& { return Engine::GetUI(); });
+
+    }
+
 
 
 } // namespace Engine::UI

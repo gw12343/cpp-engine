@@ -1,10 +1,10 @@
 #pragma once
 #include "efsw/efsw.hpp"
 #include "core/EngineData.h"
-#include "assets/AssetManager.h"
-#include <string>
-#include <filesystem>
-#include <iostream>
+
+
+
+
 
 namespace Engine {
 

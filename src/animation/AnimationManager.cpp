@@ -5,15 +5,13 @@
 
 #include "components/impl/AnimationComponent.h"
 #include "components/impl/TransformComponent.h"
-#include "components/impl/AnimationPoseComponent.h"
-#include "components/impl/SkeletonComponent.h"
 #include "components/impl/SkinnedMeshComponent.h"
 
 
 #include <utils/Utils.h>
-#include <tracy/Tracy.hpp>
+
 #include "core/SceneManager.h"
-#include "assets/AssetManager.h"
+
 #include "physics/PhysicsManager.h"
 
 namespace Engine {
@@ -74,8 +72,6 @@ namespace Engine {
 			for (auto entity : animationView) {
 				Entity e(entity, GetCurrentScene());
 				auto&  animationComponent     = e.GetComponent<Components::AnimationComponent>();
-				auto&  animationPoseComponent = e.GetComponent<Components::AnimationPoseComponent>();
-				auto&  skeletonComponent      = e.GetComponent<Components::SkeletonComponent>();
 
 				// Update animation time
 				if (GetState() == PLAYING) {
@@ -92,16 +88,16 @@ namespace Engine {
 
 					sampling_job.context = animationComponent.context; // animationWorkerComponent.context;
 					sampling_job.ratio   = animationComponent.timescale;
-					sampling_job.output  = ozz::make_span(*animationPoseComponent.local_pose);
+					sampling_job.output  = ozz::make_span(*animationComponent.local_pose);
 					if (!sampling_job.Run()) {
 						log->error("Failed to sample animation");
 						return;
 					}
 
 					ozz::animation::LocalToModelJob ltm_job;
-					ltm_job.skeleton = skeletonComponent.skeleton;
-					ltm_job.input    = ozz::make_span(*animationPoseComponent.local_pose);
-					ltm_job.output   = ozz::make_span(*animationPoseComponent.model_pose);
+					ltm_job.skeleton = animationComponent.skeleton;
+					ltm_job.input    = ozz::make_span(*animationComponent.local_pose);
+					ltm_job.output   = ozz::make_span(*animationComponent.model_pose);
 					if (!ltm_job.Run()) {
 						log->error("Failed to convert to model space");
 						return;
@@ -114,13 +110,14 @@ namespace Engine {
 
 	void AnimationManager::Render()
 	{
-		// Get all entities with a SkinnedMeshComponent and transform and AnimationPoseComponent
-		auto view = GetCurrentSceneRegistry().view<Components::SkinnedMeshComponent, Components::Transform>();
+		// Get all entities with a SkinnedMeshComponent and transform and AnimationComponent
+		auto view = GetCurrentSceneRegistry().view<Components::SkinnedMeshComponent, Components::AnimationComponent, Components::Transform>();
 		for (auto entity : view) {
 			Entity                    e(entity, GetCurrentScene());
 			auto&                     skinnedMeshComponent   = e.GetComponent<Components::SkinnedMeshComponent>();
-			auto&                     animationPoseComponent = e.GetComponent<Components::AnimationPoseComponent>();
+			auto&                     animationComponent = e.GetComponent<Components::AnimationComponent>();
 			const ozz::math::Float4x4 transform              = FromMatrix(e.GetComponent<Components::Transform>().GetWorldMatrix());
+
 
 			// Render each mesh
 			for (const Engine::Mesh& mesh : *skinnedMeshComponent.meshes) {
@@ -131,7 +128,7 @@ namespace Engine {
 				// use the joint remapping table (available from the mesh object) to
 				// reorder model-space matrices and build skinning ones
 				for (size_t i = 0; i < mesh.joint_remaps.size(); ++i) {
-					(*skinnedMeshComponent.skinning_matrices)[i] = (*animationPoseComponent.model_pose)[mesh.joint_remaps[i]] * mesh.inverse_bind_poses[i];
+					(*skinnedMeshComponent.skinning_matrices)[i] = (*animationComponent.model_pose)[mesh.joint_remaps[i]] * mesh.inverse_bind_poses[i];
 				}
 				renderer_->DrawSkinnedMesh(mesh, ozz::make_span(*skinnedMeshComponent.skinning_matrices), transform, skinnedMeshComponent.meshMaterial, render_options_);
 			}

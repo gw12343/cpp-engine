@@ -6,7 +6,7 @@
 #include "animation/renderer_impl.h"
 #include "core/module/Module.h"
 
-#include <memory>
+
 #include <ozz/animation/runtime/animation.h>
 #include <ozz/animation/runtime/blending_job.h>
 #include <ozz/animation/runtime/local_to_model_job.h>
@@ -20,9 +20,9 @@
 #include <ozz/base/maths/soa_transform.h>
 #include <ozz/base/maths/vec_float.h>
 #include <ozz/base/memory/unique_ptr.h>
-#include <string>
+
 #include <unordered_map>
-#include <vector>
+
 
 namespace Engine {
 

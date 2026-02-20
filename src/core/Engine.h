@@ -1,7 +1,7 @@
 #pragma once
 
-#include <entt/entt.hpp>
-#include <memory>
+
+
 #include <spdlog/spdlog.h>
 
 namespace Engine {
@@ -53,10 +53,7 @@ namespace Engine {
 
 
 	  private:
-		/**
-		 * @brief Creates initial entities used in the game world.
-		 */
-		static void LoadGameAssets();
+        void LoadGameAssets();
 
 		std::shared_ptr<spdlog::logger> m_logger; ///< Logger instance.
 

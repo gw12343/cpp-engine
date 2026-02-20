@@ -3,11 +3,10 @@
 //
 
 #include "TerrainTile.h"
-#include "utils/Utils.h"
 #include "core/EngineData.h"
 #include "glad/glad.h"
-#include <filesystem>
-#include <iostream>
+
+
 #include <sstream>
 #include "rendering/Renderer.h"
 
@@ -22,70 +21,35 @@ namespace Engine::Terrain {
 	std::string TerrainTile::GenerateGLSLShader() const
 	{
 		std::ostringstream ss;
-		ss << "#version 420\n";
-		ss << "in vec2 vUV;\n";
-		ss << "in vec3 vNormal;\n";
-		ss << "in vec3 vWorldPos;\n";
-		ss << "out vec4 FragColor;\n";
+		ss << "#version 420 core\n"
+              "layout (location = 0) out vec4 gAlbedo;    // RGB = base color, A = alpha\n"
+              "layout (location = 1) out vec3 gNormal;    // world-space normal\n"
+              "layout (location = 2) out vec4 gMaterial;  // R = specular strength\n"
+              "layout (location = 3) out vec3 gEmissive;  // emissive color\n"
+              "\n"
+              "in VS_OUT {\n"
+              "    vec3 FragPos;\n"
+              "    vec3 Normal;\n"
+              "    vec2 TexCoords;\n"
+              "} fs_in;\n"
+              "uniform vec2 textureScale;\n\n";
 
-		ss << "uniform vec3 lightDir;\n";
-		ss << "uniform vec3 viewPos;\n";
-		ss << "uniform float farPlane;\n";
-		ss << "uniform vec2 texScale;\n";
-		ss << "uniform mat4 view;\n";
-		ss << "uniform int cascadeCount;\n";
-		ss << "uniform int debugShadows;\n";
+
+
 
 
 		// Bind terrain texture samplers
 		int totalLayers  = static_cast<int>(splatLayerCount);
 		int textureCount = (totalLayers + 3) / 4;
 
-		// Shadow map sampler
-		ss << "layout(binding = " << (totalLayers + textureCount) << ") uniform sampler2DArray shadowMap;\n";
-
-		ss << "uniform float cascadePlaneDistances[16];\n";
-
-		// UBO for shadow matrices
-		ss << "layout(std140) uniform LightSpaceMatrices {\n";
-		ss << "    mat4 lightSpaceMatrices[16];\n";
-		ss << "};\n";
-
 		for (int i = 0; i < textureCount; ++i)
 			ss << "layout(binding = " << i << ") uniform sampler2D splat" << i << ";\n";
 		for (int i = 0; i < totalLayers; ++i)
 			ss << "layout(binding = " << (textureCount + i) << ") uniform sampler2D tex" << i << ";\n";
 
-		// Shadow utility functions
-		ss << R"(
-		int GetCascadeLayer(vec3 fragPosWorldSpace) {
-			vec4 fragPosViewSpace = view * vec4(fragPosWorldSpace, 1.0);
-			float depthValue = abs(fragPosViewSpace.z);
-			for (int i = 0; i < cascadeCount; ++i)
-				if (depthValue < cascadePlaneDistances[i]) return i;
-			return cascadeCount;
-		}
 
-		float ShadowCalculation(vec3 fragPosWorldSpace, int layer) {
-			vec4 fragPosLightSpace = lightSpaceMatrices[layer] * vec4(fragPosWorldSpace, 1.0);
-			vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-			projCoords = projCoords * 0.5 + 0.5;
 
-			float currentDepth = projCoords.z;
-			if (currentDepth > 1.0) return 0.0;
 
-			vec3 normal = normalize(vNormal);
-			float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
-			bias *= 1.0 / ((layer == cascadeCount ? farPlane : cascadePlaneDistances[layer]) * 0.5);
-
-			float shadow = 0.0;
-			vec2 texelSize = 1.0 / vec2(textureSize(shadowMap, 0));
-			for (int x = -1; x <= 1; ++x)
-				for (int y = -1; y <= 1; ++y)
-					shadow += (currentDepth - bias) > texture(shadowMap, vec3(projCoords.xy + vec2(x, y) * texelSize, layer)).r ? 1.0 : 0.0;
-			return shadow / 9.0;
-		}
-		)";
 
 		// Begin main()
 		ss << "void main() {\n";
@@ -93,7 +57,7 @@ namespace Engine::Terrain {
 		ss << "  float total = 0.0001;\n";
 
 		for (int i = 0; i < textureCount; ++i) {
-			ss << "  vec4 w" << i << " = texture(splat" << i << ", vUV);\n";
+			ss << "  vec4 w" << i << " = texture(splat" << i << ", fs_in.TexCoords);\n";
 			for (int j = 0; j < 4; ++j) {
 				int idx = i * 4 + j;
 				if (idx >= totalLayers) break;
@@ -104,32 +68,17 @@ namespace Engine::Terrain {
 
 		ss << "  vec4 baseColor = vec4(0.0);\n";
 		for (int i = 0; i < totalLayers; ++i) {
-			ss << "  baseColor += texture(tex" << i << ", vUV * texScale) * (weights[" << i << "] / total);\n";
+			ss << "  baseColor += texture(tex" << i << ", fs_in.TexCoords * textureScale) * (weights[" << i << "] / total);\n";
 		}
 
-		ss << "  vec3 N = normalize(vNormal);\n";
-		ss << "  vec3 L = normalize(lightDir);\n";
-		ss << "  float diff = max(dot(N, L), 0.0);\n";
-		ss << "  vec3 diffuse = vec3(1.0) * diff;\n";
-		ss << "  vec3 ambient = vec3(0.2) * baseColor.rgb;\n";
 
-		ss << "  vec3 viewDir = normalize(viewPos - vWorldPos);\n";
-		ss << "  vec3 reflectDir = reflect(-L, N);\n";
-		ss << "  float spec = pow(max(dot(normalize(L + viewDir), N), 0.0), 64.0);\n";
-		ss << "  vec3 specular = vec3(1.0) * spec;\n";
+        ss << "gAlbedo = baseColor;\n";
+        ss << "gNormal = normalize(fs_in.Normal);\n";
+        ss << "gMaterial = vec4(0);";
+        ss << "gEmissive = vec3(0);";
 
-		ss << "  int layer = GetCascadeLayer(vWorldPos);\n";
-		ss << "  float shadow = ShadowCalculation(vWorldPos, layer);\n";
-		ss << "  vec3 lighting = ambient + (1.0 - shadow) * (diffuse + specular);\n";
 
-		ss << "  vec3 cascadeColor;\n";
-		ss << "  if (layer == 0) cascadeColor = vec3(1,0,0);\n";
-		ss << "  else if (layer == 1) cascadeColor = vec3(0,1,0);\n";
-		ss << "  else if (layer == 2) cascadeColor = vec3(0,0,1);\n";
-		ss << "  else cascadeColor = vec3(1);\n";
-
-		ss << "  FragColor = vec4(mix(baseColor.rgb * lighting, cascadeColor, debugShadows == 1 ? 0.35 : 0.0), baseColor.a);\n";
-		ss << "}\n";
+        ss << "}\n";
 
 		return ss.str();
 	}
@@ -137,23 +86,53 @@ namespace Engine::Terrain {
 	std::string TerrainTile::GenerateGLSLVertexShader() const
 	{
 		std::ostringstream ss;
-		ss << "#version 420\n";
-		ss << "layout(location = 0) in vec3 aPosition;\n";
-		ss << "layout(location = 1) in vec2 aUV;\n";
-		ss << "layout(location = 2) in vec3 aNormal;\n";
-		ss << "uniform mat4 uModel;\n";
-		ss << "uniform mat4 uView;\n";
-		ss << "uniform mat4 uProjection;\n";
-		ss << "out vec2 vUV;\n";
-		ss << "out vec3 vNormal;\n";
-		ss << "out vec3 vWorldPos;\n";
-		ss << "void main() {\n";
-		ss << "  vUV = aUV;\n";
-		ss << "  vec4 worldPos = uModel * vec4(aPosition, 1.0);\n";
-		ss << "  vWorldPos = worldPos.xyz;\n";
-		ss << "  vNormal = mat3(transpose(inverse(uModel))) * aNormal;\n";
-		ss << "  gl_Position = uProjection * uView * worldPos;\n";
-		ss << "}\n";
+//		ss << "#version 420\n";
+//		ss << "layout(location = 0) in vec3 aPosition;\n";
+//		ss << "layout(location = 1) in vec2 aUV;\n";
+//		ss << "layout(location = 2) in vec3 aNormal;\n";
+//		ss << "uniform mat4 uModel;\n";
+//		ss << "uniform mat4 uView;\n";
+//		ss << "uniform mat4 uProjection;\n";
+//		ss << "out vec2 vUV;\n";
+//		ss << "out vec3 vNormal;\n";
+//		ss << "out vec3 vWorldPos;\n";
+//		ss << "void main() {\n";
+//		ss << "  vUV = aUV;\n";
+//		ss << "  vec4 worldPos = uModel * vec4(aPosition, 1.0);\n";
+//		ss << "  vWorldPos = worldPos.xyz;\n";
+//		ss << "  vNormal = mat3(transpose(inverse(uModel))) * aNormal;\n";
+//		ss << "  gl_Position = uProjection * uView * worldPos;\n";
+//		ss << "}\n";
+
+        ss << "#version 330 core\n"
+              "\n"
+              "layout (location = 0) in vec3 aPos;\n"
+              "layout (location = 1) in vec2 aTexCoord;\n"
+              "layout (location = 2) in vec3 aNormal;\n"
+              "\n"
+              "out VS_OUT {\n"
+              "    vec3 FragPos;\n"
+              "    vec3 Normal;\n"
+              "    vec2 TexCoords;\n"
+              "} vs_out;\n"
+              "\n"
+              "uniform mat4 model;\n"
+              "uniform mat4 view;\n"
+              "uniform mat4 projection;\n"
+              "\n"
+              "void main()\n"
+              "{\n"
+              "    // World position\n"
+              "    vs_out.FragPos = vec3(model * vec4(aPos, 1.0));\n"
+              "\n"
+              "    // Correct normal transform\n"
+              "    mat3 normalMatrix = transpose(inverse(mat3(model)));\n"
+              "    vec3 N = normalize(normalMatrix * aNormal);\n"
+              "    vs_out.Normal = N;\n"
+              "    vs_out.TexCoords = aTexCoord;\n"
+              "    gl_Position = projection * view * vec4(vs_out.FragPos, 1.0);\n"
+              "}\n";
+
 		return ss.str();
 	}
 
@@ -164,7 +143,7 @@ namespace Engine::Terrain {
 		std::string fragmentCode = GenerateGLSLShader();
 
 
-		// spdlog::info("VERTEX CODE: \n{}\n FRAGMENT CODE: \n{}", vertexCode, fragmentCode);
+        //spdlog::info("VERTEX CODE: \n{}\n FRAGMENT CODE: \n{}", vertexCode, fragmentCode);
 
 		terrainShader = std::make_shared<Engine::Shader>();
 		bool success  = terrainShader->LoadFromSource(vertexCode, fragmentCode);

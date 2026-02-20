@@ -3,10 +3,10 @@
 //
 
 #pragma once
-#include <memory>
-#include "entt/entt.hpp"
-#include "assets/AssetHandle.h"
+
 #include "utils/Logger.h"
+#include "RenderSettings.h"
+#include "entt/entt.hpp"
 
 #ifndef GAME_BUILD
 #define SCENE_LOADER JSONSceneLoader
@@ -60,11 +60,16 @@ namespace Engine {
 		std::shared_ptr<Input>                   input;
 		std::shared_ptr<GameUIManager>           gameUI;
 		EngineState                              state;
+        RenderSettings*                          renderSettings;
 		ModuleManager*                           manager;
 	};
 
 	EngineData& Get();
 
+
+    inline RenderSettings* GetRenderSettings() {
+        return Get().renderSettings;
+    }
 
 	inline auto GetDefaultLogger()
 	{
