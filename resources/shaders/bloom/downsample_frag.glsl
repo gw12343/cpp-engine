@@ -10,14 +10,20 @@ uniform int applyThreshold; // 1 = apply threshold (mip 0), 0 = skip
 
 vec3 Prefilter(vec3 color)
 {
+    color = max(color, vec3(0.0)); // prevent negative HDR values
+
     float brightness = max(max(color.r, color.g), color.b);
 
-    float soft = brightness - threshold;
-    soft = clamp(soft + knee, 0.0, 2.0 * knee);
-    soft = soft * soft / (4.0 * knee + 0.00001);
+    float kneeVal = threshold * knee;
+
+    float soft = brightness - threshold + kneeVal;
+    soft = clamp(soft, 0.0, 2.0 * kneeVal);
+    soft = (soft * soft) / (4.0 * kneeVal + 1e-5);
 
     float contribution = max(soft, brightness - threshold);
-    contribution /= max(brightness, 0.00001);
+    contribution = max(contribution, 0.0); // ← CRITICAL STABILITY LINE
+
+    contribution /= max(brightness, 1e-4); // slightly larger epsilon
 
     return color * contribution;
 }

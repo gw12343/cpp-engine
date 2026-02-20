@@ -104,6 +104,7 @@ namespace Engine {
 
             m_bloomMips[i].fb.Bind();
             glViewport(0, 0, (GLsizei)m_bloomMips[i].size.x, (GLsizei)m_bloomMips[i].size.y);
+            glClear(GL_COLOR_BUFFER_BIT);
 
             m_downSampleShader->SetFloat("threshold", GetRenderSettings()->bloom_threshold);
             m_downSampleShader->SetFloat("knee", GetRenderSettings()->bloom_knee);
@@ -119,10 +120,12 @@ namespace Engine {
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
         m_upSampleShader->Bind();
+
         for (int i = (GLsizei)GetRenderSettings()->BLOOM_MIPS - 1; i > 0; i--)
         {
             m_bloomMips[i - 1].fb.Bind();
             glViewport(0, 0, (GLsizei)m_bloomMips[i-1].size.x, (GLsizei)m_bloomMips[i-1].size.y);
+
 
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, m_bloomMips[i].fb.texture);
@@ -133,14 +136,21 @@ namespace Engine {
             glDrawArrays(GL_TRIANGLES, 0, 6);
             glBindVertexArray(0);
         }
+        glDisable(GL_BLEND);
     }
 
 
     void BloomRenderer::CombineScene()
     {
         GLuint hdrSceneTex = Window::GetFramebuffer(Window::FramebufferID::LIGHTING)->texture;
-        auto fb = Window::GetFramebuffer(Window::FramebufferID::GAME_OUT);
-        fb->Bind();
+
+#ifndef GAME_BUILD
+        // Draw to the game viewport framebuffer
+        Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->Bind();
+#else
+        // Just draw to the screen
+        Engine::Framebuffer::Unbind();
+#endif
 
         glDisable(GL_BLEND);
         glDisable(GL_DEPTH_TEST);
@@ -165,7 +175,7 @@ namespace Engine {
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
 
-        fb->Unbind();
+        Framebuffer::Unbind();
     }
 
 }
