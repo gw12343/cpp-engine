@@ -129,10 +129,12 @@
                             }
                         },
                         {
-                            "key": "GRAVITY_SCALE",
+                            "key": "BULLET_PARENT",
                             "value": {
-                                "index": 0,
-                                "data": 2.0
+                                "index": 12,
+                                "data": {
+                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
+                                }
                             }
                         },
                         {
@@ -143,11 +145,27 @@
                             }
                         },
                         {
-                            "key": "BULLET_PARENT",
+                            "key": "victorySound",
                             "value": {
-                                "index": 12,
+                                "index": 11,
                                 "data": {
-                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                }
+                            }
+                        },
+                        {
+                            "key": "CAMERA_Y_OFFSET",
+                            "value": {
+                                "index": 0,
+                                "data": 1.100000023841858
+                            }
+                        },
+                        {
+                            "key": "shootSound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
                                 }
                             }
                         },
@@ -168,13 +186,6 @@
                             }
                         },
                         {
-                            "key": "CAMERA_Y_OFFSET",
-                            "value": {
-                                "index": 0,
-                                "data": 1.100000023841858
-                            }
-                        },
-                        {
                             "key": "SHOOT_POWER",
                             "value": {
                                 "index": 0,
@@ -182,21 +193,10 @@
                             }
                         },
                         {
-                            "key": "shootSound",
+                            "key": "GRAVITY_SCALE",
                             "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
-                                }
-                            }
-                        },
-                        {
-                            "key": "victorySound",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
-                                }
+                                "index": 0,
+                                "data": 2.0
                             }
                         }
                     ]
@@ -612,7 +612,7 @@
                 "data": {
                     "position": {
                         "x": -4.384573936462402,
-                        "y": 3.0,
+                        "y": 7.633338928222656,
                         "z": 0.36615872383117678
                     },
                     "rotation": {
@@ -649,8 +649,8 @@
             "RigidBodyComponent": {
                 "nullopt": false,
                 "data": {
-                    "motionType": 1,
-                    "mass": 1.0,
+                    "motionType": 2,
+                    "mass": 193.96600341796876,
                     "friction": 0.5,
                     "restitution": 0.0,
                     "gravityFactor": 0.0,
