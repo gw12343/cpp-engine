@@ -10,6 +10,9 @@ layout (binding = 3) uniform sampler2D gMaterial;
 layout (binding = 4) uniform sampler2D skybox;
 layout (binding = 5) uniform sampler2D ssaoBlurTex;
 layout (binding = 6) uniform sampler2DArray shadowMap;
+layout (binding = 7) uniform sampler2D gEmissive;
+layout (binding = 8) uniform sampler2D bloomTex;
+
 
 uniform vec3 lightDir;
 uniform vec3 viewPos;
@@ -130,7 +133,12 @@ void main()
     if (depth >= 0.9999)
     {
         vec3 ray = ReconstructWorldRay(TexCoords);
-        FragColor = vec4(SampleSky(ray), 1.0);
+        vec3 sky = SampleSky(ray);
+
+        // Bloom should also affect sky
+        vec3 bloom = texture(bloomTex, TexCoords).rgb;
+
+        FragColor = vec4(sky + bloom, 1.0);
         return;
     }
 
@@ -139,29 +147,30 @@ void main()
     vec3 V = normalize(viewPos - FragPos);
     vec3 L = normalize(lightDir);
     vec3 H = normalize(L + V);
+
     vec3 Albedo = texture(gAlbedo, TexCoords).rgb;
+    vec3 Emissive = texture(gEmissive, TexCoords).rgb;
 
     vec2 material = texture(gMaterial, TexCoords).rg;
     float specStrength = material.r;
-    float shininess = material.g * 256.0;
+    float shininess = max(material.g * 256.0, 1.0);
 
-/* -------- Super Strong SSAO-like AO (testing) -------- */
+/* -------- SSAO -------- */
     float ao = min(texture(ssaoBlurTex, TexCoords).r, 0.65);
+
 /* -------- Ambient -------- */
     vec3 ambient = 0.45 * Albedo * ao;
 
 /* -------- Diffuse + wrap -------- */
     float wrap = 0.4;
     float diff = max((dot(N, L) + wrap) / (1.0 + wrap), 0.0);
-    vec3 diffuse = diff * Albedo*0.58;
+    vec3 diffuse = diff * Albedo * 0.58;
 
-/* -------- Specular (AA + Fresnel) -------- */
+/* -------- Specular -------- */
     float specAA = shininess / (1.0 + fwidth(dot(N, H)) * shininess);
     float spec = pow(max(dot(N, H), 0.0), specAA);
 
     float F = pow(1.0 - max(dot(N, V), 0.0), 5.0);
-
-
     vec3 specular = spec * mix(vec3(0.04), vec3(1.0), F) * specStrength;
 
 /* -------- Energy conservation -------- */
@@ -175,32 +184,29 @@ void main()
 /* -------- Shadows -------- */
     float shadow = ShadowCalculation(FragPos, GetCascadeLayer(FragPos), N);
 
+/* -------- Lighting -------- */
     vec3 lighting =
     ao * (ambient + skyDiffuse) +
     (1.0 - shadow) * (diffuse + specular + skySpec);
 
+/* -------- Add Emissive (NOT shadowed, NOT AO’d) -------- */
+    lighting += Emissive;
+
 /* -------- Fog -------- */
     float dist = length(viewPos - FragPos);
-
-    // Exponential fog (stable at distance)
     float fogDensity = 0.005;
     float fogFactor = 1.0 - exp(-dist * fogDensity);
     fogFactor = clamp(fogFactor, 0.0, 1.0);
 
-    // Fade AO & shadows with fog
-    ao = mix(1.0, ao, 1.0 - fogFactor);
-    shadow *= (1.0 - fogFactor);
-
-    // Re-evaluate lighting with faded terms
-    lighting =
-    ao * (ambient + skyDiffuse) +
-    (1.0 - shadow) * (diffuse + specular + skySpec);
-
-    // Prevent zero-light pixels before fog blend
-    lighting = max(lighting, vec3(0.02));
-
     vec3 fogColor = vec3(0.6, 0.7, 0.8);
+
+    // Fog affects lighting but not emissive intensity itself
     lighting = mix(lighting, fogColor, fogFactor);
 
+/* -------- Bloom -------- */
+    vec3 bloom = texture(bloomTex, TexCoords).rgb;
+    lighting += bloom;
+
+/* -------- Final -------- */
     FragColor = vec4(lighting, 1.0);
 }

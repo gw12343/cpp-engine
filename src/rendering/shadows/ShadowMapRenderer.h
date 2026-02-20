@@ -17,7 +17,7 @@
 namespace Engine {
 	class ShadowMapRenderer {
 	  public:
-		void Initalize();
+		void Initialize();
 		void RenderShadowMaps();
 		void UploadShadowMatrices(Engine::Shader& shader, glm::mat4& V, int textureSlot = 1);
 

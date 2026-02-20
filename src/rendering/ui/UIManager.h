@@ -12,7 +12,7 @@
 #include "rendering/ui/windows/AssetUIRenderer.h"
 #include "rendering/ui/windows/InspectorRenderer.h"
 #include "rendering/ui/windows/MaterialEditor.h"
-#include "rendering/GBuffer.h"
+#include "rendering/effects/ssao/GBuffer.h"
 #include <memory>
 #include <typeindex>
 #include <string>

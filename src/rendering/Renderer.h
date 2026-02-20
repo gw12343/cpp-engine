@@ -6,6 +6,7 @@
 #include "Skybox.h"
 #include "core/Window.h"
 #include "rendering/shadows/ShadowMapRenderer.h"
+#include "rendering/effects/bloom/BloomRenderer.h"
 
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
@@ -41,9 +42,12 @@ namespace Engine {
 		Shader& GetTerrainShader() { return m_terrainShader; }
 
 		std::shared_ptr<ShadowMapRenderer> GetShadowRenderer();
+		std::shared_ptr<BloomRenderer> GetBloomRenderer() { return m_bloomRenderer; }
 
-	  private:
+        GLuint quadVAO = 0;
+    private:
 		std::shared_ptr<ShadowMapRenderer> m_shadowRenderer;
+		std::shared_ptr<BloomRenderer> m_bloomRenderer;
 
 		Engine::Shader          m_shader;
 		Engine::Shader          m_mousePickingShader;
@@ -58,7 +62,6 @@ namespace Engine {
 
 
 		std::unique_ptr<Skybox> m_skybox;
-        GLuint quadVAO = 0;
         GLuint quadVBO = 0;
 
 		static void                    RenderGizmos(bool mousePicking);

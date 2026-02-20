@@ -13,7 +13,7 @@
 #include "rendering/ui/IconsFontAwesome6.h"
 #include "imguizmo/ImGuizmo.h"
 #include "imguizmo/ImGuizmo.h"
-
+#include "rendering/Renderer.h"
 namespace Engine {
 
 	static const ImWchar icons_ranges[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
@@ -25,8 +25,9 @@ namespace Engine {
 
 	Window::Window(int width, int height, std::string title) : m_window(nullptr), m_width(width), m_height(height), m_title(std::move(title))
 	{
-		m_frameBuffers[Window::FramebufferID::GAME_OUT]      = std::make_shared<Framebuffer>(GL_LINEAR, GL_LINEAR);
-		m_frameBuffers[Window::FramebufferID::MOUSE_PICKING] = std::make_shared<Framebuffer>(GL_NEAREST, GL_NEAREST);
+		m_frameBuffers[Window::FramebufferID::LIGHTING]      = std::make_shared<Framebuffer>(GL_LINEAR, GL_LINEAR, true);
+		m_frameBuffers[Window::FramebufferID::GAME_OUT]      = std::make_shared<Framebuffer>(GL_LINEAR, GL_LINEAR, true);
+		m_frameBuffers[Window::FramebufferID::MOUSE_PICKING] = std::make_shared<Framebuffer>(GL_NEAREST, GL_NEAREST, false);
         m_gbuffer = std::make_shared<GBuffer>();
         m_ssaobuffer = std::make_shared<SSAOBuffer>();
 	}
