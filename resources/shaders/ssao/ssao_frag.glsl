@@ -65,7 +65,8 @@ void main()
 
         float sampleDepth = ReconstructViewPos(offset.xy).z;
 
-        float rangeCheck = smoothstep(0.0, 1.0, radius / abs(posVS.z - sampleDepth));
+        float diff = abs(posVS.z - sampleDepth);
+        float rangeCheck = smoothstep(0.0, 1.0, radius / max(diff, 0.001));
         occlusion += (sampleDepth >= samplePos.z + bias ? 1.0 : 0.0) * rangeCheck;
     }
 

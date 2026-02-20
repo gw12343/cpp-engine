@@ -18,8 +18,8 @@ namespace Engine {
         std::vector<float>        shadowCascadeLevels{CAMERA_FAR_PLANE / 100.0f, CAMERA_FAR_PLANE / 50.0f, CAMERA_FAR_PLANE / 25.0f, CAMERA_FAR_PLANE / 10.0f, CAMERA_FAR_PLANE / 2.0f};
         const unsigned int BLOOM_MIPS = 6;
 
-        float bloom_threshold = 1.0f;
-        float bloom_knee = 0.1f;
+        float bloom_threshold = 1.1f;
+        float bloom_knee = 0.4f;
     };
 
 }
