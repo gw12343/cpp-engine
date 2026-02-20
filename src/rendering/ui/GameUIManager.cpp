@@ -5,7 +5,7 @@
 #include "core/Window.h"
 #include "core/EngineData.h"
 #include "scripting/ScriptManager.h"
-#include <tracy/Tracy.hpp>
+
 
 namespace Engine {
 

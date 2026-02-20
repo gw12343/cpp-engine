@@ -7,7 +7,7 @@
 #include <cereal/types/optional.hpp>
 #include <cereal/types/common.hpp>
 
-#include <iostream>
+
 #include "components/AllComponents.h"
 #include "components/Components.h"
 #include "core/SceneManager.h"

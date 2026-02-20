@@ -2,7 +2,7 @@
 // Created by gabe on 6/23/25.
 //
 
-#include <tracy/Tracy.hpp>
+
 #include "ScriptManager.h"
 
 #include "core/Entity.h"

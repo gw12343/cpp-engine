@@ -4,8 +4,8 @@
 #include "Texture.h"
 
 
-#include <memory>
-#include <string>
+
+
 
 typedef unsigned int GLuint;
 

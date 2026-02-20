@@ -5,8 +5,8 @@
 #include "ShadowMapRenderer.h"
 #include "glm/ext/matrix_transform.hpp"
 #include "spdlog/spdlog.h"
-#include "utils/Utils.h"
-#include "glm/gtc/type_ptr.hpp"
+
+
 #include "physics/PhysicsManager.h"
 #include "core/EngineData.h"
 #include "components/impl/EntityMetadataComponent.h"

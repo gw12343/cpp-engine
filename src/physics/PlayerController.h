@@ -5,7 +5,7 @@
 #ifndef CPP_ENGINE_PLAYERCONTROLLER_H
 #define CPP_ENGINE_PLAYERCONTROLLER_H
 
-#include "glm/glm.hpp"
+
 
 // Jolt includes
 #include "Jolt/Jolt.h"
@@ -24,7 +24,7 @@
 #include "Jolt/Physics/Character/CharacterBase.h"
 #include "Jolt/Physics/Collision/Shape/ScaledShape.h"
 
-#include <memory>
+
 
 using namespace JPH;
 

@@ -5,8 +5,8 @@
 #ifndef CPP_ENGINE_IASSETLOADER_H
 #define CPP_ENGINE_IASSETLOADER_H
 
-#include <memory>
-#include <string>
+
+
 namespace Engine {
 	template <typename T>
 	class IAssetLoader {

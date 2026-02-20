@@ -3,12 +3,11 @@
 
 #include "spdlog/spdlog.h"
 
-#include <glm/glm.hpp>
+
 #include <ozz/base/containers/vector.h>
 #include <ozz/base/maths/simd_math.h>
 #include <ozz/base/maths/soa_transform.h>
-#include <filesystem>
-#include <string>
+#include <glm/fwd.hpp>
 
 
 namespace Engine {

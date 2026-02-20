@@ -4,7 +4,7 @@
 
 #include "SoundLoader.h"
 
-#include <iostream>
+
 
 namespace Engine {
 	std::unique_ptr<Audio::SoundBuffer> SoundLoader::LoadFromFile(const std::string& path)

@@ -5,7 +5,7 @@
 #ifndef CPP_ENGINE_ASSETMETA_H
 #define CPP_ENGINE_ASSETMETA_H
 
-#include <string>
+
 
 namespace Engine {
 	struct AssetMeta {

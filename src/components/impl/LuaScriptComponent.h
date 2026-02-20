@@ -16,7 +16,7 @@
 #include <cereal/types/string.hpp>
 #include <cereal/types/unordered_map.hpp>
 
-#include "assets/AssetHandle.h"
+
 #include "core/EntityHandle.h"
 
 namespace Engine {

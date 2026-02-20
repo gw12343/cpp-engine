@@ -3,13 +3,13 @@
 //
 
 #include "MaterialEditor.h"
-#include "imgui.h"
+
 #include "rendering/ui/IconsFontAwesome6.h"
-#include "rendering/ui/InspectorUI.h"
+
 #include "rendering/Texture.h"
 #include "rendering/Material.h"
 #include "core/EngineData.h"
-#include "assets/AssetManager.h"
+
 #include "misc/cpp/imgui_stdlib.h"
 #include "assets/impl/MaterialLoader.h"
 #include "rendering/Renderer.h"

@@ -6,7 +6,7 @@
 #include "rendering/Renderer.h"
 #include "glad/glad.h"
 #include "SSAOBuffer.h"
-#include "glm/gtc/random.hpp"
+
 
 namespace Engine {
     void SSAOBuffer::Resize(int w, int h, bool halfRes)

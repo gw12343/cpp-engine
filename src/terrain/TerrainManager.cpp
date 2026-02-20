@@ -1,4 +1,4 @@
-#include <tracy/Tracy.hpp>
+
 #include "TerrainManager.h"
 #include "core/EngineData.h"
 #include "glad/glad.h"
@@ -8,7 +8,6 @@
 #include "components/impl/EntityMetadataComponent.h"
 #include "components/impl/TransformComponent.h"
 #include "components/impl/TerrainRendererComponent.h"
-#include "utils/Utils.h"
 
 namespace Engine::Terrain {
 

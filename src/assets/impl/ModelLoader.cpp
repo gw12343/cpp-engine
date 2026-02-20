@@ -1,13 +1,12 @@
 #include "ModelLoader.h"
 
 #include "rendering/Texture.h"
-#include "utils/Utils.h"
 #include "core/EngineData.h"
-#include "glm/gtc/type_ptr.hpp"
 
-#include <filesystem>
-#include <iostream>
-#include "assets/AssetManager.h"
+
+
+
+
 
 namespace Engine {
 	namespace Rendering {

@@ -5,7 +5,7 @@
 #include "PlayerControllerComponent.h"
 #include "core/EngineData.h"
 #include "physics/PhysicsManager.h"
-#include "imgui.h"
+
 #include "scripting/ScriptManager.h"
 
 namespace Engine::Components {

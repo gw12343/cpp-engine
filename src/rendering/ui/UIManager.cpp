@@ -5,39 +5,39 @@
 
 #include "rendering/Renderer.h"
 #include "rendering/ui/GameUIManager.h"
-#include "rendering/ui/IconsFontAwesome6.h"
-#include "rendering/ui/windows/SceneViewWindow.h"
 
+#include "rendering/ui/IconsFontAwesome6.h"
+#include "rendering/ui/Themes.h"
+
+#include "rendering/ui/windows/SceneViewWindow.h"
+#include "rendering/particles/ParticleManager.h"
 #include "components/impl/EntityMetadataComponent.h"
 #include "components/impl/TerrainRendererComponent.h"
-#include "rendering/particles/ParticleManager.h"
 
-#include "rendering/ui/Themes.h"
 
 #include "assets/impl/JSONSceneLoader.h"
 
 #include "physics/PhysicsManager.h"
-#include "core/Input.h"
 
+#include "core/Input.h"
 #include "core/SceneManager.h"
-#include "scripting/ScriptManager.h"
 #include "core/module/ModuleManager.h"
+#include "scripting/ScriptManager.h"
 
 #include "windows/ConsoleWindow.h"
 #include "windows/AudioDebugWindow.h"
 #include "windows/SceneViewWindow.h"
 #include "windows/AnimationWindow.h"
+
 #include "utils/Builder.h"
 #include "components/impl/ModelRendererComponent.h"
 #include "rendering/particles/Particle.h"
 #include "components/impl/ParticleSystemComponent.h"
-#include "InspectorUI.h"
 #include "assets/impl/MaterialLoader.h"
 
+
 #include <nfd.h>
-#include <string>
-#include <iostream>
-#include <tracy/Tracy.hpp>
+
 #include <RmlUi/Core.h>
 
 std::string SelectFolder()

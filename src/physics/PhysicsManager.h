@@ -8,9 +8,8 @@
 // Jolt includes
 #include "components/Components.h"
 
-#include "entt/entt.hpp"
-#include "glm/glm.hpp"
-#include "glm/gtc/quaternion.hpp"
+
+
 
 #include "physics/PhysicsInterfaces.h"
 #include "spdlog/spdlog.h"

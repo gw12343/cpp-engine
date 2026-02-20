@@ -1,7 +1,7 @@
 #include "spdlog/spdlog.h"
 #include "Framebuffer.h"
 #include "glad/glad.h"
-#include "utils/Utils.h"
+
 
 namespace Engine {
     void Framebuffer::Resize(int width, int height) {

@@ -4,7 +4,7 @@
 #include "EntityHandle.h"
 #include "components/impl/EntityMetadataComponent.h"
 #include "components/AllComponents.h"
-#include "utils/Utils.h"
+
 #include "glm/gtx/matrix_decompose.inl"
 
 

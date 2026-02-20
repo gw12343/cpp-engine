@@ -3,13 +3,13 @@
 //
 
 #include "InspectorRenderer.h"
-#include "imgui.h"
+
 #include "components/AllComponents.h"
+#include "rendering/ui/UIManager.h"
 #include "rendering/ui/IconsFontAwesome6.h"
 #include "imgui_internal.h"
-#include <string>
+
 #include "misc/cpp/imgui_stdlib.h"
-#include "rendering/ui/InspectorUI.h"
 
 
 namespace Engine {

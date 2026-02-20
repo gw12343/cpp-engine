@@ -3,12 +3,12 @@
 //
 
 #include "MaterialLoader.h"
-#include <string>
+
 #include <fstream>
 #include <stdexcept>
-#include <vector>
+
 #include <nlohmann/json.hpp>
-#include <glm/vec3.hpp>
+
 
 namespace Engine {
 

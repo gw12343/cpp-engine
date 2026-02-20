@@ -6,17 +6,17 @@
 
 #include "core/Engine.h"
 #include "core/Entity.h"
-#include "utils/Utils.h"
-#include "imgui.h"
+
+
 #include "ozz/animation/runtime/track.h"
-#include <string>
+
 #include <utility>
 #include "rendering/particles/ParticleManager.h"
 #include "animation/AnimationManager.h"
 #include "scripting/ScriptManager.h"
 
 #include "misc/cpp/imgui_stdlib.h"
-#include "rendering/ui/InspectorUI.h"
+
 
 
 namespace Engine::Components {

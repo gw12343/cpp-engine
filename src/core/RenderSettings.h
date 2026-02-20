@@ -4,8 +4,9 @@
 
 #pragma once
 
-#include "glm/glm.hpp"
-#include <vector>
+
+#include <glm/vec3.hpp>
+#include <glm/geometric.hpp>
 
 namespace Engine {
 

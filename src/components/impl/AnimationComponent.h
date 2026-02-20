@@ -5,8 +5,8 @@
 #ifndef CPP_ENGINE_ANIMATIONCOMPONENT_H
 #define CPP_ENGINE_ANIMATIONCOMPONENT_H
 
-#include <memory>
-#include <string>
+
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include "Jolt/Jolt.h"
 #include "Jolt/Physics/Body/BodyActivationListener.h"
@@ -23,8 +23,8 @@
 #include "Jolt/Physics/Collision/Shape/TriangleShape.h"
 
 #include <Effekseer.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+
+
 #include <glm/gtx/quaternion.hpp>
 #include <ozz/animation/runtime/sampling_job.h>
 #include <ozz/base/containers/vector.h>
