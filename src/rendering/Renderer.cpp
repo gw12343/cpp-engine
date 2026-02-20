@@ -2,7 +2,7 @@
 
 #include "glad/glad.h"
 #include "assets/impl/ModelLoader.h"
-#include "utils/Utils.h"
+
 #include "core/EngineData.h"
 #include "core/Input.h"
 #include "terrain/TerrainManager.h"
@@ -14,14 +14,12 @@
 #include "components/impl/SkinnedMeshComponent.h"
 #include "components/impl/GizmoComponent.h"
 #include <spdlog/spdlog.h>
-#include <tracy/Tracy.hpp>
+
 #include <RmlUi/Core.h>
 #include "rendering/ui/RmlUiBackend.h"
 #include "rendering/ui/GameUIManager.h"
 #include "scripting/ScriptManager.h"
-#include "DebugGroup.h"
-#include "glm/gtc/random.hpp"
-#include "glm/gtc/type_ptr.hpp"
+
 #include "components/impl/AnimationComponent.h"
 #include "Texture.h"
 

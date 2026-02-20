@@ -3,7 +3,7 @@
 
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
-#include <tracy/Tracy.hpp>
+
 #include "Window.h"
 
 #include "scripting/ScriptManager.h"

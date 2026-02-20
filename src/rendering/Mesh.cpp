@@ -3,9 +3,9 @@
 #include "Shader.h"
 #include "core/Engine.h"
 #include "terrain/TerrainManager.h"
-#include "utils/Utils.h"
+
 #include "core/EngineData.h"
-#include "assets/AssetManager.h"
+
 
 #include <glad/glad.h>
 #include <spdlog/spdlog.h>

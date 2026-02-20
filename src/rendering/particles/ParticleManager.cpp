@@ -1,7 +1,7 @@
-#include <tracy/Tracy.hpp>
+
 #include "ParticleManager.h"
 
-#include "utils/Utils.h"
+
 #include "core/EngineData.h"
 #include "components/impl/TransformComponent.h"
 #include "components/impl/ParticleSystemComponent.h"

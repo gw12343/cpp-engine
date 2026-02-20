@@ -5,7 +5,7 @@
 #include "TextureLoader.h"
 
 
-#include <iostream>
+
 
 namespace Engine {
 	std::unique_ptr<Texture> TextureLoader::LoadFromFile(const std::string& path)

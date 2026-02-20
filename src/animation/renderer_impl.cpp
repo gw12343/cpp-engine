@@ -21,14 +21,14 @@
 #include <glad/glad.h>
 
 
-#include "assets/AssetManager.h"
+
 
 #include <spdlog/spdlog.h>
 
 #include <utility>
 
 #include "AnimationManager.h"
-#include "utils/Utils.h"
+
 
 namespace {
 	// A vertex made of positions and normals.

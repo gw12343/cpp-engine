@@ -1,8 +1,8 @@
 #pragma once
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
-#include <memory>
-#include <string>
+
+
 #include <map>
 #include "rendering/Framebuffer.h"
 #include "core/module/Module.h"

@@ -8,7 +8,7 @@
 #include "components/Components.h"
 #include "rendering/Renderer.h"
 #include "TransformComponent.h"
-#include "assets/AssetManager.h"
+
 #include "core/EngineData.h"
 
 #include <cereal/cereal.hpp>

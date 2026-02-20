@@ -1,7 +1,7 @@
 #pragma once
 
-#include <entt/entt.hpp>
-#include <memory>
+
+
 #include <spdlog/spdlog.h>
 
 namespace Engine {

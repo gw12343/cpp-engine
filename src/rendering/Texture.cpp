@@ -1,7 +1,7 @@
 #include "Texture.h"
 #include "core/EngineData.h"
 #define STB_IMAGE_IMPLEMENTATION
-#include <iostream>
+
 #include <spdlog/spdlog.h>
 #include <stb/stb_image.h>
 #include <glad/glad.h>

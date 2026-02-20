@@ -1,11 +1,9 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
 #include "ozz/base/maths/simd_math.h"
 #include "ozz/base/platform.h"
 #include "core/module/Module.h"
+
 
 namespace Engine {
 

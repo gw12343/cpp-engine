@@ -261,6 +261,7 @@ file(GLOB_RECURSE SOURCES "lib/src/*.cpp" "lib/src/*.c" "src/*.cpp" "src/*.inl")
 function(setup_executable TARGET_NAME GAME_BUILD_FLAG)
     add_executable(${TARGET_NAME} ${SOURCES})
 
+
     if (GAME_BUILD_FLAG)
         target_compile_definitions(${TARGET_NAME} PRIVATE GAME_BUILD)
         message(STATUS "Configuring ${TARGET_NAME} with GAME_BUILD")
@@ -352,6 +353,12 @@ function(setup_executable TARGET_NAME GAME_BUILD_FLAG)
         target_link_directories(${TARGET_NAME} PRIVATE ${SNDFILE_LIBRARY_DIRS})
         target_link_libraries(${TARGET_NAME} PRIVATE ${SNDFILE_LIBRARIES})
     endif ()
+
+    target_precompile_headers(${TARGET_NAME}
+            PRIVATE
+            "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/src/pch.h>"
+    )
+
 
     # Link all libraries
     target_link_libraries(${TARGET_NAME} PRIVATE

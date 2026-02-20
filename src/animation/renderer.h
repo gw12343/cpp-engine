@@ -7,11 +7,11 @@
 #include "ozz/animation/runtime/skeleton.h"
 
 #include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <vector>
 
-#include "assets/AssetHandle.h"
+
+
+
+
 #include "rendering/Material.h"
 
 namespace Engine {

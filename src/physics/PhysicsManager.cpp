@@ -6,7 +6,7 @@
 #include "components/impl/RigidBodyComponent.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
 #include <cstdarg>
-#include <tracy/Tracy.hpp>
+
 #include "PlayerController.h"
 #include "components/impl/PlayerControllerComponent.h"
 #include "components/impl/EntityMetadataComponent.h"

@@ -4,12 +4,12 @@
 
 #include "MaterialPreview.h"
 #include "glad/glad.h"
-#include "utils/Utils.h"
+
 #include "glm/ext/matrix_clip_space.hpp"
 #include "glm/ext/matrix_transform.hpp"
 #include "core/EngineData.h"
-#include "assets/AssetManager.h"
-#include <vector>
+
+
 #include <cmath>
 
 #ifndef M_PI

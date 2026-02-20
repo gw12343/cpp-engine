@@ -8,9 +8,11 @@
 #include "rendering/shadows/ShadowMapRenderer.h"
 #include "rendering/effects/bloom/BloomRenderer.h"
 
-#include <entt/entt.hpp>
-#include <glm/glm.hpp>
-#include <memory>
+
+
+
+
+
 
 namespace Engine {
 	class Renderer : public Module {

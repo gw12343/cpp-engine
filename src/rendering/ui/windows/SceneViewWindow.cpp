@@ -13,7 +13,7 @@
 #include "components/impl/TransformComponent.h"
 
 
-#include "glm/gtc/type_ptr.hpp"
+
 #include "glm/gtx/matrix_decompose.inl"
 #include "components/impl/EntityMetadataComponent.h"
 #include "components/AllComponents.h"

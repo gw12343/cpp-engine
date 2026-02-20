@@ -5,11 +5,11 @@
 #include "Texture.h"
 
 
-#include <glm/glm.hpp>
-#include <memory>
-#include <string>
+
+
+
 #include <unordered_set>
-#include <vector>
+
 
 
 namespace Engine::Rendering {

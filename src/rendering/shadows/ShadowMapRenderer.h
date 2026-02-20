@@ -5,14 +5,14 @@
 #pragma once
 
 
-#include <vector>
+
 #include "glm/ext/matrix_clip_space.hpp"
 #include "core/Window.h"
 #include "Camera.h"
 #include "rendering/Shader.h"
-#include <vector>
-#include <glm/glm.hpp>
-#include "entt/entt.hpp"
+
+
+
 
 namespace Engine {
 	class ShadowMapRenderer {

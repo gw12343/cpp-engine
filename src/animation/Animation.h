@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include <string>
+
 #include "ozz/animation/runtime/animation.h"
-#include <memory>
+
 
 namespace Engine {
 	class Animation {

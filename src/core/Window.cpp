@@ -8,7 +8,7 @@
 #include <imgui.h>
 #include <spdlog/spdlog.h>
 #include <utility>
-#include <tracy/Tracy.hpp>
+
 #include "scripting/ScriptManager.h"
 #include "rendering/ui/IconsFontAwesome6.h"
 #include "imguizmo/ImGuizmo.h"

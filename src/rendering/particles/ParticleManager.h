@@ -5,9 +5,9 @@
 
 #include <Effekseer/Effekseer.h>
 #include <EffekseerRendererGL/EffekseerRendererGL.h>
-#include <entt/entt.hpp>
-#include <memory>
-#include <string>
+
+
+
 namespace Engine {
 
 	class ParticleManager : public Module {

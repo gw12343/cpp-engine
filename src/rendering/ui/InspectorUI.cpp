@@ -2,10 +2,10 @@
 // Created by gabe on 8/25/25.
 //
 
-#include "InspectorUI.h"
+
 #include "misc/cpp/imgui_stdlib.h"
 #include "rendering/Renderer.h"
-#include "assets/AssetManager.h"
+
 #include "string"
 #include "imgui_internal.h"
 #include "rendering/particles/Particle.h"
@@ -17,6 +17,7 @@
 #include "rendering/Model.h"
 #include "terrain/TerrainTile.h"
 #include "sound/SoundManager.h"
+#include "core/Entity.h"
 
 
 namespace Engine {

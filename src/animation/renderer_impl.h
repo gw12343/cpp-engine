@@ -2,20 +2,20 @@
 
 #include "renderer.h"
 
-#include <glm/glm.hpp>
-#include <vector>
+
+
 #define GLFW_INCLUDE_NONE
 #include "Camera.h"
 #include "animation/renderer.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
-#include "imgui.h"
+
 #include "ozz/base/containers/vector.h"
 #include "ozz/base/log.h"
 #include "ozz/base/memory/unique_ptr.h"
 #include "rendering/Material.h"
 
-#include "entt/entt.hpp"
+
 #include "rendering/Shader.h"
 
 

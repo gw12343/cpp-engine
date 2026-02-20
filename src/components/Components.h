@@ -1,7 +1,7 @@
 #pragma once
 
-#include <memory>
-#include <string>
+
+
 #define GLM_ENABLE_EXPERIMENTAL
 
 #ifdef AddJob
@@ -24,8 +24,8 @@
 
 
 #include <Effekseer.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+
+
 #include <glm/gtx/quaternion.hpp>
 #include <ozz/animation/runtime/sampling_job.h>
 #include <ozz/base/containers/vector.h>

@@ -3,7 +3,7 @@
 #include "core/Entity.h"
 #include "core/Window.h"
 #include "scripting/ScriptManager.h"
-#include "rendering/ui/InspectorUI.h"
+
 #include "rendering/ui/GameUIManager.h"
 #include <RmlUi/Lua.h>
 

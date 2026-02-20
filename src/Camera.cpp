@@ -5,11 +5,10 @@
 
 #include <algorithm>
 #include <utils/Utils.h>
-#include <tracy/Tracy.hpp>
 #include "core/Window.h"
 
 #include "scripting/ScriptManager.h"
-#include "imgui.h"
+
 #include "rendering/ui/UIManager.h"
 namespace Engine {
 

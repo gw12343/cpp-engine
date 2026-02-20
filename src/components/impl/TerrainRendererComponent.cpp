@@ -4,7 +4,7 @@
 
 #include "TerrainRendererComponent.h"
 #include "misc/cpp/imgui_stdlib.h"
-#include "rendering/ui/InspectorUI.h"
+
 namespace Engine {
 
 	void Components::TerrainRenderer::OnRemoved(Entity& entity)

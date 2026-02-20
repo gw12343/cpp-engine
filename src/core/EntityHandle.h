@@ -6,7 +6,7 @@
 #define CPP_ENGINE_ENTITYHANDLE_H
 
 #include <cstdint>
-#include <string>
+
 #include <utility>
 namespace Engine {
 	class EntityHandle {

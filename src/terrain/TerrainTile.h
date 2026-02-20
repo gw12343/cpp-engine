@@ -13,11 +13,11 @@
 #include "Jolt/Jolt.h"
 #include "Jolt/Geometry/Triangle.h"
 
-#include <memory>
-#include <string>
+
+
 #include <unordered_map>
-#include <vector>
-#include "assets/AssetManager.h"
+#include <Jolt/Physics/Collision/Shape/Shape.h>
+
 
 namespace Engine::Terrain {
 

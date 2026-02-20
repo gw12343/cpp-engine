@@ -3,9 +3,9 @@
 #include <RmlUi/Core/RenderInterface.h>
 #include <RmlUi/Core/SystemInterface.h>
 #include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
+
 #include <unordered_map>
-#include <vector>
+
 
 namespace Engine {
 

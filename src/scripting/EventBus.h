@@ -5,15 +5,15 @@
 #ifndef CPP_ENGINE_EVENTBUS_H
 #define CPP_ENGINE_EVENTBUS_H
 
-#include <string>
+
 #include <unordered_map>
-#include <vector>
+
 #include <variant>
 #include <mutex>
 #include <sol/sol.hpp>
 
 #include "core/Entity.h"
-#include "assets/AssetHandle.h"
+
 #include "core/EntityHandle.h"
 
 namespace Engine {

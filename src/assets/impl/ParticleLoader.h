@@ -7,7 +7,7 @@
 #include "rendering/particles/Particle.h"
 
 
-#include <string>
+
 #include <unordered_map>
 
 namespace Engine {

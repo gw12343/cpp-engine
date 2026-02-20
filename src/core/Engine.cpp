@@ -7,15 +7,14 @@
 #include <cstdio>
 #include <stdio.h>
 
-#include <memory>
+
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include "EngineData.h"
 #include "Input.h"
 #include "scripting/ScriptManager.h"
 
 #include "SceneManager.h"
-#include <filesystem>
-#include <string>
+
 
 #include "Window.h"
 #include "rendering/Renderer.h"
@@ -27,7 +26,7 @@
 #include "rendering/ui/GameUIManager.h"
 #include "terrain/TerrainManager.h"
 #include "components/impl/SkinnedMeshComponent.h"
-#include "assets/AssetManager.h"
+
 #include "assets/impl/TextureLoader.h"
 #include "assets/impl/TerrainLoader.h"
 #include "assets/impl/SoundLoader.h"
@@ -50,7 +49,7 @@
 #define TRACY_ENABLE
 #endif
 
-#include <tracy/Tracy.hpp>
+
 #include "TracyClient.cpp"
 
 
