@@ -257,13 +257,7 @@ namespace Engine {
             RenderLightingPass();
         }
 
-#ifndef GAME_BUILD
-        // Draw to the game viewport framebuffer
-        Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->Bind();
-#else
-        // Just draw to the screen
-        Engine::Framebuffer::Unbind();
-#endif
+        Framebuffer::Unbind();
 
         {
             m_bloomRenderer->RenderBloom();
