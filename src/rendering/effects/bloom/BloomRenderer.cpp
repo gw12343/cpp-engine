@@ -36,8 +36,6 @@ namespace Engine {
             mip.size = mipSize;
 
             // Resize the framebuffer for this mip
-            // Floating point for HDR
-            mip.fb.hdr = true;
             mip.fb.ResizeBloomMip(mipSize.x, mipSize.y);
 
             m_bloomMips.push_back(mip);
@@ -79,7 +77,8 @@ namespace Engine {
 
 
     void BloomRenderer::DownsampleChain() {
-        GLuint hdrSceneTex = GetWindow().GetFramebuffer(Window::FramebufferID::LIGHTING)->texture;
+        GLuint hdrSceneTex = Window::GetFramebuffer(Window::FramebufferID::LIGHTING)->texture;
+
         m_downSampleShader->Bind();
 
         for (int i = 0; i < GetRenderSettings()->BLOOM_MIPS; i++) {
@@ -104,7 +103,7 @@ namespace Engine {
             m_downSampleShader->SetVec2("srcTexSize", srcSize);
 
             m_bloomMips[i].fb.Bind();
-            glViewport(0, 0, m_bloomMips[i].size.x, m_bloomMips[i].size.y);
+            glViewport(0, 0, (GLsizei)m_bloomMips[i].size.x, (GLsizei)m_bloomMips[i].size.y);
 
             m_downSampleShader->SetFloat("threshold", GetRenderSettings()->bloom_threshold);
             m_downSampleShader->SetFloat("knee", GetRenderSettings()->bloom_knee);
@@ -112,6 +111,7 @@ namespace Engine {
             glBindVertexArray(GetRenderer().quadVAO);
             glDrawArrays(GL_TRIANGLES, 0, 6);
             glBindVertexArray(0);
+            Framebuffer::Unbind();
         }
     }
 
@@ -119,10 +119,10 @@ namespace Engine {
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
         m_upSampleShader->Bind();
-        for (int i = GetRenderSettings()->BLOOM_MIPS - 1; i > 0; i--)
+        for (int i = (GLsizei)GetRenderSettings()->BLOOM_MIPS - 1; i > 0; i--)
         {
             m_bloomMips[i - 1].fb.Bind();
-            glViewport(0, 0, m_bloomMips[i-1].size.x, m_bloomMips[i-1].size.y);
+            glViewport(0, 0, (GLsizei)m_bloomMips[i-1].size.x, (GLsizei)m_bloomMips[i-1].size.y);
 
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, m_bloomMips[i].fb.texture);
@@ -138,8 +138,8 @@ namespace Engine {
 
     void BloomRenderer::CombineScene()
     {
-        GLuint hdrSceneTex = GetWindow().GetFramebuffer(Window::FramebufferID::LIGHTING)->texture;
-        auto fb = GetWindow().GetFramebuffer(Window::FramebufferID::GAME_OUT);
+        GLuint hdrSceneTex = Window::GetFramebuffer(Window::FramebufferID::LIGHTING)->texture;
+        auto fb = Window::GetFramebuffer(Window::FramebufferID::GAME_OUT);
         fb->Bind();
 
         glDisable(GL_BLEND);

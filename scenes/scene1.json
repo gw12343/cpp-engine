@@ -115,19 +115,19 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
+                            "key": "RUN_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 12.0
+                            }
+                        },
+                        {
                             "key": "BULLET_PARENT",
                             "value": {
                                 "index": 12,
                                 "data": {
                                     "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
                                 }
-                            }
-                        },
-                        {
-                            "key": "RUN_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 12.0
                             }
                         },
                         {
@@ -145,10 +145,28 @@
                             }
                         },
                         {
-                            "key": "SHOOT_POWER",
+                            "key": "JUMP_POWER",
                             "value": {
                                 "index": 0,
-                                "data": 14.800000190734864
+                                "data": 8.0
+                            }
+                        },
+                        {
+                            "key": "BULLET_MATERIAL",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
+                                }
+                            }
+                        },
+                        {
+                            "key": "victorySound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                }
                             }
                         },
                         {
@@ -168,28 +186,10 @@
                             }
                         },
                         {
-                            "key": "BULLET_MATERIAL",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
-                                }
-                            }
-                        },
-                        {
-                            "key": "JUMP_POWER",
+                            "key": "SHOOT_POWER",
                             "value": {
                                 "index": 0,
-                                "data": 8.0
-                            }
-                        },
-                        {
-                            "key": "victorySound",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
-                                }
+                                "data": 14.800000190734864
                             }
                         },
                         {
