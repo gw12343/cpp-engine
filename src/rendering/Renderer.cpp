@@ -260,6 +260,8 @@ namespace Engine {
         Framebuffer::Unbind();
 
         {
+            ZoneScopedN("Render Bloom Pass");
+            DebugGroup group("Render Bloom Pass");
             m_bloomRenderer->RenderBloom();
         }
 
@@ -270,12 +272,21 @@ namespace Engine {
 //		}
 
 
+#ifndef GAME_BUILD
+        // Draw to the game viewport framebuffer
+        Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->Bind();
+#else
+        // Just draw to the screen
+        Engine::Framebuffer::Unbind();
+#endif
         {
             ZoneScopedN("Render Particles");
+            DebugGroup group("Render Particles");
             GetParticleManager().Render();
         }
         {
             ZoneScopedN("Render RmlUi");
+            DebugGroup group("Render RmlUi");
             // Render RmlUi into the framebuffer
             GetGameUIManager().Render();
         }
