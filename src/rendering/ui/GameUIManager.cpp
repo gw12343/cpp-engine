@@ -143,10 +143,16 @@ namespace Engine {
 		ZoneScoped;
 
 
-
+        glDisable(GL_DEPTH_TEST);
+        glDepthMask(GL_FALSE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         if (m_rmlContext) {
 			m_rmlContext->Render();
 		}
+        glDisable(GL_BLEND);
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
 	}
 
 	void GameUIManager::onGameStart() {
