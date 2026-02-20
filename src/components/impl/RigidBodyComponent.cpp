@@ -2,21 +2,21 @@
 // Created by gabe on 6/24/25.
 //
 
-#include "assets/AssetManager.h"
-#include "assets/AssetManager.h"
+
+
 #include "components/Components.h"
 
 #include "core/Entity.h"
-#include "utils/Utils.h"
 
-#include "imgui.h"
+
+
 #include "ozz/animation/runtime/track.h"
 #include "rendering/particles/ParticleManager.h"
 #include "animation/AnimationManager.h"
 #include "scripting/ScriptManager.h"
 #include "physics/PhysicsManager.h"
 #include "RigidBodyComponent.h"
-#include "rendering/ui/InspectorUI.h"
+
 
 namespace Engine::Components {
 

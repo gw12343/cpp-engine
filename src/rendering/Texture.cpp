@@ -1,11 +1,11 @@
 #include "Texture.h"
 #include "core/EngineData.h"
 #define STB_IMAGE_IMPLEMENTATION
-#include <iostream>
+
 #include <spdlog/spdlog.h>
 #include <stb/stb_image.h>
 #include <glad/glad.h>
-
+#include "rendering/Renderer.h"
 namespace Engine {
 	std::unordered_set<GLuint> Engine::Texture::s_loadedTextures;
 
@@ -47,7 +47,7 @@ namespace Engine {
 		unsigned char* data = stbi_load(path.c_str(), &m_width, &m_height, &m_channels, 0);
 
 		if (!data) {
-			spdlog::error("Failed to load texture: {}", path);
+			GetRenderer().log->error("Failed to load texture: {}", path);
 			return false;
 		}
 
@@ -60,7 +60,7 @@ namespace Engine {
 		else if (m_channels == 4)
 			format = GL_RGBA;
 		else {
-			spdlog::error("Unsupported number of channels: {}", m_channels);
+            GetRenderer().log->error("Unsupported number of channels: {}", m_channels);
 			stbi_image_free(data);
 			return false;
 		}
@@ -96,7 +96,7 @@ namespace Engine {
 		float* data = stbi_loadf(path.c_str(), &m_width, &m_height, &m_channels, 0);
 
 		if (!data) {
-			spdlog::error("No data for HDR texture: {}", path);
+            GetRenderer().log->error("No data for HDR texture: {}", path);
 			return false;
 		}
 

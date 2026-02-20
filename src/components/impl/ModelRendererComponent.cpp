@@ -2,16 +2,16 @@
 // Created by gabe on 6/24/25.
 //
 #include "core/Entity.h"
-#include "utils/Utils.h"
 
-#include "imgui.h"
+
+
 #include "misc/cpp/imgui_stdlib.h"
 #include "rendering/particles/ParticleManager.h"
 #include "animation/AnimationManager.h"
 #include "scripting/ScriptManager.h"
 #include "assets/impl/ModelLoader.h"
 #include "ModelRendererComponent.h"
-#include "rendering/ui/InspectorUI.h"
+
 #include "core/EngineData.h"
 namespace Engine::Components {
 
@@ -19,7 +19,7 @@ namespace Engine::Components {
 	{
 		auto& lua = GetScriptManager().lua;
 
-		lua.new_usertype<ModelRenderer>("ModelRenderer", "setModel", &ModelRenderer::SetModel, "setMaterial", &ModelRenderer::SetMaterial);
+		lua.new_usertype<ModelRenderer>("ModelRenderer",  "model", &ModelRenderer::model,  "setModel", &ModelRenderer::SetModel, "setMaterial", &ModelRenderer::SetMaterial);
 	}
 
 	void ModelRenderer::Draw(const Shader& shader, Components::Transform& transform, bool uploadMaterial)

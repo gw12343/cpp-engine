@@ -14,7 +14,8 @@ namespace Engine {
 		void                      onShutdown() override;
 		[[nodiscard]] std::string name() const override { return "ScriptModule"; }
 		void                      ReloadEditorScript();
-		
+        void EditorScriptUpdate(float dt);
+
 		// Get event bus for external access
 		EventBus& GetEventBus() { return eventBus; }
 

@@ -5,16 +5,17 @@
 #include "core/Entity.h"
 #include "sound/SoundManager.h"
 
-#include "entt/entt.hpp"
-#include "imgui.h"
+
+
 #include "core/module/Module.h"
 #include "ModelPreview.h"
 #include "rendering/ui/windows/AssetUIRenderer.h"
 #include "rendering/ui/windows/InspectorRenderer.h"
 #include "rendering/ui/windows/MaterialEditor.h"
-#include <memory>
+#include "rendering/effects/ssao/GBuffer.h"
+
 #include <typeindex>
-#include <string>
+
 #include <unordered_map>
 
 
@@ -29,6 +30,7 @@ namespace Engine {
 			void                      onGameStart() override {}
 			void                      onShutdown() override;
 			[[nodiscard]] std::string name() const override { return "UIModule"; };
+            void                      setLuaBindings() override;
 
 			void BeginDockspace(float ht);
 			void EndDockspace();
@@ -42,26 +44,31 @@ namespace Engine {
 			std::shared_ptr<Texture> m_shaderIconTexture;
 			std::shared_ptr<Texture> m_particleIconTexture;
 			std::shared_ptr<Texture> m_materialIconTexture;
+
 			AssetHandle<Material>    m_selectedMaterial;
+			AssetHandle<Engine::Rendering::Model>    m_selectedModel;
 
 			// Selected entity
-			Entity m_selectedEntity;
+			Entity m_selectedEntity = Entity();
 
 			std::unique_ptr<InspectorRenderer> m_inspectorRenderer;
 			bool                               isOverSceneView() const;
-
+            [[nodiscard]] const Engine::Entity& getSelectedEntity() const { return m_selectedEntity; }
 		  private:
 			// UI rendering methods
 			void  RenderHierarchyWindow();
 			float RenderTopBar(float top);
 			float RenderMainMenuBar();
 			void  RenderPauseOverlay();
+            void RenderGBufferDebug(std::shared_ptr<GBuffer> gbuffer);
+            void RenderModelDebug(AssetHandle<Engine::Rendering::Model> handle);
 
 			bool                             m_overSceneView = false;
 			std::unique_ptr<AssetUIRenderer> m_uiAssetRenderer;
 			std::unique_ptr<MaterialEditor>  m_materialEditor;
 			int                              m_selectedTheme = 0;
 			void                             RenderEntityTreeNode(Entity entity);
-		};
+
+        };
 	} // namespace UI
 } // namespace Engine

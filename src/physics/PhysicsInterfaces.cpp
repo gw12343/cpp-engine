@@ -3,7 +3,7 @@
 #include "physics/PhysicsManager.h"
 #include "components/impl/LuaScriptComponent.h"
 #include "scripting/ScriptManager.h"
-#include "utils/Utils.h"
+
 using namespace JPH;
 using namespace JPH::literals;
 

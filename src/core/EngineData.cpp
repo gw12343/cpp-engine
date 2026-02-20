@@ -3,7 +3,7 @@
 //
 
 #include "EngineData.h"
-#include "assets/AssetManager.h"
+
 #include "SceneManager.h"
 
 namespace Engine {

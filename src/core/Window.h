@@ -1,16 +1,18 @@
 #pragma once
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
-#include <memory>
-#include <string>
+
+
 #include <map>
 #include "rendering/Framebuffer.h"
 #include "core/module/Module.h"
+#include "rendering/effects/ssao/GBuffer.h"
+#include "rendering/effects/ssao/SSAOBuffer.h"
 
 namespace Engine {
 	class Window : public Module {
 	  public:
-		enum class FramebufferID { GAME_OUT, MOUSE_PICKING };
+		enum class FramebufferID { LIGHTING, GAME_OUT, MOUSE_PICKING };
 
 		Window(int width, int height, std::string title);
 		~Window();
@@ -41,7 +43,11 @@ namespace Engine {
 
 		static std::map<FramebufferID, std::shared_ptr<Framebuffer>> m_frameBuffers;
 
+        static std::shared_ptr<GBuffer> m_gbuffer;
+        static std::shared_ptr<SSAOBuffer> m_ssaobuffer;
 
+        std::shared_ptr<GBuffer> GetGBuffer() { return m_gbuffer; }
+        std::shared_ptr<SSAOBuffer> GetSSAOBuffer() { return m_ssaobuffer; }
 
 		int targetWidth;
 		int targetHeight;
@@ -49,10 +55,10 @@ namespace Engine {
 		int targetY;
 
 	  private:
-		GLFWwindow* m_window;
-		int         m_width;
-		int         m_height;
-		std::string m_title;
+		GLFWwindow*              m_window;
+		int                      m_width;
+		int                      m_height;
+		std::string              m_title;
 
 		bool        InitGLFW();
 		static bool InitGLAD();

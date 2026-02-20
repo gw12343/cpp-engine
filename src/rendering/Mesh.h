@@ -5,11 +5,11 @@
 #include "Texture.h"
 
 
-#include <glm/glm.hpp>
-#include <memory>
-#include <string>
+
+
+
 #include <unordered_set>
-#include <vector>
+
 
 
 namespace Engine::Rendering {
@@ -32,6 +32,10 @@ namespace Engine::Rendering {
 		[[nodiscard]] const std::shared_ptr<Material>& GetMaterial() const { return m_material; }
 		[[nodiscard]] const std::vector<Vertex>&       GetVertices() const { return m_vertices; }
 		[[nodiscard]] const std::vector<unsigned int>& GetIndices() const { return m_indices; }
+
+        [[nodiscard]] GLuint GetVAO() { return m_vao; }
+        [[nodiscard]] GLuint GetVBO() { return m_vbo; }
+        [[nodiscard]] GLuint GetEBO() { return m_ebo; }
 
 	  private:
 		void SetupMesh();

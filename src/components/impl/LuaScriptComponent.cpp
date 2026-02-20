@@ -6,17 +6,17 @@
 
 #include "core/Engine.h"
 #include "core/Entity.h"
-#include "utils/Utils.h"
-#include "imgui.h"
+
+
 #include "ozz/animation/runtime/track.h"
-#include <string>
+
 #include <utility>
 #include "rendering/particles/ParticleManager.h"
 #include "animation/AnimationManager.h"
 #include "scripting/ScriptManager.h"
 
 #include "misc/cpp/imgui_stdlib.h"
-#include "rendering/ui/InspectorUI.h"
+
 
 
 namespace Engine::Components {
@@ -340,7 +340,7 @@ namespace Engine::Components {
 
 		// Inject gameObject
 		env["gameObject"] = entity;
-		
+
 		// Inject custom subscribe function to track subscriptions
 		env["subscribe"] = [this](const std::string& eventName, sol::function callback) {
 			uint32_t id = GetScriptManager().eventBus.Subscribe(eventName, callback);

@@ -6,14 +6,14 @@
 #include "components/impl/AudioSourceComponent.h"
 #include "components/impl/TransformComponent.h"
 
-#include "assets/AssetManager.h"
-#include "utils/Utils.h"
+
+
 
 #include <cstring>
 #include <sndfile.h>
 #include <spdlog/spdlog.h>
-#include <vector>
-#include <tracy/Tracy.hpp>
+
+
 
 
 namespace Engine::Audio {
@@ -302,6 +302,7 @@ namespace Engine::Audio {
 
 	void SoundManager::onInit()
 	{
+        ZoneScopedN("Initialize SoundManager");
 		// Open the default audio device
 		m_device = alcOpenDevice(nullptr);
 		if (!m_device) {

@@ -2,10 +2,10 @@
 // Created by gabe on 6/24/25.
 //
 #include "components/Components.h"
-#include "imgui.h"
+
 #include "EntityMetadataComponent.h"
 #include "core/Entity.h"
-#include "rendering/ui/InspectorUI.h"
+
 
 namespace Engine::Components {
 	void EntityMetadata::OnRemoved(Entity& entity)

@@ -1,6 +1,7 @@
 #include "renderer_impl.h"
 
 #include "animation/AnimatedMesh.h"
+#include "core/Window.h"
 #include "animation/AnimationShader.h"
 #include "animation/icosphere.h"
 #include "animation/immediate.h"
@@ -20,13 +21,15 @@
 #include <glad/glad.h>
 
 
-#include "assets/AssetManager.h"
+
 
 #include <spdlog/spdlog.h>
 
 #include <utility>
 
 #include "AnimationManager.h"
+
+
 namespace {
 	// A vertex made of positions and normals.
 	struct VertexPNC {
@@ -996,12 +999,13 @@ bool RendererImpl::DrawMesh(const Mesh& _mesh, const ozz::math::Float4x4& _trans
 		// Binds shader with this array buffer, depending on rendering options.
 		AnimationShader* shader = nullptr;
 		if (_options.texture) {
-			ambient_textured_shader->Bind(_transform, GetCamera().view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false, uvs_stride, uvs_offset);
+			ambient_textured_shader->Bind(_transform, Engine::FromMatrix(GetCamera().GetViewMatrix()), Engine::FromMatrix(GetCamera().GetProjectionMatrix()), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false, uvs_stride, uvs_offset);
 			shader = ambient_textured_shader.get();
 			
 			if (valid_material) {
 				// Binds default texture
 				if (GetAssetManager().Get(material->GetDiffuseTexture())) {
+                    glActiveTexture(GL_TEXTURE0);
 					GL(BindTexture(GL_TEXTURE_2D, GetAssetManager().Get(material->GetDiffuseTexture())->GetID()));
 				}
 			}
@@ -1295,7 +1299,8 @@ bool RendererImpl::DrawSkinnedMesh(const Engine::Mesh& _mesh, const ozz::span<oz
 		AnimationShader* shader = nullptr;
 		if (_options.texture) {
 			shader = ambient_textured_shader.get();
-			ambient_textured_shader->Bind(_transform, GetCamera().view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false, uvs_stride, uvs_offset);
+
+			ambient_textured_shader->Bind(_transform, Engine::FromMatrix(GetCamera().GetViewMatrix()), Engine::FromMatrix(GetCamera().GetProjectionMatrix()), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false, uvs_stride, uvs_offset);
 
 			// Binds default texture
 			if (valid_material) {
@@ -1306,7 +1311,8 @@ bool RendererImpl::DrawSkinnedMesh(const Engine::Mesh& _mesh, const ozz::span<oz
 			}
 		}
 		else {
-			ambient_shader->Bind(_transform, GetCamera().view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false);
+			GetAnimationManager().log->error("unimpl"); //TODO impl
+            //ambient_shader->Bind(_transform, GetCamera().view_proj(), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false);
 			shader = ambient_shader.get();
 		}
 
@@ -1314,6 +1320,14 @@ bool RendererImpl::DrawSkinnedMesh(const Engine::Mesh& _mesh, const ozz::span<oz
 		GL(BindBuffer(GL_ELEMENT_ARRAY_BUFFER, dynamic_index_bo_));
 		const Mesh::TriangleIndices& indices = _mesh.triangle_indices;
 		GL(BufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(Mesh::TriangleIndices::value_type), array_begin(indices), GL_STREAM_DRAW));
+
+        GLenum attachments[] = {
+                GL_COLOR_ATTACHMENT0,
+                GL_COLOR_ATTACHMENT1,
+                GL_COLOR_ATTACHMENT2,
+                GL_COLOR_ATTACHMENT3
+        };
+        glDrawBuffers(4, attachments);
 
 		// Draws the mesh.
 		static_assert(sizeof(Mesh::TriangleIndices::value_type) == 2, "Expects 2 bytes indices.");

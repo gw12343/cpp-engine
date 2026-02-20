@@ -6,14 +6,14 @@
 
 #include "core/Engine.h"
 #include "core/Entity.h"
-#include "utils/Utils.h"
-#include "imgui.h"
+
+
 #include "ozz/animation/runtime/track.h"
 #include "ozz/base/containers/vector.h"
 #include "ozz/base/maths/simd_math.h"
-#include <string>
+
 #include "animation/AnimationManager.h"
-#include "rendering/ui/InspectorUI.h"
+
 namespace Engine::Components {
 	std::unordered_set<std::vector<ozz::math::Float4x4>*> SkinnedMeshComponent::s_skin_mats;
 	std::unordered_set<ozz::vector<Engine::Mesh>*>        SkinnedMeshComponent::s_all_meshes;

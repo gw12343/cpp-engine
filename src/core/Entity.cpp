@@ -4,7 +4,7 @@
 #include "EntityHandle.h"
 #include "components/impl/EntityMetadataComponent.h"
 #include "components/AllComponents.h"
-#include "utils/Utils.h"
+
 #include "glm/gtx/matrix_decompose.inl"
 
 
@@ -49,6 +49,8 @@ namespace Engine {
 			}
 		}
 	}
+
+
 	void Entity::Destroy()
 	{
 		auto reg = m_scene->GetRegistry();
@@ -56,6 +58,15 @@ namespace Engine {
 		if (reg->valid(GetENTTHandle())) {
 			if (HasComponent<Components::EntityMetadata>()) {
 				auto&        em           = GetComponent<Components::EntityMetadata>();
+
+                std::vector<EntityHandle> entitiesToRemove;
+                entitiesToRemove.insert(entitiesToRemove.end(), em.children.begin(), em.children.end());
+
+                for(auto& childHandle : entitiesToRemove){
+					Entity child = GetCurrentScene()->Get(childHandle);
+                    child.Destroy();
+                }
+
 				EntityHandle parentHandle = em.parentEntity;
 				if (parentHandle.IsValid()) {
 					Entity parent = GetCurrentScene()->Get(parentHandle);

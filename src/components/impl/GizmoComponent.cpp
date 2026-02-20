@@ -3,8 +3,8 @@
 //
 
 #include "GizmoComponent.h"
-#include "rendering/ui/InspectorUI.h"
-#include "glm/gtc/type_ptr.hpp"
+
+
 
 namespace Engine::Components {
 	void GizmoComponent::OnRemoved(Entity& entity)

@@ -9,11 +9,11 @@
 #include <unordered_set>
 #include <typeindex>
 #include <functional>
-#include <string>
+
 
 #include "rendering/ui/ModelPreview.h"
 #include "rendering/ui/MaterialPreview.h"
-#include "imgui.h"
+
 #include "efsw/efsw.hpp"
 
 namespace Engine {

@@ -6,7 +6,7 @@
 #include "components/impl/RigidBodyComponent.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
 #include <cstdarg>
-#include <tracy/Tracy.hpp>
+
 #include "PlayerController.h"
 #include "components/impl/PlayerControllerComponent.h"
 #include "components/impl/EntityMetadataComponent.h"
@@ -53,6 +53,7 @@ namespace Engine {
 
 	void PhysicsManager::onInit()
 	{
+        ZoneScopedN("Initialize PhysicsManager");
 		RegisterDefaultAllocator();
 		Trace = PhysicsManager::TraceImpl;
 		JPH_IF_ENABLE_ASSERTS(AssertFailed = AssertFailedImpl;)

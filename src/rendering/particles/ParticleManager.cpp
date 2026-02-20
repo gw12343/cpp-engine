@@ -1,7 +1,7 @@
-#include <tracy/Tracy.hpp>
+
 #include "ParticleManager.h"
 
-#include "utils/Utils.h"
+
 #include "core/EngineData.h"
 #include "components/impl/TransformComponent.h"
 #include "components/impl/ParticleSystemComponent.h"
@@ -40,6 +40,7 @@ namespace Engine {
 
 	void ParticleManager::onInit()
 	{
+        ZoneScopedN("Initialize ParticleManager");
 		m_renderer = EffekseerRendererGL::Renderer::Create(MAX_INSTANCES, EffekseerRendererGL::OpenGLDeviceType::OpenGL3);
 		if (!m_renderer) {
 			log->critical("Failed to create Effekseer renderer");
