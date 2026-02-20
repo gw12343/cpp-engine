@@ -113,7 +113,7 @@ namespace Engine {
 	}
 
 
-	void ShadowMapRenderer::Initalize()
+	void ShadowMapRenderer::Initialize()
 	{
 		if (!m_depthShader.LoadFromFiles("resources/shaders/depth.vert", "resources/shaders/depth.frag", "resources/shaders/depth.geom")) {
 			GetDefaultLogger()->error("Failed to load depth shader");

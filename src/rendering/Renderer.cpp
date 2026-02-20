@@ -34,7 +34,12 @@ namespace Engine {
         ZoneScopedN("Initialize Renderer");
 
         m_shadowRenderer = std::make_shared<ShadowMapRenderer>();
+        m_bloomRenderer = std::make_shared<BloomRenderer>();
 
+        {
+            ZoneScopedN("Initialize BloomRenderer");
+            m_bloomRenderer->Initialize();
+        }
         {
             ZoneScopedN("Load Shaders");
             ReloadShaders();
@@ -57,8 +62,9 @@ namespace Engine {
 
         {
             ZoneScopedN("Initialize ShadowMapRenderer");
-            m_shadowRenderer->Initalize();
+            m_shadowRenderer->Initialize();
         }
+
         {
             ZoneScopedN("Create fullscreen quad");
             InitFullscreenQuad();
@@ -163,6 +169,9 @@ namespace Engine {
         glActiveTexture(GL_TEXTURE5);
         glBindTexture(GL_TEXTURE_2D, GetWindow().GetSSAOBuffer()->blurTex);
 
+        glActiveTexture(GL_TEXTURE7);
+        glBindTexture(GL_TEXTURE_2D, GetWindow().GetGBuffer()->GetEmissive());
+
         glm::mat4 V = GetCamera().GetViewMatrix();
         glm::mat4 viewInv = glm::inverse(V);
         m_lightingShader.SetMat4("invView", &viewInv);
@@ -176,6 +185,9 @@ namespace Engine {
         m_lightingShader.SetInt("gMaterial", 3);
         m_lightingShader.SetInt("skybox", 4);
         m_lightingShader.SetInt("ssaoBlurTex", 5);
+
+        m_lightingShader.SetInt("gEmissive", 7);
+        m_lightingShader.SetInt("bloomTex", 8);
 
         // Camera + light uniforms
         m_shadowRenderer->UploadShadowMatrices(m_lightingShader, V, 6);
@@ -234,6 +246,19 @@ namespace Engine {
             RenderSSAOBlur();
         }
 
+
+        // Draw to the lighting framebuffer
+        Engine::Window::GetFramebuffer(Window::FramebufferID::LIGHTING)->Bind();
+
+
+        {
+            ZoneScopedN("Render Lighting Pass");
+            DebugGroup group("Deferred Lighting Pass");
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glDisable(GL_CULL_FACE);
+            RenderLightingPass();
+        }
+
 #ifndef GAME_BUILD
         // Draw to the game viewport framebuffer
         Engine::Window::GetFramebuffer(Window::FramebufferID::GAME_OUT)->Bind();
@@ -243,11 +268,7 @@ namespace Engine {
 #endif
 
         {
-            ZoneScopedN("Render Lighting Pass");
-            DebugGroup group("Deferred Lighting Pass");
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glDisable(GL_CULL_FACE);
-            RenderLightingPass();
+            m_bloomRenderer->RenderBloom();
         }
 
 
@@ -553,11 +574,14 @@ namespace Engine {
             log->error("Failed to load ssao blur shader");
             return;
         }
+
+        m_bloomRenderer->ReloadShaders();
     }
 
     std::shared_ptr<ShadowMapRenderer> Renderer::GetShadowRenderer() {
         return m_shadowRenderer;
     }
+
 
 
 } // namespace Engine

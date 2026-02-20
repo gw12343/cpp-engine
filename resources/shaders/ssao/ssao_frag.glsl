@@ -70,5 +70,6 @@ void main()
     }
 
     occlusion = 1.0 - (occlusion / 32.0);
+
     FragColor = (occlusion * occlusion * occlusion);
 }

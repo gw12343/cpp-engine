@@ -718,6 +718,28 @@ namespace Engine::UI {
             ImGui::Unindent();
         }
 
+        if(ImGui::CollapsingHeader("BLOOM")) {
+            ImGui::Indent();
+
+            ImGui::SliderFloat("Threshold", &GetRenderSettings()->bloom_threshold, 0.1, 2.0);
+            ImGui::SliderFloat("Knee", &GetRenderSettings()->bloom_knee, 0.1,0.5);
+
+            auto br = GetRenderer().GetBloomRenderer();
+
+            int i = 0;
+            for(auto bm : br->GetBloomMips()) {
+                ImGui::Text("MIP %d   ( %f x %f )", (++i), bm.size.x, bm.size.y);
+
+                ImGui::Image((ImTextureID) (intptr_t) bm.fb.texture,
+                             ImVec2(previewSize, previewSize),
+                             uv0, uv1);
+                }
+
+
+
+            ImGui::Unindent();
+        }
+
         ImGui::Text("Albedo");
         ImGui::Image((ImTextureID)(intptr_t)gbuffer->GetAlbedo(),
                      ImVec2(previewSize, previewSize),
@@ -742,6 +764,8 @@ namespace Engine::UI {
         ImGui::Image((ImTextureID)(intptr_t)gbuffer->GetDepth(),
                      ImVec2(previewSize, previewSize),
                      uv0, uv1);
+
+
 
         ImGui::End();
     }

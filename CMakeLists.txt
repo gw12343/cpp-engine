@@ -231,7 +231,6 @@ add_library(imgui STATIC
         ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
 
         ${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.cpp
-        src/rendering/DebugGroup.h
 )
 
 target_include_directories(imgui PUBLIC

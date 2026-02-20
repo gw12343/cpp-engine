@@ -6,13 +6,13 @@
 #include <map>
 #include "rendering/Framebuffer.h"
 #include "core/module/Module.h"
-#include "rendering/GBuffer.h"
-#include "rendering/SSAOBuffer.h"
+#include "rendering/effects/ssao/GBuffer.h"
+#include "rendering/effects/ssao/SSAOBuffer.h"
 
 namespace Engine {
 	class Window : public Module {
 	  public:
-		enum class FramebufferID { GAME_OUT, MOUSE_PICKING };
+		enum class FramebufferID { LIGHTING, GAME_OUT, MOUSE_PICKING };
 
 		Window(int width, int height, std::string title);
 		~Window();
