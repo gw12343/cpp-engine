@@ -98,6 +98,11 @@ FetchContent_Declare(
         GIT_PROGRESS TRUE
 )
 
+FetchContent_Declare(
+        dds_image
+        GIT_REPOSITORY https://github.com/spnda/dds_image.git
+        GIT_TAG main
+)
 
 
 FetchContent_Declare(
@@ -181,7 +186,7 @@ set(RMLUI_TESTS OFF CACHE BOOL "" FORCE)
 set(RMLUI_LUA_BINDINGS ON CACHE BOOL "" FORCE)
 set(RMLUI_FONT_ENGINE "freetype" CACHE STRING "" FORCE)
 
-FetchContent_MakeAvailable(cereal spdlog nativefiledialog jolt ozz imgui effekseer lua sol2 nlohmann_json efsw tracy)
+FetchContent_MakeAvailable(cereal spdlog nativefiledialog jolt ozz imgui effekseer lua sol2 nlohmann_json efsw tracy dds_image)
 
 # Now point RmlUi to our built Lua library (after lua has been fetched)
 if (WIN32)
@@ -255,8 +260,13 @@ add_library(lua STATIC ${LUA_SOURCES})
 target_include_directories(lua PUBLIC ${lua_SOURCE_DIR}/src)
 
 # ----------------- Source & Includes -------------------
-file(GLOB_RECURSE SOURCES "lib/src/*.cpp" "lib/src/*.c" "src/*.cpp" "src/*.inl")
-
+file(GLOB_RECURSE SOURCES
+        CONFIGURE_DEPENDS
+        "lib/src/*.cpp"
+        "lib/src/*.c"
+        "src/*.cpp"
+        "src/*.inl"
+)
 # ----------------- Function to setup an executable -------------------
 function(setup_executable TARGET_NAME GAME_BUILD_FLAG)
     add_executable(${TARGET_NAME} ${SOURCES})
@@ -276,6 +286,7 @@ function(setup_executable TARGET_NAME GAME_BUILD_FLAG)
             ${CMAKE_CURRENT_SOURCE_DIR}/src
             ${lua_SOURCE_DIR}/src
             ${rmlui_SOURCE_DIR}/Include
+            ${dds_image_SOURCE_DIR}/include
     )
 
     # Effekseer
@@ -378,6 +389,7 @@ function(setup_executable TARGET_NAME GAME_BUILD_FLAG)
             rmlui_core
             rmlui_debugger
             rmlui_lua
+            dds_image
     )
 
     # Debug Info
