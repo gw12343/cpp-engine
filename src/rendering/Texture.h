@@ -14,6 +14,7 @@ namespace Engine {
 		~Texture() = default;
 
 		bool                  LoadFromFile(const std::string& path);
+		bool                  LoadDDSFromFile(const std::string& path);
 		bool                  LoadHDRFromFile(const std::string& path);
 		void                  Bind(unsigned int unit = 0) const;
 		[[maybe_unused]] void CleanUp();
