@@ -6,6 +6,9 @@
 #include <stb/stb_image.h>
 #include <glad/glad.h>
 #include "rendering/Renderer.h"
+
+//#include "dds.hpp"
+
 namespace Engine {
 	std::unordered_set<GLuint> Engine::Texture::s_loadedTextures;
 
@@ -13,12 +16,29 @@ namespace Engine {
 	{
 	}
 
+    bool ends_with(std::string s, std::string end){
+        if(s.length() < end.length()) return false;
+
+        for(int i = 0; i < end.length(); i++){
+            if(s[s.length() - 1 - i] != end[end.length() - 1 - i]){
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 	bool Texture::LoadFromFile(const std::string& path)
 	{
 		// Check if file is HDR
 		if (stbi_is_hdr(path.c_str())) {
 			return LoadHDRFromFile(path);
 		}
+        if(ends_with(path, ".dds")){
+            GetRenderer().log->info("TYRING TO LOAD DDS");
+            return LoadDDSFromFile(path);
+        }
+
 		m_name = path.substr(path.find_last_of("/\\") + 1);
 		if (glGetString(GL_VERSION) == nullptr) {
 			std::cerr << "No valid OpenGL context!" << std::endl;
@@ -76,6 +96,68 @@ namespace Engine {
 		m_isHDR = false;
 		return true;
 	}
+
+    bool Texture::LoadDDSFromFile(const std::string &path) {
+        m_name = path.substr(path.find_last_of("/\\") + 1);
+        if (glGetString(GL_VERSION) == nullptr) {
+            std::cerr << "No valid OpenGL context!" << std::endl;
+        }
+
+        // Generate texture ID
+        glGenTextures(1, &m_textureID);
+        s_loadedTextures.insert(m_textureID);
+
+        GLenum err = glGetError();
+        if (err != GL_NO_ERROR) {
+            std::cerr << "OpenGL Error: " << err << std::endl;
+        }
+
+        glBindTexture(GL_TEXTURE_2D, m_textureID);
+
+
+        // Set texture parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        // Load image data
+        stbi_set_flip_vertically_on_load(false);
+        unsigned char* data = stbi_load(path.c_str(), &m_width, &m_height, &m_channels, 0);
+
+        //dds::Image image;
+
+
+        if (!data) {
+            GetRenderer().log->error("Failed to load texture: {}", path);
+            return false;
+        }
+
+        // Determine format based on number of channels
+        GLenum format;
+        if (m_channels == 1)
+            format = GL_RED;
+        else if (m_channels == 3)
+            format = GL_RGB;
+        else if (m_channels == 4)
+            format = GL_RGBA;
+        else {
+            GetRenderer().log->error("Unsupported number of channels: {}", m_channels);
+            stbi_image_free(data);
+            return false;
+        }
+
+        // Upload texture data
+        glTexImage2D(GL_TEXTURE_2D, 0, static_cast<int>(format), m_width, m_height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        // Free image data
+        stbi_image_free(data);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        m_isHDR = false;
+        return true;
+    }
 
 	bool Texture::LoadHDRFromFile(const std::string& path)
 	{
@@ -159,5 +241,7 @@ namespace Engine {
 		s_loadedTextures.clear();
 		GetDefaultLogger()->info("Cleaned up all tracked textures.");
 	}
+
+
 
 } // namespace Engine
