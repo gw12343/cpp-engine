@@ -5,7 +5,7 @@
 #include "BloomRenderer.h"
 #include "core/EngineData.h"
 #include "rendering/Renderer.h"
-#include "glad/glad.h"
+
 
 
 namespace Engine {

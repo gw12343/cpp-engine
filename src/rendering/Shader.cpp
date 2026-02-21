@@ -5,7 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <sstream>
-#include <glad/glad.h>
+
 #include "core/EngineData.h"
 #include <regex>
 namespace Engine {

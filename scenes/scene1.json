@@ -115,6 +115,13 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
+                            "key": "WALK_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 7.0
+                            }
+                        },
+                        {
                             "key": "MOUSE_SENSITIVITY",
                             "value": {
                                 "index": 0,
@@ -122,10 +129,12 @@
                             }
                         },
                         {
-                            "key": "WALK_SPEED",
+                            "key": "victorySound",
                             "value": {
-                                "index": 0,
-                                "data": 7.0
+                                "index": 11,
+                                "data": {
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                }
                             }
                         },
                         {
@@ -141,29 +150,6 @@
                                 "index": 7,
                                 "data": {
                                     "guid": "a9dfb812233c1829cad774e7b2670a02"
-                                }
-                            }
-                        },
-                        {
-                            "key": "GRAVITY_SCALE",
-                            "value": {
-                                "index": 0,
-                                "data": 2.0
-                            }
-                        },
-                        {
-                            "key": "SHOOT_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 14.800000190734864
-                            }
-                        },
-                        {
-                            "key": "victorySound",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
                                 }
                             }
                         },
@@ -184,10 +170,17 @@
                             }
                         },
                         {
-                            "key": "CAMERA_Y_OFFSET",
+                            "key": "GRAVITY_SCALE",
                             "value": {
                                 "index": 0,
-                                "data": 1.100000023841858
+                                "data": 2.0
+                            }
+                        },
+                        {
+                            "key": "SHOOT_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 14.800000190734864
                             }
                         },
                         {
@@ -197,6 +190,13 @@
                                 "data": {
                                     "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
                                 }
+                            }
+                        },
+                        {
+                            "key": "CAMERA_Y_OFFSET",
+                            "value": {
+                                "index": 0,
+                                "data": 1.100000023841858
                             }
                         }
                     ]
@@ -610,9 +610,9 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": -4.384573936462402,
-                        "y": 3.0,
-                        "z": 0.36615872383117678
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
                     },
                     "rotation": {
                         "x": 0.0,

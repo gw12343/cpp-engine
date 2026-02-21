@@ -1,5 +1,5 @@
 #include "utils/Utils.h"
-#include "glad/glad.h"
+
 
 namespace Engine {
 	ozz::math::Float4x4 FromMatrix(const glm::mat4& glmMatrix)

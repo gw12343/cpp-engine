@@ -13,7 +13,7 @@
 #include "components/impl/ModelRendererComponent.h"
 #include "components/impl/ShadowCasterComponent.h"
 #include "components/impl/SkinnedMeshComponent.h"
-#include <glad/glad.h>
+
 #include "animation/AnimationManager.h"
 #include "components/impl/AnimationComponent.h"
 

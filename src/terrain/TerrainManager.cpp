@@ -1,7 +1,7 @@
 
 #include "TerrainManager.h"
 #include "core/EngineData.h"
-#include "glad/glad.h"
+
 #include "rendering/Renderer.h"
 
 #include "stb/stb_image_write.h"
