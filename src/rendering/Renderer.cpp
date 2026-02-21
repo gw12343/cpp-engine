@@ -1,6 +1,6 @@
 #include "Renderer.h"
 
-#include "glad/glad.h"
+
 #include "assets/impl/ModelLoader.h"
 
 #include "core/EngineData.h"
@@ -46,7 +46,7 @@ namespace Engine {
             ZoneScopedN("Load Skybox");
             m_skybox = std::make_unique<Skybox>();
 
-            const std::string p = "resources/textures/san_giuseppe_bridge_4k.hdr";
+            const std::string p = "resources/textures/output2.hdr";
             if (!m_skybox->LoadFromFile(p)) {
                 log->error("Failed to load skybox");
                 return;

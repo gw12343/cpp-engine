@@ -3,7 +3,7 @@
 //
 
 #include "DebugGroup.h"
-#include "glad/glad.h"
+
 
 namespace Engine {
 

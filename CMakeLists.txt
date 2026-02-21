@@ -188,6 +188,9 @@ set(RMLUI_FONT_ENGINE "freetype" CACHE STRING "" FORCE)
 
 FetchContent_MakeAvailable(cereal spdlog nativefiledialog jolt ozz imgui effekseer lua sol2 nlohmann_json efsw tracy dds_image)
 
+target_compile_features(dds_image INTERFACE cxx_std_20)
+target_compile_definitions(dds_image INTERFACE DDS_CPP_20=1)
+
 # Now point RmlUi to our built Lua library (after lua has been fetched)
 if (WIN32)
     set(LUA_LIBRARIES lua CACHE STRING "" FORCE)
