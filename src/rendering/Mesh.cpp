@@ -7,7 +7,7 @@
 #include "core/EngineData.h"
 
 
-#include <glad/glad.h>
+
 #include <spdlog/spdlog.h>
 #include "rendering/Renderer.h"
 

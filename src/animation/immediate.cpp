@@ -32,7 +32,7 @@
 #include "renderer_impl.h"
 #include "core/EngineData.h"
 
-#include "glad/glad.h"
+
 
 #include <cassert>
 #include <spdlog/spdlog.h>

@@ -1,4 +1,4 @@
-#include "glad/glad.h"
+
 #include "GameUIManager.h"
 #include "components/impl/RmlUIComponent.h"
 #include "core/Input.h"

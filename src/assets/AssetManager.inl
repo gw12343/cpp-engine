@@ -9,7 +9,7 @@
 
 #include <nlohmann/json.hpp>
 
-
+#include "rendering/Texture.h"
 
 namespace Engine {
     inline std::string NormalizePath(const std::string& path)
