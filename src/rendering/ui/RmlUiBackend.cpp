@@ -1,4 +1,4 @@
-#include <glad/glad.h>
+
 #include "RmlUiBackend.h"
 #include "core/EngineData.h"
 #include "rendering/ui/GameUIManager.h"

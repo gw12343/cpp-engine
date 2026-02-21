@@ -16,6 +16,7 @@
 #include "assets/AssetHandle.h"
 #include "assets/AssetManager.h"
 
+#include <glad/glad.h>
 
 // Entt
 #include <entt/entt.hpp>
