@@ -6,14 +6,14 @@
             0.29411765933036804
         ],
         "diffuse": [
-            0.800000011920929,
-            0.800000011920929,
-            0.800000011920929
+            0.0,
+            0.11295676231384277,
+            1.0
         ],
         "emissive": [
             0.0,
-            0.0,
-            0.0
+            0.31229233741760254,
+            1.0
         ],
         "specular": [
             0.5,
@@ -21,7 +21,7 @@
             0.5
         ]
     },
-    "name": "Ball",
+    "name": "BLUE LIGHT",
     "properties": {
         "shininess": 32.0,
         "textureScale": [
@@ -30,7 +30,7 @@
         ]
     },
     "textures": {
-        "diffuse": "19fc6d1f686f18d6fb7ea0a5588d1e74",
+        "diffuse": "",
         "height": "",
         "normal": "",
         "specular": ""

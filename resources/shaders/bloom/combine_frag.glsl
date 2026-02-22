@@ -17,7 +17,7 @@ void main()
     vec3 scene = texture(sceneTex, TexCoords).rgb;
     vec3 bloom = texture(bloomTex, TexCoords).rgb;
 
-    vec3 color = scene + bloom * bloomStrength;
+    vec3 color = scene + bloom * bloomStrength*4;
 
     // Compute vignette factor
     float dist = distance(TexCoords, vignetteCenter);
