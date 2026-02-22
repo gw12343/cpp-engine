@@ -36,15 +36,14 @@ void main()
     vec3 result = vec3(0.0);
 
     // 3x3 box blur to smooth the downsample
-    //for(int x = -1; x <= -1; ++x)
-    //for(int y = -1; y <= -1; ++y)
-   // {
-        vec2 offset = vec2(0, 0) * texelSize;
+    for(int x = -1; x <= 1; ++x)
+    for(int y = -1; y <= 1; ++y)
+    {
+        vec2 offset = vec2(x, y) * texelSize;
         result += texture(srcTex, TexCoords + offset).rgb;
-    //}
+    }
 
-    result /= 1.0;
-
+    result /= 9.0;
     // Apply threshold only on first mip
     if (applyThreshold == 1)
     {

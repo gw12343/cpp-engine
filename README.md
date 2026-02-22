@@ -2,6 +2,8 @@
 
 A modern C++ game engine with physics, audio, animation, and rendering capabilities.
 
+![cover](docs/cover.png)
+
 ## Overview
 
 cpp-engine is a lightweight, modular game engine built in C++ that provides a comprehensive set of features for game development:

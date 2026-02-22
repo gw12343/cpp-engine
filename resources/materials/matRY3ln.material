@@ -6,12 +6,12 @@
             0.20000000298023224
         ],
         "diffuse": [
-            0.800000011920929,
-            0.800000011920929,
-            0.800000011920929
+            1.0,
+            0.0,
+            0.0
         ],
         "emissive": [
-            0.0,
+            1.0,
             0.0,
             0.0
         ],
@@ -21,7 +21,7 @@
             0.12292361259460449
         ]
     },
-    "name": "matRY3ln",
+    "name": "RED LED",
     "properties": {
         "shininess": 51.02199935913086,
         "textureScale": [
@@ -30,7 +30,7 @@
         ]
     },
     "textures": {
-        "diffuse": "cbaaeb48a2ce07cc7adcede17356eba3",
+        "diffuse": "",
         "height": "",
         "normal": "",
         "specular": ""
