@@ -5,7 +5,6 @@
 #pragma once
 
 
-
 namespace Engine {
     struct DebugGroup {
         DebugGroup(const char* name);

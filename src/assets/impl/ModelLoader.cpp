@@ -168,6 +168,11 @@ namespace Engine {
 			loadFirst(aiTextureType_NORMALS, "texture_normal", [](auto& m, auto& t) { m->SetNormalTexture(t); });
 			loadFirst(aiTextureType_HEIGHT, "texture_height", [](auto& m, auto& t) { m->SetHeightTexture(t); });
 
+            material->SetDiffuseColor({1.0, 1.0, 1.0});
+            material->SetSpecularColor({1.0, 1.0, 1.0});
+            material->SetAmbientColor({0.0, 0.0, 0.0});
+            material->SetEmissiveColor({0.0, 0.0, 0.0});
+            material->SetShininess(20.0);
 			material->SetName("Material");
 			return material;
 		}

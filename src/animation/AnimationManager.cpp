@@ -51,7 +51,7 @@ namespace Engine {
 		for (auto& pair : loaded_skeletons_) {
 			pair.second.reset();
 		}
-		renderer_.reset();
+		//renderer_.reset();
 	}
 
 

@@ -230,6 +230,9 @@ void Window::onGameStart()
 
 	void Window::OnResize(int width, int height)
 	{
+        if(width < 10) width = 10;
+        if(height < 10) height = 10;
+
 		m_width  = width;
 		m_height = height;
 
@@ -266,7 +269,9 @@ void Window::onGameStart()
 		targetY = y;
 		if (render_width != targetWidth || render_height != targetHeight) {
 			targetWidth  = render_width;
+            if(targetWidth < 10) targetWidth = 10;
 			targetHeight = render_height;
+            if(targetHeight < 10) targetHeight = 10;
 		}
 	}
 

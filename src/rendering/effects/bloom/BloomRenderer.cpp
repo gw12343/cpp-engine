@@ -168,12 +168,26 @@ namespace Engine {
         glBindTexture(GL_TEXTURE_2D, m_bloomMips[0].fb.texture);
         m_combineShader->SetInt("bloomTex", 1);
 
+
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, GetWindow().GetGBuffer()->GetDepth());
+        m_combineShader->SetInt("depthTex", 2);
+
         GetWindow().SetFullViewport();
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
+        glDepthFunc(GL_ALWAYS);
+
 
         // Render fullscreen quad
         glBindVertexArray(GetRenderer().quadVAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LESS);
 
         Framebuffer::Unbind();
     }

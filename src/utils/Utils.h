@@ -17,6 +17,8 @@ namespace Engine {
 	void _GLCheckError(const char* file, int line);
 
 	std::string GetFileName(std::string path);
+
+
 #define ENGINE_GLCheckError() _GLCheckError(__FILE__, __LINE__)
 
 	// Platform-specific debug break

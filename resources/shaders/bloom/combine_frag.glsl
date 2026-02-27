@@ -4,6 +4,7 @@ in vec2 TexCoords;
 
 uniform sampler2D sceneTex;
 uniform sampler2D bloomTex;
+uniform sampler2D depthTex;
 uniform float bloomStrength;
 
 // Vignette constants
@@ -16,6 +17,10 @@ void main()
 {
     vec3 scene = texture(sceneTex, TexCoords).rgb;
     vec3 bloom = texture(bloomTex, TexCoords).rgb;
+
+    float depth = texture(depthTex, TexCoords).r;
+    gl_FragDepth = depth;
+
 
     vec3 color = scene + bloom * bloomStrength*4;
 

@@ -11,6 +11,7 @@
 #include <cereal/cereal.hpp>
 #include <cereal/types/vector.hpp>
 #include <cereal/types/array.hpp>
+#include <utility>
 
 
 namespace Engine::Components {
@@ -21,7 +22,7 @@ namespace Engine::Components {
 		bool                  looping  = false;
 
 		ParticleSystem() = default;
-		explicit ParticleSystem(AssetHandle<Particle> particle) : effect(particle) {}
+		explicit ParticleSystem(AssetHandle<Particle> particle) : effect(std::move(particle)) {}
 
 		template <class Archive>
 		void serialize(Archive& ar)
@@ -32,6 +33,8 @@ namespace Engine::Components {
 		void OnAdded(Entity& entity) override;
 		void OnRemoved(Entity& entity) override;
 		void RenderInspector(Entity& entity) override;
+
+        void Play(Entity& entity);
 
 
 		Effekseer::Handle handle = -1;

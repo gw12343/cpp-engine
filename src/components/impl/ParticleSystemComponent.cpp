@@ -35,8 +35,10 @@ namespace Engine::Components {
 	{
 		if (effect.IsValid()) {
 			Particle* particle = GetAssetManager().Get(effect);
-			ENGINE_VERIFY(particle, "Particle effect is null!");
-			ENGINE_VERIFY(particle->IsValid(), "Particle effect incorrectly loaded!");
+            if(!particle){
+                GetParticleManager().log->error("Particle effect is invald!");
+            }
+
 			// Get particle manager
 			const auto& manager = GetParticleManager().GetManager();
 
@@ -54,10 +56,8 @@ namespace Engine::Components {
 		ENGINE_VERIFY(manager != nullptr, "ParticleSystem::RenderInspector: Failed to get Effekseer manager");
 		bool paused = manager->GetPaused(handle);
 
-		std::string newID = effect.GetID();
-		if (ImGui::InputText("Particle Effect", &newID)) {
-			effect = AssetHandle<Particle>(newID);
-		}
+        LeftLabelAssetParticle("Particle Effect", &effect);
+
 
 		if (ImGui::Button(paused ? "Unpause" : "Pause")) {
 			manager->SetPaused(handle, !paused);
@@ -71,6 +71,19 @@ namespace Engine::Components {
 			handle              = manager->Play(particle->GetEffect(), pos.x, pos.y, pos.z);
 		}
 	}
+
+
+    void ParticleSystem::Play(Entity& entity) {
+        const auto& manager = GetParticleManager().GetManager();
+        ENGINE_VERIFY(manager != nullptr, "ParticleSystem::RenderInspector: Failed to get Effekseer manager");
+
+        manager->StopEffect(handle);
+        auto      transform = entity.GetComponent<Components::Transform>();
+        auto      pos       = transform.GetWorldPosition();
+        Particle* particle  = GetAssetManager().Get(effect);
+        handle              = manager->Play(particle->GetEffect(), pos.x, pos.y, pos.z);
+    }
+
 } // namespace Engine::Components
 
 #include "assets/AssetManager.inl"

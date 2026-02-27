@@ -66,7 +66,7 @@ namespace Engine::Audio {
 
 	SoundBuffer::~SoundBuffer()
 	{
-		alDeleteBuffers(1, &m_bufferID);
+		//alDeleteBuffers(1, &m_bufferID);
 	}
 
 	// SoundSource implementation
@@ -82,7 +82,7 @@ namespace Engine::Audio {
 
 	SoundSource::~SoundSource()
 	{
-		alDeleteSources(1, &m_sourceID);
+		//alDeleteSources(1, &m_sourceID);
 	}
 
 	[[maybe_unused]] void SoundSource::SetDistanceModel(ALenum model)

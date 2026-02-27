@@ -311,7 +311,13 @@ namespace Engine {
 			
 			auto handle = GetAssetManager().Load<Animation>(path);
 			strncpy(payload.id, handle.GetID().c_str(), sizeof(payload.id));
-		}
+		}else if (ext == ".efk") {
+            payloadType = "ASSET_PARTICLE";
+            assetType = "Particle";
+
+            auto handle = GetAssetManager().Load<Animation>(path);
+            strncpy(payload.id, handle.GetID().c_str(), sizeof(payload.id));
+        }
 
 		payload.type = assetType;
 		payload.id[sizeof(payload.id) - 1] = '\0';

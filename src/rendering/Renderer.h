@@ -29,6 +29,7 @@ namespace Engine {
 		static void PostRender();
 
         void RenderLightingPass();
+        void RenderBloomPass();
 		void RenderEntitiesMousePicking();
 		void RenderEntitiesGBuffer();
 		void RenderSSAO();

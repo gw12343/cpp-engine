@@ -15,18 +15,19 @@ namespace Engine {
 
 	class ParticleManager::DebugTextureLoader : public Effekseer::TextureLoader {
 	  public:
-		DebugTextureLoader(EffekseerRendererGL::RendererRef renderer) : m_renderer(renderer), m_internalLoader(renderer->CreateTextureLoader()) {}
+		explicit DebugTextureLoader(EffekseerRendererGL::RendererRef renderer) : m_renderer(renderer), m_internalLoader(renderer->CreateTextureLoader()) {}
 
 		Effekseer::TextureRef Load(const EFK_CHAR* path, Effekseer::TextureType type) override
 		{
 			std::u16string u16Path(path);
 			std::string    pathStr(u16Path.begin(), u16Path.end());
-			GetParticleManager().log->debug("Effekseer trying to load texture: {}", pathStr);
+			GetParticleManager().log->debug("Effekseer trying to load texture: {}   (type: {})", pathStr, (type == Effekseer::TextureType::Normal ? "NORMAL" : (type == Effekseer::TextureType::Distortion ? "DISTORTION" : "COLOR")));
 
 			auto tex = m_internalLoader->Load(path, type);
 			if (!tex) {
-				GetParticleManager().log->error("Failed to load texture: {}", pathStr);
+				GetParticleManager().log->error("Effekseer Failed to load texture: {}", pathStr);
 			}
+
 			return tex;
 		}
 
@@ -49,6 +50,15 @@ namespace Engine {
 
 		ResetInternalManager();
 	}
+
+
+	void ParticleManager::onGameStart(){
+        auto view = GetCurrentSceneRegistry().view<Components::Transform, Components::ParticleSystem>();
+        for (auto [entity, transform, particleSystem] : view.each()) {
+
+           // particleSystem.Play(Entity(, GetCurrentScene()));
+        }
+    }
 
 
 	void ParticleManager::onUpdate(float dt)
@@ -81,7 +91,8 @@ namespace Engine {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
-		glEnable(GL_CULL_FACE);
+		//glEnable(GL_CULL_FACE);
+		glDisable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 		glDepthMask(GL_FALSE);
 		if (m_renderer) {

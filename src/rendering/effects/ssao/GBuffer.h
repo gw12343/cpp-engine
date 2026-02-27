@@ -30,6 +30,8 @@ namespace Engine {
 
         [[nodiscard]] GLuint GetDepth() const { return gDepth; }
 
+        [[nodiscard]] GLuint GetFBO() const { return FBO; }
+
     private:
         GLuint FBO = 0;
 

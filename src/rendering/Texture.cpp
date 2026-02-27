@@ -39,7 +39,6 @@ namespace Engine {
 			return LoadHDRFromFile(path);
 		}
         if(ends_with(path, ".dds")){
-            GetRenderer().log->info("TYRING TO LOAD DDS");
             return LoadDDSFromFile(path);
         }
 
@@ -438,11 +437,13 @@ namespace Engine {
         {
             if (glFmt.compressed)
             {
+
                 size_t blockSize =
                         (image->format == DXGI_FORMAT_BC1_UNORM ||
                          image->format == DXGI_FORMAT_BC1_UNORM_SRGB ||
                          image->format == DXGI_FORMAT_BC4_UNORM ||
                          image->format == DXGI_FORMAT_BC4_SNORM) ? 8 : 16;
+
 
                 size_t size =
                         ((width + 3) / 4) *
@@ -511,7 +512,7 @@ namespace Engine {
             return false;
         }
 
-        GetRenderer().log->info("loaded dds ({}x{}) with {} channels. Format: {}", m_width, m_height, m_channels, image.format);
+        //GetRenderer().log->info("loaded {} dds ({}x{}) with  alpha: {}. Format: {}", path, image.width, image.height, image.supportsAlpha, image.format);
 
         m_textureID = UploadDDSTexture2D(&image);
         s_loadedTextures.insert(m_textureID);

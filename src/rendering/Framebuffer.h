@@ -22,6 +22,9 @@ namespace Engine {
 		GLint       mag_filter;
         bool hdr;
 
+        [[nodiscard]] GLuint GetFBO() const { return FBO; }
+        [[nodiscard]] GLuint GetRBO() const { return RBO; }
+
 	  private:
 		GLuint FBO = 0;
 		GLuint RBO = 0;

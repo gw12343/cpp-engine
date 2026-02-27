@@ -28,6 +28,7 @@ namespace Engine {
 
 	void _GLCheckError(const char* file, int line)
 	{
+#ifndef NDEBUG
 		GLenum err;
 		while ((err = glGetError()) != GL_NO_ERROR) {
 			const char* errorStr = "UNKNOWN_ERROR";
@@ -56,6 +57,6 @@ namespace Engine {
 			}
 			spdlog::log(spdlog::source_loc{file, line, SPDLOG_FUNCTION}, spdlog::level::err, "[OpenGL Error] {} (0x{:X})", errorStr, err);
 		}
-		return;
+		#endif
 	}
 } // namespace Engine

@@ -9,6 +9,8 @@ namespace Engine {
 
     DebugGroup::DebugGroup(const char* name){
 #ifndef GAME_BUILD
+
+
         glPushDebugGroup(
                 GL_DEBUG_SOURCE_APPLICATION,
                 0,

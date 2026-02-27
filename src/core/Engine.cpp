@@ -102,10 +102,10 @@ namespace Engine {
 		manager.RegisterExternal(Get().ui);
 #endif
 		manager.RegisterExternal(Get().gameUI);
+		manager.RegisterExternal(Get().renderer);
 		manager.RegisterExternal(Get().animation);
 		manager.RegisterExternal(Get().particle);
 		manager.RegisterExternal(Get().terrain);
-		manager.RegisterExternal(Get().renderer);
 		manager.RegisterExternal(Get().scene);
 
 #ifndef GAME_BUILD
@@ -164,6 +164,7 @@ namespace Engine {
 		    {".wav", [this](const std::string& p) { GetAssetManager().Load<Audio::SoundBuffer>(p); }},
 		    {".anim", [this](const std::string& p) { GetAssetManager().Load<Animation>(p); }},
 		    {".bin", [this](const std::string& p) { GetAssetManager().Load<Terrain::TerrainTile>(p); }},
+		    {".efk", [this](const std::string& p) { GetAssetManager().Load<Particle>(p); }},
 		};
 
 		auto loadFromAssetSubfolder = [&](const std::string& assetSubfolder) {

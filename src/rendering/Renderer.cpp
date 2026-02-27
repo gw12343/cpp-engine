@@ -24,6 +24,8 @@
 #include "Texture.h"
 
 
+#define RENDER_STEP(name) ZoneScopedN(name); DebugGroup group(name);
+
 namespace Engine {
     std::vector<glm::vec3> ssaoKernel;
 
@@ -146,8 +148,16 @@ namespace Engine {
     void Renderer::onShutdown() {
     }
 
+    void Renderer::RenderBloomPass() {
+        RENDER_STEP("Render Bloom Pass");
+        m_bloomRenderer->RenderBloom();
+    }
+
     void Renderer::RenderLightingPass() {
-        ZoneScopedN("Deferred Lighting");
+
+        RENDER_STEP("Deferred Lighting");
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
@@ -202,16 +212,14 @@ namespace Engine {
 
     void Renderer::onUpdate(float dt) {
         ZoneScopedN("Render");
+
         PreRender();
-        {
-            ZoneScopedN("Render Shadow Maps");
-            RenderShadowMaps();
-        }
+
+        // Shadows
+        RenderShadowMaps();
 
         {
-            ZoneScopedN("Render GBuffer");
-            DebugGroup group("Deferred GBuffer Pass");
-
+            RENDER_STEP("Deferred GBuffer Pass");
 
             GetWindow().GetGBuffer()->Bind();
 
@@ -221,7 +229,7 @@ namespace Engine {
 
             RenderEntitiesGBuffer();
             {
-                ZoneScopedN("Render Animations");
+                RENDER_STEP("Deferred GBuffer Animations Pass");
                 GetAnimationManager().Render();
             }
             GetTerrainManager().RenderGBuffer();
@@ -230,47 +238,22 @@ namespace Engine {
         }
 
 
-        {
-            ZoneScopedN("Render SSAO Pass");
-            DebugGroup group("SSAO Pass");
+        // SSAO
+        RenderSSAO();
+        RenderSSAOBlur();
 
-            RenderSSAO();
-        }
 
-        {
-            ZoneScopedN("Render SSAO Blur Pass");
-            DebugGroup group("SSAO Blur Pass");
-
-            RenderSSAOBlur();
-        }
 
 
         // Draw to the lighting framebuffer
         Engine::Window::GetFramebuffer(Window::FramebufferID::LIGHTING)->Bind();
 
-
-        {
-            ZoneScopedN("Render Lighting Pass");
-            DebugGroup group("Deferred Lighting Pass");
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glDisable(GL_CULL_FACE);
-            RenderLightingPass();
-        }
-
+        // Do lighting calculations with GBuffer
+        RenderLightingPass();
         Framebuffer::Unbind();
 
-        {
-            ZoneScopedN("Render Bloom Pass");
-            DebugGroup group("Render Bloom Pass");
-            m_bloomRenderer->RenderBloom();
-        }
 
-
-//		{
-//			ZoneScopedN("Render Terrains");
-//			GetTerrainManager().Render();
-//		}
-
+        RenderBloomPass();
 
 #ifndef GAME_BUILD
         // Draw to the game viewport framebuffer
@@ -279,11 +262,25 @@ namespace Engine {
         // Just draw to the screen
         Engine::Framebuffer::Unbind();
 #endif
+
+#ifndef GAME_BUILD
+        {
+            if (GetState() == EDITOR || GetState() == PAUSED) {
+                ZoneScopedN("Render Gizmos");
+                DebugGroup group("Render Gizmos");
+
+                RenderGizmos(false);
+            }
+        }
+#endif
+
         {
             ZoneScopedN("Render Particles");
             DebugGroup group("Render Particles");
             GetParticleManager().Render();
         }
+
+
         {
             ZoneScopedN("Render RmlUi");
             DebugGroup group("Render RmlUi");
@@ -293,20 +290,11 @@ namespace Engine {
 
 #ifndef GAME_BUILD
         {
-            ZoneScopedN("Render Gizmos");
-            if (GetState() == EDITOR || GetState() == PAUSED) {
-                RenderGizmos(false);
-            }
-        }
-
-        {
             ZoneScopedN("Render Mouse Picking");
+            DebugGroup group("Render Mouse Picking");
             Engine::Window::GetFramebuffer(Window::FramebufferID::MOUSE_PICKING)->Bind();
             RenderEntitiesMousePicking();
         }
-#endif
-
-#ifndef GAME_BUILD
         GetScriptManager().EditorScriptUpdate(dt);
 #endif
 
@@ -324,6 +312,7 @@ namespace Engine {
 
 
     void Renderer::RenderSSAO() {
+        RENDER_STEP("Render SSAO Pass");
         GetWindow().GetSSAOBuffer()->BindSSAO();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -372,6 +361,7 @@ namespace Engine {
     }
 
     void Renderer::RenderSSAOBlur() {
+        RENDER_STEP("Render SSAO Blur Pass");
         GetWindow().GetSSAOBuffer()->BindBlur();
 
         m_ssaoBlurShader.Bind();
@@ -505,6 +495,7 @@ namespace Engine {
     }
 
     void Renderer::RenderShadowMaps() {
+        RENDER_STEP("Render Shadow Maps");
         m_shadowRenderer->RenderShadowMaps();
     }
 
