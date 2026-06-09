@@ -37,6 +37,7 @@ namespace Engine::Components {
 	void SkinnedMeshComponent::OnAdded(Entity& entity)
 	{
 		if (!meshPath.empty()) {
+			//TODO put back
 			meshes = AnimationManager::LoadMeshesFromPath(meshPath);
 			s_all_meshes.insert(meshes);
 			if (!meshes) {

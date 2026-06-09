@@ -143,6 +143,16 @@ FetchContent_Declare(
 )
 
 FetchContent_Declare(
+        glfw
+        GIT_REPOSITORY https://github.com/glfw/glfw.git
+        GIT_TAG 3.4
+)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
+
+FetchContent_Declare(
         efsw
         GIT_REPOSITORY https://github.com/SpartanJ/efsw.git
         GIT_TAG master
@@ -180,7 +190,7 @@ set(RMLUI_TESTS OFF CACHE BOOL "" FORCE)
 set(RMLUI_LUA_BINDINGS ON CACHE BOOL "" FORCE)
 set(RMLUI_FONT_ENGINE "freetype" CACHE STRING "" FORCE)
 
-FetchContent_MakeAvailable(cereal spdlog nativefiledialog jolt ozz imgui effekseer lua sol2 nlohmann_json efsw tracy dds_image)
+FetchContent_MakeAvailable(glfw cereal spdlog nativefiledialog jolt ozz imgui effekseer lua sol2 nlohmann_json efsw tracy dds_image)
 
 target_compile_features(dds_image INTERFACE cxx_std_20)
 target_compile_definitions(dds_image INTERFACE DDS_CPP_20=1)
@@ -265,6 +275,7 @@ file(GLOB_RECURSE SOURCES
         "src/*.inl"
         "src/scripting/ComponentMethodBinder.h"
         "src/scripting/ComponentMethodBinder.cpp"
+        "src/animation/AnimationManager.cpp"
 )
 # ----------------- Function to setup an executable -------------------
 function(setup_executable TARGET_NAME GAME_BUILD_FLAG)
@@ -342,21 +353,6 @@ function(setup_executable TARGET_NAME GAME_BUILD_FLAG)
         endif ()
     endif ()
 
-    # GLFW
-    if (WIN32)
-        set(GLFW_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/glfw3.lib")
-        set(GLFW_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/include")
-        if (EXISTS "${GLFW_LIB}")
-            message(STATUS "Using manually specified GLFW at ${GLFW_LIB}")
-            target_link_libraries(${TARGET_NAME} PRIVATE "${GLFW_LIB}")
-            target_include_directories(${TARGET_NAME} PRIVATE "${GLFW_INCLUDE_DIR}")
-        else ()
-            message(FATAL_ERROR "GLFW library not found at ${GLFW_LIB}")
-        endif ()
-    else ()
-        find_package(glfw3 REQUIRED)
-        target_link_libraries(${TARGET_NAME} PRIVATE glfw)
-    endif ()
 
     # SndFile
     if (WIN32)
@@ -377,6 +373,7 @@ function(setup_executable TARGET_NAME GAME_BUILD_FLAG)
 
     # Link all libraries
     target_link_libraries(${TARGET_NAME} PRIVATE
+            glfw
             lua
             sol2::sol2
             imgui

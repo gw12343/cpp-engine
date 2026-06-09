@@ -33,6 +33,13 @@
                             }
                         },
                         {
+                            "key": "GRAVITY_SCALE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
+                            }
+                        },
+                        {
                             "key": "CAMERA_Y_OFFSET",
                             "value": {
                                 "index": 0,
@@ -51,29 +58,6 @@
                             "value": {
                                 "index": 0,
                                 "data": 7.0
-                            }
-                        },
-                        {
-                            "key": "GRAVITY_SCALE",
-                            "value": {
-                                "index": 0,
-                                "data": 2.0
-                            }
-                        },
-                        {
-                            "key": "victorySound",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
-                                }
-                            }
-                        },
-                        {
-                            "key": "SHOOT_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 14.800000190734864
                             }
                         },
                         {
@@ -99,6 +83,22 @@
                                 "data": {
                                     "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
                                 }
+                            }
+                        },
+                        {
+                            "key": "victorySound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                }
+                            }
+                        },
+                        {
+                            "key": "SHOOT_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 14.800000190734864
                             }
                         }
                     ]

@@ -11,6 +11,7 @@
 
 #include "core/EngineData.h"
 
+#include "ozz/base/containers/vector.h"
 #include <cereal/cereal.hpp>
 #include <cereal/types/vector.hpp>
 #include <cereal/types/array.hpp>

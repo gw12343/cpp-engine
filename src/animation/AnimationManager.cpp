@@ -3,6 +3,10 @@
 #include "AnimationUtils.h"
 #include "core/Entity.h"
 
+#include "ozz/animation/runtime/track.h"
+#include "ozz/base/containers/vector.h"
+#include "ozz/base/maths/simd_math.h"
+
 #include "components/impl/AnimationComponent.h"
 #include "components/impl/TransformComponent.h"
 #include "components/impl/SkinnedMeshComponent.h"
@@ -203,20 +207,21 @@ namespace Engine {
 		return model_pose;
 	}
 
-	 ozz::vector<Engine::Mesh>* LoadMeshesFromPath(const std::string& path)
-	{
-		// Create a new vector to hold the meshes
-		auto meshes = new ozz::vector<Engine::Mesh>();
 
-		// Load the meshes from file
-		if (!LoadMeshes(path.c_str(), meshes)) {
-			GetAnimationManager().log->error("Failed to load meshes from path: {}", path);
-			delete meshes;
-			return nullptr;
-		}
-
-		return meshes;
-	}
+	// ozz::vector<Engine::Mesh>* AnimationManager::LoadMeshesFromPath(const std::string& path)
+	// {
+	// 	// Create a new vector to hold the meshes
+	// 	auto meshes = new ozz::vector<Engine::Mesh>();
+	//
+	// 	// Load the meshes from file
+	// 	if (!LoadMeshes(path.c_str(), meshes)) {
+	// 		GetAnimationManager().log->error("Failed to load meshes from path: {}", path);
+	// 		delete meshes;
+	// 		return nullptr;
+	// 	}
+	//
+	// 	return meshes;
+	// }
 
 
 } // namespace Engine
