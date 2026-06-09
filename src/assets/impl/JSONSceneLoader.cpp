@@ -6,7 +6,7 @@
 #include <cereal/archives/json.hpp>
 #include <cereal/types/optional.hpp>
 #include <cereal/types/common.hpp>
-
+#include <cereal/types/map.hpp>
 
 #include "components/AllComponents.h"
 #include "components/Components.h"

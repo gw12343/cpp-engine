@@ -203,7 +203,7 @@ namespace Engine {
 		return model_pose;
 	}
 
-	ozz::vector<Engine::Mesh>* AnimationManager::LoadMeshesFromPath(const std::string& path)
+	 ozz::vector<Engine::Mesh>* LoadMeshesFromPath(const std::string& path)
 	{
 		// Create a new vector to hold the meshes
 		auto meshes = new ozz::vector<Engine::Mesh>();

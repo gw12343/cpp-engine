@@ -9,6 +9,8 @@
 #ifdef AddJob
 #undef AddJob
 #endif
+#include <Camera.h>
+
 #include "physics/PhysicsManager.h"
 namespace Engine {
 	static const int MAX_INSTANCES = 8000;

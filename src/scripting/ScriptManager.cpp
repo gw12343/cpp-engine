@@ -5,44 +5,24 @@
 
 #include "ScriptManager.h"
 
+#include <components/impl/EntityMetadataComponent.h>
+#include <components/impl/LuaScriptComponent.h>
+#include <components/impl/PlayerControllerComponent.h>
+
+#include "ComponentMethodBinder.h"
+#include "LuaWatcher.h"
 #include "core/Entity.h"
-#include "components/impl/AnimationComponent.h"
-#include "assets/impl/ModelLoader.h"
-#include "components/impl/LuaScriptComponent.h"
-#include "components/impl/ShadowCasterComponent.h"
-#include "components/impl/EntityMetadataComponent.h"
-#include "components/impl/ModelRendererComponent.h"
-#include "components/impl/RigidBodyComponent.h"
-#include "components/impl/AudioSourceComponent.h"
-#include "components/impl/SkinnedMeshComponent.h"
-#include "components/impl/ParticleSystemComponent.h"
-#include "components/AllComponents.h"
-
-#include "efsw/efsw.hpp"
-
-#define COMPONENT_METHODS(COMPONENT_TYPE, COMPONENT_NAME)                                                                                                                                                                                      \
-	"Add" #COMPONENT_NAME, [](Entity& e) -> COMPONENT_TYPE& { return e.AddComponent<COMPONENT_TYPE>(); }, "Get" #COMPONENT_NAME, [](Entity& e) -> COMPONENT_TYPE& { return e.GetComponent<COMPONENT_TYPE>(); }, "Has" #COMPONENT_NAME,         \
-	    [](Entity& e) -> bool { return e.HasComponent<COMPONENT_TYPE>(); }, "Remove" #COMPONENT_NAME, [](Entity& e) { e.RemoveComponent<COMPONENT_TYPE>(); }
 
 
 namespace Engine {
 
 
-	class LuaWatcher : public efsw::FileWatchListener {
-	  public:
-		void handleFileAction(efsw::WatchID watchid, const std::string& dir, const std::string& filename, efsw::Action action, std::string oldFilename) override
-		{
-			if (filename.size() > 4 && filename.substr(filename.size() - 4) == ".lua") {
-				// TODO editor script folder? not hard code random file ... tsk tsk
-				if (filename != "init.lua") return;
-                GetScriptManager().log->info("Reloading editor script");
-				GetScriptManager().ReloadEditorScript();
-			}
-		}
-	};
+
 
 	efsw::FileWatcher fw;
 	LuaWatcher        listener;
+	ComponentMethodBinder binder;
+
 
 	void ScriptManager::onInit()
 	{
@@ -53,27 +33,7 @@ namespace Engine {
 
 
         try {
-#define X(type, name, fancy) COMPONENT_METHODS(type, name),
-			// Bind Entity
-			lua.new_usertype<Engine::Entity>(
-			    "Entity",
-			    "isValid",
-			    [](const Engine::Entity& e) { return static_cast<bool>(e); },
-			    "getName",
-			    &Engine::Entity::GetName,
-			    "getTag",
-			    &Engine::Entity::GetTag,
-			    "setName",
-			    &Engine::Entity::SetName,
-			    "setParent",
-			    &Engine::Entity::SetParent,
-			    "getChildren",
-			    &Engine::Entity::GetChildren,
-			    "destroy",
-			    &Engine::Entity::MarkForDestruction,
-			    COMPONENT_LIST COMPONENT_METHODS(Components::EntityMetadata, EntityMetadata));
-#undef X
-
+        	binder.BindMethodsLua(&lua);
 
 			// create_entity(name)
 			lua.set_function("createEntity", [](const std::string& name) { return Engine::Entity::Create(name, GetCurrentScene()); });

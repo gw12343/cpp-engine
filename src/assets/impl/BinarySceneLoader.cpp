@@ -3,18 +3,20 @@
 //
 #include "BinarySceneLoader.h"
 
+#include <cereal/cereal.hpp>
 #include <cereal/archives/binary.hpp>
-#include <cereal/types/optional.hpp>
-#include <cereal/types/common.hpp>
 
 
 #include "components/AllComponents.h"
-#include "components/Components.h"
 #include "core/SceneManager.h"
 
 #include <fstream>
 #include <optional>
 
+#include <cereal/types/vector.hpp>
+#include <cereal/types/optional.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/map.hpp>
 
 #include "core/Scene.h"
 

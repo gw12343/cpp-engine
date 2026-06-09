@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Camera.h"
 #include "core/Window.h"
 
 #include <Effekseer/Effekseer.h>

@@ -7,19 +7,19 @@
 
 #include <unordered_map>
 #include <unordered_set>
-#include <typeindex>
-#include <functional>
+#include <efsw/efsw.hpp>
 
 
 #include "rendering/ui/ModelPreview.h"
 #include "rendering/ui/MaterialPreview.h"
 
-#include "efsw/efsw.hpp"
 
 namespace Engine {
 	class AssetWatcher : public efsw::FileWatchListener {
 	  public:
-		void handleFileAction(efsw::WatchID watchid, const std::string& dir, const std::string& filename, efsw::Action action, std::string oldFilename) override;
+		void  handleFileAction( efsw::WatchID watchid, const std::string& dir,
+								   const std::string& filename, efsw::Action action,
+								   const std::string& oldFilename) override;
 	};
 
 	class AssetUIRenderer {

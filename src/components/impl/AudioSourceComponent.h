@@ -9,8 +9,7 @@
 #include "core/EngineData.h"
 
 #include <cereal/cereal.hpp>
-#include <cereal/types/vector.hpp>
-#include <cereal/types/array.hpp>
+#include <sound/SoundManager.h>
 
 namespace Engine::Components {
 	class AudioSource : public Component {

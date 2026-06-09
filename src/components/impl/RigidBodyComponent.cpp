@@ -17,6 +17,8 @@
 #include "physics/PhysicsManager.h"
 #include "RigidBodyComponent.h"
 
+#include <rendering/Model.h>
+
 
 namespace Engine::Components {
 

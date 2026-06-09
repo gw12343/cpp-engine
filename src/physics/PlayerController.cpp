@@ -19,8 +19,9 @@ namespace Engine {
 	class PlayerContactListener : public CharacterContactListener {
 	  public:
 		// Called whenever the character touches another body
-		virtual bool OnContactValidate(const CharacterVirtual* inCharacter, const BodyID& inBodyID, const SubShapeID& inSubShapeID) override
+		bool OnContactValidate(const CharacterVirtual *inCharacter, const CharacterContact &inContact) override
 		{
+
 			// Decide whether this contact should be valid or ignored
 			// e.g., ignore triggers, or prevent standing on certain objects
 			// Return true to accept the contact, false to reject it.
@@ -28,13 +29,14 @@ namespace Engine {
 		}
 
 		// Called whenever a contact is added
-		virtual void OnContactAdded(const CharacterVirtual* inCharacter, const BodyID& inBodyID, const SubShapeID& inSubShapeID, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
+		void OnContactAdded(const CharacterVirtual *inCharacter, const CharacterContact &inContact, CharacterContactSettings &ioSettings) override
 		{
 			auto& physics       = GetPhysics();
 			auto& scriptManager = GetScriptManager();
 
 
-			Entity& entity1 = physics.bodyToEntityMap[inBodyID];
+
+			Entity& entity1 = physics.bodyToEntityMap[inContact.mBodyB];
 
 			if (!entity1) {
 				ENGINE_WARN("SHOULD NOT BE NULL");
@@ -48,13 +50,13 @@ namespace Engine {
 		}
 
 		// Called whenever a contact is persisted
-		virtual void OnContactPersisted(const CharacterVirtual* inCharacter, const BodyID& inBodyID, const SubShapeID& inSubShapeID, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override
+		void OnContactPersisted(const CharacterVirtual *inCharacter, const CharacterContact &inContact, CharacterContactSettings &ioSettings) override
 		{
 			// You can modify ongoing contact behavior here
 		}
 
 		// Called whenever a contact is removed
-		virtual void OnContactRemoved(const CharacterVirtual* inCharacter, const BodyID& inBodyID, const SubShapeID& inSubShapeID) override
+		void OnContactRemoved(const CharacterVirtual* inCharacter, const BodyID& inBodyID, const SubShapeID& inSubShapeID) override
 		{
 			// Cleanup or state updates when a contact ends
 		}

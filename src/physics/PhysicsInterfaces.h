@@ -1,6 +1,13 @@
 #pragma once
 
-#include "components/Components.h"
+#include <Jolt/Jolt.h>
+
+#include <Jolt/Physics/Collision/ObjectLayer.h>
+#include <Jolt/Physics/Collision/BroadPhase/BroadPhase.h>
+
+#include "Jolt/Physics/Collision/CollideShape.h"
+#include "Jolt/Physics/Collision/ContactListener.h"
+#include "Jolt/Physics/Body/BodyActivationListener.h"
 
 
 using namespace JPH;

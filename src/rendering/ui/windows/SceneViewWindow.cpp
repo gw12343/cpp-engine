@@ -172,7 +172,7 @@ namespace Engine {
 
 			if (!GetUI().m_inspectorRenderer->m_openPopup && GetInput().IsMouseClicked(0) && !ImGuizmo::IsOver()) {
 				if (entityID != 0xFFFFFF) {
-					*selectedEntity = (Entity){static_cast<entt::entity>(entityID), GetCurrentScene()};
+					*selectedEntity = Entity{static_cast<entt::entity>(entityID), GetCurrentScene()};
 				}
 				else {
 					*selectedEntity = Entity();

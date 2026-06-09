@@ -1,11 +1,15 @@
 #include "physics/PhysicsInterfaces.h"
+
+#include <components/impl/LuaScriptComponent.h>
+
 #include "core/EngineData.h"
 #include "physics/PhysicsManager.h"
-#include "components/impl/LuaScriptComponent.h"
 #include "scripting/ScriptManager.h"
 
 using namespace JPH;
 using namespace JPH::literals;
+
+
 
 namespace Engine {
 	bool ObjectLayerPairFilterImpl::ShouldCollide(ObjectLayer inObject1, ObjectLayer inObject2) const

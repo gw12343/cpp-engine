@@ -52,7 +52,9 @@ namespace Engine {
 	DELETE_IF(Animation, Animation, ".anim", "resources/animations/")
 
 
-	void AssetWatcher::handleFileAction(efsw::WatchID watchid, const std::string& dir, const std::string& filename, efsw::Action action, std::string oldFilename)
+	void AssetWatcher::handleFileAction(efsw::WatchID watchid, const std::string& dir,
+								   const std::string& filename, efsw::Action action,
+								   const std::string& oldFilename)
 	{
 		fs::path    filePath = dir + filename;
 		fs::path    metaPath = dir + filename + ".meta";

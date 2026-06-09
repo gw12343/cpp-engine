@@ -39,15 +39,9 @@ set(ozz_build_postfix OFF CACHE BOOL "" FORCE)
 set(OPENAL_ROOT "C:/Users/Gabe/Documents/openal-soft-1.24.3-bin")  # Change this if needed
 option(USE_ASSIMP_FROM_SOURCE "Build and use Assimp 6.0.2 from source" ON)
 
-if (WIN32)
-    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        # Use MDd in Debug, MD in Release
-        if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-            add_compile_options(/MDd)
-        else ()
-            add_compile_options(/MD)
-        endif ()
-    endif ()
+if(MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" CACHE STRING "" FORCE)
+    add_compile_definitions(_SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS)
 endif()
 
 # Fetch external libraries
@@ -269,6 +263,8 @@ file(GLOB_RECURSE SOURCES
         "lib/src/*.c"
         "src/*.cpp"
         "src/*.inl"
+        "src/scripting/ComponentMethodBinder.h"
+        "src/scripting/ComponentMethodBinder.cpp"
 )
 # ----------------- Function to setup an executable -------------------
 function(setup_executable TARGET_NAME GAME_BUILD_FLAG)
@@ -281,6 +277,11 @@ function(setup_executable TARGET_NAME GAME_BUILD_FLAG)
     else()
         message(STATUS "Configuring ${TARGET_NAME} without GAME_BUILD")
     endif()
+
+
+    target_compile_options(${TARGET_NAME} PRIVATE
+            $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
+    )
 
     target_include_directories(${TARGET_NAME} PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/lib/include
