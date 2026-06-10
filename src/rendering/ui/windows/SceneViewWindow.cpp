@@ -77,7 +77,7 @@ namespace Engine {
 					glm::mat4 model = tr.GetWorldMatrix();
 
 					ImGuizmo::SetDrawlist(ImGui::GetCurrentWindow()->DrawList);
-					//ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), mCurrentGizmoOperation, mCurrentGizmoMode, glm::value_ptr(model));
+					ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), mCurrentGizmoOperation, mCurrentGizmoMode, glm::value_ptr(model));
 
 					if (ImGuizmo::IsUsingAny()) {
 						glm::vec3 outTranslation, outScale, skew;

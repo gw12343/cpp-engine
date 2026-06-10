@@ -1610,7 +1610,9 @@ namespace IMGUIZMO_NAMESPACE {
 						vec_t cornerWorldPos = (dirPlaneX * quadUV[j * 2] + dirPlaneY * quadUV[j * 2 + 1]) * gContext.mScreenFactor;
 						screenQuadPts[j]     = worldToPos(cornerWorldPos, gContext.mMVP);
 					}
-					drawList->AddPolyline(screenQuadPts, 4, GetColorU32(DIRECTION_X + i), true, 1.0f);
+
+					drawList->AddPolyline(screenQuadPts, 4, GetColorU32(DIRECTION_X + i), ImDrawFlags_Closed, 1.0f);
+
 					drawList->AddConvexPolyFilled(screenQuadPts, 4, colors[i + 4]);
 				}
 			}
