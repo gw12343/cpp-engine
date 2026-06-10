@@ -111,7 +111,7 @@ namespace Engine {
 		}
 	};
 
-	void JSONSceneLoader::SerializeScene(const AssetHandle<Scene>& sceneRef, const std::string& path)
+	void JSONSceneLoader::SerializeScene(const SceneHandle& sceneRef, const std::string& path)
 	{
 		std::ofstream             os(path);
 		cereal::JSONOutputArchive archive(os);

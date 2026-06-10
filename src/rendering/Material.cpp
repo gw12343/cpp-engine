@@ -18,22 +18,22 @@ namespace Engine {
 	{
 	}
 
-	void Material::SetDiffuseTexture(AssetHandle<Texture> texture)
+	void Material::SetDiffuseTexture(TextureHandle texture)
 	{
 		m_diffuseTexture = std::move(texture);
 	}
 
-	void Material::SetSpecularTexture(AssetHandle<Texture> texture)
+	void Material::SetSpecularTexture(TextureHandle texture)
 	{
 		m_specularTexture = std::move(texture);
 	}
 
-	void Material::SetNormalTexture(AssetHandle<Texture> texture)
+	void Material::SetNormalTexture(TextureHandle texture)
 	{
 		m_normalTexture = std::move(texture);
 	}
 
-	void Material::SetHeightTexture(AssetHandle<Texture> texture)
+	void Material::SetHeightTexture(TextureHandle texture)
 	{
 		m_heightTexture = std::move(texture);
 	}

@@ -34,12 +34,12 @@ namespace Engine {
 
 		//		std::shared_ptr<Scene> GetScene(const std::string& name);
 		//
-		void SetActiveScene(AssetHandle<Scene> scene);
+		void SetActiveScene(SceneHandle scene);
 
-		AssetHandle<Scene> GetActiveScene() { return m_activeScene; }
+		SceneHandle GetActiveScene() { return m_activeScene; }
 
 	  private:
-		AssetHandle<Scene> m_activeScene;
+		SceneHandle m_activeScene;
 	};
 
 } // namespace Engine

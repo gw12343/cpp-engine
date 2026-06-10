@@ -19,10 +19,10 @@ namespace Engine::Components {
 	// Renderer component for 3D models
 	class ModelRenderer : public Component {
 	  public:
-		AssetHandle<Rendering::Model>      model;
+		ModelHandle      model;
 		bool                               visible         = true;
 		bool                               backfaceCulling = true;
-		std::vector<AssetHandle<Material>> materialOverrides;
+		std::vector<MaterialHandle> materialOverrides;
 		ModelRenderer() = default;
 
 		template <class Archive>
@@ -32,7 +32,7 @@ namespace Engine::Components {
 			);
 		}
 
-		explicit ModelRenderer(const AssetHandle<Rendering::Model>& handle) : model(handle) {}
+		explicit ModelRenderer(const ModelHandle& handle) : model(handle) {}
 		// Draw the model with the given shader and transform
 		void Draw(const Shader& shader, Components::Transform& transform, bool uploadMaterial);
 
@@ -40,7 +40,7 @@ namespace Engine::Components {
 
 
 
-		void SetMaterial(AssetHandle<Material> mat);
+		void SetMaterial(MaterialHandle mat);
 
 		static void AddBindings();
 

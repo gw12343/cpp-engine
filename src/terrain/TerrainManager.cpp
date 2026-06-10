@@ -18,11 +18,11 @@ namespace Engine::Terrain {
             auto& tile = terrPairs.second;
 
             // todo move!!
-            AssetHandle<Texture> tex1 = GetAssetManager().Load<Texture>("resources/textures/Terrain Grass.png");
-            AssetHandle<Texture> tex2 = GetAssetManager().Load<Texture>("resources/textures/Terrain Dirt.png");
-            AssetHandle<Texture> tex3 = GetAssetManager().Load<Texture>("resources/textures/Terrain Sand.png");
-            AssetHandle<Texture> tex4 = GetAssetManager().Load<Texture>("resources/textures/Terrain Rock.png");
-            AssetHandle<Texture> tex5 = GetAssetManager().Load<Texture>("resources/textures/white.png");
+            TextureHandle tex1 = GetAssetManager().Load<Texture>("resources/textures/Terrain Grass.png");
+            TextureHandle tex2 = GetAssetManager().Load<Texture>("resources/textures/Terrain Dirt.png");
+            TextureHandle tex3 = GetAssetManager().Load<Texture>("resources/textures/Terrain Sand.png");
+            TextureHandle tex4 = GetAssetManager().Load<Texture>("resources/textures/Terrain Rock.png");
+            TextureHandle tex5 = GetAssetManager().Load<Texture>("resources/textures/white.png");
 
 
             tile->diffuseTextures.clear();

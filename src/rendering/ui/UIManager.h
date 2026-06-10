@@ -45,7 +45,7 @@ namespace Engine {
 			std::shared_ptr<Texture> m_particleIconTexture;
 			std::shared_ptr<Texture> m_materialIconTexture;
 
-			AssetHandle<Material>    m_selectedMaterial;
+			MaterialHandle    m_selectedMaterial;
 			AssetHandle<Engine::Rendering::Model>    m_selectedModel;
 
 			// Selected entity

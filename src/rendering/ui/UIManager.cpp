@@ -475,10 +475,10 @@ namespace Engine::UI {
 
 			if (ImGui::MenuItem("Add Model")) {
 				Entity                        entity = Entity::Create("New Model", GetCurrentScene());
-				AssetHandle<Rendering::Model> model;
+				ModelHandle model;
 
 				if (!GetAssetManager().GetStorage<Rendering::Model>().guidToAsset.empty()) {
-					model = AssetHandle<Rendering::Model>(GetAssetManager().GetStorage<Rendering::Model>().guidToAsset.begin()->first);
+					model = ModelHandle(GetAssetManager().GetStorage<Rendering::Model>().guidToAsset.begin()->first);
 				}
 
 				entity.AddComponent<Components::Transform>(spawnPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
@@ -487,10 +487,10 @@ namespace Engine::UI {
 			}
 			if (ImGui::MenuItem("Add Particle System")) {
 				Entity                entity = Entity::Create("New Particle System", GetCurrentScene());
-				AssetHandle<Particle> particle;
+				ParticleHandle particle;
 
 				if (!GetAssetManager().GetStorage<Particle>().guidToAsset.empty()) {
-					particle = AssetHandle<Particle>(GetAssetManager().GetStorage<Particle>().guidToAsset.begin()->first);
+					particle = ParticleHandle(GetAssetManager().GetStorage<Particle>().guidToAsset.begin()->first);
 				}
 
 				entity.AddComponent<Components::Transform>(spawnPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));

@@ -21,7 +21,7 @@ namespace Engine::Components {
 		std::string                       meshPath;
         bool visible = true;
 
-		AssetHandle<Material> meshMaterial;
+		MaterialHandle meshMaterial;
 
 		SkinnedMeshComponent() = default;
 

@@ -17,10 +17,35 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
-                            "key": "MOUSE_SENSITIVITY",
+                            "key": "BULLET_PARENT",
+                            "value": {
+                                "index": 12,
+                                "data": {
+                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
+                                }
+                            }
+                        },
+                        {
+                            "key": "RUN_SPEED",
                             "value": {
                                 "index": 0,
-                                "data": 0.10000000149011612
+                                "data": 20.0
+                            }
+                        },
+                        {
+                            "key": "victorySound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                }
+                            }
+                        },
+                        {
+                            "key": "SHOOT_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 14.800000190734864
                             }
                         },
                         {
@@ -28,6 +53,13 @@
                             "value": {
                                 "index": 0,
                                 "data": 7.0
+                            }
+                        },
+                        {
+                            "key": "MOUSE_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.10000000149011612
                             }
                         },
                         {
@@ -47,26 +79,10 @@
                             }
                         },
                         {
-                            "key": "RUN_SPEED",
+                            "key": "GRAVITY_SCALE",
                             "value": {
                                 "index": 0,
-                                "data": 20.0
-                            }
-                        },
-                        {
-                            "key": "BULLET_PARENT",
-                            "value": {
-                                "index": 12,
-                                "data": {
-                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
-                                }
-                            }
-                        },
-                        {
-                            "key": "SHOOT_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 14.800000190734864
+                                "data": 2.0
                             }
                         },
                         {
@@ -74,22 +90,6 @@
                             "value": {
                                 "index": 0,
                                 "data": 14.800000190734864
-                            }
-                        },
-                        {
-                            "key": "victorySound",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
-                                }
-                            }
-                        },
-                        {
-                            "key": "GRAVITY_SCALE",
-                            "value": {
-                                "index": 0,
-                                "data": 2.0
                             }
                         },
                         {

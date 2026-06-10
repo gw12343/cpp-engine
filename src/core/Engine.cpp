@@ -134,7 +134,7 @@ namespace Engine {
 			ZoneScopedN("Init All Modules");
 			manager.InitAll();
 		}
-		// AssetHandle<Particle> testParticle = GetAssetManager().Load<Particle>("resources/particles/testleaf.efk");
+		// ParticleHandle testParticle = GetAssetManager().Load<Particle>("resources/particles/testleaf.efk");
 		{
 			ZoneScopedN("Load Game Assets");
 			LoadGameAssets();
@@ -232,13 +232,13 @@ namespace Engine {
 		// TODO terrain instanced detail rendereing
 		// TODO terrain mesh shape?? maybe component
 
-		//  AssetHandle<Terrain::TerrainTile> terr        = GetAssetManager().Load<Terrain::TerrainTile>("resources/terrain/terrain1.bin");
+		//  TerrainHandle terr        = GetAssetManager().Load<Terrain::TerrainTile>("resources/terrain/terrain1.bin");
 
 		//		Entity terrainWrapper = Entity::Create("TerrainWrapper");
 		//		terrainWrapper.AddComponent<Components::Transform>(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 		//
 		//		auto&                             body_interface = GetPhysics().GetPhysicsSystem()->GetBodyInterface();
-		//		AssetHandle<Terrain::TerrainTile> terrain        = GetAssetManager().Load<Terrain::TerrainTile>("resources/terrain/TerrainA.bin");
+		//		TerrainHandle terrain        = GetAssetManager().Load<Terrain::TerrainTile>("resources/terrain/TerrainA.bin");
 		//		auto                              tile           = GetAssetManager().Get(terrain);
 		//
 		//		if (!tile->heightfieldShape) {

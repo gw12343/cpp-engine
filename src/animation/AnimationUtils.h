@@ -67,68 +67,68 @@ namespace ozz {
 // ozz runtime animation jobs.
 // OnGui function allows to tweak controller parameters through the application
 // Gui.
-class PlaybackController {
-  public:
-	// Constructor.
-	PlaybackController();
-
-	// Sets animation current time.
-	// Returns the number of loops that happened during update. A positive numbre
-	// means looping going foward, a negative number means looping going backward.
-	int set_time_ratio(float _time);
-
-	// Gets animation current time.
-	float time_ratio() const;
-
-	// Gets animation time ratio of last update. Useful when the range between
-	// previous and current frame needs to pe processed.
-	float previous_time_ratio() const;
-
-	// Sets playback speed.
-	void set_playback_speed(float _speed) { playback_speed_ = _speed; }
-
-	// Gets playback speed.
-	float playback_speed() const { return playback_speed_; }
-
-	// Sets loop modes. If true, animation time is always clamped between 0 and 1.
-	void set_loop(bool _loop) { loop_ = _loop; }
-
-	// Gets loop mode.
-	bool loop() const { return loop_; }
-
-	// Get if animation is playing, otherwise it is paused.
-	bool playing() const { return play_; }
-
-	// Updates animation time if in "play" state, according to playback speed and
-	// given frame time _dt.
-	// Returns the number of loops that happened during update. A positive number
-	// means looping going foward, a negative number means looping going backward.
-	int Update(const ozz::animation::Animation& _animation, float _dt);
-
-	// Resets all parameters to their default value.
-	void Reset();
-
-	// Do controller Gui.
-	// Returns true if animation time has been changed.
-	bool OnGui(const ozz::animation::Animation& _animation, bool _enabled = true, bool _allow_set_time = true);
-
-  private:
-	// Current animation time ratio, in the unit interval [0,1], where 0 is the
-	// beginning of the animation, 1 is the end.
-	float time_ratio_;
-
-	// Time ratio of the previous update.
-	float previous_time_ratio_;
-
-	// Playback speed, can be negative in order to play the animation backward.
-	float playback_speed_;
-
-	// Animation play mode state: play/pause.
-	bool play_;
-
-	// Animation loop mode.
-	bool loop_;
-};
+// class PlaybackController {
+//   public:
+// 	// Constructor.
+// 	PlaybackController();
+//
+// 	// Sets animation current time.
+// 	// Returns the number of loops that happened during update. A positive numbre
+// 	// means looping going foward, a negative number means looping going backward.
+// 	int set_time_ratio(float _time);
+//
+// 	// Gets animation current time.
+// 	float time_ratio() const;
+//
+// 	// Gets animation time ratio of last update. Useful when the range between
+// 	// previous and current frame needs to pe processed.
+// 	float previous_time_ratio() const;
+//
+// 	// Sets playback speed.
+// 	void set_playback_speed(float _speed) { playback_speed_ = _speed; }
+//
+// 	// Gets playback speed.
+// 	float playback_speed() const { return playback_speed_; }
+//
+// 	// Sets loop modes. If true, animation time is always clamped between 0 and 1.
+// 	void set_loop(bool _loop) { loop_ = _loop; }
+//
+// 	// Gets loop mode.
+// 	bool loop() const { return loop_; }
+//
+// 	// Get if animation is playing, otherwise it is paused.
+// 	bool playing() const { return play_; }
+//
+// 	// Updates animation time if in "play" state, according to playback speed and
+// 	// given frame time _dt.
+// 	// Returns the number of loops that happened during update. A positive number
+// 	// means looping going foward, a negative number means looping going backward.
+// 	int Update(const ozz::animation::Animation& _animation, float _dt);
+//
+// 	// Resets all parameters to their default value.
+// 	void Reset();
+//
+// 	// Do controller Gui.
+// 	// Returns true if animation time has been changed.
+// 	bool OnGui(const ozz::animation::Animation& _animation, bool _enabled = true, bool _allow_set_time = true);
+//
+//   private:
+// 	// Current animation time ratio, in the unit interval [0,1], where 0 is the
+// 	// beginning of the animation, 1 is the end.
+// 	float time_ratio_;
+//
+// 	// Time ratio of the previous update.
+// 	float previous_time_ratio_;
+//
+// 	// Playback speed, can be negative in order to play the animation backward.
+// 	float playback_speed_;
+//
+// 	// Animation play mode state: play/pause.
+// 	bool play_;
+//
+// 	// Animation loop mode.
+// 	bool loop_;
+// };
 
 // Computes the bounding box of _skeleton. This is the box that encloses all
 // skeleton's joints in model space.

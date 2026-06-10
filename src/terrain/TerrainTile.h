@@ -54,7 +54,7 @@ namespace Engine::Terrain {
 		GLuint                                    ebo        = 0;
 		GLuint                                    indexCount = 0;
 		std::vector<GLuint>                       splatTextures;   // One RGBA texture per 4 layers
-		std::vector<AssetHandle<Engine::Texture>> diffuseTextures; // One RGBA texture per 4 layers
+		std::vector<TextureHandle> diffuseTextures; // One RGBA texture per 4 layers
 	  private:
 		[[nodiscard]] std::string GenerateGLSLShader() const;
 		[[nodiscard]] std::string GenerateGLSLVertexShader() const;

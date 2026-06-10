@@ -115,7 +115,7 @@ namespace Engine {
 		}
 	};
 
-	[[maybe_unused]] void BinarySceneLoader::SerializeScene(const AssetHandle<Scene>& sceneRef, const std::string& path)
+	[[maybe_unused]] void BinarySceneLoader::SerializeScene(const SceneHandle& sceneRef, const std::string& path)
 	{
 		GetDefaultLogger()->info("Saving binary scene: {}", path);
 		std::ofstream               os(path, std::ios::binary);

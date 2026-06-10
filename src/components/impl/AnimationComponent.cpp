@@ -5,11 +5,8 @@
 #include "components/Components.h"
 #include "components/impl/AnimationComponent.h"
 
-#include "core/Engine.h"
-#include "core/Entity.h"
 
 #include "ozz/animation/runtime/track.h"
-#include "rendering/particles/ParticleManager.h"
 #include "animation/AnimationManager.h"
 #include "scripting/ScriptManager.h"
 

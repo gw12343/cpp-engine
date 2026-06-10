@@ -5,8 +5,6 @@
 #ifndef CPP_ENGINE_ENTITYHANDLE_H
 #define CPP_ENGINE_ENTITYHANDLE_H
 
-#include <cstdint>
-
 #include <utility>
 namespace Engine {
 	class EntityHandle {
@@ -21,6 +19,9 @@ namespace Engine {
 		bool operator==(const EntityHandle& other) const { return guid == other.guid; }
 		bool operator<(const EntityHandle& other) const { return guid < other.guid; }
 	};
+
+	using EntityHandleList = std::vector<EntityHandle>;
+
 } // namespace Engine
 
 #endif // CPP_ENGINE_ENTITYHANDLE_H

@@ -6,7 +6,6 @@
 #include "ozz/base/maths/math_archive.h"
 #include "ozz/base/maths/simd_math.h"
 #include "ozz/base/maths/simd_math_archive.h"
-#include "ozz/base/maths/vec_float.h"
 #include "ozz/base/platform.h"
 
 #undef max

@@ -126,11 +126,11 @@ namespace Engine
 
 		bool DrawSphereShaded(float _radius, ozz::span<const ozz::math::Float4x4> _transforms, const Engine::Color& _color);;
 
-		virtual bool DrawSkinnedMesh(const Engine::AnimatedMesh& _mesh, ozz::span<ozz::math::Float4x4> _skinning_matrices, const ozz::math::Float4x4& _transform, AssetHandle<Material> _material, const Options& _options = Options());
+		virtual bool DrawSkinnedMesh(const Engine::AnimatedMesh& _mesh, ozz::span<ozz::math::Float4x4> _skinning_matrices, const ozz::math::Float4x4& _transform, MaterialHandle _material, const Options& _options = Options());
 		bool         DrawSkinnedMeshMousePicking(glm::vec3 entityColor, const Engine::AnimatedMesh& _mesh, ozz::span<ozz::math::Float4x4> _skinning_matrices, const ozz::math::Float4x4& _transform);
 		bool         DrawSkinnedMeshShadows(Engine::Shader* shadowShader, const Engine::AnimatedMesh& _mesh, ozz::span<ozz::math::Float4x4> _skinning_matrices, const ozz::math::Float4x4& _transform);
 
-		virtual bool DrawMesh(const Engine::AnimatedMesh& _mesh, const ozz::math::Float4x4& _transform, AssetHandle<Material> _material, const Options& _options = Options());
+		virtual bool DrawMesh(const Engine::AnimatedMesh& _mesh, const ozz::math::Float4x4& _transform, MaterialHandle _material, const Options& _options = Options());
 
 		bool DrawLines(ozz::span<const ozz::math::Float3> _vertices, const Engine::Color& _color, const ozz::math::Float4x4& _transform);;
 

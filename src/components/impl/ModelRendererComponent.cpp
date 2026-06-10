@@ -96,7 +96,7 @@ namespace Engine::Components {
 			ImGui::Text("Model: Invalid");
 		}
 	}
-	void ModelRenderer::SetMaterial(AssetHandle<Material> mat)
+	void ModelRenderer::SetMaterial(MaterialHandle mat)
 	{
 		// resize material overrides to match model
 		if (model.IsValid()) {

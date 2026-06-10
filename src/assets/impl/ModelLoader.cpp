@@ -105,11 +105,11 @@ namespace Engine {
 			return std::make_shared<Mesh>(vertices, indices, material);
 		}
 
-		std::vector<AssetHandle<Texture>> ModelLoader::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName, const std::string& directory)
+		std::vector<TextureHandle> ModelLoader::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName, const std::string& directory)
 		{
 			ENGINE_ASSERT(mat, "Null aiMaterial passed to LoadMaterialTextures");
 
-			std::vector<AssetHandle<Texture>> textures;
+			std::vector<TextureHandle> textures;
 
 			for (unsigned int i = 0; i < mat->GetTextureCount(type); ++i) {
 				aiString str;

@@ -228,53 +228,53 @@ namespace Engine::Components {
 			else if (kv.second.is<int>()) {
 				cppVariables[key] = kv.second.as<int>();
 			}
-			else if (kv.second.is<AssetHandle<Texture>>()) {
-				cppVariables[key] = kv.second.as<AssetHandle<Texture>>();
+			else if (kv.second.is<TextureHandle>()) {
+				cppVariables[key] = kv.second.as<TextureHandle>();
 			}
-			else if (kv.second.is<AssetHandle<Rendering::Model>>()) {
-				cppVariables[key] = kv.second.as<AssetHandle<Rendering::Model>>();
+			else if (kv.second.is<ModelHandle>()) {
+				cppVariables[key] = kv.second.as<ModelHandle>();
 			}
-			else if (kv.second.is<AssetHandle<Material>>()) {
-				cppVariables[key] = kv.second.as<AssetHandle<Material>>();
+			else if (kv.second.is<MaterialHandle>()) {
+				cppVariables[key] = kv.second.as<MaterialHandle>();
 			}
-			else if (kv.second.is<AssetHandle<Scene>>()) {
-				cppVariables[key] = kv.second.as<AssetHandle<Scene>>();
+			else if (kv.second.is<SceneHandle>()) {
+				cppVariables[key] = kv.second.as<SceneHandle>();
 			}
-			else if (kv.second.is<AssetHandle<Terrain::TerrainTile>>()) {
-				cppVariables[key] = kv.second.as<AssetHandle<Terrain::TerrainTile>>();
+			else if (kv.second.is<TerrainHandle>()) {
+				cppVariables[key] = kv.second.as<TerrainHandle>();
 			}
-			else if (kv.second.is<AssetHandle<Particle>>()) {
-				cppVariables[key] = kv.second.as<AssetHandle<Particle>>();
+			else if (kv.second.is<ParticleHandle>()) {
+				cppVariables[key] = kv.second.as<ParticleHandle>();
 			}
-			else if (kv.second.is<AssetHandle<Audio::SoundBuffer>>()) {
-				cppVariables[key] = kv.second.as<AssetHandle<Audio::SoundBuffer>>();
+			else if (kv.second.is<SoundHandle>()) {
+				cppVariables[key] = kv.second.as<SoundHandle>();
 			}
 			else if (kv.second.is<EntityHandle>()) {
 				cppVariables[key] = kv.second.as<EntityHandle>();
 			}
-			else if (kv.second.is<std::vector<EntityHandle>>()) {
-				cppVariables[key] = kv.second.as<std::vector<EntityHandle>>();
+			else if (kv.second.is<EntityHandleList>()) {
+				cppVariables[key] = kv.second.as<EntityHandleList>();
 			}
-			else if (kv.second.is<std::vector<AssetHandle<Texture>>>()) {
-				cppVariables[key] = kv.second.as<std::vector<AssetHandle<Texture>>>();
+			else if (kv.second.is<TextureHandleList>()) {
+				cppVariables[key] = kv.second.as<TextureHandleList>();
 			}
-			else if (kv.second.is<std::vector<AssetHandle<Rendering::Model>>>()) {
-				cppVariables[key] = kv.second.as<std::vector<AssetHandle<Rendering::Model>>>();
+			else if (kv.second.is<ModelHandleList>()) {
+				cppVariables[key] = kv.second.as<ModelHandleList>();
 			}
-			else if (kv.second.is<std::vector<AssetHandle<Material>>>()) {
-				cppVariables[key] = kv.second.as<std::vector<AssetHandle<Material>>>();
+			else if (kv.second.is<MaterialHandleList>()) {
+				cppVariables[key] = kv.second.as<MaterialHandleList>();
 			}
-			else if (kv.second.is<std::vector<AssetHandle<Scene>>>()) {
-				cppVariables[key] = kv.second.as<std::vector<AssetHandle<Scene>>>();
+			else if (kv.second.is<SceneHandleList>()) {
+				cppVariables[key] = kv.second.as<SceneHandleList>();
 			}
-			else if (kv.second.is<std::vector<AssetHandle<Terrain::TerrainTile>>>()) {
-				cppVariables[key] = kv.second.as<std::vector<AssetHandle<Terrain::TerrainTile>>>();
+			else if (kv.second.is<TerrainHandleList>()) {
+				cppVariables[key] = kv.second.as<TerrainHandleList>();
 			}
-			else if (kv.second.is<std::vector<AssetHandle<Particle>>>()) {
-				cppVariables[key] = kv.second.as<std::vector<AssetHandle<Particle>>>();
+			else if (kv.second.is<ParticleHandleList>()) {
+				cppVariables[key] = kv.second.as<ParticleHandleList>();
 			}
-			else if (kv.second.is<std::vector<AssetHandle<Audio::SoundBuffer>>>()) {
-				cppVariables[key] = kv.second.as<std::vector<AssetHandle<Audio::SoundBuffer>>>();
+			else if (kv.second.is<SoundHandleList>()) {
+				cppVariables[key] = kv.second.as<SoundHandleList>();
 			}
 			else {
 				SPDLOG_WARN("TRYING TO LOAD INVALID VAR VALUE FROM LUA");
@@ -306,13 +306,12 @@ namespace Engine::Components {
 		if (s->m_entityMap.count(handle)) {
 			return s->m_entityMap[handle];
 		}
-		else {
-			GetScriptManager().log->warn("Script requested an invalid entity: {}", handle.GetID());
-			return {};
-		}
+
+		GetScriptManager().log->warn("Script requested an invalid entity: {}", handle.GetID());
+		return {};
 	}
 
-	void LuaScript::LoadScript(Engine::Entity& entity, std::string path)
+	void LuaScript::LoadScript(Entity& entity, std::string path)
 	{
 		this->scriptPath = std::move(path);
 

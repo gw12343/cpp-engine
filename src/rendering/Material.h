@@ -15,10 +15,10 @@ namespace Engine {
 		~Material() = default;
 
 		// Texture setters
-		void SetDiffuseTexture(AssetHandle<Texture> texture);
-		void SetSpecularTexture(AssetHandle<Texture> texture);
-		void SetNormalTexture(AssetHandle<Texture> texture);
-		void SetHeightTexture(AssetHandle<Texture> texture);
+		void SetDiffuseTexture(TextureHandle texture);
+		void SetSpecularTexture(TextureHandle texture);
+		void SetNormalTexture(TextureHandle texture);
+		void SetHeightTexture(TextureHandle texture);
 
 		// Color setters
 		void SetDiffuseColor(const glm::vec3& color);
@@ -28,10 +28,10 @@ namespace Engine {
 		void SetShininess(float shininess);
 
 		// Getters
-		[[nodiscard]] AssetHandle<Texture>                  GetDiffuseTexture() const { return m_diffuseTexture; }
-		[[nodiscard]] AssetHandle<Texture>                  GetSpecularTexture() const { return m_specularTexture; }
-		[[nodiscard]] AssetHandle<Texture>                  GetNormalTexture() const { return m_normalTexture; }
-		[[maybe_unused]] [[nodiscard]] AssetHandle<Texture> GetHeightTexture() const { return m_heightTexture; }
+		[[nodiscard]] TextureHandle                  GetDiffuseTexture() const { return m_diffuseTexture; }
+		[[nodiscard]] TextureHandle                  GetSpecularTexture() const { return m_specularTexture; }
+		[[nodiscard]] TextureHandle                  GetNormalTexture() const { return m_normalTexture; }
+		[[maybe_unused]] [[nodiscard]] TextureHandle GetHeightTexture() const { return m_heightTexture; }
 
 		[[nodiscard]] glm::vec3 GetDiffuseColor() const { return m_diffuseColor; }
 		[[nodiscard]] glm::vec3 GetSpecularColor() const { return m_specularColor; }
@@ -52,10 +52,10 @@ namespace Engine {
 		friend class MaterialEditor;
 
 		// Textures
-		AssetHandle<Texture> m_diffuseTexture;
-		AssetHandle<Texture> m_specularTexture;
-		AssetHandle<Texture> m_normalTexture;
-		AssetHandle<Texture> m_heightTexture;
+		TextureHandle m_diffuseTexture;
+		TextureHandle m_specularTexture;
+		TextureHandle m_normalTexture;
+		TextureHandle m_heightTexture;
 
 		// Colors
 		glm::vec3 m_diffuseColor;

@@ -16,7 +16,7 @@
 
 namespace Engine {
 
-	void MaterialEditor::RenderMaterialEditor(AssetHandle<Material> matRef)
+	void MaterialEditor::RenderMaterialEditor(MaterialHandle matRef)
 	{
 		ImGui::Begin(ICON_FA_PALETTE " Material Editor");
 

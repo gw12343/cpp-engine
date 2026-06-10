@@ -45,7 +45,7 @@ namespace Engine {
 		return scene;
 	}
 
-	void SceneManager::SetActiveScene(AssetHandle<Scene> scene)
+	void SceneManager::SetActiveScene(SceneHandle scene)
 	{
 		m_activeScene = std::move(scene);
 		GetScriptManager().pendingCollisions.clear();

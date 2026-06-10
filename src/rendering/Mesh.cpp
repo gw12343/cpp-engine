@@ -60,7 +60,7 @@ namespace Engine {
 		}
 
 
-		void Mesh::Draw(const Shader& shader, bool cullBackfaces, bool uploadMaterial, const AssetHandle<Material>& materialOverride) const
+		void Mesh::Draw(const Shader& shader, bool cullBackfaces, bool uploadMaterial, const MaterialHandle& materialOverride) const
 		{
 			Material* mat = materialOverride.IsValid() ? GetAssetManager().Get(materialOverride) : m_material.get();
 			if (uploadMaterial) {

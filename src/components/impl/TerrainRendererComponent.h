@@ -15,7 +15,7 @@
 namespace Engine::Components {
 	class TerrainRenderer : public Component {
 	  public:
-		AssetHandle<Terrain::TerrainTile> terrainTile;
+		TerrainHandle terrainTile;
 		bool                              visible = true;
 
 		TerrainRenderer() = default;
@@ -27,7 +27,7 @@ namespace Engine::Components {
 			);
 		}
 
-		explicit TerrainRenderer(const AssetHandle<Terrain::TerrainTile>& tile) : terrainTile(tile) {}
+		explicit TerrainRenderer(const TerrainHandle& tile) : terrainTile(tile) {}
 
 		static void AddBindings();
 

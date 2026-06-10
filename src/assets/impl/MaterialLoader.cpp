@@ -25,10 +25,10 @@ namespace Engine {
 		mat->SetName(j.value("name", ""));
 
 		if (j.contains("textures")) {
-			mat->SetDiffuseTexture(AssetHandle<Texture>(j["textures"].value("diffuse", "")));
-			mat->SetSpecularTexture(AssetHandle<Texture>(j["textures"].value("specular", "")));
-			mat->SetNormalTexture(AssetHandle<Texture>(j["textures"].value("normal", "")));
-			mat->SetHeightTexture(AssetHandle<Texture>(j["textures"].value("height", "")));
+			mat->SetDiffuseTexture(TextureHandle(j["textures"].value("diffuse", "")));
+			mat->SetSpecularTexture(TextureHandle(j["textures"].value("specular", "")));
+			mat->SetNormalTexture(TextureHandle(j["textures"].value("normal", "")));
+			mat->SetHeightTexture(TextureHandle(j["textures"].value("height", "")));
 		}
 
 		if (j.contains("colors")) {

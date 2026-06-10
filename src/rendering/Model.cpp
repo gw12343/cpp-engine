@@ -8,11 +8,11 @@ namespace Engine::Rendering {
 	void Model::Draw(const Shader& shader, bool cullBackfaces, bool uploadMaterial) const
 	{
 		for (const auto& mesh : m_meshes) {
-			mesh->Draw(shader, cullBackfaces, uploadMaterial, AssetHandle<Material>());
+			mesh->Draw(shader, cullBackfaces, uploadMaterial, MaterialHandle());
 		}
 	}
 
-	void Model::Draw(const Shader& shader, bool cullBackfaces, bool uploadMaterial, const std::vector<AssetHandle<Material>>& materialOverrides) const
+	void Model::Draw(const Shader& shader, bool cullBackfaces, bool uploadMaterial, const std::vector<MaterialHandle>& materialOverrides) const
 	{
 		ENGINE_VERIFY(materialOverrides.size() == m_meshes.size(), "Invalid material list size");
 

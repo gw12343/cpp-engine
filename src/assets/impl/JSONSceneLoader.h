@@ -16,7 +16,7 @@ namespace Engine {
 	class JSONSceneLoader : public IAssetLoader<Scene> {
 	  public:
 		std::unique_ptr<Scene> LoadFromFile(const std::string& path) override;
-		static void            SerializeScene(const AssetHandle<Scene>& sceneRef, const std::string& path);
+		static void            SerializeScene(const SceneHandle& sceneRef, const std::string& path);
 	};
 } // namespace Engine
 

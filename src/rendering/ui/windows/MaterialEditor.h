@@ -11,7 +11,7 @@
 namespace Engine {
 	class MaterialEditor {
 	  public:
-		void RenderMaterialEditor(AssetHandle<Material> matRef);
+		void RenderMaterialEditor(MaterialHandle matRef);
 
 	  private:
 		void RenderPreviewPanel(Material* material);

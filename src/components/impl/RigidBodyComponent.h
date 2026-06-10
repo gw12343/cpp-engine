@@ -30,7 +30,7 @@ namespace Engine::Components {
 		JPH::Vec3         shapeSize     = JPH::Vec3::sReplicate(1.0f); // size/half-extents
 		std::vector<bool> meshSelection;                               // Which meshes from the model are enabled for collision
 		JPH::Vec3         centerOfMassOffset = JPH::Vec3::sZero();     // Offset for convex hull shapes
-		AssetHandle<Rendering::Model> colliderModel;                   // Model used for mesh/convex mesh colliders
+		ModelHandle colliderModel;                   // Model used for mesh/convex mesh colliders
 
 		RigidBodyComponent() : bodyID(0) {}
 

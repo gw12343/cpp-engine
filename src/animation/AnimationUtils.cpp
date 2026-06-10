@@ -33,7 +33,6 @@
 #include "ozz/animation/runtime/animation.h"
 #include "ozz/animation/runtime/local_to_model_job.h"
 #include "ozz/animation/runtime/skeleton.h"
-#include "ozz/animation/runtime/track.h"
 #include "ozz/base/io/archive.h"
 #include "ozz/base/io/stream.h"
 #include "ozz/base/log.h"
@@ -41,103 +40,101 @@
 #include "ozz/base/maths/simd_math.h"
 #include "ozz/base/maths/simd_quaternion.h"
 #include "ozz/base/maths/soa_transform.h"
-#include "ozz/base/memory/allocator.h"
-#include "ozz/geometry/runtime/skinning_job.h"
+#include "ozz/animation/runtime/track.h"
 
 #include <cassert>
 #include <limits>
 
-
-PlaybackController::PlaybackController() : time_ratio_(0.f), previous_time_ratio_(0.f), playback_speed_(1.f), play_(true), loop_(true)
-{
-}
-
-int PlaybackController::Update(const ozz::animation::Animation& _animation, float _dt)
-{
-	float new_ratio = time_ratio_;
-
-	if (play_) {
-		new_ratio = time_ratio_ + _dt * playback_speed_ / _animation.duration();
-	}
-
-	// Must be called even if time doesn't change, in order to update previous
-	// frame time ratio. Uses set_time_ratio function in order to update
-	// previous_time_ and wrap time value in the unit interval (depending on loop
-	// mode).
-	return set_time_ratio(new_ratio);
-}
-
-int PlaybackController::set_time_ratio(float _ratio)
-{
-	//  Number of loops completed within _ratio, possibly negative if going
-	//  backward.
-	previous_time_ratio_ = time_ratio_;
-	if (loop_) {
-		// Wraps in the unit interval [0:1]
-		const float loops = floorf(_ratio);
-		time_ratio_       = _ratio - loops;
-		return static_cast<int>(loops);
-	}
-	else {
-		// Clamps in the unit interval [0:1].
-		time_ratio_ = ozz::math::Clamp(0.f, _ratio, 1.f);
-		return 0;
-	}
-}
-
-// Gets animation current time.
-float PlaybackController::time_ratio() const
-{
-	return time_ratio_;
-}
-
-// Gets animation time of last update.
-float PlaybackController::previous_time_ratio() const
-{
-	return previous_time_ratio_;
-}
-
-void PlaybackController::Reset()
-{
-	previous_time_ratio_ = time_ratio_ = 0.f;
-	playback_speed_                    = 1.f;
-	play_                              = true;
-}
-
-bool PlaybackController::OnGui(const ozz::animation::Animation& _animation, bool _enabled, bool _allow_set_time)
-{
-	bool time_changed = false;
-
-	// if (_im_gui->DoButton(play_ ? "Pause" : "Play", _enabled)) {
-	//   play_ = !play_;
-	// }
-
-	// _im_gui->DoCheckBox("Loop", &loop_, _enabled);
-
-	// char label[64];
-
-	// // Uses a local copy of time_ so that set_time is used to actually apply
-	// // changes. Otherwise previous time would be incorrect.
-	// float ratio = time_ratio();
-	// std::snprintf(label, sizeof(label), "Animation time: %.2f",
-	//               ratio * _animation.duration());
-	// if (_im_gui->DoSlider(label, 0.f, 1.f, &ratio, 1.f,
-	//                       _enabled && _allow_set_time)) {
-	//   set_time_ratio(ratio);
-	//   // Pause the time if slider as moved.
-	//   play_ = false;
-	//   time_changed = true;
-	// }
-	// std::snprintf(label, sizeof(label), "Playback speed: %.2f", playback_speed_);
-	// _im_gui->DoSlider(label, -3.f, 3.f, &playback_speed_, 1.f, _enabled);
-
-	// // Allow to reset speed if it is not the default value.
-	// if (_im_gui->DoButton("Reset playback speed",
-	//                       playback_speed_ != 1.f && _enabled)) {
-	//   playback_speed_ = 1.f;
-	// }
-	return time_changed;
-}
+// PlaybackController::PlaybackController() : time_ratio_(0.f), previous_time_ratio_(0.f), playback_speed_(1.f), play_(true), loop_(true)
+// {
+// }
+//
+// int PlaybackController::Update(const ozz::animation::Animation& _animation, float _dt)
+// {
+// 	float new_ratio = time_ratio_;
+//
+// 	if (play_) {
+// 		new_ratio = time_ratio_ + _dt * playback_speed_ / _animation.duration();
+// 	}
+//
+// 	// Must be called even if time doesn't change, in order to update previous
+// 	// frame time ratio. Uses set_time_ratio function in order to update
+// 	// previous_time_ and wrap time value in the unit interval (depending on loop
+// 	// mode).
+// 	return set_time_ratio(new_ratio);
+// }
+//
+// int PlaybackController::set_time_ratio(float _ratio)
+// {
+// 	//  Number of loops completed within _ratio, possibly negative if going
+// 	//  backward.
+// 	previous_time_ratio_ = time_ratio_;
+// 	if (loop_) {
+// 		// Wraps in the unit interval [0:1]
+// 		const float loops = floorf(_ratio);
+// 		time_ratio_       = _ratio - loops;
+// 		return static_cast<int>(loops);
+// 	}
+// 	else {
+// 		// Clamps in the unit interval [0:1].
+// 		time_ratio_ = ozz::math::Clamp(0.f, _ratio, 1.f);
+// 		return 0;
+// 	}
+// }
+//
+// // Gets animation current time.
+// float PlaybackController::time_ratio() const
+// {
+// 	return time_ratio_;
+// }
+//
+// // Gets animation time of last update.
+// float PlaybackController::previous_time_ratio() const
+// {
+// 	return previous_time_ratio_;
+// }
+//
+// void PlaybackController::Reset()
+// {
+// 	previous_time_ratio_ = time_ratio_ = 0.f;
+// 	playback_speed_                    = 1.f;
+// 	play_                              = true;
+// }
+//
+// bool PlaybackController::OnGui(const ozz::animation::Animation& _animation, bool _enabled, bool _allow_set_time)
+// {
+// 	bool time_changed = false;
+//
+// 	// if (_im_gui->DoButton(play_ ? "Pause" : "Play", _enabled)) {
+// 	//   play_ = !play_;
+// 	// }
+//
+// 	// _im_gui->DoCheckBox("Loop", &loop_, _enabled);
+//
+// 	// char label[64];
+//
+// 	// // Uses a local copy of time_ so that set_time is used to actually apply
+// 	// // changes. Otherwise previous time would be incorrect.
+// 	// float ratio = time_ratio();
+// 	// std::snprintf(label, sizeof(label), "Animation time: %.2f",
+// 	//               ratio * _animation.duration());
+// 	// if (_im_gui->DoSlider(label, 0.f, 1.f, &ratio, 1.f,
+// 	//                       _enabled && _allow_set_time)) {
+// 	//   set_time_ratio(ratio);
+// 	//   // Pause the time if slider as moved.
+// 	//   play_ = false;
+// 	//   time_changed = true;
+// 	// }
+// 	// std::snprintf(label, sizeof(label), "Playback speed: %.2f", playback_speed_);
+// 	// _im_gui->DoSlider(label, -3.f, 3.f, &playback_speed_, 1.f, _enabled);
+//
+// 	// // Allow to reset speed if it is not the default value.
+// 	// if (_im_gui->DoButton("Reset playback speed",
+// 	//                       playback_speed_ != 1.f && _enabled)) {
+// 	//   playback_speed_ = 1.f;
+// 	// }
+// 	return time_changed;
+// }
 
 namespace {
 	bool OnRawSkeletonJointGui(ozz::animation::offline::RawSkeleton::Joint::Children* _children, ozz::vector<bool>::iterator* _oc_state)

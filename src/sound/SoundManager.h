@@ -34,7 +34,7 @@ namespace Engine::Audio {
 		explicit SoundSource(bool looping = false);
 		~SoundSource();
 
-		void                  Play(AssetHandle<Audio::SoundBuffer> buffer) const;
+		void                  Play(SoundHandle buffer) const;
 		void                  Stop() const;
 		void                  Pause() const;
 		[[maybe_unused]] void Resume() const;
@@ -66,7 +66,7 @@ namespace Engine::Audio {
 		static void                  SetListenerPosition(float x, float y, float z);
 		[[maybe_unused]] static void SetListenerVelocity(float x, float y, float z);
 		static void                  SetListenerOrientation(float atX, float atY, float atZ, float upX, float upY, float upZ);
-		void                         Play(AssetHandle<Audio::SoundBuffer> buffer, bool looping = false, float volume = 1.0f);
+		void                         Play(SoundHandle buffer, bool looping = false, float volume = 1.0f);
 
 		static void CheckOpenALError(const char* operation);
 

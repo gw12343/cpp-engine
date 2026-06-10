@@ -1,6 +1,7 @@
 //
 // Created by Gabe on 6/4/2026.
 //
+
 #include "components/Components.h"
 #include "components/impl/LuaScriptComponent.h"
 
@@ -59,7 +60,7 @@ namespace Engine
 
 				sol::optional<sol::object> existing = self.variables[name];
 				if (!existing) {
-					Engine::GetScriptManager().log->warn("Variable '{}' does not exist in LuaScript.", name);
+					GetScriptManager().log->warn("Variable '{}' does not exist in LuaScript.", name);
 					return sol::nil;
 				}
 
@@ -67,41 +68,39 @@ namespace Engine
 			});
 
 		// Asset Handle bindings
-		lua.new_usertype<Engine::AssetHandle<Texture>>("TextureHandle", "getGuid", &AssetHandle<Texture>::GetID, "isValid", &AssetHandle<Texture>::IsValid, "clear", [](AssetHandle<Texture>& self) { self = AssetHandle<Texture>(); });
+		lua.new_usertype<TextureHandle>("TextureHandle", "getGuid", &TextureHandle::GetID, "isValid", &TextureHandle::IsValid, "clear", [](TextureHandle& self) { self = TextureHandle(); });
 
-		lua.new_usertype<AssetHandle<Rendering::Model>>(
-			"ModelHandle", "getGuid", &AssetHandle<Rendering::Model>::GetID, "isValid", &AssetHandle<Rendering::Model>::IsValid, "clear", [](AssetHandle<Rendering::Model>& self) { self = AssetHandle<Rendering::Model>(); });
+		lua.new_usertype<ModelHandle>(
+			"ModelHandle", "getGuid", &ModelHandle::GetID, "isValid", &ModelHandle::IsValid, "clear", [](ModelHandle& self) { self = ModelHandle(); });
 
-		lua.new_usertype<AssetHandle<Material>>("MaterialHandle", "getGuid", &AssetHandle<Material>::GetID, "isValid", &AssetHandle<Material>::IsValid, "clear", [](AssetHandle<Material>& self) { self = AssetHandle<Material>(); });
+		lua.new_usertype<MaterialHandle>("MaterialHandle", "getGuid", &MaterialHandle::GetID, "isValid", &MaterialHandle::IsValid, "clear", [](MaterialHandle& self) { self = MaterialHandle(); });
 
-		lua.new_usertype<AssetHandle<Scene>>("SceneHandle", "getGuid", &AssetHandle<Scene>::GetID, "isValid", &AssetHandle<Scene>::IsValid, "clear", [](AssetHandle<Scene>& self) { self = AssetHandle<Scene>(); });
+		lua.new_usertype<SceneHandle>("SceneHandle", "getGuid", &SceneHandle::GetID, "isValid", &SceneHandle::IsValid, "clear", [](SceneHandle& self) { self = SceneHandle(); });
 
-		lua.new_usertype<AssetHandle<Terrain::TerrainTile>>(
-			"TerrainTileHandle", "getGuid", &AssetHandle<Terrain::TerrainTile>::GetID, "isValid", &AssetHandle<Terrain::TerrainTile>::IsValid, "clear", [](AssetHandle<Terrain::TerrainTile>& self) {
-				self = AssetHandle<Terrain::TerrainTile>();
+		lua.new_usertype<TerrainHandle>(
+			"TerrainTileHandle", "getGuid", &TerrainHandle::GetID, "isValid", &TerrainHandle::IsValid, "clear", [](TerrainHandle& self) {
+				self = TerrainHandle();
 			});
 
-		lua.new_usertype<AssetHandle<Particle>>("ParticleHandle", "getGuid", &AssetHandle<Particle>::GetID, "isValid", &AssetHandle<Particle>::IsValid, "clear", [](AssetHandle<Particle>& self) { self = AssetHandle<Particle>(); });
+		lua.new_usertype<ParticleHandle>("ParticleHandle", "getGuid", &ParticleHandle::GetID, "isValid", &ParticleHandle::IsValid, "clear", [](ParticleHandle& self) { self = ParticleHandle(); });
 
-		lua.new_usertype<AssetHandle<Audio::SoundBuffer>>(
-			"SoundHandle", "getGuid", &AssetHandle<Audio::SoundBuffer>::GetID, "isValid", &AssetHandle<Audio::SoundBuffer>::IsValid, "clear", [](AssetHandle<Audio::SoundBuffer>& self) { self = AssetHandle<Audio::SoundBuffer>(); });
+		lua.new_usertype<SoundHandle>(
+			"SoundHandle", "getGuid", &SoundHandle::GetID, "isValid", &SoundHandle::IsValid, "clear", [](SoundHandle& self) { self = SoundHandle(); });
 
 		// Factory functions for creating asset handles
-		lua.set_function("tex", []() { return AssetHandle<Texture>(); });
-		lua.set_function("model", []() { return AssetHandle<Rendering::Model>(); });
-		lua.set_function("material", []() { return AssetHandle<Material>(); });
-		lua.set_function("scene", []() { return AssetHandle<Scene>(); });
-		lua.set_function("terrainTile", []() { return AssetHandle<Terrain::TerrainTile>(); });
-		lua.set_function("particle", []() { return AssetHandle<Particle>(); });
-		lua.set_function("sound", []() { return AssetHandle<Audio::SoundBuffer>(); });
+		lua.set_function("tex", []() { return TextureHandle(); });
+		lua.set_function("model", []() { return ModelHandle(); });
+		lua.set_function("material", []() { return MaterialHandle(); });
+		lua.set_function("scene", []() { return SceneHandle(); });
+		lua.set_function("terrainTile", []() { return TerrainHandle(); });
+		lua.set_function("particle", []() { return ParticleHandle(); });
+		lua.set_function("sound", []() { return SoundHandle(); });
 
 		// Factory for entity handle
 		lua.new_usertype<EntityHandle>("EntityHandle", "getGuid", &EntityHandle::GetID, "isValid", &EntityHandle::IsValid, "clear", [](EntityHandle& self) { self = EntityHandle(); });
 		lua.set_function("ehandle", sol::overload([]() { return EntityHandle(); }, [](const std::string& guid) { return EntityHandle(guid); }));
 
 
-		// Factory for entity handle vector
-		// using EntityVector = ;
 
 		using EntityVector = std::vector<EntityHandle>;
 
@@ -124,8 +123,6 @@ namespace Engine
 				self[i - 1] = value;
 			});
 
-		using MaterialHandle = AssetHandle<Material>;
-		using MaterialVector = std::vector<MaterialHandle>;
 
 #define BIND_ASSET_VECTOR(Name, Type)                                                                                                                                                                                                          \
 {                                                                                                                                                                                                                                          \

@@ -24,6 +24,7 @@ namespace Engine {
 
         // Reserve reasonable capacity to avoid reallocations
         //players.reserve(4);
+        players.reserve(4);
         layers.reserve(4);
     }
 

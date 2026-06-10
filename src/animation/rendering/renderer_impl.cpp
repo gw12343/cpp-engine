@@ -906,7 +906,7 @@ namespace Engine{
 		                                     {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}, {0.f, 0.f}};
 	} // namespace
 
-	bool RendererImpl::DrawMesh(const AnimatedMesh& _mesh, const ozz::math::Float4x4& _transform, AssetHandle<Material> _material, const Options& _options)
+	bool RendererImpl::DrawMesh(const AnimatedMesh& _mesh, const ozz::math::Float4x4& _transform, MaterialHandle _material, const Options& _options)
 	{
 		if (_options.wireframe) {
 			GL(PolygonMode(GL_FRONT_AND_BACK, GL_LINE));
@@ -1088,7 +1088,7 @@ namespace Engine{
 		return true;
 	}
 
-	bool RendererImpl::DrawSkinnedMesh(const Engine::AnimatedMesh& _mesh, const ozz::span<ozz::math::Float4x4> _skinning_matrices, const ozz::math::Float4x4& _transform, AssetHandle<Material> _material, const Options& _options)
+	bool RendererImpl::DrawSkinnedMesh(const Engine::AnimatedMesh& _mesh, const ozz::span<ozz::math::Float4x4> _skinning_matrices, const ozz::math::Float4x4& _transform, MaterialHandle _material, const Options& _options)
 	{
 		// Forward to DrawMesh function is skinning is disabled.
 		if (_options.skip_skinning || !_mesh.skinned()) {

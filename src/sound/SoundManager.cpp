@@ -127,7 +127,7 @@ namespace Engine::Audio {
 	}
 
 
-	void SoundSource::Play(AssetHandle<Audio::SoundBuffer> buffer) const
+	void SoundSource::Play(SoundHandle buffer) const
 	{
 		// Clear any previous errors
 		alGetError();
@@ -235,7 +235,7 @@ namespace Engine::Audio {
 	}
 
 
-	void SoundManager::Play(AssetHandle<Audio::SoundBuffer> soundBuffer, bool looping, float volume)
+	void SoundManager::Play(SoundHandle soundBuffer, bool looping, float volume)
 	{
 		// auto buffer = GetSound(soundName);
 		//		if (!buffer) {
