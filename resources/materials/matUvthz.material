@@ -16,21 +16,21 @@
             0.0
         ],
         "specular": [
-            0.07308971881866455,
-            0.07308971881866455,
-            0.07308971881866455
+            0.5,
+            0.5,
+            0.5
         ]
     },
-    "name": "SIGN",
+    "name": "Floor",
     "properties": {
-        "shininess": 410.5050048828125,
+        "shininess": 32.0,
         "textureScale": [
-            1.0,
-            1.0
+            100.0,
+            100.0
         ]
     },
     "textures": {
-        "diffuse": "19fc6d1f686f18d6fb7ea0a5588d1e74",
+        "diffuse": "cbaaeb48a2ce07cc7adcede17356eba3",
         "height": "",
         "normal": "",
         "specular": ""

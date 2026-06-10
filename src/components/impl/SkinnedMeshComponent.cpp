@@ -16,7 +16,7 @@
 
 namespace Engine::Components {
 	std::unordered_set<std::vector<ozz::math::Float4x4>*> SkinnedMeshComponent::s_skin_mats;
-	std::unordered_set<ozz::vector<Engine::Mesh>*>        SkinnedMeshComponent::s_all_meshes;
+	std::unordered_set<ozz::vector<Engine::AnimatedMesh>*>        SkinnedMeshComponent::s_all_meshes;
 
 
 	void SkinnedMeshComponent::OnRemoved(Entity& entity)
@@ -55,7 +55,7 @@ namespace Engine::Components {
 		// Mesh::joint_remaps is used to know how to order skinning matrices. So
 		// the number of matrices required is the size of joint_remaps
 		size_t num_skinning_matrices = 0;
-		for (const Engine::Mesh& mesh : *meshes) {
+		for (const Engine::AnimatedMesh& mesh : *meshes) {
 			num_skinning_matrices = ozz::math::Max(num_skinning_matrices, mesh.joint_remaps.size());
 		}
 
@@ -66,6 +66,7 @@ namespace Engine::Components {
 
 	void SkinnedMeshComponent::RenderInspector(Entity& entity)
 	{
+        LeftLabelCheckbox("Visible", &visible);
 		ImGui::Text("Meshes: %s", meshes ? std::to_string(meshes->size()).c_str() : "Null");
 		ImGui::Text("Skinning Matrices: %s", skinning_matrices ? std::to_string(skinning_matrices->size()).c_str() : "Null");
 		LeftLabelAssetMaterial("Material", &meshMaterial);
@@ -78,7 +79,7 @@ namespace Engine::Components {
 			delete mat;
 		}
 
-		for (ozz::vector<Engine::Mesh>* mesh : s_all_meshes) {
+		for (ozz::vector<Engine::AnimatedMesh>* mesh : s_all_meshes) {
 			delete mesh;
 		}
 	}

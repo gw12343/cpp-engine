@@ -120,10 +120,13 @@ namespace Engine {
 
 	glm::vec2 Input::GetMouseDelta() const
 	{
+#ifndef GAME_BUILD
+        if(ImGui::IsKeyDown(ImGuiKey_Escape)) return {0,0};
+#endif
 		return glm::vec2(m_mousePosition.x, m_lastMousePosition.y) - glm::vec2(m_lastMousePosition.x, m_mousePosition.y); // m_mousePosition - m_lastMousePosition;
 	}
 
-	float Input::GetMouseScrollDelta()
+	float Input::GetMouseScrollDelta() const
 	{
 		return m_scrollDelta;
 	}
@@ -142,7 +145,7 @@ namespace Engine {
 		m_gameCursorMode = mode;
 	}
 
-	int Input::GetCursorModeGame()
+	int Input::GetCursorModeGame() const
 	{
 		return m_gameCursorMode;
 	}

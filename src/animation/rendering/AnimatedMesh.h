@@ -15,7 +15,7 @@ namespace Engine {
 	// Defines a mesh with skinning information (joint indices and weights).
 	// The mesh is subdivided into parts that group vertices according to their
 	// number of influencing joints. Triangle indices are shared across mesh parts.
-	struct Mesh {
+	struct AnimatedMesh {
 		// Number of triangle indices for the mesh.
 		[[nodiscard]] int triangle_index_count() const { return static_cast<int>(triangle_indices.size()); }
 
@@ -107,23 +107,23 @@ namespace Engine {
 namespace ozz::io {
 
 	// Part
-	OZZ_IO_TYPE_TAG("ozz-sample-Mesh-Part", Engine::Mesh::Part)
-	OZZ_IO_TYPE_VERSION(1, Engine::Mesh::Part)
+	OZZ_IO_TYPE_TAG("ozz-sample-Mesh-Part", Engine::AnimatedMesh::Part)
+	OZZ_IO_TYPE_VERSION(1, Engine::AnimatedMesh::Part)
 
 	template <>
-	struct Extern<Engine::Mesh::Part> {
-		static void Save(OArchive& _archive, const Engine::Mesh::Part* _parts, size_t _count);
-		static void Load(IArchive& _archive, Engine::Mesh::Part* _parts, size_t _count, uint32_t _version);
+	struct Extern<Engine::AnimatedMesh::Part> {
+		static void Save(OArchive& _archive, const Engine::AnimatedMesh::Part* _parts, size_t _count);
+		static void Load(IArchive& _archive, Engine::AnimatedMesh::Part* _parts, size_t _count, uint32_t _version);
 	};
 
 	// Mesh
-	OZZ_IO_TYPE_TAG("ozz-sample-Mesh", Engine::Mesh)
-	OZZ_IO_TYPE_VERSION(1, Engine::Mesh)
+	OZZ_IO_TYPE_TAG("ozz-sample-Mesh", Engine::AnimatedMesh)
+	OZZ_IO_TYPE_VERSION(1, Engine::AnimatedMesh)
 
 	template <>
-	struct Extern<Engine::Mesh> {
-		static void Save(OArchive& _archive, const Engine::Mesh* _meshes, size_t _count);
-		static void Load(IArchive& _archive, Engine::Mesh* _meshes, size_t _count, uint32_t _version);
+	struct Extern<Engine::AnimatedMesh> {
+		static void Save(OArchive& _archive, const Engine::AnimatedMesh* _meshes, size_t _count);
+		static void Load(IArchive& _archive, Engine::AnimatedMesh* _meshes, size_t _count, uint32_t _version);
 	};
 
 } // namespace ozz::io

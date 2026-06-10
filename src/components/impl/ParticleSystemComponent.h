@@ -34,7 +34,7 @@ namespace Engine::Components {
 		void OnRemoved(Entity& entity) override;
 		void RenderInspector(Entity& entity) override;
 
-        void Play(Entity& entity);
+        static void AddBindings();
 
 
 		Effekseer::Handle handle = -1;

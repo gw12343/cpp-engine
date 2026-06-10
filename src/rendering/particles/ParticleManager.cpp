@@ -12,12 +12,16 @@
 #include <Camera.h>
 
 #include "physics/PhysicsManager.h"
+
+
+#include "scripting/ScriptManager.h"
+
 namespace Engine {
 	static const int MAX_INSTANCES = 8000;
 
 	class ParticleManager::DebugTextureLoader : public Effekseer::TextureLoader {
 	  public:
-		explicit DebugTextureLoader(EffekseerRendererGL::RendererRef renderer) : m_renderer(renderer), m_internalLoader(renderer->CreateTextureLoader()) {}
+		explicit DebugTextureLoader(const EffekseerRendererGL::RendererRef& renderer) : m_renderer(renderer), m_internalLoader(renderer->CreateTextureLoader()) {}
 
 		Effekseer::TextureRef Load(const EFK_CHAR* path, Effekseer::TextureType type) override
 		{
@@ -40,6 +44,16 @@ namespace Engine {
 		Effekseer::TextureLoaderRef      m_internalLoader;
 	};
 
+    void ParticleManager::setLuaBindings() {
+        // Bind the PhysicsManager class
+        GetScriptManager().lua.new_usertype<ParticleManager>("ParticleManager",
+                                                             "playEffect",
+                                                             &ParticleManager::PlayEffect
+        );
+
+        // Provide access to the main PhysicsManager
+        GetScriptManager().lua.set_function("getParticleManager", []() -> ParticleManager & { return Engine::GetParticleManager(); });
+    }
 
 	void ParticleManager::onInit()
 	{
@@ -57,9 +71,22 @@ namespace Engine {
 	void ParticleManager::onGameStart(){
         auto view = GetCurrentSceneRegistry().view<Components::Transform, Components::ParticleSystem>();
         for (auto [entity, transform, particleSystem] : view.each()) {
+            if (particleSystem.autoPlay && particleSystem.effect.IsValid()) {
+                Particle* particle = GetAssetManager().Get(particleSystem.effect);
+                if(!particle){
+                    GetParticleManager().log->error("Particle effect is invalid!");
+                    return;
+                }
 
-           // particleSystem.Play(Entity(, GetCurrentScene()));
+                // Get particle manager
+                const auto& manager = GetParticleManager().GetManager();
+
+                // Spawn particle system at transform
+                auto pos       = transform.GetWorldPosition();
+                particleSystem.handle         = manager->Play(particle->GetEffect(), pos.x, pos.y, pos.z);
+            }
         }
+
     }
 
 
@@ -69,16 +96,25 @@ namespace Engine {
 		if (GetState() != PLAYING) return;
 
 		if (m_manager) {
-			m_manager->Update(dt * 60.0);
+			m_manager->Update(dt * 60.0f);
 		}
 
 		// Update particles systems' locations
 		auto view = GetCurrentSceneRegistry().view<Components::Transform, Components::ParticleSystem>();
 		for (auto [entity, transform, particleSystem] : view.each()) {
 			auto pos = transform.GetWorldPosition();
-			m_manager->SetLocation(particleSystem.handle, pos.x, pos.y, pos.z); // particleSystem.UpdateTransform(transform);
+
+            if(particleSystem.looping && !m_manager->Exists(particleSystem.handle)){
+                Particle* particle = GetAssetManager().Get(particleSystem.effect);
+                if(particle) {
+                    particleSystem.handle = m_manager->Play(particle->GetEffect(), pos.x, pos.y, pos.z);
+                }
+            }
+			m_manager->SetLocation(particleSystem.handle, pos.x, pos.y, pos.z);
 		}
 	}
+
+
 	void ParticleManager::onShutdown()
 	{
 		m_manager.Reset();
@@ -113,16 +149,16 @@ namespace Engine {
 	}
 
 
-	Effekseer::Handle ParticleManager::PlayEffect(const std::u16string& path, float x, float y, float z)
-	{
-		Effekseer::RefPtr<Effekseer::Effect> effect = Effekseer::Effect::Create(m_manager, path.c_str());
-		if (!effect) {
-			log->critical("Failed to load particle effect: {}", std::string(path.begin(), path.end()));
-			return -1;
-		}
-
-		return m_manager->Play(effect, x, y, z);
-	}
+//	Effekseer::Handle ParticleManager::PlayEffect(const std::u16string& path, float x, float y, float z)
+//	{
+//		Effekseer::RefPtr<Effekseer::Effect> effect = Effekseer::Effect::Create(m_manager, path.c_str());
+//		if (!effect) {
+//			log->critical("Failed to load particle effect: {}", std::string(path.begin(), path.end()));
+//			return -1;
+//		}
+//
+//		return m_manager->Play(effect, x, y, z);
+//	}
 	void ParticleManager::ResetInternalManager()
 	{
 		m_manager = Effekseer::Manager::Create(MAX_INSTANCES);
@@ -144,6 +180,35 @@ namespace Engine {
 			log->info("Effekseer Manager initialized!");
 		}
 	}
+
+    void ParticleManager::PlayEffect(Entity &entity) {
+        const auto& manager = GetManager();
+        ENGINE_VERIFY(manager != nullptr, "ParticleSystem::RenderInspector: Failed to get Effekseer manager");
+
+        if(!entity.HasComponent<Components::ParticleSystem>()){
+            log->warn("Entity has no particle system; cannot play particle effect.");
+            return;
+        }
+
+        if(!entity.HasComponent<Components::Transform>()){
+            log->warn("Entity has no transform; cannot play particle effect.");
+            return;
+        }
+
+        auto& ps = entity.GetComponent<Components::ParticleSystem>();
+        auto& tr = entity.GetComponent<Components::Transform>();
+
+        manager->StopEffect(ps.handle);
+        auto      pos       = tr.GetWorldPosition();
+
+        Particle* particle  = GetAssetManager().Get(ps.effect);
+
+        if(!particle){
+            log->warn("Invalid particle effect.");
+            return;
+        }
+        ps.handle = manager->Play(particle->GetEffect(), pos.x, pos.y, pos.z);
+    }
 
 
 } // namespace Engine

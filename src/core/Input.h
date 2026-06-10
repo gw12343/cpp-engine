@@ -31,13 +31,13 @@ namespace Engine {
 		glm::vec2                  GetMousePositionInViewport() const;
 		glm::vec2                  GetMousePositionInViewportScaledFlipped() const;
 		glm::vec2                  GetMouseDelta() const;
-		float                      GetMouseScrollDelta();
-		[[maybe_unused]] void SetMousePosition(const glm::vec2& position);
+		float                      GetMouseScrollDelta() const;
+		[[maybe_unused]] static void SetMousePosition(const glm::vec2& position);
 
-		void                          SetCursorMode(int mode);
-		int                           GetCursorMode();
+		static void                          SetCursorMode(int mode);
+		static int                           GetCursorMode();
 		void                          SetCursorModeGame(int mode);
-		int                           GetCursorModeGame();
+		int                           GetCursorModeGame() const;
 		bool                          IsMouseClicked(int btn);
 		std::unordered_map<int, bool> m_mouseButtonStates;
 		std::unordered_map<int, bool> m_prevMouseButtonStates;

@@ -212,7 +212,7 @@ namespace Engine {
 
 
 			// Render each mesh
-			for (const Engine::Mesh& mesh : *skinnedMeshComponent.meshes) {
+			for (const Engine::AnimatedMesh& mesh : *skinnedMeshComponent.meshes) {
 				// Render the mesh
 
 				// Builds skinning matrices, based on the output of the animation stage

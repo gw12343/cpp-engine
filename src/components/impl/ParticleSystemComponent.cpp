@@ -19,6 +19,15 @@
 
 
 namespace Engine::Components {
+
+
+    void ParticleSystem::AddBindings()
+    {
+        auto& lua = GetScriptManager().lua;
+
+        lua.new_usertype<ParticleSystem>("ParticleSystem");
+    }
+
 	void ParticleSystem::OnRemoved(Entity& entity)
 	{
 		auto manager = GetParticleManager().GetManager();
@@ -33,20 +42,7 @@ namespace Engine::Components {
 
 	void ParticleSystem::OnAdded(Entity& entity)
 	{
-		if (effect.IsValid()) {
-			Particle* particle = GetAssetManager().Get(effect);
-            if(!particle){
-                GetParticleManager().log->error("Particle effect is invald!");
-            }
 
-			// Get particle manager
-			const auto& manager = GetParticleManager().GetManager();
-
-			// Spawn particle system at transform
-			auto transform = entity.GetComponent<Components::Transform>();
-			auto pos       = transform.GetWorldPosition();
-			handle         = manager->Play(particle->GetEffect(), pos.x, pos.y, pos.z);
-		}
 	}
 
 	void ParticleSystem::RenderInspector(Entity& entity)
@@ -58,6 +54,9 @@ namespace Engine::Components {
 
         LeftLabelAssetParticle("Particle Effect", &effect);
 
+
+        LeftLabelCheckbox("Autoplay", &autoPlay);
+        LeftLabelCheckbox("Loop", &looping);
 
 		if (ImGui::Button(paused ? "Unpause" : "Pause")) {
 			manager->SetPaused(handle, !paused);
@@ -72,17 +71,6 @@ namespace Engine::Components {
 		}
 	}
 
-
-    void ParticleSystem::Play(Entity& entity) {
-        const auto& manager = GetParticleManager().GetManager();
-        ENGINE_VERIFY(manager != nullptr, "ParticleSystem::RenderInspector: Failed to get Effekseer manager");
-
-        manager->StopEffect(handle);
-        auto      transform = entity.GetComponent<Components::Transform>();
-        auto      pos       = transform.GetWorldPosition();
-        Particle* particle  = GetAssetManager().Get(effect);
-        handle              = manager->Play(particle->GetEffect(), pos.x, pos.y, pos.z);
-    }
 
 } // namespace Engine::Components
 

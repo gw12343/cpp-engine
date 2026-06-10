@@ -28,88 +28,89 @@
 #include "immediate.h"
 
 #include "AnimationShader.h"
-#include "Camera.h"
 #include "renderer_impl.h"
 #include "core/EngineData.h"
-
+#include "ozz/base/log.h"
 
 
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-
-GlImmediateRenderer::GlImmediateRenderer(RendererImpl* _renderer) : vbo_(0), size_(0), renderer_(_renderer)
+namespace Engine
 {
-}
-
-GlImmediateRenderer::~GlImmediateRenderer()
-{
-	assert(size_ == 0 && "Immediate rendering still in use.");
-
-	if (vbo_) {
-		GL(DeleteBuffers(1, &vbo_));
-		vbo_ = 0;
-	}
-}
-
-bool GlImmediateRenderer::Initialize()
-{
-	GL(GenBuffers(1, &vbo_));
-
-	immediate_pc_shader = ImmediatePCShader::Build();
-	if (!immediate_pc_shader) {
-		return false;
-	}
-	immediate_ptc_shader = ImmediatePTCShader::Build();
-	if (!immediate_ptc_shader) {
-		return false;
+	GlImmediateRenderer::GlImmediateRenderer(RendererImpl* _renderer) : vbo_(0), size_(0), renderer_(_renderer)
+	{
 	}
 
-	return true;
+	GlImmediateRenderer::~GlImmediateRenderer()
+	{
+		assert(size_ == 0 && "Immediate rendering still in use.");
+
+		if (vbo_) {
+			GL(DeleteBuffers(1, &vbo_));
+			vbo_ = 0;
+		}
+	}
+
+	bool GlImmediateRenderer::Initialize()
+	{
+		GL(GenBuffers(1, &vbo_));
+
+		immediate_pc_shader = ImmediatePCShader::Build();
+		if (!immediate_pc_shader) {
+			return false;
+		}
+		immediate_ptc_shader = ImmediatePTCShader::Build();
+		if (!immediate_ptc_shader) {
+			return false;
+		}
+
+		return true;
+	}
+
+	void GlImmediateRenderer::Begin()
+	{
+		assert(size_ == 0 && "Immediate rendering already in use.");
+	}
+
+	template <>
+	void GlImmediateRenderer::End<VertexPC>(GLenum _mode, const ozz::math::Float4x4& _transform)
+	{
+		GL(BindBuffer(GL_ARRAY_BUFFER, vbo_));
+		GL(BufferData(GL_ARRAY_BUFFER, size_, buffer_.data(), GL_STREAM_DRAW));
+
+		immediate_pc_shader->Bind(_transform, Engine::GetCamera().view_proj(), sizeof(VertexPC), 0, sizeof(VertexPC), 12);
+
+		const int count = static_cast<int>(size_ / sizeof(VertexPC));
+		GL(DrawArrays(_mode, 0, count));
+
+		immediate_pc_shader->Unbind();
+
+		GL(BindBuffer(GL_ARRAY_BUFFER, 0));
+
+		// Reset vertex count for the next call
+		size_ = 0;
+	}
+
+	template <>
+	void GlImmediateRenderer::End<VertexPTC>(GLenum _mode, const ozz::math::Float4x4& _transform)
+	{
+		GL(BindBuffer(GL_ARRAY_BUFFER, vbo_));
+		GL(BufferData(GL_ARRAY_BUFFER, size_, buffer_.data(), GL_STREAM_DRAW));
+
+		immediate_ptc_shader->Bind(_transform, GetCamera().view_proj(), sizeof(VertexPTC), 0, sizeof(VertexPTC), 12, sizeof(VertexPTC), 20);
+
+		const int count = static_cast<int>(size_ / sizeof(VertexPTC));
+		GL(DrawArrays(_mode, 0, count));
+
+		immediate_ptc_shader->Unbind();
+
+		GL(BindBuffer(GL_ARRAY_BUFFER, 0));
+
+		// Reset vertex count for the next call
+		size_ = 0;
+	}
+	// }  // namespace internal
+	// }  // namespace sample
+	// }  // namespace ozz
 }
-
-void GlImmediateRenderer::Begin()
-{
-	assert(size_ == 0 && "Immediate rendering already in use.");
-}
-
-template <>
-void GlImmediateRenderer::End<VertexPC>(GLenum _mode, const ozz::math::Float4x4& _transform)
-{
-	GL(BindBuffer(GL_ARRAY_BUFFER, vbo_));
-	GL(BufferData(GL_ARRAY_BUFFER, size_, buffer_.data(), GL_STREAM_DRAW));
-
-	immediate_pc_shader->Bind(_transform, GetCamera().view_proj(), sizeof(VertexPC), 0, sizeof(VertexPC), 12);
-
-	const int count = static_cast<int>(size_ / sizeof(VertexPC));
-	GL(DrawArrays(_mode, 0, count));
-
-	immediate_pc_shader->Unbind();
-
-	GL(BindBuffer(GL_ARRAY_BUFFER, 0));
-
-	// Reset vertex count for the next call
-	size_ = 0;
-}
-
-template <>
-void GlImmediateRenderer::End<VertexPTC>(GLenum _mode, const ozz::math::Float4x4& _transform)
-{
-	GL(BindBuffer(GL_ARRAY_BUFFER, vbo_));
-	GL(BufferData(GL_ARRAY_BUFFER, size_, buffer_.data(), GL_STREAM_DRAW));
-
-	immediate_ptc_shader->Bind(_transform, GetCamera().view_proj(), sizeof(VertexPTC), 0, sizeof(VertexPTC), 12, sizeof(VertexPTC), 20);
-
-	const int count = static_cast<int>(size_ / sizeof(VertexPTC));
-	GL(DrawArrays(_mode, 0, count));
-
-	immediate_ptc_shader->Unbind();
-
-	GL(BindBuffer(GL_ARRAY_BUFFER, 0));
-
-	// Reset vertex count for the next call
-	size_ = 0;
-}
-// }  // namespace internal
-// }  // namespace sample
-// }  // namespace ozz

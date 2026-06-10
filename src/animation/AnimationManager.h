@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Camera.h"
-#include "animation/AnimatedMesh.h"
-#include "animation/renderer.h"
-#include "animation/renderer_impl.h"
+#include "animation/rendering/AnimatedMesh.h"
+#include "animation/rendering/renderer_impl.h"
 #include "core/module/Module.h"
 
 
@@ -11,7 +10,6 @@
 
 #include <ozz/animation/runtime/skeleton.h>
 
-#include "ozz/animation/runtime/track.h"
 #include "ozz/base/containers/vector.h"
 #include "ozz/base/maths/simd_math.h"
 
@@ -24,7 +22,6 @@
 
 namespace Engine {
 
-	class GEngine; // Forward declaration
 
 	class AnimationManager : public Module {
 	  public:
@@ -34,16 +31,16 @@ namespace Engine {
 		void        onShutdown() override;
 		std::string name() const override { return "AnimationModule"; }
 
-		static std::vector<Mesh, ozz::StdAllocator<Mesh>>* LoadMeshesFromPath(const std::string& string) { return nullptr; }
 
 
 
 		void Render();
+		void RenderDebug() const;
 
 
 		bool&                      GetDrawSkeleton() { return draw_skeleton_; }
 		bool&                      GetDrawMesh() { return draw_mesh_; }
-		AnimatedRenderer::Options& GetRenderOptions() { return render_options_; }
+		RendererImpl::Options& GetRenderOptions() { return render_options_; }
 
 		// Load a skeleton from a file path
 		ozz::animation::Skeleton* LoadSkeletonFromPath(const std::string& path);
@@ -58,7 +55,7 @@ namespace Engine {
 		static std::vector<ozz::math::Float4x4>* AllocateModelPose(const ozz::animation::Skeleton* skeleton);
 
 		// Load meshes from a file path
-		//static ozz::vector<Engine::Mesh>* LoadMeshesFromPath(const std::string& path);
+		static ozz::vector<AnimatedMesh>* LoadMeshesFromPath(std::string path);
 
 
 		ozz::unique_ptr<RendererImpl> renderer_;
@@ -74,7 +71,7 @@ namespace Engine {
 		// Rendering options
 		bool                      draw_skeleton_ = false;
 		bool                      draw_mesh_     = true;
-		AnimatedRenderer::Options render_options_;
+		RendererImpl::Options render_options_;
 
 		// Renderer
 	};

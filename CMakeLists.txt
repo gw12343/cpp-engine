@@ -21,7 +21,10 @@ endif ()
 # Global dependency flags
 set(SPDLOG_BUILD_WARNINGS OFF CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-
+set(GLFW_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(EFFEKSEER_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(BUILD_PROGRAMS OFF CACHE BOOL "" FORCE)
+set(USE_MSVC_RUNTIME_LIBRARY_DLL OFF CACHE BOOL "" FORCE)
 
 set(JPH_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
 set(JPH_BUILD_UNIT_TESTS OFF CACHE BOOL "" FORCE)
@@ -40,7 +43,7 @@ set(OPENAL_ROOT "C:/Users/Gabe/Documents/openal-soft-1.24.3-bin")  # Change this
 option(USE_ASSIMP_FROM_SOURCE "Build and use Assimp 6.0.2 from source" ON)
 
 if(MSVC)
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" CACHE STRING "" FORCE)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     add_compile_definitions(_SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS)
 endif()
 
@@ -189,6 +192,7 @@ set(RMLUI_SAMPLES OFF CACHE BOOL "" FORCE)
 set(RMLUI_TESTS OFF CACHE BOOL "" FORCE)
 set(RMLUI_LUA_BINDINGS ON CACHE BOOL "" FORCE)
 set(RMLUI_FONT_ENGINE "freetype" CACHE STRING "" FORCE)
+set(RMLUI_STATIC_LIB ON CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(glfw cereal spdlog nativefiledialog jolt ozz imgui effekseer lua sol2 nlohmann_json efsw tracy dds_image)
 
@@ -397,6 +401,11 @@ function(setup_executable TARGET_NAME GAME_BUILD_FLAG)
     get_target_property(LINK_LIBS ${TARGET_NAME} LINK_LIBRARIES)
     message(STATUS "${TARGET_NAME} links: ${LINK_LIBS}")
 endfunction()
+
+
+get_target_property(EFFEKSEER_RUNTIME Effekseer MSVC_RUNTIME_LIBRARY)
+message(STATUS "Effekseer runtime = ${EFFEKSEER_RUNTIME}")
+
 
 # ----------------- Create Both Executables -------------------
 # Development build (without GAME_BUILD)

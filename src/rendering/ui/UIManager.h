@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Camera.h"
-#include "animation/renderer_impl.h"
+#include "animation/rendering/renderer_impl.h"
 #include "core/Entity.h"
 #include "sound/SoundManager.h"
 

@@ -283,7 +283,7 @@ namespace Engine {
 	{
 		manager.ShutdownAll();
 
-		Components::AnimationComponent::CleanAnimationContexts();
+		//Components::AnimationComponent::CleanAnimationContexts();
 		Components::SkinnedMeshComponent::CleanSkinnedModels();
 		Texture::CleanAllTextures();
 		Rendering::Mesh::CleanAllMeshes();

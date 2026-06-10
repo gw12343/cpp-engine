@@ -4,7 +4,7 @@
 
 #include <Effekseer/Effekseer.h>
 #include <EffekseerRendererGL/EffekseerRendererGL.h>
-
+#include <core/Entity.h>
 
 
 namespace Engine {
@@ -20,8 +20,10 @@ namespace Engine {
 
 		void Render();
 
-		Effekseer::Handle                          PlayEffect(const std::u16string& path, float x, float y, float z);
+		void                          PlayEffect(Entity& entity);
 		[[nodiscard]] const Effekseer::ManagerRef& GetManager() const { return m_manager; }
+        void        setLuaBindings() override;
+
 
 	  private:
 		class DebugTextureLoader;

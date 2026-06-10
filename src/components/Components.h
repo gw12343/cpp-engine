@@ -29,7 +29,6 @@ namespace ozz::math {
 
 
 namespace Engine {
-	class Mesh;
 	class Entity;
 
 	// Component structs for the ECS system

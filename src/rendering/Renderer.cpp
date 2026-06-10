@@ -266,11 +266,19 @@ namespace Engine {
 #ifndef GAME_BUILD
         {
             if (GetState() == EDITOR || GetState() == PAUSED) {
-                ZoneScopedN("Render Gizmos");
-                DebugGroup group("Render Gizmos");
+                {
+                    ZoneScopedN("Render Gizmos");
+                    DebugGroup group("Render Gizmos");
 
-                RenderGizmos(false);
+                    RenderGizmos(false);
+                }
+
             }
+        }
+
+        {
+            RENDER_STEP("Animations Debug Skeleton Pass");
+            GetAnimationManager().RenderDebug();
         }
 #endif
 
@@ -472,7 +480,7 @@ namespace Engine {
                 glm::vec3 encodedColor = EncodeEntityID(entity);
 
                 // Render each mesh
-                for (const Engine::Mesh &mesh: *skinnedMeshComponent.meshes) {
+                for (const Engine::AnimatedMesh &mesh: *skinnedMeshComponent.meshes) {
                     // Render the mesh
 
                     // Builds skinning matrices, based on the output of the animation stage
