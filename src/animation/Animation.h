@@ -14,6 +14,6 @@ namespace Engine {
 		Animation() = default;
 		~Animation();
 		std::string                name;
-		ozz::animation::Animation* source;
+		ozz::animation::Animation* source = nullptr;
 	};
 } // namespace Engine

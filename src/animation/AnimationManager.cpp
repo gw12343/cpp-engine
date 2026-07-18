@@ -1,7 +1,9 @@
 #include "AnimationManager.h"
 
 #include "AnimationUtils.h"
+#include "Animation.h"
 #include "core/Entity.h"
+#include "core/EngineData.h"
 
 #include "components/impl/AnimationComponent.h"
 #include "components/impl/TransformComponent.h"
@@ -14,6 +16,7 @@
 #include "physics/PhysicsManager.h"
 #include "entt/entt.hpp"
 #include "ozz/animation/runtime/local_to_model_job.h"
+#include "assets/AssetManager.h"
 
 namespace Engine {
 
@@ -43,9 +46,12 @@ namespace Engine {
 
     void AnimationManager::onShutdown()
     {
-        for (auto& pair : loaded_skeletons_) {
-            pair.second.reset();
+        if (Get().assetManager) {
+            GetAssetManager().UnloadAll<Animation>();
         }
+
+        renderer_.reset();
+        loaded_skeletons_.clear();
     }
 
     void AnimationManager::onUpdate(float deltaTime)
@@ -222,6 +228,7 @@ namespace Engine {
         auto animation = new ozz::animation::Animation();
         if (!LoadAnimation(path.c_str(), animation)) {
             log->error("Failed to load animation from path: {}", path);
+            delete animation;
             return nullptr;
         }
         return animation;

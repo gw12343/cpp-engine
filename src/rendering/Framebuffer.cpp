@@ -1,7 +1,7 @@
 #include "spdlog/spdlog.h"
 #include "Framebuffer.h"
-
-
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
 namespace Engine {
     void Framebuffer::Resize(int width, int height) {
@@ -70,17 +70,19 @@ namespace Engine {
     }
 
     void Framebuffer::Delete() {
-        if (FBO != 0) {
-            glDeleteFramebuffers(1, &FBO);
-            FBO = 0;
+        if (glfwGetCurrentContext() != nullptr) {
+            if (FBO != 0) {
+                glDeleteFramebuffers(1, &FBO);
+            }
+            if (texture != 0) {
+                glDeleteTextures(1, &texture);
+            }
+            if (RBO != 0) {
+                glDeleteRenderbuffers(1, &RBO);
+            }
         }
-        if (texture != 0) {
-            glDeleteTextures(1, &texture);
-            texture = 0;
-        }
-        if (RBO != 0) {
-            glDeleteRenderbuffers(1, &RBO);
-            RBO = 0;
-        }
+        FBO = 0;
+        texture = 0;
+        RBO = 0;
     }
 }

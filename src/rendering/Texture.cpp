@@ -6,6 +6,8 @@
 #include <stb/stb_image.h>
 
 #include "rendering/Renderer.h"
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
 #define DDS_USE_STD_FILESYSTEM 1
 
@@ -597,8 +599,11 @@ namespace Engine {
 
 	void Texture::CleanAllTextures()
 	{
+		const bool hasContext = glfwGetCurrentContext() != nullptr;
 		for (GLuint texID : s_loadedTextures) {
-			glDeleteTextures(1, &texID);
+			if (hasContext) {
+				glDeleteTextures(1, &texID);
+			}
 		}
 		s_loadedTextures.clear();
 		GetDefaultLogger()->info("Cleaned up all tracked textures.");

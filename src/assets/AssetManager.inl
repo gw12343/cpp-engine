@@ -127,6 +127,20 @@ namespace Engine {
         }
     }
 
+    template <typename T>
+    void AssetManager::UnloadAll()
+    {
+        auto& storage = GetStorage<T>();
+        storage.guidToAsset.clear();
+        storage.pathToGuid.clear();
+    }
+
+    inline void AssetManager::ClearAll()
+    {
+        storages.clear();
+        m_pendingActions.clear();
+    }
+
 	template <typename T>
 	void AssetManager::RenameAsset(const std::string& oldPath, const std::string& newPath)
 	{

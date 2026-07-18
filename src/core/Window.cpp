@@ -213,7 +213,26 @@ void Window::onGameStart()
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 
-		// Terminate GLFW
+		for (auto& [id, fb] : m_frameBuffers) {
+			if (fb) {
+				fb->Delete();
+			}
+		}
+		m_frameBuffers.clear();
+		if (m_gbuffer) {
+			m_gbuffer->Delete();
+			m_gbuffer.reset();
+		}
+		if (m_ssaobuffer) {
+			m_ssaobuffer->Delete();
+			m_ssaobuffer.reset();
+		}
+
+		if (m_window) {
+			glfwDestroyWindow(m_window);
+			m_window = nullptr;
+		}
+
 		log->info("Shutting down glfw window");
 		glfwTerminate();
 	}

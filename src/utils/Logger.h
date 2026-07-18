@@ -13,5 +13,6 @@ namespace Engine {
 	  public:
 		static std::shared_ptr<spdlog::logger> get(const std::string& name);
 		static std::shared_ptr<ImGuiLogSink>   getImGuiSink();
+		static void                            Shutdown();
 	};
 } // namespace Engine

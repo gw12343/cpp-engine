@@ -22,6 +22,7 @@ namespace Engine {
 		void InitAllLuaBindings();
 		void UpdateAll(float dt);
 		void ShutdownAll();
+		void Clear();
 
 		void StartGame();
 

@@ -9,6 +9,7 @@ namespace Engine {
 	Engine::Animation::~Animation()
 	{
 		delete source;
+		source = nullptr;
 	}
 
 } // namespace Engine

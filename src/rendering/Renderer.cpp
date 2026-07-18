@@ -146,6 +146,31 @@ namespace Engine {
     }
 
     void Renderer::onShutdown() {
+        Texture::CleanAllTextures();
+        Rendering::Mesh::CleanAllMeshes();
+
+        m_skybox.reset();
+        m_bloomRenderer.reset();
+        m_shadowRenderer.reset();
+
+        m_shader.Destroy();
+        m_mousePickingShader.Destroy();
+        m_modelPreviewShader.Destroy();
+        m_materialPreviewShader.Destroy();
+        m_terrainShader.Destroy();
+        m_gbufferShader.Destroy();
+        m_lightingShader.Destroy();
+        m_ssaoShader.Destroy();
+        m_ssaoBlurShader.Destroy();
+
+        if (quadVAO != 0) {
+            glDeleteVertexArrays(1, &quadVAO);
+            quadVAO = 0;
+        }
+        if (quadVBO != 0) {
+            glDeleteBuffers(1, &quadVBO);
+            quadVBO = 0;
+        }
     }
 
     void Renderer::RenderBloomPass() {

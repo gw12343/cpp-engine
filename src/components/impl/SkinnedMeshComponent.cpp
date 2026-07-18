@@ -5,7 +5,9 @@
 #include "SkinnedMeshComponent.h"
 
 #include "core/Engine.h"
+#include "core/EngineData.h"
 #include "core/Entity.h"
+#include "core/Scene.h"
 
 
 #include "ozz/animation/runtime/track.h"
@@ -75,13 +77,27 @@ namespace Engine::Components {
 
 	void SkinnedMeshComponent::CleanSkinnedModels()
 	{
+		if (Get().scene && Get().assetManager) {
+			Scene* scene = GetCurrentScene();
+			if (scene && scene->GetRegistry()) {
+				auto view = scene->GetRegistry()->view<SkinnedMeshComponent>();
+				for (auto entity : view) {
+					auto& sm = view.get<SkinnedMeshComponent>(entity);
+					sm.skinning_matrices = nullptr;
+					sm.meshes            = nullptr;
+				}
+			}
+		}
+
 		for (std::vector<ozz::math::Float4x4>* mat : s_skin_mats) {
 			delete mat;
 		}
+		s_skin_mats.clear();
 
 		for (ozz::vector<Engine::AnimatedMesh>* mesh : s_all_meshes) {
 			delete mesh;
 		}
+		s_all_meshes.clear();
 	}
 
 

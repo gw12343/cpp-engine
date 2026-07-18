@@ -8,16 +8,27 @@
 
 #include "core/EngineData.h"
 #include <regex>
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 namespace Engine {
 	Shader::Shader() : programID(0)
 	{
 	}
 
-	Shader::~Shader()
+	void Shader::Destroy()
 	{
-		if (programID != 0) {
+		if (programID == 0) {
+			return;
+		}
+		if (glfwGetCurrentContext() != nullptr) {
 			glDeleteProgram(programID);
 		}
+		programID = 0;
+	}
+
+	Shader::~Shader()
+	{
+		Destroy();
 	}
 
 	bool Shader::LoadFromFiles(const std::string& vertexPath, const std::string& fragmentPath, const std::optional<std::string>& geometryPath)

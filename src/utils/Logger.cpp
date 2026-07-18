@@ -41,4 +41,11 @@ namespace Engine {
 	{
 		return imguiSink;
 	}
+
+	void Logger::Shutdown()
+	{
+		loggers.clear();
+		spdlog::shutdown();
+		imguiSink.reset();
+	}
 } // namespace Engine

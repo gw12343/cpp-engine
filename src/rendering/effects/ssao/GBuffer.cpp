@@ -5,6 +5,8 @@
 #include "GBuffer.h"
 #include "core/EngineData.h"
 #include "rendering/Renderer.h"
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
 
 namespace Engine {
@@ -88,12 +90,14 @@ namespace Engine {
 
         void GBuffer::Delete()
         {
-            glDeleteFramebuffers(1, &FBO);
-            glDeleteTextures(1, &gAlbedo);
-            glDeleteTextures(1, &gNormal);
-            glDeleteTextures(1, &gMaterial);
-            glDeleteTextures(1, &gEmissive);
-            glDeleteTextures(1, &gDepth);
+            if (glfwGetCurrentContext() != nullptr) {
+                if (FBO) glDeleteFramebuffers(1, &FBO);
+                if (gAlbedo) glDeleteTextures(1, &gAlbedo);
+                if (gNormal) glDeleteTextures(1, &gNormal);
+                if (gMaterial) glDeleteTextures(1, &gMaterial);
+                if (gEmissive) glDeleteTextures(1, &gEmissive);
+                if (gDepth) glDeleteTextures(1, &gDepth);
+            }
 
             FBO = gAlbedo = gNormal = gMaterial = gEmissive = gDepth = 0;
         }

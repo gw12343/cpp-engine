@@ -35,6 +35,8 @@
 
 #include <cassert>
 #include <spdlog/spdlog.h>
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
 namespace Engine
 {
@@ -47,7 +49,9 @@ namespace Engine
 		assert(size_ == 0 && "Immediate rendering still in use.");
 
 		if (vbo_) {
-			GL(DeleteBuffers(1, &vbo_));
+			if (glfwGetCurrentContext() != nullptr) {
+				GL(DeleteBuffers(1, &vbo_));
+			}
 			vbo_ = 0;
 		}
 	}

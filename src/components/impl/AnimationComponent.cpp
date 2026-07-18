@@ -14,6 +14,8 @@
 #include "animation/AnimationPlayer.h"
 #include "animation/Animation.h"
 #include "ozz/animation/runtime/local_to_model_job.h"
+#include "core/EngineData.h"
+#include "core/Scene.h"
 
 namespace Engine::Components {
 
@@ -152,6 +154,32 @@ namespace Engine::Components {
         }
 
         controller.players.clear();
+        skeleton = nullptr;
+    }
+
+    void AnimationComponent::CleanAnimationContexts()
+    {
+        Scene* scene = GetCurrentScene();
+        if (!scene || !scene->GetRegistry()) {
+            return;
+        }
+
+        auto view = scene->GetRegistry()->view<AnimationComponent>();
+        for (auto entity : view) {
+            auto& ac = view.get<AnimationComponent>(entity);
+
+            ac.controller.players.clear();
+
+            if (ac.local_pose) {
+                delete ac.local_pose;
+                ac.local_pose = nullptr;
+            }
+            if (ac.model_pose) {
+                delete ac.model_pose;
+                ac.model_pose = nullptr;
+            }
+            ac.skeleton = nullptr;
+        }
     }
 
     static float animRatio = 0.0;

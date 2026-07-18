@@ -14,6 +14,9 @@ namespace Engine {
 		Shader();
 		~Shader();
 
+		// Release the GL program while a context is still current. Safe to call multiple times.
+		void Destroy();
+
 		// Load and compile shaders from source files
 		bool LoadFromFiles(const std::string& vertexPath, const std::string& fragmentPath, const std::optional<std::string>& geometryPath);
 		// Load and compile shaders from in-memory source strings

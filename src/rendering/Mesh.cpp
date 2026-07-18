@@ -10,6 +10,8 @@
 
 #include <spdlog/spdlog.h>
 #include "rendering/Renderer.h"
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
 namespace Engine {
 	namespace Rendering {
@@ -162,14 +164,17 @@ namespace Engine {
 		{
 			GetDefaultLogger()->info("Cleaning up all VAOs, VBOs, and EBOs");
 
-			for (GLuint vao : s_vaos) {
-				glDeleteVertexArrays(1, &vao);
-			}
-			for (GLuint vbo : s_vbos) {
-				glDeleteBuffers(1, &vbo);
-			}
-			for (GLuint ebo : s_ebos) {
-				glDeleteBuffers(1, &ebo);
+			const bool hasContext = glfwGetCurrentContext() != nullptr;
+			if (hasContext) {
+				for (GLuint vao : s_vaos) {
+					glDeleteVertexArrays(1, &vao);
+				}
+				for (GLuint vbo : s_vbos) {
+					glDeleteBuffers(1, &vbo);
+				}
+				for (GLuint ebo : s_ebos) {
+					glDeleteBuffers(1, &ebo);
+				}
 			}
 
 			s_vaos.clear();

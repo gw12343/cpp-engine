@@ -35,6 +35,8 @@
 #include <cassert>
 #include <cstdio>
 #include <spdlog/spdlog.h>
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
 
 
@@ -60,16 +62,23 @@ namespace Engine
 
 	AnimationShader::~AnimationShader()
 	{
+		if (glfwGetCurrentContext() == nullptr) {
+			vertex_ = fragment_ = program_ = 0;
+			return;
+		}
 		if (vertex_) {
 			GL(DetachShader(program_, vertex_));
 			GL(DeleteShader(vertex_));
+			vertex_ = 0;
 		}
 		if (fragment_) {
 			GL(DetachShader(program_, fragment_));
 			GL(DeleteShader(fragment_));
+			fragment_ = 0;
 		}
 		if (program_) {
 			GL(DeleteProgram(program_));
+			program_ = 0;
 		}
 	}
 

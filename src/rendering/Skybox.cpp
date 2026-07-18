@@ -1,7 +1,7 @@
 #include "Skybox.h"
 #include "core/EngineData.h"
-
-
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
 namespace Engine {
 	Skybox::Skybox() : m_vao(0), m_vbo(0), m_texture(nullptr), m_initialized(false)
@@ -10,10 +10,15 @@ namespace Engine {
 
 	Skybox::~Skybox()
 	{
-		if (m_initialized) {
+		if (!m_initialized) {
+			return;
+		}
+		if (glfwGetCurrentContext() != nullptr) {
 			glDeleteVertexArrays(1, &m_vao);
 			glDeleteBuffers(1, &m_vbo);
 		}
+		m_vao = m_vbo = 0;
+		m_initialized = false;
 	}
 
 	bool Skybox::LoadFromFile(const std::string& path)

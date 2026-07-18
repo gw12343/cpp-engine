@@ -13,12 +13,11 @@ namespace Engine {
 	{
 		std::unique_ptr<Animation> animation       = std::make_unique<Animation>();
 		ozz::animation::Animation* animationSource = GetAnimationManager().LoadAnimationFromPath(path);
-		if (!animation) {
+		if (!animationSource) {
 			spdlog::error("Failed to load animation from path: {}", path);
+			return nullptr;
 		}
-		else {
-			GetDefaultLogger()->info("Loaded animation from path: {}", path);
-		}
+		GetDefaultLogger()->info("Loaded animation from path: {}", path);
 		animation->name   = path.substr(path.find_last_of("/\\") + 1);
 		animation->source = animationSource;
 		return animation;

@@ -108,6 +108,8 @@ namespace Engine::Components {
         AnimationPlayer& PlayAnimation(const AssetHandle<Animation>& animation, bool loop = true);
         void CrossfadeTo(const AssetHandle<Animation>& animation, float fadeDuration = 0.2f);
         AnimationPlayer* GetActivePlayer();
+
+        static void CleanAnimationContexts();
     };
 } // namespace Engine::Components
 

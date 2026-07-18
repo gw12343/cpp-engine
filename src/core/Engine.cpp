@@ -4,9 +4,6 @@
 #include "assets/impl/ModelLoader.h"
 #include "Jolt/Physics/Collision/Shape/MeshShape.h"
 #include "core/module/ModuleManager.h"
-#include <cstdio>
-#include <stdio.h>
-
 
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include "EngineData.h"
@@ -37,6 +34,10 @@
 #include "assets/impl/BinarySceneLoader.h"
 #include "assets/impl/AnimationLoader.h"
 #include "components/impl/AnimationComponent.h"
+#include "components/impl/EntityMetadataComponent.h"
+#include "core/Entity.h"
+#include "core/Scene.h"
+#include "utils/Logger.h"
 #include "assets/AssetWatcher.h"
 
 #if defined(__clang__) || defined(__GNUC__)
@@ -56,14 +57,15 @@
 namespace fs = std::filesystem;
 
 namespace Engine {
-	ModuleManager manager;
-
 
 	GEngine::GEngine(int width, int height, const char* title) : m_deltaTime(0.0f), m_lastFrame(0.0f)
 	{
 		ZoneScopedN("Engine Awake");
 		SetState(EDITOR);
-		Get().manager        = &manager;
+
+		m_moduleManager = std::make_unique<ModuleManager>();
+		Get().manager   = m_moduleManager.get();
+
 		Get().renderSettings = new RenderSettings();
 		// Initialize asset loaders
 		Get().assetManager = std::make_shared<AssetManager>();
@@ -92,21 +94,22 @@ namespace Engine {
 		Get().scene     = std::make_shared<SceneManager>();
 
 		// Register Modules to handle lifecycle
-		manager.RegisterExternal(Get().script); // ScriptManager must run first to clear subscriptions before UI reloads
-		manager.RegisterExternal(Get().window);
-		manager.RegisterExternal(Get().input);
-		manager.RegisterExternal(Get().camera);
-		manager.RegisterExternal(Get().physics);
-		manager.RegisterExternal(Get().sound);
+		auto& modules = *m_moduleManager;
+		modules.RegisterExternal(Get().script); // ScriptManager must run first to clear subscriptions before UI reloads
+		modules.RegisterExternal(Get().window);
+		modules.RegisterExternal(Get().input);
+		modules.RegisterExternal(Get().camera);
+		modules.RegisterExternal(Get().physics);
+		modules.RegisterExternal(Get().sound);
 #ifndef GAME_BUILD
-		manager.RegisterExternal(Get().ui);
+		modules.RegisterExternal(Get().ui);
 #endif
-		manager.RegisterExternal(Get().gameUI);
-		manager.RegisterExternal(Get().renderer);
-		manager.RegisterExternal(Get().animation);
-		manager.RegisterExternal(Get().particle);
-		manager.RegisterExternal(Get().terrain);
-		manager.RegisterExternal(Get().scene);
+		modules.RegisterExternal(Get().gameUI);
+		modules.RegisterExternal(Get().renderer);
+		modules.RegisterExternal(Get().animation);
+		modules.RegisterExternal(Get().particle);
+		modules.RegisterExternal(Get().terrain);
+		modules.RegisterExternal(Get().scene);
 
 #ifndef GAME_BUILD
 		m_assetFileWatcher = std::make_unique<efsw::FileWatcher>();
@@ -128,11 +131,11 @@ namespace Engine {
 		}
 		{
 			ZoneScopedN("InitAllLuaBindings");
-			manager.InitAllLuaBindings();
+			m_moduleManager->InitAllLuaBindings();
 		}
 		{
 			ZoneScopedN("Init All Modules");
-			manager.InitAll();
+			m_moduleManager->InitAll();
 		}
 		// ParticleHandle testParticle = GetAssetManager().Load<Particle>("resources/particles/testleaf.efk");
 		{
@@ -273,7 +276,7 @@ namespace Engine {
 			m_lastFrame       = currentFrame;
 
 			GetAssetManager().Update();
-			manager.UpdateAll(m_deltaTime);
+			m_moduleManager->UpdateAll(m_deltaTime);
 			//FrameMarkEnd("main");
 		}
 	}
@@ -281,13 +284,69 @@ namespace Engine {
 
 	void GEngine::Shutdown()
 	{
-		manager.ShutdownAll();
-
-		//Components::AnimationComponent::CleanAnimationContexts();
+		Components::AnimationComponent::CleanAnimationContexts();
 		Components::SkinnedMeshComponent::CleanSkinnedModels();
-		Texture::CleanAllTextures();
-		Rendering::Mesh::CleanAllMeshes();
-		GetDefaultLogger()->info("Engine shutdown complete");
+
+		if (Get().assetManager && Get().scene) {
+			Scene* scene = GetCurrentScene();
+			if (scene) {
+				std::vector<Entity> roots;
+				roots.reserve(scene->m_entityList.size());
+				for (Entity& e : scene->m_entityList) {
+					if (!e.IsValid()) continue;
+					if (!e.HasComponent<Components::EntityMetadata>()) continue;
+					if (!e.GetComponent<Components::EntityMetadata>().parentEntity.IsValid()) {
+						roots.push_back(e);
+					}
+				}
+				for (Entity& e : roots) {
+					if (e.IsValid()) {
+						e.Destroy();
+					}
+				}
+				scene->m_entityList.clear();
+				scene->m_entityMap.clear();
+			}
+		}
+
+		if (Get().assetManager) {
+			GetAssetManager().ClearAll();
+		}
+
+		if (m_moduleManager) {
+			m_moduleManager->ShutdownAll();
+		}
+
+		auto& data = Get();
+		data.gameUI.reset();
+		data.ui.reset();
+		data.input.reset();
+		data.camera.reset();
+		data.physics.reset();
+		data.script.reset();
+		data.terrain.reset();
+		data.particle.reset();
+		data.animation.reset();
+		data.sound.reset();
+		data.renderer.reset();
+		data.window.reset();
+		data.scene.reset();
+		data.assetManager.reset();
+		delete data.renderSettings;
+		data.renderSettings = nullptr;
+
+		data.manager = nullptr;
+		if (m_moduleManager) {
+			m_moduleManager->Clear();
+			m_moduleManager.reset();
+		}
+
+#ifndef GAME_BUILD
+		m_assetFileWatcher.reset();
+		m_assetWatcher.reset();
+#endif
+
+		Logger::Shutdown();
 	}
 } // namespace Engine
 #include "assets/AssetManager.inl"

@@ -27,9 +27,18 @@
 
 #include <utility>
 #include <glad/glad.h>
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
 #include "animation/AnimationManager.h"
 #include "ozz/base/log.h"
+
+namespace {
+	bool GlContextAvailable()
+	{
+		return glfwGetCurrentContext() != nullptr;
+	}
+}
 
 namespace Engine{
 	// A vertex made of positions and normals.
@@ -48,7 +57,9 @@ namespace Engine{
 	RendererImpl::Model::~Model()
 	{
 		if (vbo) {
-			GL(DeleteBuffers(1, &vbo));
+			if (GlContextAvailable()) {
+				GL(DeleteBuffers(1, &vbo));
+			}
 			vbo = 0;
 		}
 	}
@@ -57,20 +68,20 @@ namespace Engine{
 
 	RendererImpl::~RendererImpl()
 	{
-		if (vertex_array_o_) {
-			GL(DeleteVertexArrays(1, &vertex_array_o_));
-			vertex_array_o_ = 0;
+		if (GlContextAvailable()) {
+			if (vertex_array_o_) {
+				GL(DeleteVertexArrays(1, &vertex_array_o_));
+			}
+			if (dynamic_array_bo_) {
+				GL(DeleteBuffers(1, &dynamic_array_bo_));
+			}
+			if (dynamic_index_bo_) {
+				GL(DeleteBuffers(1, &dynamic_index_bo_));
+			}
 		}
-
-		if (dynamic_array_bo_) {
-			GL(DeleteBuffers(1, &dynamic_array_bo_));
-			dynamic_array_bo_ = 0;
-		}
-
-		if (dynamic_index_bo_) {
-			GL(DeleteBuffers(1, &dynamic_index_bo_));
-			dynamic_index_bo_ = 0;
-		}
+		vertex_array_o_   = 0;
+		dynamic_array_bo_ = 0;
+		dynamic_index_bo_ = 0;
 	}
 
 	bool RendererImpl::Initialize()

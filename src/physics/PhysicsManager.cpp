@@ -116,19 +116,34 @@ namespace Engine {
 	{
 		GetDefaultLogger()->info("cleaning up physics");
 
-		auto           physicsView    = GetCurrentSceneRegistry().view<Engine::Components::RigidBodyComponent>();
-		BodyInterface& body_interface = physics->GetBodyInterface();
-
-		for (auto [entity, rb] : physicsView.each()) {
-			body_interface.RemoveBody(rb.bodyID);
-			body_interface.DestroyBody(rb.bodyID);
+		if (physics && Get().assetManager && Get().scene) {
+			Scene* scene = GetCurrentScene();
+			if (scene && scene->GetRegistry()) {
+				BodyInterface& body_interface = physics->GetBodyInterface();
+				auto physicsView = scene->GetRegistry()->view<Engine::Components::RigidBodyComponent>();
+				for (auto [entity, rb] : physicsView.each()) {
+					if (rb.bodyID.IsInvalid()) continue;
+					if (body_interface.IsAdded(rb.bodyID)) {
+						body_interface.RemoveBody(rb.bodyID);
+					}
+					body_interface.DestroyBody(rb.bodyID);
+					rb.bodyID = JPH::BodyID();
+				}
+			}
 		}
+		bodyToEntityMap.clear();
 
 		UnregisterTypes();
 
 		// Destroy the factory
 		delete Factory::sInstance;
 		Factory::sInstance = nullptr;
+
+		character.reset();
+		controller.reset();
+		physics.reset();
+		jobs.reset();
+		allocater.reset();
 	}
 
 

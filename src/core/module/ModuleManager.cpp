@@ -41,9 +41,14 @@ namespace Engine {
 
 	void ModuleManager::ShutdownAll()
 	{
-		for (auto& module : m_modules) {
-			module->log->debug("Shutting down...");
-			module->onShutdown();
+		for (auto it = m_modules.rbegin(); it != m_modules.rend(); ++it) {
+			(*it)->log->debug("Shutting down...");
+			(*it)->onShutdown();
 		}
+	}
+
+	void ModuleManager::Clear()
+	{
+		m_modules.clear();
 	}
 } // namespace Engine

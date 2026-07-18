@@ -2,10 +2,13 @@
 
 
 
+#include <memory>
 #include <spdlog/spdlog.h>
 
 namespace Engine {
 	class HotReloadWatcher;
+	class ModuleManager;
+	class Entity;
 }
 
 namespace efsw {
@@ -13,9 +16,6 @@ namespace efsw {
 }
 
 namespace Engine {
-
-	// Forward declaration
-	class Entity;
 
 	/**
 	 * @brief Core engine class managing the game loop, systems, and global state.
@@ -53,13 +53,14 @@ namespace Engine {
 
 
 	  private:
-        void LoadGameAssets();
+		void LoadGameAssets();
 
 		std::shared_ptr<spdlog::logger> m_logger; ///< Logger instance.
 
-
 		float m_deltaTime; ///< Time elapsed since last frame.
 		float m_lastFrame; ///< Timestamp of last frame.
+
+		std::unique_ptr<ModuleManager> m_moduleManager;
 
 		std::unique_ptr<efsw::FileWatcher> m_assetFileWatcher;
 		std::unique_ptr<HotReloadWatcher>  m_assetWatcher;

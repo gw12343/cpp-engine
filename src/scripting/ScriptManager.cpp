@@ -246,6 +246,16 @@ namespace Engine {
 			}
 		}
 #endif
+
+		luaUpdate = sol::function();
+		eventBus.ClearAllSubscriptions();
+		pendingCollisions.clear();
+		pendingCharacterCollisions.clear();
+		try {
+			lua.collect_garbage();
+		}
+		catch (...) {
+		}
 	}
 	void ScriptManager::onGameStart()
 	{

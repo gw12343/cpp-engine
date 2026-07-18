@@ -6,6 +6,8 @@
 #include "rendering/Renderer.h"
 
 #include "SSAOBuffer.h"
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
 
 namespace Engine {
@@ -100,13 +102,15 @@ namespace Engine {
 
     void SSAOBuffer::Delete()
     {
-        if (ssaoFBO) glDeleteFramebuffers(1, &ssaoFBO);
-        if (blurFBO) glDeleteFramebuffers(1, &blurFBO);
-        if (ssaoTex) glDeleteTextures(1, &ssaoTex);
-        if (blurTex) glDeleteTextures(1, &blurTex);
-        if (noiseTex) glDeleteTextures(1, &noiseTex);
+        if (glfwGetCurrentContext() != nullptr) {
+            if (ssaoFBO) glDeleteFramebuffers(1, &ssaoFBO);
+            if (blurFBO) glDeleteFramebuffers(1, &blurFBO);
+            if (ssaoTex) glDeleteTextures(1, &ssaoTex);
+            if (blurTex) glDeleteTextures(1, &blurTex);
+            if (noiseTex) glDeleteTextures(1, &noiseTex);
+        }
 
         ssaoFBO = blurFBO = 0;
-        ssaoTex = blurTex = 0;
+        ssaoTex = blurTex = noiseTex = 0;
     }
 }

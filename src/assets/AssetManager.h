@@ -41,6 +41,11 @@ namespace Engine {
 		void UnloadByPath(const std::string& path);
 
 		template <typename T>
+		void UnloadAll();
+
+		void ClearAll();
+
+		template <typename T>
 		void RenameAsset(const std::string& oldPath, const std::string& newPath);
 
 		template <typename T>
