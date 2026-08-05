@@ -87,7 +87,7 @@ namespace Engine::Components {
 			}
 
 			glm::mat4 localMatrix = glm::translate(glm::mat4(1.0f), GetLocalPosition()) * glm::mat4_cast(GetLocalRotation()) * glm::scale(glm::mat4(1.0f), GetLocalScale());
-			GetDefaultLogger()->info("updating");
+			//GetDefaultLogger()->info("updating");
 			SetWorldMatrix(parentMatrix * localMatrix);
 			SetWorldPosition(glm::vec3(GetWorldMatrix()[3]));
 			SetWorldRotation(glm::quat_cast(GetWorldMatrix()));

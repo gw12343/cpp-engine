@@ -30,6 +30,10 @@ namespace Engine::Components {
 		bool        IsOnGround();
 		static void AddBindings();
 		void        SetRotationEuler(glm::vec3 eulerAngles);
+
+		// Face a world-space direction on XZ (y ignored). Uses the same yaw basis as
+		// the engine camera: flat forward = (cos yaw, sin yaw).
+		void SetFacingDirection(glm::vec3 worldDir);
 	};
 } // namespace Engine::Components
 

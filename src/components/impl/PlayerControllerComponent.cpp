@@ -7,6 +7,7 @@
 #include "physics/PhysicsManager.h"
 
 #include "scripting/ScriptManager.h"
+#include <cmath>
 
 namespace Engine::Components {
 	void PlayerControllerComponent::OnAdded(Engine::Entity& entity)
@@ -40,13 +41,15 @@ namespace Engine::Components {
 	}
 	glm::quat PlayerControllerComponent::GetRotation()
 	{
-		auto rot = GetPhysics().GetCharacter()->GetRotation();
-		return {rot.GetW(), rot.GetX(), rot.GetY(), rot.GetZ()};
+		// Same conversion as RigidBodyComponent::ToGlm
+		const Quat rot = GetPhysics().GetCharacter()->GetRotation();
+		return glm::quat(rot.GetW(), rot.GetX(), rot.GetY(), rot.GetZ());
 	}
 	void PlayerControllerComponent::SetRotation(glm::quat rot)
 	{
-		Quat joltRot = Quat(rot.x, rot.y, rot.z, rot.w);
-		GetPhysics().GetCharacter()->SetRotation(joltRot);
+		// Same conversion as RigidBodyComponent::ToJolt
+		rot = glm::normalize(rot);
+		GetPhysics().GetCharacter()->SetRotation(Quat(rot.x, rot.y, rot.z, rot.w));
 	}
 	void PlayerControllerComponent::AddBindings()
 	{
@@ -68,7 +71,9 @@ namespace Engine::Components {
 		                                            "setRotation",
 		                                            &PlayerControllerComponent::SetRotation,
 		                                            "setRotationEuler",
-		                                            &PlayerControllerComponent::SetRotationEuler);
+		                                            &PlayerControllerComponent::SetRotationEuler,
+		                                            "setFacingDirection",
+		                                            &PlayerControllerComponent::SetFacingDirection);
 	}
 
 	void PlayerControllerComponent::SetLinearVelocity(glm::vec3 vel)
@@ -79,8 +84,32 @@ namespace Engine::Components {
 
 	void PlayerControllerComponent::SetRotationEuler(glm::vec3 eulerAngles)
 	{
-		glm::quat rot = glm::quat(glm::radians(eulerAngles));
-		SetRotation(rot);
+		// .y = degrees of yaw about world +Y. Uses Jolt's rotation helper so the
+		// character and rendered transform share one convention.
+		const float yawRad = glm::radians(eulerAngles.y);
+		GetPhysics().GetCharacter()->SetRotation(Quat::sRotation(Vec3::sAxisY(), yawRad));
+	}
+
+	void PlayerControllerComponent::SetFacingDirection(glm::vec3 worldDir)
+	{
+		// Face so local +Z points along worldDir on the XZ plane.
+		// (Mixamo / ozz bind pose forward is +Z.)
+		//
+		// With Ry(yaw): +Z -> (sin yaw, 0, cos yaw)
+		// so yaw = atan2(dir.x, dir.z).
+		//
+		// Do NOT use atan2(z, x) — that is the camera yaw basis
+		// (front = (cos, sin)) and turns the character the wrong way relative
+		// to orbit while holding W.
+		worldDir.y = 0.f;
+		const float len2 = glm::dot(worldDir, worldDir);
+		if (len2 < 1e-12f) {
+			return;
+		}
+		worldDir *= glm::inversesqrt(len2);
+
+		const float yawRad = std::atan2(worldDir.x, worldDir.z);
+		GetPhysics().GetCharacter()->SetRotation(Quat::sRotation(Vec3::sAxisY(), yawRad));
 	}
 
 	glm::vec3 PlayerControllerComponent::GetLinearVelocity()
