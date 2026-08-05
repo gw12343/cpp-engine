@@ -17,49 +17,10 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
-                            "key": "BULLET_MATERIAL",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
-                                }
-                            }
-                        },
-                        {
-                            "key": "JUMP_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 8.0
-                            }
-                        },
-                        {
                             "key": "SHOOT_POWER",
                             "value": {
                                 "index": 0,
                                 "data": 14.800000190734864
-                            }
-                        },
-                        {
-                            "key": "shootSound",
-                            "value": {
-                                "index": 0,
-                                "data": 14.800000190734864
-                            }
-                        },
-                        {
-                            "key": "RUN_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 20.0
-                            }
-                        },
-                        {
-                            "key": "BULLET_PARENT",
-                            "value": {
-                                "index": 12,
-                                "data": {
-                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
-                                }
                             }
                         },
                         {
@@ -74,6 +35,13 @@
                             "value": {
                                 "index": 0,
                                 "data": 0.10000000149011612
+                            }
+                        },
+                        {
+                            "key": "GRAVITY_SCALE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
                             }
                         },
                         {
@@ -93,10 +61,42 @@
                             }
                         },
                         {
-                            "key": "GRAVITY_SCALE",
+                            "key": "shootSound",
                             "value": {
                                 "index": 0,
-                                "data": 2.0
+                                "data": 14.800000190734864
+                            }
+                        },
+                        {
+                            "key": "BULLET_PARENT",
+                            "value": {
+                                "index": 12,
+                                "data": {
+                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
+                                }
+                            }
+                        },
+                        {
+                            "key": "RUN_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 20.0
+                            }
+                        },
+                        {
+                            "key": "JUMP_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 8.0
+                            }
+                        },
+                        {
+                            "key": "BULLET_MATERIAL",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
+                                }
                             }
                         }
                     ]
@@ -19260,7 +19260,40 @@
                 "children": []
             },
             "LuaScript": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {
+                    "scriptPath": "scripts/animation_example.lua",
+                    "variables": [
+                        {
+                            "key": "walkAnim",
+                            "value": {
+                                "index": 1,
+                                "data": "resources/animations/walk_inplace.anim"
+                            }
+                        },
+                        {
+                            "key": "fade",
+                            "value": {
+                                "index": 0,
+                                "data": 0.25
+                            }
+                        },
+                        {
+                            "key": "runAnim",
+                            "value": {
+                                "index": 1,
+                                "data": "resources/animations/run_inplace.anim"
+                            }
+                        },
+                        {
+                            "key": "idleAnim",
+                            "value": {
+                                "index": 1,
+                                "data": "resources/animations/idle.ozz"
+                            }
+                        }
+                    ]
+                }
             },
             "ShadowCaster": {
                 "nullopt": false,
@@ -19303,39 +19336,16 @@
                 "nullopt": false,
                 "data": {
                     "skeletonPath": "resources/animations/skeleton.ozz",
-                    "controller": {
-                        "players": [
-                            {
-                                "ptr_wrapper": {
-                                    "valid": 1,
-                                    "data": {
-                                        "animation": {
-                                            "guid": "143950bbcc17af70eb0da3ba15412923"
-                                        },
-                                        "time": 0.0,
-                                        "weight": 1.0,
-                                        "targetWeight": 0.0,
-                                        "playbackSpeed": 1.0,
-                                        "looping": true
-                                    }
-                                }
-                            },
-                            {
-                                "ptr_wrapper": {
-                                    "valid": 1,
-                                    "data": {
-                                        "animation": {
-                                            "guid": "790de0f9242134e98fbd1827fed1799c"
-                                        },
-                                        "time": 0.0,
-                                        "weight": 1.0,
-                                        "targetWeight": 1.0,
-                                        "playbackSpeed": 1.0,
-                                        "looping": true
-                                    }
-                                }
-                            }
-                        ]
+                    "defaultFadeDuration": 0.20000000298023225,
+                    "playbackSpeed": 1.0,
+                    "current": {
+                        "clip": {
+                            "guid": "790de0f9242134e98fbd1827fed1799c"
+                        },
+                        "time": 0.0,
+                        "speed": 1.0,
+                        "looping": true,
+                        "active": true
                     }
                 }
             },

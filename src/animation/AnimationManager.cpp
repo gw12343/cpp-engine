@@ -17,8 +17,35 @@
 #include "entt/entt.hpp"
 #include "ozz/animation/runtime/local_to_model_job.h"
 #include "assets/AssetManager.h"
+#include "scripting/ScriptManager.h"
+#include <algorithm>
+#include <cmath>
 
 namespace Engine {
+
+    void AnimationManager::setLuaBindings()
+    {
+        auto& lua = GetScriptManager().lua;
+
+        lua.new_usertype<AnimationManager>(
+            "AnimationManager",
+            "getDrawSkeleton", &AnimationManager::GetDrawSkeletonValue,
+            "setDrawSkeleton", &AnimationManager::SetDrawSkeleton,
+            "getDrawMesh", &AnimationManager::GetDrawMeshValue,
+            "setDrawMesh", &AnimationManager::SetDrawMesh,
+            "drawSkeleton",
+            sol::property(&AnimationManager::GetDrawSkeletonValue, &AnimationManager::SetDrawSkeleton),
+            "drawMesh",
+            sol::property(&AnimationManager::GetDrawMeshValue, &AnimationManager::SetDrawMesh));
+
+        lua.set_function("getAnimationManager", []() -> AnimationManager& {
+            return Engine::GetAnimationManager();
+        });
+
+        lua.set_function("loadAnimation", [](const std::string& path) -> AnimationHandle {
+            return GetAssetManager().Load<Animation>(path);
+        });
+    }
 
     void AnimationManager::onInit()
     {
@@ -58,111 +85,18 @@ namespace Engine {
     {
         ZoneScopedN("Animation Update");
 
+        auto animationView =
+            GetCurrentSceneRegistry().view<Components::EntityMetadata, Components::AnimationComponent>();
 
+        for (auto [entity, metadata, ac] : animationView.each()) {
+            if (!ac.skeleton) continue;
 
-        {
-            ZoneScopedN("Sample animations");
-            auto animationView = GetCurrentSceneRegistry().view<Components::EntityMetadata, Components::AnimationComponent>();
-            for (auto [entity, metadata, ac] : animationView.each()) {
-                if (!ac.skeleton || !ac.local_pose || !ac.model_pose) continue;
-
-                const int soa_count = ac.skeleton->num_soa_joints();
-
-                // ----------------------------------------------------------------
-                // 1. Advance time and sample each player
-                // ----------------------------------------------------------------
-                std::vector<ozz::animation::BlendingJob::Layer> layers;
-
-                for (auto& player : ac.controller.players) {
-                    Animation* anim = player->animation.IsValid()
-                                      ? GetAssetManager().Get(player->animation)
-                                      : nullptr;
-
-                    if (!anim || !anim->source) continue;
-
-                    // Advance time
-                    if (GetState() == PLAYING) {
-                        player->time += deltaTime * player->playbackSpeed;
-                        if (player->looping) {
-                            player->time = fmod(player->time, anim->source->duration());
-                        } else {
-                            player->time = std::min(player->time, anim->source->duration());
-                        }
-                    }
-
-                    // Lerp weight toward target (crossfade)
-                    constexpr float kWeightLerpSpeed = 5.f;
-                    player->weight = std::lerp(player->weight, player->targetWeight,
-                                               std::min(1.f, deltaTime * kWeightLerpSpeed));
-
-                    // Ensure localPose is sized correctly
-                    if ((int)player->localPose.size() != soa_count) {
-                        player->localPose.resize(soa_count);
-                    }
-
-                    // Sample
-                    const float ratio = anim->source->duration() > 0.f
-                                        ? player->time / anim->source->duration()
-                                        : 0.f;
-
-                    ozz::animation::SamplingJob sampling_job;
-                    sampling_job.animation = anim->source;
-                    sampling_job.context   = &player->context;
-                    sampling_job.ratio     = ratio;
-                    sampling_job.output    = ozz::make_span(player->localPose);
-
-                    if (!sampling_job.Run()) {
-                        log->error("Failed to sample animation player");
-                        continue;
-                    }
-
-                    // Register layer for blending
-                    ozz::animation::BlendingJob::Layer layer;
-                    layer.transform = ozz::make_span(player->localPose);
-                    layer.weight    = player->weight;
-                    layers.push_back(layer);
-                }
-
-                // Blend all layers into local_pose
-                if (layers.empty()) continue;
-
-                if (layers.size() == 1 && layers[0].weight >= 1.f) {
-                    // skip blending job
-                    ozz::span<const ozz::math::SoaTransform> src = layers[0].transform;
-                    std::copy(src.begin(), src.end(), ac.local_pose->begin());
-                } else {
-                    ozz::animation::BlendingJob blend_job;
-                    blend_job.threshold = ozz::animation::BlendingJob().threshold; // default threshold
-                    blend_job.layers    = ozz::make_span(layers);
-                    blend_job.rest_pose = ac.skeleton->joint_rest_poses();
-                    blend_job.output    = ozz::make_span(*ac.local_pose);
-
-                    if (!blend_job.Run()) {
-                        log->error("Failed to blend animation layers");
-                        continue;
-                    }
-                }
-
-                // Local -> model space
-                ozz::animation::LocalToModelJob ltm_job;
-                ltm_job.skeleton = ac.skeleton;
-                ltm_job.input    = ozz::make_span(*ac.local_pose);
-                ltm_job.output   = ozz::make_span(*ac.model_pose);
-
-                if (!ltm_job.Run()) {
-                    log->error("Failed to convert to model space");
-                    continue;
-                }
-
-                // Prune players
-
-//                auto& players = ac.controller.players;
-//                players.erase(
-//                        std::remove_if(players.begin(), players.end(),
-//                                       [](const std::unique_ptr<AnimationPlayer>& p) {
-//                                           return p->weight < 0.001f && p->targetWeight <= 0.f;
-//                                       }),
-//                        players.end());
+            // Advance time only while playing; always evaluate pose for editor display.
+            const float dt = (GetState() == PLAYING) ? deltaTime : 0.f;
+            if (ac.IsPlaying()) {
+                ac.UpdatePlayback(dt);
+            } else if (ac.local_pose && ac.model_pose) {
+                ac.EvaluatePose();
             }
         }
     }
@@ -179,6 +113,8 @@ namespace Engine {
             const ozz::math::Float4x4 transform = FromMatrix(e.GetComponent<Components::Transform>().GetWorldMatrix());
 
             if (!skinnedMeshComponent.visible) continue;
+            if (!animationComponent.model_pose || !skinnedMeshComponent.meshes || !skinnedMeshComponent.skinning_matrices)
+                continue;
 
             for (const Engine::AnimatedMesh& mesh : *skinnedMeshComponent.meshes) {
                 for (size_t i = 0; i < mesh.joint_remaps.size(); ++i) {
@@ -199,6 +135,7 @@ namespace Engine {
             auto&  animationComponent = e.GetComponent<Components::AnimationComponent>();
             const ozz::math::Float4x4 transform = FromMatrix(e.GetComponent<Components::Transform>().GetWorldMatrix());
 
+            if (!animationComponent.skeleton || !animationComponent.model_pose) continue;
             renderer_->DrawPosture(*animationComponent.skeleton,
                                    ozz::make_span(*animationComponent.model_pose),
                                    transform, true);

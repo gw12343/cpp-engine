@@ -87,6 +87,12 @@ namespace Engine
 		lua.new_usertype<SoundHandle>(
 			"SoundHandle", "getGuid", &SoundHandle::GetID, "isValid", &SoundHandle::IsValid, "clear", [](SoundHandle& self) { self = SoundHandle(); });
 
+		lua.new_usertype<AnimationHandle>(
+			"AnimationHandle",
+			"getGuid", &AnimationHandle::GetID,
+			"isValid", &AnimationHandle::IsValid,
+			"clear", [](AnimationHandle& self) { self = AnimationHandle(); });
+
 		// Factory functions for creating asset handles
 		lua.set_function("tex", []() { return TextureHandle(); });
 		lua.set_function("model", []() { return ModelHandle(); });
@@ -95,6 +101,7 @@ namespace Engine
 		lua.set_function("terrainTile", []() { return TerrainHandle(); });
 		lua.set_function("particle", []() { return ParticleHandle(); });
 		lua.set_function("sound", []() { return SoundHandle(); });
+		lua.set_function("animation", []() { return AnimationHandle(); });
 
 		// Factory for entity handle
 		lua.new_usertype<EntityHandle>("EntityHandle", "getGuid", &EntityHandle::GetID, "isValid", &EntityHandle::IsValid, "clear", [](EntityHandle& self) { self = EntityHandle(); });
@@ -145,5 +152,6 @@ self[i - 1] = value;                                                            
 		BIND_ASSET_VECTOR("TerrainTileVector", Terrain::TerrainTile)
 		BIND_ASSET_VECTOR("ParticleVector", Particle)
 		BIND_ASSET_VECTOR("SoundVector", Audio::SoundBuffer)
+		BIND_ASSET_VECTOR("AnimationVector", Animation)
 	}
 }

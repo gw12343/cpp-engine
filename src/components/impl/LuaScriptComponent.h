@@ -54,7 +54,9 @@ namespace Engine {
 	                                    std::vector<SceneHandle>,
 	                                    std::vector<TerrainHandle>,
 	                                    std::vector<ParticleHandle>,
-	                                    SoundHandleList>;
+	                                    SoundHandleList,
+										AnimationHandle,
+										AnimationHandleList>;
 
 	namespace Components {
 

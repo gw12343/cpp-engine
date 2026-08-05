@@ -27,6 +27,7 @@ namespace Engine
 
 	class Texture;
 	class Material;
+	class Animation;
 }
 
 namespace Engine {
@@ -52,6 +53,7 @@ namespace Engine {
 	using TerrainHandle = AssetHandle<Engine::Terrain::TerrainTile>;
 	using ParticleHandle = AssetHandle<Engine::Particle>;
 	using SoundHandle = AssetHandle<Engine::Audio::SoundBuffer>;
+	using AnimationHandle = AssetHandle<Engine::Animation>;
 
 	using TextureHandleList = std::vector<TextureHandle>;
 	using ModelHandleList = std::vector<ModelHandle>;
@@ -60,6 +62,7 @@ namespace Engine {
 	using TerrainHandleList = std::vector<TerrainHandle>;
 	using ParticleHandleList = std::vector<ParticleHandle>;
 	using SoundHandleList = std::vector<SoundHandle>;
+	using AnimationHandleList = std::vector<AnimationHandle>;
 
 } // namespace Engine
 

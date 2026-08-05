@@ -29,17 +29,18 @@ namespace Engine {
 		void        onUpdate(float dt) override;
 		void        onGameStart() override {}
 		void        onShutdown() override;
+		void        setLuaBindings() override;
 		std::string name() const override { return "AnimationModule"; }
-
-
-
 
 		void Render();
 		void RenderDebug() const;
 
-
-		bool&                      GetDrawSkeleton() { return draw_skeleton_; }
-		bool&                      GetDrawMesh() { return draw_mesh_; }
+		bool&                  GetDrawSkeleton() { return draw_skeleton_; }
+		bool&                  GetDrawMesh() { return draw_mesh_; }
+		bool                   GetDrawSkeletonValue() const { return draw_skeleton_; }
+		bool                   GetDrawMeshValue() const { return draw_mesh_; }
+		void                   SetDrawSkeleton(bool v) { draw_skeleton_ = v; }
+		void                   SetDrawMesh(bool v) { draw_mesh_ = v; }
 		RendererImpl::Options& GetRenderOptions() { return render_options_; }
 
 		// Load a skeleton from a file path

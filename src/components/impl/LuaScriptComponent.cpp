@@ -249,6 +249,9 @@ namespace Engine::Components {
 			else if (kv.second.is<SoundHandle>()) {
 				cppVariables[key] = kv.second.as<SoundHandle>();
 			}
+			else if (kv.second.is<AnimationHandle>()) {
+				cppVariables[key] = kv.second.as<AnimationHandle>();
+			}
 			else if (kv.second.is<EntityHandle>()) {
 				cppVariables[key] = kv.second.as<EntityHandle>();
 			}
@@ -275,6 +278,9 @@ namespace Engine::Components {
 			}
 			else if (kv.second.is<SoundHandleList>()) {
 				cppVariables[key] = kv.second.as<SoundHandleList>();
+			}
+			else if (kv.second.is<AnimationHandleList>()) {
+				cppVariables[key] = kv.second.as<AnimationHandleList>();
 			}
 			else {
 				SPDLOG_WARN("TRYING TO LOAD INVALID VAR VALUE FROM LUA");

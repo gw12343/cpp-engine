@@ -1,276 +1,539 @@
 //
-// Created by gabe on 6/24/25.
+// AnimationComponent — dual-slot full-body playback on top of ozz.
 //
 
-#include "components/Components.h"
 #include "components/impl/AnimationComponent.h"
 
-
-#include "ozz/animation/runtime/track.h"
 #include "animation/AnimationManager.h"
-#include "scripting/ScriptManager.h"
-
-#include "animation/AnimationController.h"
-#include "animation/AnimationPlayer.h"
 #include "animation/Animation.h"
-#include "ozz/animation/runtime/local_to_model_job.h"
+#include "scripting/ScriptManager.h"
 #include "core/EngineData.h"
 #include "core/Scene.h"
+#include "assets/AssetManager.h"
+
+#include "ozz/animation/runtime/local_to_model_job.h"
+#include "ozz/animation/runtime/blending_job.h"
+#include "ozz/animation/runtime/sampling_job.h"
+#include "ozz/animation/runtime/skeleton.h"
+
+#include <algorithm>
+#include <cmath>
 
 namespace Engine::Components {
 
-    void AnimationComponent::OnAdded(Entity& entity)
-    {
-        if (!skeletonPath.empty()) {
-            skeleton = GetAnimationManager().LoadSkeletonFromPath(skeletonPath);
-            if (!skeleton) {
-                spdlog::error("Failed to load skeleton from path: {}", skeletonPath);
-            } else {
-                GetDefaultLogger()->info("Loaded skeleton from path: {}", skeletonPath);
-            }
-        }
+	AnimationComponent::AnimationComponent(const AnimationComponent& other)
+	{
+		skeletonPath         = other.skeletonPath;
+		defaultFadeDuration  = other.defaultFadeDuration;
+		playbackSpeed        = other.playbackSpeed;
+		current.clip         = other.current.clip;
+		current.time         = other.current.time;
+		current.speed        = other.current.speed;
+		current.looping      = other.current.looping;
+		current.active       = other.current.active;
+		// Runtime buffers rebuilt in OnAdded
+	}
 
-        if (skeleton != nullptr) {
-            local_pose = AnimationManager::AllocateLocalPose(skeleton);
-            model_pose = AnimationManager::AllocateModelPose(skeleton);
+	AnimationComponent& AnimationComponent::operator=(const AnimationComponent& other)
+	{
+		if (this != &other) {
+			skeletonPath         = other.skeletonPath;
+			defaultFadeDuration  = other.defaultFadeDuration;
+			playbackSpeed        = other.playbackSpeed;
+			current.clip         = other.current.clip;
+			current.time         = other.current.time;
+			current.speed        = other.current.speed;
+			current.looping      = other.current.looping;
+			current.active       = other.current.active;
+			from.Deactivate();
+			isFading     = false;
+			blendWeight  = 1.f;
+			fadeElapsed  = 0.f;
+		}
+		return *this;
+	}
 
-            if (!local_pose || !model_pose) {
-                spdlog::error("Failed to allocate pose data for entity");
-            }
+	void AnimationComponent::EnsurePoseBuffers()
+	{
+		if (!skeleton) return;
+		if (!local_pose) {
+			local_pose = AnimationManager::AllocateLocalPose(skeleton);
+		}
+		if (!model_pose) {
+			model_pose = AnimationManager::AllocateModelPose(skeleton);
+		}
+	}
 
-            // Re-initialize any players that were deserialized before OnAdded ran
-            for (auto& player : controller.players) {
-                player->localPose.resize(skeleton->num_soa_joints());
-                if (player->animation.IsValid()) {
-                    Animation* anim = GetAssetManager().Get(player->animation);
-                    if (anim && anim->source) {
-                        player->context.Resize(anim->source->num_tracks());
-                    }
-                }
-            }
-        }
-    }
+	Animation* AnimationComponent::ResolveClip(const AnimationTrack& track)
+	{
+		if (!track.clip.IsValid()) {
+			return nullptr;
+		}
+		Animation* clip = GetAssetManager().Get(track.clip);
+		return (clip && clip->IsValid()) ? clip : nullptr;
+	}
 
-    void AnimationComponent::SetSkeleton(const std::string& path)
-    {
-        this->skeletonPath = path;
+	bool AnimationComponent::PrepareTrack(AnimationTrack& track)
+	{
+		if (!skeleton) {
+			return false;
+		}
+		Animation* clip = ResolveClip(track);
+		if (!clip) {
+			return false;
+		}
 
-        if (!skeletonPath.empty()) {
-            skeleton = GetAnimationManager().LoadSkeletonFromPath(skeletonPath);
-            if (!skeleton) {
-                spdlog::error("Failed to load skeleton from path: {}", skeletonPath);
-            } else {
-                GetDefaultLogger()->info("Loaded skeleton from path: {}", skeletonPath);
-            }
-        }
+		const int soa = skeleton->num_soa_joints();
+		if ((int)track.localPose.size() != soa) {
+			track.localPose.resize(soa);
+		}
+		track.context.Resize(clip->NumTracks());
+		track.active = true;
+		return true;
+	}
 
-        if (skeleton != nullptr) {
-            delete local_pose;
-            delete model_pose;
+	void AnimationComponent::OnAdded(Entity& entity)
+	{
+		if (!skeletonPath.empty()) {
+			skeleton = GetAnimationManager().LoadSkeletonFromPath(skeletonPath);
+			if (!skeleton) {
+				spdlog::error("Failed to load skeleton from path: {}", skeletonPath);
+			}
+		}
 
-            local_pose = AnimationManager::AllocateLocalPose(skeleton);
-            model_pose = AnimationManager::AllocateModelPose(skeleton);
+		if (skeleton) {
+			EnsurePoseBuffers();
+			if (current.clip.IsValid()) {
+				if (PrepareTrack(current)) {
+					// Keep serialized time; clamp to clip length after prepare
+					if (Animation* clip = ResolveClip(current)) {
+						const float dur = clip->Duration();
+						if (dur > 0.f) {
+							current.time = std::fmod(current.time, dur);
+							if (current.time < 0.f) current.time += dur;
+						}
+					}
+				} else {
+					current.Deactivate();
+				}
+			}
+			from.Deactivate();
+			isFading    = false;
+			blendWeight = 1.f;
+			EvaluatePose();
+		}
+	}
 
-            if (!local_pose || !model_pose) {
-                spdlog::error("Failed to allocate pose data for entity");
-            }
+	void AnimationComponent::OnRemoved(Entity& entity)
+	{
+		delete local_pose;
+		local_pose = nullptr;
+		delete model_pose;
+		model_pose = nullptr;
+		current.Deactivate();
+		from.Deactivate();
+		skeleton = nullptr;
+	}
 
-            // Re-initialize all existing players for the new skeleton
-            for (auto& player : controller.players) {
-                player->localPose.resize(skeleton->num_soa_joints());
-                if (player->animation.IsValid()) {
-                    Animation* anim = GetAssetManager().Get(player->animation);
-                    if (anim && anim->source) {
-                        player->context.Resize(anim->source->num_tracks());
-                    }
-                }
-            }
-        }
-    }
+	void AnimationComponent::CleanAnimationContexts()
+	{
+		Scene* scene = GetCurrentScene();
+		if (!scene || !scene->GetRegistry()) return;
 
-    AnimationPlayer& AnimationComponent::PlayAnimation(const AssetHandle<Animation>& animation, bool loop)
-    {
-        auto& player = controller.players.emplace_back(std::make_unique<AnimationPlayer>());
-        player->animation     = animation;
-        player->looping       = loop;
-        player->time          = 0.f;
-        player->weight        = 1.f;
-        player->targetWeight  = 1.f;
-        player->playbackSpeed = 1.f;
+		auto view = scene->GetRegistry()->view<AnimationComponent>();
+		for (auto entity : view) {
+			auto& ac = view.get<AnimationComponent>(entity);
+			delete ac.local_pose;
+			ac.local_pose = nullptr;
+			delete ac.model_pose;
+			ac.model_pose = nullptr;
+			ac.current.Deactivate();
+			ac.from.Deactivate();
+			ac.skeleton = nullptr;
+			ac.isFading = false;
+		}
+	}
 
-        if (skeleton) {
-            player->localPose.resize(skeleton->num_soa_joints());
-        }
+	void AnimationComponent::SetSkeleton(const std::string& path)
+	{
+		skeletonPath = path;
+		skeleton     = nullptr;
+		if (!skeletonPath.empty()) {
+			skeleton = GetAnimationManager().LoadSkeletonFromPath(skeletonPath);
+		}
 
-        if (animation.IsValid()) {
-            Animation* anim = GetAssetManager().Get(animation);
-            if (anim && anim->source) {
-                player->context.Resize(anim->source->num_tracks());
-                GetDefaultLogger()->info("Playing animation with {} tracks", anim->source->num_tracks());
-            }
-        }
+		delete local_pose;
+		local_pose = nullptr;
+		delete model_pose;
+		model_pose = nullptr;
 
-        return *player;
-    }
+		if (skeleton) {
+			EnsurePoseBuffers();
+			if (current.active) {
+				PrepareTrack(current);
+			}
+			if (from.active) {
+				PrepareTrack(from);
+			}
+		}
+	}
 
-    void AnimationComponent::CrossfadeTo(const AssetHandle<Animation>& animation, float fadeDuration)
-    {
-        for (auto& player : controller.players) {
-            player->targetWeight = 0.f;
-        }
+	void AnimationComponent::ClearCrossfade()
+	{
+		from.Deactivate();
+		isFading    = false;
+		fadeElapsed = 0.f;
+		blendWeight = 1.f;
+	}
 
-        AnimationPlayer& next = PlayAnimation(animation);
-        next.weight       = 0.f;
-        next.targetWeight = 1.f;
+	void AnimationComponent::Play(const AnimationHandle& clip, bool loop, float fade)
+	{
+		if (!clip.IsValid()) {
+			spdlog::error("AnimationComponent::Play: invalid clip");
+			return;
+		}
+		if (!skeleton) {
+			spdlog::error("AnimationComponent::Play: no skeleton loaded");
+			return;
+		}
 
-        controller.fadeDuration = fadeDuration;
-    }
+		EnsurePoseBuffers();
 
-    AnimationPlayer* AnimationComponent::GetActivePlayer()
-    {
-        if (controller.players.empty()) return nullptr;
+		const float useFade = (fade < 0.f) ? defaultFadeDuration : fade;
 
-        AnimationPlayer* best = nullptr;
-        for (auto& player : controller.players) {
-            if (!best || player->weight > best->weight) {
-                best = player.get();
-            }
-        }
-        return best;
-    }
+		// Same clip already current — just update loop / optional restart from start if stopped
+		if (current.active && current.clip == clip) {
+			current.looping = loop;
+			if (!IsPlaying()) {
+				current.time = 0.f;
+			}
+			ClearCrossfade();
+			return;
+		}
 
-    void AnimationComponent::OnRemoved(Entity& entity)
-    {
-        GetDefaultLogger()->info("DELETING ANIMATION POSES");
+		const bool canCrossfade = useFade > 0.f && current.active && current.clip.IsValid();
 
-        if (local_pose) {
-            delete local_pose;
-            local_pose = nullptr;
-        }
+		if (canCrossfade) {
+			// Snapshot current into `from` (re-prepare sampling buffers; Context is not movable).
+			from.clip    = current.clip;
+			from.time    = current.time;
+			from.speed   = current.speed;
+			from.looping = current.looping;
+			if (!PrepareTrack(from)) {
+				from.Deactivate();
+			}
 
-        if (model_pose) {
-            delete model_pose;
-            model_pose = nullptr;
-        }
+			current.clip    = clip;
+			current.looping = loop;
+			current.speed   = 1.f;
+			current.time    = 0.f;
+			if (!PrepareTrack(current)) {
+				current.Deactivate();
+				from.Deactivate();
+				return;
+			}
 
-        controller.players.clear();
-        skeleton = nullptr;
-    }
+			isFading     = from.active;
+			fadeDuration = useFade;
+			fadeElapsed  = 0.f;
+			blendWeight  = isFading ? 0.f : 1.f;
+		} else {
+			ClearCrossfade();
+			current.clip    = clip;
+			current.looping = loop;
+			current.speed   = 1.f;
+			current.time    = 0.f;
+			if (!PrepareTrack(current)) {
+				current.Deactivate();
+				return;
+			}
+			blendWeight = 1.f;
+		}
+	}
 
-    void AnimationComponent::CleanAnimationContexts()
-    {
-        Scene* scene = GetCurrentScene();
-        if (!scene || !scene->GetRegistry()) {
-            return;
-        }
+	void AnimationComponent::Play(const std::string& path, bool loop, float fade)
+	{
+		Play(GetAssetManager().Load<Animation>(path), loop, fade);
+	}
 
-        auto view = scene->GetRegistry()->view<AnimationComponent>();
-        for (auto entity : view) {
-            auto& ac = view.get<AnimationComponent>(entity);
+	void AnimationComponent::Stop()
+	{
+		current.Deactivate();
+		ClearCrossfade();
+	}
 
-            ac.controller.players.clear();
+	void AnimationComponent::Seek(float timeSeconds)
+	{
+		current.time = std::max(0.f, timeSeconds);
+		if (!current.active) return;
 
-            if (ac.local_pose) {
-                delete ac.local_pose;
-                ac.local_pose = nullptr;
-            }
-            if (ac.model_pose) {
-                delete ac.model_pose;
-                ac.model_pose = nullptr;
-            }
-            ac.skeleton = nullptr;
-        }
-    }
+		Animation* clip = ResolveClip(current);
+		if (!clip) return;
 
-    static float animRatio = 0.0;
+		const float dur = clip->Duration();
+		if (dur <= 0.f) return;
 
-    void AnimationComponent::RenderInspector(Entity& entity)
-    {
-        ImGui::Text("Skeleton Information:");
-        ImGui::Separator();
-        ImGui::Text("Skeleton: %s", skeleton ? "Loaded" : "Null");
-        ImGui::Text("Joints: %d", skeleton ? skeleton->num_joints() : 0);
-        ImGui::Text("SOA Joints: %d", skeleton ? skeleton->num_soa_joints() : 0);
+		if (current.looping) {
+			current.time = std::fmod(current.time, dur);
+			if (current.time < 0.f) current.time += dur;
+		} else {
+			current.time = std::min(current.time, dur);
+		}
+	}
 
-        ImGui::NewLine();
-        ImGui::Text("Pose Information:");
-        ImGui::Separator();
-        ImGui::Text("Local Pose: %s", local_pose ? std::to_string(local_pose->size()).c_str() : "Null");
-        ImGui::Text("Model Pose: %s", model_pose ? std::to_string(model_pose->size()).c_str() : "Null");
+	bool AnimationComponent::IsPlaying() const
+	{
+		return current.active && current.clip.IsValid();
+	}
 
-        ImGui::NewLine();
-        ImGui::Text("Animation Controller:");
-        ImGui::Separator();
-        ImGui::Text("Active Players: %d", (int)controller.players.size());
-        ImGui::Text("Fade Duration: %.2f", controller.fadeDuration);
+	float AnimationComponent::GetLength() const
+	{
+		Animation* clip = ResolveClip(current);
+		return clip ? clip->Duration() : 0.f;
+	}
 
-        LeftLabelSliderFloat("Ratios", &animRatio, 0.f, 1.f);
-        if(!controller.players.empty()) controller.players[0]->targetWeight = animRatio;
-        if(controller.players.size() > 1) controller.players[1]->targetWeight = 1-animRatio;
+	bool AnimationComponent::HasSkeleton() const
+	{ return skeleton != nullptr; }
 
-        for (int i = 0; i < (int)controller.players.size(); ++i) {
-            AnimationPlayer& player = *controller.players[i];
-            ImGui::PushID(i);
+	int AnimationComponent::JointCount() const
+	{ return skeleton ? skeleton->num_joints() : 0; }
 
-            ImGui::Text("Player %d", i);
-            ImGui::Indent();
+	void AnimationComponent::AdvanceTrack(AnimationTrack& track, float dt)
+	{
+		if (!track.active) return;
 
-            Animation* anim = player.animation.IsValid() ? GetAssetManager().Get(player.animation) : nullptr;
-            ImGui::Text("Animation: %s", anim && anim->source ? "Loaded" : "Null");
-            ImGui::Text("Tracks: %d",    anim && anim->source ? anim->source->num_tracks() : 0);
-            ImGui::Text("Duration: %.2f", anim && anim->source ? anim->source->duration() : 0.f);
-            ImGui::Text("Time: %.3f / Speed: %.2f", player.time, player.playbackSpeed);
-            ImGui::Text("Weight: %.2f -> %.2f", player.weight, player.targetWeight);
-            ImGui::Text("Looping: %s", player.looping ? "Yes" : "No");
+		Animation* clip = ResolveClip(track);
+		if (!clip) return;
 
-            float ratio = (anim && anim->source && anim->source->duration() > 0.f)
-                          ? player.time / anim->source->duration()
-                          : 0.f;
-            if (LeftLabelSliderFloat("Scrub", &ratio, 0.f, 1.f)) {
-                if (anim && anim->source) {
-                    player.time = ratio * anim->source->duration();
-                }
+		const float duration = clip->Duration();
+		if (duration <= 0.f) return;
 
-                ozz::animation::SamplingJob sampling_job;
-                sampling_job.animation = anim->source;
-                sampling_job.context   = &player.context;
-                sampling_job.ratio     = ratio;
-                sampling_job.output    = ozz::make_span(player.localPose);
-                if (!sampling_job.Run()) {
-                    GetAnimationManager().log->error("Failed to sample animation (player {})", i);
-                } else {
-                    ozz::animation::LocalToModelJob ltm_job;
-                    ltm_job.skeleton = skeleton;
-                    ltm_job.input    = ozz::make_span(player.localPose);
-                    ltm_job.output   = ozz::make_span(*model_pose);
-                    if (!ltm_job.Run()) {
-                        GetAnimationManager().log->error("Failed LocalToModel (player {})", i);
-                    }
-                }
-            }
+		track.time += dt * track.speed * playbackSpeed;
+		if (track.looping) {
+			track.time = std::fmod(track.time, duration);
+			if (track.time < 0.f) track.time += duration;
+		} else {
+			track.time = std::clamp(track.time, 0.f, duration);
+		}
+	}
 
-            AssetHandle<Animation> handle = player.animation;
-            if (LeftLabelAssetAnimation("Animation", &handle)) {
-                player.animation = handle;
-                if (handle.IsValid()) {
-                    Animation* newAnim = GetAssetManager().Get(handle);
-                    if (newAnim && newAnim->source) {
-                        player.context.Resize(newAnim->source->num_tracks());
-                        if (skeleton) {
-                            player.localPose.resize(skeleton->num_soa_joints());
-                        }
-                    }
-                }
-            }
+	void AnimationComponent::SampleTrack(AnimationTrack& track)
+	{
+		if (!track.active || !skeleton) return;
 
-            ImGui::Unindent();
-            ImGui::PopID();
-        }
+		Animation* clip = ResolveClip(track);
+		if (!clip) return;
 
-        ImGui::NewLine();
-        if (ImGui::Button("Add Player")) {
-            PlayAnimation(AssetHandle<Animation>{});
-        }
-    }
+		ozz::animation::Animation* ozzAnim = clip->Runtime();
+		const float                duration = clip->Duration();
+		const float                ratio    = duration > 0.f ? (track.time / duration) : 0.f;
+
+		if ((int)track.localPose.size() != skeleton->num_soa_joints()) {
+			track.localPose.resize(skeleton->num_soa_joints());
+		}
+
+		ozz::animation::SamplingJob job;
+		job.animation = ozzAnim;
+		job.context   = &track.context;
+		job.ratio     = ratio;
+		job.output    = ozz::make_span(track.localPose);
+		if (!job.Run()) {
+			GetDefaultLogger()->error("Animation sampling failed");
+		}
+	}
+
+	void AnimationComponent::UpdatePlayback(float dt)
+	{
+		if (!skeleton || !local_pose || !model_pose) return;
+		if (!current.active) return;
+
+		// Crossfade progress (wall-clock, not scaled by clip speed)
+		if (isFading) {
+			if (fadeDuration <= 0.f) {
+				blendWeight = 1.f;
+				ClearCrossfade();
+			} else {
+				fadeElapsed += dt;
+				blendWeight = std::clamp(fadeElapsed / fadeDuration, 0.f, 1.f);
+				if (blendWeight >= 1.f) {
+					ClearCrossfade();
+				}
+			}
+		}
+
+		AdvanceTrack(current, dt);
+		if (from.active) {
+			AdvanceTrack(from, dt);
+		}
+
+		EvaluatePose();
+	}
+
+	void AnimationComponent::EvaluatePose()
+	{
+		if (!skeleton || !local_pose || !model_pose) return;
+		if (!current.active || !ResolveClip(current)) return;
+
+		SampleTrack(current);
+
+		const bool blendFrom =
+		    isFading && from.active && ResolveClip(from) && blendWeight < 1.f - 1e-4f;
+
+		if (!blendFrom || blendWeight >= 1.f) {
+			std::copy(current.localPose.begin(), current.localPose.end(), local_pose->begin());
+		} else if (blendWeight <= 1e-4f) {
+			SampleTrack(from);
+			std::copy(from.localPose.begin(), from.localPose.end(), local_pose->begin());
+		} else {
+			SampleTrack(from);
+
+			ozz::animation::BlendingJob::Layer layers[2];
+			layers[0].transform = ozz::make_span(from.localPose);
+			layers[0].weight    = 1.f - blendWeight;
+			layers[1].transform = ozz::make_span(current.localPose);
+			layers[1].weight    = blendWeight;
+
+			ozz::animation::BlendingJob blend;
+			blend.threshold = ozz::animation::BlendingJob().threshold;
+			blend.layers    = ozz::span<const ozz::animation::BlendingJob::Layer>(layers, 2);
+			blend.rest_pose = skeleton->joint_rest_poses();
+			blend.output    = ozz::make_span(*local_pose);
+			if (!blend.Run()) {
+				GetDefaultLogger()->error("Animation blend failed");
+				return;
+			}
+		}
+
+		ozz::animation::LocalToModelJob ltm;
+		ltm.skeleton = skeleton;
+		ltm.input    = ozz::make_span(*local_pose);
+		ltm.output   = ozz::make_span(*model_pose);
+		if (!ltm.Run()) {
+			GetDefaultLogger()->error("LocalToModel failed");
+		}
+	}
+
+	void AnimationComponent::AddBindings()
+	{
+		auto& lua = GetScriptManager().lua;
+
+		lua.new_usertype<AnimationComponent>(
+		    "AnimationComponent",
+		    "skeletonPath",
+		    &AnimationComponent::skeletonPath,
+		    "defaultFadeDuration",
+		    &AnimationComponent::defaultFadeDuration,
+		    "playbackSpeed",
+		    &AnimationComponent::playbackSpeed,
+		    "setSkeleton",
+		    &AnimationComponent::SetSkeleton,
+
+		    "play",
+		    sol::overload(
+		        [](AnimationComponent& self, const std::string& path) {
+			        self.Play(path, true, -1.f);
+		        },
+		        [](AnimationComponent& self, const std::string& path, bool loop) {
+			        self.Play(path, loop, -1.f);
+		        },
+		        [](AnimationComponent& self, const std::string& path, bool loop, float fade) {
+			        self.Play(path, loop, fade);
+		        },
+		        [](AnimationComponent& self, const AnimationHandle& h) {
+			        self.Play(h, true, -1.f);
+		        },
+		        [](AnimationComponent& self, const AnimationHandle& h, bool loop) {
+			        self.Play(h, loop, -1.f);
+		        },
+		        [](AnimationComponent& self, const AnimationHandle& h, bool loop, float fade) {
+			        self.Play(h, loop, fade);
+		        }),
+
+		    // Alias: crossfadeTo(path [, fade]) always loops
+		    "crossfadeTo",
+		    sol::overload(
+		        [](AnimationComponent& self, const std::string& path) {
+			        self.Play(path, true, self.defaultFadeDuration);
+		        },
+		        [](AnimationComponent& self, const std::string& path, float fade) {
+			        self.Play(path, true, fade);
+		        },
+		        [](AnimationComponent& self, const AnimationHandle& h) {
+			        self.Play(h, true, self.defaultFadeDuration);
+		        },
+		        [](AnimationComponent& self, const AnimationHandle& h, float fade) {
+			        self.Play(h, true, fade);
+		        }),
+
+		    "stop",
+		    &AnimationComponent::Stop,
+		    "seek",
+		    &AnimationComponent::Seek,
+		    "isPlaying",
+		    &AnimationComponent::IsPlaying,
+		    "isFading",
+		    &AnimationComponent::IsFading,
+		    "getTime",
+		    &AnimationComponent::GetTime,
+		    "getLength",
+		    &AnimationComponent::GetLength,
+		    "getBlendWeight",
+		    &AnimationComponent::GetBlendWeight,
+		    "getCurrentClip",
+		    &AnimationComponent::GetCurrentClip,
+		    "hasSkeleton",
+		    &AnimationComponent::HasSkeleton,
+		    "jointCount",
+		    &AnimationComponent::JointCount,
+		    "speed",
+		    sol::property(&AnimationComponent::GetSpeed, &AnimationComponent::SetSpeed),
+		    "looping",
+		    sol::property(&AnimationComponent::GetLooping, &AnimationComponent::SetLooping));
+	}
+
+	void AnimationComponent::RenderInspector(Entity& entity)
+	{
+		ImGui::Text("Skeleton: %s", skeleton ? "Loaded" : "None");
+		ImGui::Text("Joints: %d", JointCount());
+		LeftLabelSliderFloat("Playback Speed", &playbackSpeed, 0.f, 3.f);
+		LeftLabelSliderFloat("Default Fade", &defaultFadeDuration, 0.f, 2.f);
+
+		ImGui::Separator();
+		ImGui::Text("Current Clip");
+		AnimationHandle clip = current.clip;
+		if (LeftLabelAssetAnimation("Animation", &clip)) {
+			Play(clip, current.looping, 0.f);
+		}
+
+		bool loop = current.looping;
+		if (LeftLabelCheckbox("Looping", &loop)) {
+			current.looping = loop;
+		}
+
+		float speed = current.speed;
+		if (LeftLabelSliderFloat("Clip Speed", &speed, 0.f, 3.f)) {
+			current.speed = speed;
+		}
+
+		const float length = GetLength();
+		float       t      = current.time;
+		if (length > 0.f && LeftLabelSliderFloat("Time", &t, 0.f, length)) {
+			Seek(t);
+			EvaluatePose();
+		}
+
+		ImGui::Text("Playing: %s  Fading: %s  Blend: %.2f",
+		            IsPlaying() ? "yes" : "no",
+		            isFading ? "yes" : "no",
+		            blendWeight);
+
+		if (ImGui::Button("Stop")) {
+			Stop();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Restart") && current.clip.IsValid()) {
+			Play(current.clip, current.looping, 0.f);
+		}
+	}
 
 } // namespace Engine::Components
