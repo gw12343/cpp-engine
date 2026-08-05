@@ -9,9 +9,11 @@
 
 #include "components/AllComponents.h"
 #include "core/SceneManager.h"
+#include "core/EngineData.h"
 
 #include <fstream>
 #include <optional>
+#include <cstdio>
 
 #include <cereal/types/vector.hpp>
 #include <cereal/types/optional.hpp>
@@ -153,23 +155,53 @@ namespace Engine {
 		std::map<EntityHandle, Entity> loaded_entities_map;
 
 		if (std::filesystem::exists(path)) {
-			std::ifstream              is(path, std::ios::binary);
-			cereal::BinaryInputArchive archive(is);
+			try {
+				std::ifstream              is(path, std::ios::binary);
+				cereal::BinaryInputArchive archive(is);
 
+				std::vector<SerializedEntity> entities;
+				archive(cereal::make_nvp("entities", entities));
+				GetDefaultLogger()->info("[cereal] Binary scene parsed {} entities from {}", entities.size(), path);
 
-			std::vector<SerializedEntity> entities;
-			archive(cereal::make_nvp("entities", entities)); // This causes an error
-			for (auto& se : entities) {
-				auto e = scene->GetRegistry()->create();
-				scene->GetRegistry()->emplace<Engine::Components::EntityMetadata>(e, se.meta);
-				Entity entity(e, scene.get());
-				loaded_entities.push_back(entity);
-				loaded_entities_map[EntityHandle(se.meta.guid)] = entity;
+				for (auto& se : entities) {
+					// Copy before COMPONENT_LIST macros: parameter `name` would rewrite se.meta.name
+					const std::string entityName = se.meta.name;
+					const std::string entityGuid = se.meta.guid;
+					try {
+						auto e = scene->GetRegistry()->create();
+						scene->GetRegistry()->emplace<Engine::Components::EntityMetadata>(e, se.meta);
+						Entity entity(e, scene.get());
+						loaded_entities.push_back(entity);
+						loaded_entities_map[EntityHandle(entityGuid)] = entity;
 
 #define X(type, name, fancy)                                                                                                                                                                                                                   \
-	if (se.name.has_value()) entity.AddComponent<type>(se.name.value());
-				COMPONENT_LIST
+	if (se.name.has_value()) {                                                                                                                                                                                                                 \
+		try {                                                                                                                                                                                                                                  \
+			entity.AddComponent<type>(se.name.value());                                                                                                                                                                                        \
+		}                                                                                                                                                                                                                                      \
+		catch (const std::exception& ex) {                                                                                                                                                                                                     \
+			GetDefaultLogger()->error("[cereal] AddComponent {} entity={} [{}]: {}", #name, entityName, entityGuid, ex.what());                                                                                                                \
+			std::fprintf(stderr, "[cereal] AddComponent %s entity=%s: %s\n", #name, entityName.c_str(), ex.what());                                                                                                                            \
+		}                                                                                                                                                                                                                                      \
+	}
+						COMPONENT_LIST
 #undef X
+					}
+					catch (const std::exception& ex) {
+						GetDefaultLogger()->error("[cereal] entity {} [{}]: {}", entityName, entityGuid, ex.what());
+						std::fprintf(stderr, "[cereal] entity %s: %s\n", entityName.c_str(), ex.what());
+					}
+				}
+			}
+			catch (const cereal::Exception& e) {
+				GetDefaultLogger()->error("[cereal] BinaryInputArchive '{}': {}", path, e.what());
+				std::fprintf(stderr, "[cereal] BinaryInputArchive '%s': %s\n", path.c_str(), e.what());
+				std::fflush(stderr);
+			}
+			catch (const std::exception& e) {
+				GetDefaultLogger()->error("[cereal] exception loading binary scene '{}': {}", path, e.what());
+				std::fprintf(stderr, "[cereal] binary scene '%s': %s\n", path.c_str(), e.what());
+				std::fflush(stderr);
 			}
 		}
 

@@ -262,19 +262,17 @@ namespace Engine {
 			glm::vec3 worldPos = controller.GetPosition();
 			glm::quat worldRot = controller.GetRotation();
 
-			tr.SetWorldPosition(worldPos);
-			tr.SetWorldRotation(worldRot);
-
-
 			auto hr = GetCurrentSceneRegistry().get<Components::EntityMetadata>(entity);
 
 			if (!hr.parentEntity.IsValid()) {
-				// Root player: local == world
+				// Root: local == world so later Scene::UpdateTransforms keeps the capsule pose.
+				tr.SetLocalPosition(worldPos);
+				tr.SetLocalRotation(worldRot);
 				tr.SetWorldPosition(worldPos);
 				tr.SetWorldRotation(worldRot);
 			}
 			else {
-				// Child player: world -> local
+				// Child: world -> local
 				auto parentEntity = GetCurrentScene()->Get(hr.parentEntity);
 				if (parentEntity && parentEntity.HasComponent<Engine::Components::Transform>()) {
 					auto&     parentTr  = parentEntity.GetComponent<Engine::Components::Transform>();
@@ -290,9 +288,7 @@ namespace Engine {
 				}
 			}
 
-
-			// Update world matrix for consistency (optional if Scene::UpdateTransforms runs afterward)
-			tr.SetWorldMatrix(glm::translate(glm::mat4(1.0f), tr.GetWorldPosition()) * glm::toMat4(tr.GetWorldRotation()) * glm::scale(glm::mat4(1.0f), tr.GetWorldScale()));
+			tr.SetWorldMatrix(glm::translate(glm::mat4(1.0f), worldPos) * glm::toMat4(worldRot) * glm::scale(glm::mat4(1.0f), tr.GetWorldScale()));
 		}
 	}
 

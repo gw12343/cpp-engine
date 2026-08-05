@@ -6,10 +6,13 @@
 #include <typeinfo>
 
 #include <fstream>
+#include <cstdio>
 
 #include <nlohmann/json.hpp>
+#include <cereal/cereal.hpp>
 
 #include "rendering/Texture.h"
+#include "utils/Logger.h"
 
 namespace Engine {
     inline std::string NormalizePath(const std::string& path)
@@ -42,12 +45,29 @@ namespace Engine {
         if (it != storage.guidToAsset.end()) return AssetHandle<T>(guid);
 
         assert(storage.loader);
-        auto asset = storage.loader->LoadFromFile(normPath);
-        if (!asset) return AssetHandle<T>();
-
-        storage.guidToAsset[guid] = std::move(asset);
-        storage.pathToGuid[normPath] = guid;
-        return AssetHandle<T>(guid);
+        try {
+            auto asset = storage.loader->LoadFromFile(normPath);
+            if (!asset) {
+                Logger::get("core")->error("[AssetManager] LoadFromFile returned null: {}", normPath);
+                return AssetHandle<T>();
+            }
+            storage.guidToAsset[guid] = std::move(asset);
+            storage.pathToGuid[normPath] = guid;
+            return AssetHandle<T>(guid);
+        }
+        catch (const cereal::Exception& e) {
+            // cereal::Exception covers RapidJSONException and NVP/type errors
+            Logger::get("core")->error("[AssetManager] cereal exception loading {}: {}", normPath, e.what());
+            std::fprintf(stderr, "[cereal] AssetManager load '%s': %s\n", normPath.c_str(), e.what());
+            std::fflush(stderr);
+            return AssetHandle<T>();
+        }
+        catch (const std::exception& e) {
+            Logger::get("core")->error("[AssetManager] exception loading {}: {}", normPath, e.what());
+            std::fprintf(stderr, "[AssetManager] load '%s': %s\n", normPath.c_str(), e.what());
+            std::fflush(stderr);
+            return AssetHandle<T>();
+        }
     }
 
 	template <typename T>

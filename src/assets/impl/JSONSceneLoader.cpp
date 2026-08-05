@@ -7,13 +7,19 @@
 #include <cereal/types/optional.hpp>
 #include <cereal/types/common.hpp>
 #include <cereal/types/map.hpp>
+#include <cereal/types/vector.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/memory.hpp>
 
 #include "components/AllComponents.h"
 #include "components/Components.h"
 #include "core/SceneManager.h"
+#include "core/EngineData.h"
 
 #include <fstream>
 #include <optional>
+#include <sstream>
+#include <cstdio>
 
 
 namespace glm {
@@ -143,32 +149,97 @@ namespace Engine {
 		archive(cereal::make_nvp("entities", entities));
 	}
 
+	namespace {
+		// Always print cereal/rapidjson failures to the log *and* stderr so they
+		// are visible even if spdlog sinks are not yet fully configured.
+		void LogCerealError(const char* phase, const std::string& path, const char* what)
+		{
+			const std::string msg = std::string("[cereal] ") + phase + " '" + path + "': " + (what ? what : "(null)");
+			std::fprintf(stderr, "%s\n", msg.c_str());
+			std::fflush(stderr);
+			GetDefaultLogger()->error("{}", msg);
+		}
+	} // namespace
+
 	std::unique_ptr<Scene> JSONSceneLoader::LoadFromFile(const std::string& path)
 	{
+		GetDefaultLogger()->info("[cereal] Loading JSON scene: {}", path);
+
 		std::unique_ptr<Scene> scene = GetSceneManager().CreateScene(path);
 
-		std::ifstream            is(path);
-		cereal::JSONInputArchive archive(is);
+		std::ifstream is(path);
+		if (!is) {
+			LogCerealError("open failed", path, "could not open file for reading");
+			return scene;
+		}
 
 		std::vector<SerializedEntity> entities;
-		archive(cereal::make_nvp("entities", entities));
+		try {
+			cereal::JSONInputArchive archive(is);
+			archive(cereal::make_nvp("entities", entities));
+			GetDefaultLogger()->info("[cereal] Parsed {} entities from {}", entities.size(), path);
+		}
+		catch (const cereal::Exception& e) {
+			// Includes cereal::RapidJSONException ("rapidjson internal assertion failure: ...")
+			// and NVP-not-found / type errors.
+			LogCerealError("JSONInputArchive exception", path, e.what());
+			return scene;
+		}
+		catch (const std::exception& e) {
+			LogCerealError("std::exception during deserialize", path, e.what());
+			return scene;
+		}
+		catch (...) {
+			LogCerealError("unknown exception during deserialize", path, "non-std exception");
+			return scene;
+		}
+
 		std::vector<Entity>            loaded_entities;
 		std::map<EntityHandle, Entity> loaded_entities_map;
 
-		for (auto& se : entities) {
-			auto e = scene->GetRegistry()->create();
-			scene->GetRegistry()->emplace<Engine::Components::EntityMetadata>(e, se.meta);
-			Entity entity(e, scene.get());
-			loaded_entities.push_back(entity);
-			loaded_entities_map[EntityHandle(se.meta.guid)] = entity;
+		for (size_t i = 0; i < entities.size(); ++i) {
+			auto& se = entities[i];
+			// Copy before COMPONENT_LIST macros: parameter `name` would rewrite se.meta.name
+			// into se.meta.LuaScript / se.meta.Transform / etc.
+			const std::string entityName = se.meta.name;
+			const std::string entityGuid = se.meta.guid;
+			try {
+				auto e = scene->GetRegistry()->create();
+				scene->GetRegistry()->emplace<Engine::Components::EntityMetadata>(e, se.meta);
+				Entity entity(e, scene.get());
+				loaded_entities.push_back(entity);
+				loaded_entities_map[EntityHandle(entityGuid)] = entity;
+
 #define X(type, name, fancy)                                                                                                                                                                                                                   \
-	if (se.name.has_value()) entity.AddComponent<type>(se.name.value());
-			COMPONENT_LIST
+	if (se.name.has_value()) {                                                                                                                                                                                                                 \
+		try {                                                                                                                                                                                                                                  \
+			entity.AddComponent<type>(se.name.value());                                                                                                                                                                                        \
+		}                                                                                                                                                                                                                                      \
+		catch (const std::exception& ex) {                                                                                                                                                                                                     \
+			std::string ctx = std::string("AddComponent ") + #name + " entity=" + entityName + " [" + entityGuid + "]";                                                                                                                        \
+			LogCerealError(ctx.c_str(), path, ex.what());                                                                                                                                                                                      \
+		}                                                                                                                                                                                                                                      \
+	}
+				COMPONENT_LIST
 #undef X
+			}
+			catch (const cereal::Exception& e) {
+				LogCerealError(
+				    ("entity index " + std::to_string(i) + " name=" + entityName + " guid=" + entityGuid).c_str(),
+				    path,
+				    e.what());
+			}
+			catch (const std::exception& e) {
+				LogCerealError(
+				    ("entity index " + std::to_string(i) + " name=" + entityName + " guid=" + entityGuid).c_str(),
+				    path,
+				    e.what());
+			}
 		}
 
 		scene->m_entityList = loaded_entities;
 		scene->m_entityMap  = loaded_entities_map;
+		GetDefaultLogger()->info("[cereal] Scene load finished: {} entities in registry", loaded_entities.size());
 		return scene;
 	}
 

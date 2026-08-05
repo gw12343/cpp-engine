@@ -90,10 +90,10 @@ namespace Engine {
 	{
 		Vec3 mDesiredVelocity = Vec3::sZero();
 
-		// Update the character rotation and its up vector to match the up vector set by the user settings
+		// Keep character upright. Do not overwrite yaw — gameplay scripts set facing
+		// (needed for third-person / animated characters).
 		Quat character_up_rotation = Quat::sEulerAngles(Vec3(sUpRotationX, 0, sUpRotationZ));
 		mCharacter->SetUp(character_up_rotation.RotateAxisY());
-		mCharacter->SetRotation(character_up_rotation);
 
 		// A cheaper way to update the character's ground velocity,
 		// the platforms that the character is standing on may have changed velocity
