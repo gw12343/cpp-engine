@@ -109,6 +109,12 @@ namespace Engine {
 			ZoneScopedNC("Sync Physics Entities", 0x46556D);
 			SyncPhysicsEntities();
 		}
+
+		// Camera follow / other post-physics script work (must see character pose
+		// after ExtendedUpdate, not the pre-step position).
+		if (GetState() == PLAYING) {
+			GetScriptManager().RunLateUpdates(dt);
+		}
 	}
 
 

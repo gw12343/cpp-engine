@@ -203,34 +203,35 @@ function Update()
     )
 
 
-    -- Update character velocity
+    -- Update character velocity (applied in physics after this Update)
     cr:setLinearVelocity(new_velocity)
 
-
-    -- Camera Controls
+    -- Look: apply mouse this frame. Camera module rebuilds front/right next.
     local mouseDelta = input:getMouseDelta()
-    local xoffset = mouseDelta.x;
-    local yoffset = mouseDelta.y;
-    xoffset = xoffset * variables.MOUSE_SENSITIVITY
-    yoffset = yoffset * variables.MOUSE_SENSITIVITY
+    local xoffset = mouseDelta.x * variables.MOUSE_SENSITIVITY
+    local yoffset = mouseDelta.y * variables.MOUSE_SENSITIVITY
     camera.yaw = camera.yaw + xoffset
     camera.pitch = camera.pitch + yoffset
 
-    -- Clamp Pitch
     if camera.pitch < -89.0 then
         camera.pitch = -89.0
     elseif camera.pitch > 89.0 then
         camera.pitch = 89.0
     end
 
-    -- Move Camera
-    local crPos = cr:getPosition()
-    local nextPos = vec3(crPos.x, crPos.y + variables.CAMERA_Y_OFFSET, crPos.z)
-    camera:setPosition(nextPos)
-
     -- Shoot Balls
     if input:isKeyPressedThisFrame(KEY_E) then
         local shape = SphereShape(0.5 / 2)
         ShootObject("resources/models/sphere.obj", shape, variables.SHOOT_POWER, 0.5)
     end
+end
+
+-- After CharacterVirtual::ExtendedUpdate + transform sync.
+-- Following here keeps the eye locked to the capsule so fast falls don't leave
+-- the camera inside the body for a frame.
+function LateUpdate()
+    local camera = getCamera()
+    local cr = gameObject:GetPlayerControllerComponent()
+    local crPos = cr:getPosition()
+    camera:setPosition(vec3(crPos.x, crPos.y + variables.CAMERA_Y_OFFSET, crPos.z))
 end

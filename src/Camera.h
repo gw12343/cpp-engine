@@ -30,7 +30,7 @@ namespace Engine {
 		[[nodiscard]] glm::vec3 GetPosition() const { return m_position; }
 		[[nodiscard]] glm::vec3 GetFront() const { return m_front; }
 
-		void SetPosition(glm::vec3 position) { m_position = position; }
+		void SetPosition(glm::vec3 position);
 		void SaveEditorLocation()
 		{
 			m_editorSavePos   = m_position;

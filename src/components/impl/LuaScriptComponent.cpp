@@ -249,9 +249,6 @@ namespace Engine::Components {
 			else if (kv.second.is<SoundHandle>()) {
 				cppVariables[key] = kv.second.as<SoundHandle>();
 			}
-			else if (kv.second.is<AnimationHandle>()) {
-				cppVariables[key] = kv.second.as<AnimationHandle>();
-			}
 			else if (kv.second.is<EntityHandle>()) {
 				cppVariables[key] = kv.second.as<EntityHandle>();
 			}
@@ -278,9 +275,6 @@ namespace Engine::Components {
 			}
 			else if (kv.second.is<SoundHandleList>()) {
 				cppVariables[key] = kv.second.as<SoundHandleList>();
-			}
-			else if (kv.second.is<AnimationHandleList>()) {
-				cppVariables[key] = kv.second.as<AnimationHandleList>();
 			}
 			else {
 				SPDLOG_WARN("TRYING TO LOAD INVALID VAR VALUE FROM LUA");
@@ -325,6 +319,7 @@ namespace Engine::Components {
 		env                  = sol::environment();
 		start                = sol::function();
 		update               = sol::function();
+		lateUpdate           = sol::function();
 		collisionEnter       = sol::function();
 		playerCollisionEnter = sol::function();
 		variables            = sol::table();
@@ -366,6 +361,7 @@ namespace Engine::Components {
 			// Bind lifecycle functions
 			start                = env["Start"];
 			update               = env["Update"];
+			lateUpdate           = env["LateUpdate"];
 			collisionEnter       = env["CollisionEnter"];
 			playerCollisionEnter = env["PlayerCollisionEnter"];
 			sol::object vars     = env["variables"];

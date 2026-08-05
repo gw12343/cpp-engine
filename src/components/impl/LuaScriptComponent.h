@@ -54,9 +54,7 @@ namespace Engine {
 	                                    std::vector<SceneHandle>,
 	                                    std::vector<TerrainHandle>,
 	                                    std::vector<ParticleHandle>,
-	                                    SoundHandleList,
-										AnimationHandle,
-										AnimationHandleList>;
+	                                    SoundHandleList>;
 
 	namespace Components {
 
@@ -90,6 +88,7 @@ namespace Engine {
 			sol::table                                      variables;
 			sol::function                                   start;
 			sol::function                                   update;
+			sol::function                                   lateUpdate; // after physics (camera follow, etc.)
 			sol::function                                   collisionEnter;
 			sol::function                                   playerCollisionEnter;
 			std::unordered_map<std::string, ScriptVariable> cppVariables;

@@ -232,6 +232,33 @@ namespace Engine {
 		}
 	}
 
+	void ScriptManager::RunLateUpdates(float dt)
+	{
+		if (GetState() != PLAYING) {
+			return;
+		}
+
+		ZoneScopedN("Script LateUpdate");
+		scriptDeltaTime = dt;
+
+		GetCurrentSceneRegistry().view<Components::LuaScript, Components::EntityMetadata>().each(
+		    [this](entt::entity entity, Components::LuaScript& script, Components::EntityMetadata& meta) {
+			    if (meta.toBeDestroyedNextUpdate) return;
+			    if (!script.hasStarted) return;
+			    if (!script.lateUpdate.valid()) return;
+
+			    if (script.env) {
+				    script.env["deltaTime"] = scriptDeltaTime;
+			    }
+
+			    sol::protected_function_result result = script.lateUpdate();
+			    if (!result.valid()) {
+				    sol::error err = result;
+				    log->error("Lua LateUpdate() error for entity {}: {}", static_cast<int>(entity), err.what());
+			    }
+		    });
+	}
+
 	void ScriptManager::onShutdown()
 	{
 		log->info("Shutting down Lua scripting...");

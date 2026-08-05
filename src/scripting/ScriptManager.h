@@ -14,7 +14,11 @@ namespace Engine {
 		void                      onShutdown() override;
 		[[nodiscard]] std::string name() const override { return "ScriptModule"; }
 		void                      ReloadEditorScript();
-        void EditorScriptUpdate(float dt);
+		void                      EditorScriptUpdate(float dt);
+
+		// Run after physics (character ExtendedUpdate + entity sync). Use for
+		// camera follow so the view is not one step behind the capsule.
+		void RunLateUpdates(float dt);
 
 		// Get event bus for external access
 		EventBus& GetEventBus() { return eventBus; }

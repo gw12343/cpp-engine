@@ -91,12 +91,18 @@ namespace Engine {
 
 	glm::mat4 Camera::GetViewMatrix() const
 	{
-		return m_view;
+		return glm::lookAt(m_position, m_position + m_front, m_up);
 	}
 
 	glm::mat4 Camera::GetProjectionMatrix() const
 	{
 		return m_proj;
+	}
+
+	void Camera::SetPosition(glm::vec3 position)
+	{
+		m_position = position;
+		m_view     = glm::lookAt(m_position, m_position + m_front, m_up);
 	}
 
 	void Camera::ProcessKeyboard(float deltaTime)

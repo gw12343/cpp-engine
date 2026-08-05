@@ -17,20 +17,6 @@
                     "scriptPath": "scripts/player.lua",
                     "variables": [
                         {
-                            "key": "SHOOT_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 14.800000190734864
-                            }
-                        },
-                        {
-                            "key": "WALK_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 7.0
-                            }
-                        },
-                        {
                             "key": "MOUSE_SENSITIVITY",
                             "value": {
                                 "index": 0,
@@ -38,17 +24,10 @@
                             }
                         },
                         {
-                            "key": "GRAVITY_SCALE",
+                            "key": "WALK_SPEED",
                             "value": {
                                 "index": 0,
-                                "data": 2.0
-                            }
-                        },
-                        {
-                            "key": "CAMERA_Y_OFFSET",
-                            "value": {
-                                "index": 0,
-                                "data": 1.100000023841858
+                                "data": 7.0
                             }
                         },
                         {
@@ -61,10 +40,26 @@
                             }
                         },
                         {
-                            "key": "shootSound",
+                            "key": "BULLET_MATERIAL",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
+                                }
+                            }
+                        },
+                        {
+                            "key": "JUMP_POWER",
                             "value": {
                                 "index": 0,
-                                "data": 14.800000190734864
+                                "data": 8.0
+                            }
+                        },
+                        {
+                            "key": "RUN_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 20.0
                             }
                         },
                         {
@@ -77,26 +72,31 @@
                             }
                         },
                         {
-                            "key": "RUN_SPEED",
+                            "key": "CAMERA_Y_OFFSET",
                             "value": {
                                 "index": 0,
-                                "data": 20.0
+                                "data": 1.100000023841858
                             }
                         },
                         {
-                            "key": "JUMP_POWER",
+                            "key": "SHOOT_POWER",
                             "value": {
                                 "index": 0,
-                                "data": 8.0
+                                "data": 14.800000190734864
                             }
                         },
                         {
-                            "key": "BULLET_MATERIAL",
+                            "key": "shootSound",
                             "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
-                                }
+                                "index": 0,
+                                "data": 14.800000190734864
+                            }
+                        },
+                        {
+                            "key": "GRAVITY_SCALE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
                             }
                         }
                     ]
@@ -19265,17 +19265,10 @@
                     "scriptPath": "scripts/animation_example.lua",
                     "variables": [
                         {
-                            "key": "walkAnim",
+                            "key": "idleAnim",
                             "value": {
                                 "index": 1,
-                                "data": "resources/animations/walk_inplace.anim"
-                            }
-                        },
-                        {
-                            "key": "fade",
-                            "value": {
-                                "index": 0,
-                                "data": 0.25
+                                "data": "resources/animations/idle.ozz"
                             }
                         },
                         {
@@ -19286,10 +19279,17 @@
                             }
                         },
                         {
-                            "key": "idleAnim",
+                            "key": "fade",
+                            "value": {
+                                "index": 0,
+                                "data": 0.25
+                            }
+                        },
+                        {
+                            "key": "walkAnim",
                             "value": {
                                 "index": 1,
-                                "data": "resources/animations/idle.ozz"
+                                "data": "resources/animations/walk_inplace.anim"
                             }
                         }
                     ]
