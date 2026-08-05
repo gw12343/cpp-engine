@@ -2,6 +2,97 @@
     "entities": [
         {
             "EntityMetadata": {
+                "name": "Animation",
+                "tag": "",
+                "active": true,
+                "guid": "0bb03671d8faccd3dce7514ad1ba8d43",
+                "parentEntity": {
+                    "guid": "2ecf7797fdff414a7991e3ab19bfd32c"
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": false,
+                "data": {}
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 0.0,
+                        "y": -0.7562770247459412,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": true
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": false,
+                "data": {
+                    "skeletonPath": "",
+                    "defaultFadeDuration": 0.20000000298023225,
+                    "playbackSpeed": 1.0,
+                    "current": {
+                        "clip": {
+                            "guid": ""
+                        },
+                        "time": 0.0,
+                        "speed": 1.0,
+                        "looping": true,
+                        "active": false
+                    }
+                }
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "meshPath": "resources/animations/s.ozz",
+                    "meshMaterial": {
+                        "guid": "48ac579eaa8ac969e99c1fca5ab57c90"
+                    }
+                }
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
                 "name": "Player",
                 "tag": "",
                 "active": true,
@@ -9,7 +100,11 @@
                 "parentEntity": {
                     "guid": ""
                 },
-                "children": []
+                "children": [
+                    {
+                        "guid": "0bb03671d8faccd3dce7514ad1ba8d43"
+                    }
+                ]
             },
             "LuaScript": {
                 "nullopt": false,
@@ -17,24 +112,24 @@
                     "scriptPath": "scripts/player_thirdperson.lua",
                     "variables": [
                         {
-                            "key": "WALK_SPEED",
+                            "key": "CAMERA_PITCH_MAX",
                             "value": {
                                 "index": 0,
-                                "data": 7.0
+                                "data": 60.0
                             }
                         },
                         {
-                            "key": "MOUSE_SENSITIVITY",
+                            "key": "SHOOT_FORWARD_OFFSET",
                             "value": {
                                 "index": 0,
-                                "data": 0.10000000149011612
+                                "data": 1.0
                             }
                         },
                         {
                             "key": "RUN_SPEED",
                             "value": {
                                 "index": 0,
-                                "data": 20.0
+                                "data": 7.199999809265137
                             }
                         },
                         {
@@ -47,17 +142,17 @@
                             }
                         },
                         {
-                            "key": "IDLE_ANIM",
+                            "key": "shootSound",
                             "value": {
-                                "index": 1,
-                                "data": "resources/animations/idle.ozz"
+                                "index": 0,
+                                "data": 14.800000190734864
                             }
                         },
                         {
-                            "key": "WALK_ANIM",
+                            "key": "SHOOT_HEAD_HEIGHT",
                             "value": {
-                                "index": 1,
-                                "data": "resources/animations/walk_inplace.anim"
+                                "index": 0,
+                                "data": 1.100000023841858
                             }
                         },
                         {
@@ -65,6 +160,55 @@
                             "value": {
                                 "index": 0,
                                 "data": 2.0
+                            }
+                        },
+                        {
+                            "key": "RUN_ANIM",
+                            "value": {
+                                "index": 1,
+                                "data": "resources/animations/run_inplace.anim"
+                            }
+                        },
+                        {
+                            "key": "ZOOM_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.5
+                            }
+                        },
+                        {
+                            "key": "CAMERA_HEIGHT",
+                            "value": {
+                                "index": 0,
+                                "data": 1.2000000476837159
+                            }
+                        },
+                        {
+                            "key": "GRAVITY_SCALE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
+                            }
+                        },
+                        {
+                            "key": "MOUSE_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.10000000149011612
+                            }
+                        },
+                        {
+                            "key": "WALK_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 3.5999999046325685
+                            }
+                        },
+                        {
+                            "key": "ANIM_FADE",
+                            "value": {
+                                "index": 0,
+                                "data": 0.20000000298023225
                             }
                         },
                         {
@@ -91,24 +235,47 @@
                             }
                         },
                         {
-                            "key": "SKELETON",
-                            "value": {
-                                "index": 1,
-                                "data": "resources/animations/skeleton.ozz"
-                            }
-                        },
-                        {
-                            "key": "shootSound",
+                            "key": "SHOOT_POWER",
                             "value": {
                                 "index": 0,
                                 "data": 14.800000190734864
                             }
                         },
                         {
-                            "key": "SHOOT_HEAD_HEIGHT",
+                            "key": "victorySound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                }
+                            }
+                        },
+                        {
+                            "key": "WALK_ANIM",
+                            "value": {
+                                "index": 1,
+                                "data": "resources/animations/walk_inplace.anim"
+                            }
+                        },
+                        {
+                            "key": "IDLE_ANIM",
+                            "value": {
+                                "index": 1,
+                                "data": "resources/animations/idle.ozz"
+                            }
+                        },
+                        {
+                            "key": "TURN_SPEED",
                             "value": {
                                 "index": 0,
-                                "data": 1.100000023841858
+                                "data": 381.6000061035156
+                            }
+                        },
+                        {
+                            "key": "SKELETON",
+                            "value": {
+                                "index": 1,
+                                "data": "resources/animations/skeleton.ozz"
                             }
                         },
                         {
@@ -124,78 +291,6 @@
                                 "index": 0,
                                 "data": 5.0
                             }
-                        },
-                        {
-                            "key": "CAMERA_PITCH_MAX",
-                            "value": {
-                                "index": 0,
-                                "data": 60.0
-                            }
-                        },
-                        {
-                            "key": "ANIM_FADE",
-                            "value": {
-                                "index": 0,
-                                "data": 0.20000000298023225
-                            }
-                        },
-                        {
-                            "key": "victorySound",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
-                                }
-                            }
-                        },
-                        {
-                            "key": "ZOOM_SENSITIVITY",
-                            "value": {
-                                "index": 0,
-                                "data": 0.5
-                            }
-                        },
-                        {
-                            "key": "CAMERA_HEIGHT",
-                            "value": {
-                                "index": 0,
-                                "data": 1.2000000476837159
-                            }
-                        },
-                        {
-                            "key": "GRAVITY_SCALE",
-                            "value": {
-                                "index": 0,
-                                "data": 2.0
-                            }
-                        },
-                        {
-                            "key": "SHOOT_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 14.800000190734864
-                            }
-                        },
-                        {
-                            "key": "RUN_ANIM",
-                            "value": {
-                                "index": 1,
-                                "data": "resources/animations/run_inplace.anim"
-                            }
-                        },
-                        {
-                            "key": "TURN_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 720.0
-                            }
-                        },
-                        {
-                            "key": "SHOOT_FORWARD_OFFSET",
-                            "value": {
-                                "index": 0,
-                                "data": 1.0
-                            }
                         }
                     ]
                 }
@@ -209,7 +304,7 @@
                 "data": {
                     "position": {
                         "x": 5.444698810577393,
-                        "y": 0.21601545810699464,
+                        "y": 1.755455493927002,
                         "z": 0.0
                     },
                     "rotation": {
@@ -229,19 +324,7 @@
                 "nullopt": true
             },
             "ModelRenderer": {
-                "nullopt": false,
-                "data": {
-                    "visible": false,
-                    "model": {
-                        "guid": "8f4859e3ac89632544374bc702a531e9"
-                    },
-                    "backfaceCulling": true,
-                    "materialOverrides": [
-                        {
-                            "guid": "50261caca552b9ed2cda4de3bc2b2e6b"
-                        }
-                    ]
-                }
+                "nullopt": true
             },
             "RigidBodyComponent": {
                 "nullopt": true
@@ -263,31 +346,10 @@
                 }
             },
             "AnimationComponent": {
-                "nullopt": false,
-                "data": {
-                    "skeletonPath": "resources/animations/skeleton.ozz",
-                    "defaultFadeDuration": 0.20000000298023225,
-                    "playbackSpeed": 1.0,
-                    "current": {
-                        "clip": {
-                            "guid": "143950bbcc17af70eb0da3ba15412923"
-                        },
-                        "time": 0.0,
-                        "speed": 1.0,
-                        "looping": true,
-                        "active": true
-                    }
-                }
+                "nullopt": true
             },
             "SkinnedMeshComponent": {
-                "nullopt": false,
-                "data": {
-                    "visible": true,
-                    "meshPath": "resources/animations/s.ozz",
-                    "meshMaterial": {
-                        "guid": "9d47718ceee1b16bc66fa294bc7ad47d"
-                    }
-                }
+                "nullopt": true
             },
             "ParticleSystem": {
                 "nullopt": true

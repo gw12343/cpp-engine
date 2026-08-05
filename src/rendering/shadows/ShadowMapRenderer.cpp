@@ -206,7 +206,16 @@ namespace Engine {
 		for (auto entity : viewAnim) {
 			Entity e(entity, GetCurrentScene());
 			auto&  skinnedMeshComponent   = e.GetComponent<Components::SkinnedMeshComponent>();
+			if (!skinnedMeshComponent.meshes || !skinnedMeshComponent.skinning_matrices) {
+				continue;
+			}
+			if (!e.HasComponent<Components::AnimationComponent>()) {
+				continue;
+			}
 			auto&  animationComponent = e.GetComponent<Components::AnimationComponent>();
+			if (!animationComponent.model_pose) {
+				continue;
+			}
 
 			const ozz::math::Float4x4 model = FromMatrix(e.GetComponent<Components::Transform>().GetWorldMatrix());
 

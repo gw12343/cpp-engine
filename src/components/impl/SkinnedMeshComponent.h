@@ -39,10 +39,19 @@ namespace Engine::Components {
 		void OnRemoved(Entity& entity) override;
 		void RenderInspector(Entity& entity) override;
 
+		/** Load (or reload) meshes from meshPath. Safe if path is empty or load fails. */
+		void SetMeshPath(const std::string& path);
+		bool TryLoadMeshes();
+
 		static void CleanSkinnedModels();
 
 		static std::unordered_set<std::vector<ozz::math::Float4x4>*> s_skin_mats;
 		static std::unordered_set<ozz::vector<Engine::AnimatedMesh>*>        s_all_meshes;
+
+	  private:
+		void FreeMeshes();
+		void FreeSkinningMatrices();
+		void RebuildSkinningMatrices();
 	};
 } // namespace Engine::Components
 

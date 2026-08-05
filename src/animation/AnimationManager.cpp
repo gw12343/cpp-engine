@@ -129,17 +129,17 @@ namespace Engine {
 
     void AnimationManager::RenderDebug() const
     {
-        auto view = GetCurrentSceneRegistry().view<Components::AnimationComponent, Components::Transform>();
-        for (auto entity : view) {
-            Entity e(entity, GetCurrentScene());
-            auto&  animationComponent = e.GetComponent<Components::AnimationComponent>();
-            const ozz::math::Float4x4 transform = FromMatrix(e.GetComponent<Components::Transform>().GetWorldMatrix());
-
-            if (!animationComponent.skeleton || !animationComponent.model_pose) continue;
-            renderer_->DrawPosture(*animationComponent.skeleton,
-                                   ozz::make_span(*animationComponent.model_pose),
-                                   transform, true);
-        }
+        // auto view = GetCurrentSceneRegistry().view<Components::AnimationComponent, Components::Transform>();
+        // for (auto entity : view) {
+        //     Entity e(entity, GetCurrentScene());
+        //     auto&  animationComponent = e.GetComponent<Components::AnimationComponent>();
+        //     const ozz::math::Float4x4 transform = FromMatrix(e.GetComponent<Components::Transform>().GetWorldMatrix());
+        //
+        //     if (!animationComponent.skeleton || !animationComponent.model_pose) continue;
+        //     renderer_->DrawPosture(*animationComponent.skeleton,
+        //                            ozz::make_span(*animationComponent.model_pose),
+        //                            transform, true);
+        // }
     }
 
     ozz::animation::Skeleton* AnimationManager::LoadSkeletonFromPath(const std::string& path)

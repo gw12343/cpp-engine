@@ -9,71 +9,130 @@
 #include "core/Entity.h"
 #include "core/Scene.h"
 
-
 #include "ozz/animation/runtime/track.h"
 #include "ozz/base/containers/vector.h"
 #include "ozz/base/maths/simd_math.h"
 
 #include "animation/AnimationManager.h"
+#include "rendering/ui/InspectorUI.h"
 
 namespace Engine::Components {
 	std::unordered_set<std::vector<ozz::math::Float4x4>*> SkinnedMeshComponent::s_skin_mats;
 	std::unordered_set<ozz::vector<Engine::AnimatedMesh>*>        SkinnedMeshComponent::s_all_meshes;
 
-
-	void SkinnedMeshComponent::OnRemoved(Entity& entity)
+	void SkinnedMeshComponent::FreeMeshes()
 	{
-		GetDefaultLogger()->info("REMOVING SKINNED MESH COMPONENT");
-		if (skinning_matrices) {
-			s_skin_mats.erase(skinning_matrices);
-			delete skinning_matrices;
-			skinning_matrices = nullptr;
-		}
-
 		if (meshes) {
 			s_all_meshes.erase(meshes);
 			delete meshes;
 			meshes = nullptr;
 		}
 	}
-	void SkinnedMeshComponent::OnAdded(Entity& entity)
-	{
-		if (!meshPath.empty()) {
-			//TODO put back
-			meshes = AnimationManager::LoadMeshesFromPath(meshPath);
-			s_all_meshes.insert(meshes);
-			if (!meshes) {
-				GetDefaultLogger()->error("Failed to load meshes from path: {}", meshPath);
-			}
-		}
 
-		ENGINE_VERIFY(meshes, "SkinnedMeshComponent::OnAdded: Failed to load meshes");
+	void SkinnedMeshComponent::FreeSkinningMatrices()
+	{
+		if (skinning_matrices) {
+			s_skin_mats.erase(skinning_matrices);
+			delete skinning_matrices;
+			skinning_matrices = nullptr;
+		}
+	}
+
+	void SkinnedMeshComponent::RebuildSkinningMatrices()
+	{
+		FreeSkinningMatrices();
+
+		if (!meshes || meshes->empty()) {
+			return;
+		}
 
 		skinning_matrices = new std::vector<ozz::math::Float4x4>();
 		s_skin_mats.insert(skinning_matrices);
-		// Computes the number of skinning matrices required to skin all meshes
-		// A mesh is skinned by only a subset of joints, so the number of skinning
-		// matrices might be less that the number of skeleton joints
-		// Mesh::joint_remaps is used to know how to order skinning matrices. So
-		// the number of matrices required is the size of joint_remaps
+
+		// A mesh is skinned by only a subset of joints; joint_remaps size is the
+		// number of matrices required for that mesh.
 		size_t num_skinning_matrices = 0;
 		for (const Engine::AnimatedMesh& mesh : *meshes) {
 			num_skinning_matrices = ozz::math::Max(num_skinning_matrices, mesh.joint_remaps.size());
 		}
 
-		// Allocates skinning matrices
 		skinning_matrices->resize(num_skinning_matrices);
-		ENGINE_ASSERT(skinning_matrices, "SkinnedMeshComponent::OnAdded: Failed to allocate skinning matrices");
+	}
+
+	bool SkinnedMeshComponent::TryLoadMeshes()
+	{
+		FreeMeshes();
+
+		if (meshPath.empty()) {
+			FreeSkinningMatrices();
+			return false;
+		}
+
+		meshes = AnimationManager::LoadMeshesFromPath(meshPath);
+		if (!meshes) {
+			GetDefaultLogger()->error("SkinnedMeshComponent: Failed to load meshes from path: {}", meshPath);
+			FreeSkinningMatrices();
+			return false;
+		}
+
+		s_all_meshes.insert(meshes);
+		RebuildSkinningMatrices();
+		return true;
+	}
+
+	void SkinnedMeshComponent::SetMeshPath(const std::string& path)
+	{
+		meshPath = path;
+		TryLoadMeshes();
+	}
+
+	void SkinnedMeshComponent::OnRemoved(Entity& entity)
+	{
+		GetDefaultLogger()->info("REMOVING SKINNED MESH COMPONENT");
+		FreeSkinningMatrices();
+		FreeMeshes();
+	}
+
+	void SkinnedMeshComponent::OnAdded(Entity& entity)
+	{
+		// Allow adding from the inspector with an empty path. Meshes can be loaded
+		// later via SetMeshPath / the inspector "Load Mesh" button.
+		if (!meshes) {
+			if (meshPath.empty()) {
+				return;
+			}
+			// Load may fail; keep the component alive so the path can be fixed in-editor.
+			TryLoadMeshes();
+			return;
+		}
+
+		// Meshes already assigned (e.g. constructor) — track them and ensure matrices.
+		s_all_meshes.insert(meshes);
+		if (!skinning_matrices) {
+			RebuildSkinningMatrices();
+		}
 	}
 
 	void SkinnedMeshComponent::RenderInspector(Entity& entity)
 	{
-        LeftLabelCheckbox("Visible", &visible);
-		ImGui::Text("Meshes: %s", meshes ? std::to_string(meshes->size()).c_str() : "Null");
-		ImGui::Text("Skinning Matrices: %s", skinning_matrices ? std::to_string(skinning_matrices->size()).c_str() : "Null");
+		LeftLabelCheckbox("Visible", &visible);
+
+		LeftLabelInputText("Mesh Path", &meshPath);
+		if (ImGui::Button("Load Mesh")) {
+			TryLoadMeshes();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Clear Mesh")) {
+			meshPath.clear();
+			FreeMeshes();
+			FreeSkinningMatrices();
+		}
+
+		ImGui::Text("Meshes: %s", meshes ? std::to_string(meshes->size()).c_str() : "None");
+		ImGui::Text("Skinning Matrices: %s",
+		            skinning_matrices ? std::to_string(skinning_matrices->size()).c_str() : "None");
 		LeftLabelAssetMaterial("Material", &meshMaterial);
 	}
-
 
 	void SkinnedMeshComponent::CleanSkinnedModels()
 	{

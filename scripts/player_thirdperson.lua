@@ -53,6 +53,7 @@ local currentClip   = nil
 local wasMoving     = false
 local wasRunning    = false
 local wasGrounded   = true
+local visualEntity  = nil -- child with AnimationComponent + SkinnedMesh
 
 local function clamp(v, lo, hi)
     if v < lo then return lo end
@@ -84,12 +85,41 @@ local function lerpAngle(from, to, maxStep)
     return from - maxStep
 end
 
+-- Visual lives on a child so it can sit at capsule feet (physics is at center).
+local function resolveVisual()
+    if visualEntity and visualEntity:isValid() and visualEntity:HasAnimationComponent() then
+        return visualEntity
+    end
+    visualEntity = nil
+    local kids = gameObject:getChildren()
+    if kids then
+        for _, h in pairs(kids) do
+            local e = getEntityFromHandle(h)
+            if e and e:isValid() and e:HasAnimationComponent() then
+                visualEntity = e
+                return visualEntity
+            end
+        end
+    end
+    return nil
+end
+
 local function hasAnim()
-    return gameObject:HasAnimationComponent()
+    local v = resolveVisual()
+    return v ~= nil
+end
+
+local function anim()
+    local v = resolveVisual()
+    if not v then
+        return nil
+    end
+    return v:GetAnimationComponent()
 end
 
 local function playClip(path, fade)
-    if not hasAnim() then
+    local ac = anim()
+    if not ac then
         return
     end
     if currentClip == path then
@@ -100,7 +130,7 @@ local function playClip(path, fade)
     if f == nil then
         f = variables.ANIM_FADE
     end
-    gameObject:GetAnimationComponent():play(path, true, f)
+    ac:play(path, true, f)
 end
 
 local function updateLocomotionAnim(moving, running, grounded)
@@ -144,16 +174,16 @@ function Start()
     orbitYaw   = camera.yaw
     orbitPitch = clamp(camera.pitch, variables.CAMERA_PITCH_MIN, variables.CAMERA_PITCH_MAX)
 
-    if hasAnim() then
-        local ac = gameObject:GetAnimationComponent()
+    local ac = anim()
+    if ac then
         if ac.skeletonPath == nil or ac.skeletonPath == "" then
             ac:setSkeleton(variables.SKELETON)
         end
         ac.defaultFadeDuration = variables.ANIM_FADE
         playClip(variables.IDLE_ANIM, 0.0)
-        info(string.format("player anim ready (joints=%d)", ac:jointCount()))
+        info(string.format("player visual ready (joints=%d)", ac:jointCount()))
     else
-        info("player_thirdperson: no AnimationComponent — locomotion clips disabled")
+        info("player_thirdperson: no PlayerVisual child with AnimationComponent")
     end
 
     subscribe("TargetHit", function()
@@ -174,6 +204,7 @@ end
 ballCount = 0
 
 function ShootObject(model, shape, speed, scale)
+    publish("AllTargetsDestroyed")
     local cam = getCamera()
     local cr = gameObject:GetPlayerControllerComponent()
     local body = cr:getPosition()
