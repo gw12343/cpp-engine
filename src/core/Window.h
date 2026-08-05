@@ -4,6 +4,8 @@
 
 
 #include <map>
+#include <string>
+#include <vector>
 #include "rendering/Framebuffer.h"
 #include "core/module/Module.h"
 #include "rendering/effects/ssao/GBuffer.h"
@@ -49,6 +51,11 @@ namespace Engine {
         std::shared_ptr<GBuffer> GetGBuffer() { return m_gbuffer; }
         std::shared_ptr<SSAOBuffer> GetSSAOBuffer() { return m_ssaobuffer; }
 
+		/** OS file drops (Explorer → window). Consumed by editor UI that wants them. */
+		[[nodiscard]] bool                       HasDroppedFiles() const { return !m_droppedFiles.empty(); }
+		std::vector<std::string>                 ConsumeDroppedFiles();
+		void                                     ClearDroppedFiles() { m_droppedFiles.clear(); m_dropAgeFrames = 0; }
+
 		int targetWidth;
 		int targetHeight;
 		int targetX;
@@ -59,7 +66,10 @@ namespace Engine {
 		int                      m_width;
 		int                      m_height;
 		std::string              m_title;
+		std::vector<std::string> m_droppedFiles;
+		int                      m_dropAgeFrames = 0;
 
+		void        OnFilesDropped(int count, const char** paths);
 		bool        InitGLFW();
 		static bool InitGLAD();
 		bool        InitImGui();

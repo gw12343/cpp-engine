@@ -112,9 +112,6 @@ namespace Engine {
 		glfwMakeContextCurrent(m_window);
 		glfwSwapInterval(0);
 
-
-
-
 		return true;
 	}
 
@@ -158,10 +155,39 @@ namespace Engine {
 
 		io.FontGlobalScale = 1.0f;
 		ImGuizmo::SetImGuiContext(ImGui::GetCurrentContext());
+
+		// Install after ImGui so we own the drop callback (ImGui does not use it).
+		glfwSetDropCallback(m_window, [](GLFWwindow* window, int count, const char** paths) {
+			auto* win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+			if (win) win->OnFilesDropped(count, paths);
+		});
+
 		return true;
 	}
 
+	void Window::OnFilesDropped(int count, const char** paths)
+	{
+		if (!paths || count <= 0) return;
+		m_droppedFiles.clear();
+		m_droppedFiles.reserve(static_cast<size_t>(count));
+		for (int i = 0; i < count; ++i) {
+			if (paths[i] && paths[i][0] != '\0') {
+				m_droppedFiles.emplace_back(paths[i]);
+			}
+		}
+		m_dropAgeFrames = 0;
+		if (!m_droppedFiles.empty()) {
+			log->info("OS file drop: {} path(s)", m_droppedFiles.size());
+		}
+	}
 
+	std::vector<std::string> Window::ConsumeDroppedFiles()
+	{
+		std::vector<std::string> out;
+		out.swap(m_droppedFiles);
+		m_dropAgeFrames = 0;
+		return out;
+	}
 
 	void Window::onUpdate(float dt)
 	{
@@ -169,6 +195,15 @@ namespace Engine {
 		glfwPollEvents();
 
 		glfwPollEvents();
+
+		// Age out unclaimed OS drops so they don't stick forever.
+		if (!m_droppedFiles.empty()) {
+			++m_dropAgeFrames;
+			if (m_dropAgeFrames > 2) {
+				m_droppedFiles.clear();
+				m_dropAgeFrames = 0;
+			}
+		}
 
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
