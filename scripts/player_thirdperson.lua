@@ -35,6 +35,7 @@ variables = {
     IDLE_ANIM = "resources/animations/idle.ozz",
     WALK_ANIM = "resources/animations/walk_inplace.anim",
     RUN_ANIM  = "resources/animations/run_inplace.anim",
+    JUMP_ANIM = "resources/animations/Jump.anim",
     ANIM_FADE = 0.2,
     SKELETON  = "resources/animations/skeleton.ozz",
 
@@ -117,7 +118,7 @@ local function anim()
     return v:GetAnimationComponent()
 end
 
-local function playClip(path, fade)
+local function playClip(path, fade, loop)
     local ac = anim()
     if not ac then
         return
@@ -130,7 +131,11 @@ local function playClip(path, fade)
     if f == nil then
         f = variables.ANIM_FADE
     end
-    ac:play(path, true, f)
+    local shouldLoop = true
+    if loop ~= nil then
+        shouldLoop = loop
+    end
+    ac:play(path, shouldLoop, f)
 end
 
 local function updateLocomotionAnim(moving, running, grounded)
@@ -138,10 +143,10 @@ local function updateLocomotionAnim(moving, running, grounded)
         return
     end
 
-    -- Airborne: keep last locomotion clip (or idle if never moved)
+    -- Airborne: play jump clip (non-looping; holds last frame at end)
     if not grounded then
-        if wasGrounded then
-            -- left ground; leave current clip playing
+        if currentClip ~= variables.JUMP_ANIM then
+            playClip(variables.JUMP_ANIM, variables.ANIM_FADE, false)
         end
         wasGrounded = false
         wasMoving = moving
@@ -158,9 +163,9 @@ local function updateLocomotionAnim(moving, running, grounded)
         target = variables.WALK_ANIM
     end
 
-    -- Only crossfade when state changes
+    -- Only crossfade when state changes (including landing off jump)
     if target ~= currentClip then
-        playClip(target, variables.ANIM_FADE)
+        playClip(target, variables.ANIM_FADE, true)
     end
 
     wasGrounded = true
@@ -204,7 +209,6 @@ end
 ballCount = 0
 
 function ShootObject(model, shape, speed, scale)
-    publish("AllTargetsDestroyed")
     local cam = getCamera()
     local cr = gameObject:GetPlayerControllerComponent()
     local body = cr:getPosition()

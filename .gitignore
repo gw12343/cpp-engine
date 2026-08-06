@@ -11,6 +11,7 @@ CTestTestfile.cmake
 _deps
 build
 cmake-build-*/
+build-game
 imgui.ini
 .idea
 .cache

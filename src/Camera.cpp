@@ -86,7 +86,7 @@ namespace Engine {
 
 	ozz::math::Float4x4 Camera::view_proj() const
 	{
-		return m_viewProj;
+		return FromMatrix(GetProjectionMatrix()) * FromMatrix(GetViewMatrix());
 	}
 
 	glm::mat4 Camera::GetViewMatrix() const
@@ -96,7 +96,9 @@ namespace Engine {
 
 	glm::mat4 Camera::GetProjectionMatrix() const
 	{
-		return m_proj;
+		float aspect = GetWindow().GetTargetAspectRatio();
+		ENGINE_VERIFY(aspect > 0.0f, "Camera::view_proj: aspect ratio is non-positive");
+		return glm::perspective(glm::radians(m_fov), aspect, GetRenderSettings()->CAMERA_NEAR_PLANE, GetRenderSettings()->CAMERA_FAR_PLANE);
 	}
 
 	void Camera::SetPosition(glm::vec3 position)

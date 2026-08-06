@@ -6,6 +6,7 @@
 --   1              idle
 --   2              walk
 --   3              run
+--   4              jump (one-shot)
 --   Left Shift     hold to run (from walk)
 --   [ / ]          slower / faster clip speed
 --   K              toggle skeleton debug draw
@@ -14,6 +15,7 @@ variables = {
     idleAnim = "resources/animations/idle.ozz",
     walkAnim = "resources/animations/walk_inplace.anim",
     runAnim  = "resources/animations/run_inplace.anim",
+    jumpAnim = "resources/animations/Jump.anim",
     fade     = 0.25,
 }
 
@@ -27,7 +29,7 @@ local function anim()
     return gameObject:GetAnimationComponent()
 end
 
-local function playClip(path, fade)
+local function playClip(path, fade, loop)
     if not hasAnim() then
         return
     end
@@ -39,7 +41,11 @@ local function playClip(path, fade)
     if f == nil then
         f = variables.fade
     end
-    anim():play(path, true, f)
+    local shouldLoop = true
+    if loop ~= nil then
+        shouldLoop = loop
+    end
+    anim():play(path, shouldLoop, f)
     info("play -> " .. path)
 end
 
@@ -79,6 +85,8 @@ function Update()
         playClip(variables.walkAnim)
     elseif input:isKeyPressedThisFrame(KEY_3) then
         playClip(variables.runAnim)
+    elseif input:isKeyPressedThisFrame(KEY_4) then
+        playClip(variables.jumpAnim, variables.fade, false)
     end
 
     if currentClip ~= variables.idleAnim then
