@@ -5,7 +5,10 @@
 #include "scripting/ScriptManager.h"
 #include "components/impl/RigidBodyComponent.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
+#include "Jolt/Physics/Collision/RayCast.h"
+#include "Jolt/Physics/Collision/CastResult.h"
 #include <cstdarg>
+#include <cfloat>
 
 #include "PlayerController.h"
 #include "components/impl/PlayerControllerComponent.h"
@@ -27,6 +30,41 @@ namespace Engine {
 	std::shared_ptr<PhysicsSystem> PhysicsManager::GetPhysicsSystem()
 	{
 		return physics;
+	}
+
+	bool PhysicsManager::Raycast(const glm::vec3& origin, const glm::vec3& direction, float maxDistance, glm::vec3& outHitPoint, float& outDistance) const
+	{
+		if (!physics || maxDistance <= 0.0f) {
+			return false;
+		}
+
+		const float dirLen = glm::length(direction);
+		if (dirLen < 1e-6f) {
+			return false;
+		}
+
+		const glm::vec3 dir = direction / dirLen;
+		const RVec3     start(origin.x, origin.y, origin.z);
+		const Vec3      rayDir(dir.x * maxDistance, dir.y * maxDistance, dir.z * maxDistance);
+		const RRayCast  ray{start, rayDir};
+
+		RayCastResult hit;
+		hit.mFraction = 1.0f + FLT_EPSILON;
+
+		const bool hasHit = physics->GetNarrowPhaseQuery().CastRay(
+		    ray,
+		    hit,
+		    physics->GetDefaultBroadPhaseLayerFilter(Layers::MOVING),
+		    physics->GetDefaultLayerFilter(Layers::MOVING));
+
+		if (!hasHit) {
+			return false;
+		}
+
+		const RVec3 point = ray.GetPointOnRay(hit.mFraction);
+		outHitPoint       = glm::vec3(point.GetX(), point.GetY(), point.GetZ());
+		outDistance       = hit.mFraction * maxDistance;
+		return true;
 	}
 
 	void PhysicsManager::TraceImpl(const char* inFMT, ...)
@@ -162,6 +200,20 @@ namespace Engine {
 		                                                    [](PhysicsManager& self) {
 			                                                    auto g = physics->GetGravity();
 			                                                    return glm::vec3(g.GetX(), g.GetY(), g.GetZ());
+		                                                    },
+		                                                    // Closest-hit raycast: returns nil or { point, distance, fraction }
+		                                                    "raycast",
+		                                                    [](PhysicsManager& self, const glm::vec3& origin, const glm::vec3& direction, float maxDistance) -> sol::object {
+			                                                    glm::vec3 hitPoint{};
+			                                                    float     hitDistance = 0.0f;
+			                                                    if (!self.Raycast(origin, direction, maxDistance, hitPoint, hitDistance)) {
+				                                                    return sol::make_object(GetScriptManager().lua, sol::nil);
+			                                                    }
+			                                                    sol::table result = GetScriptManager().lua.create_table();
+			                                                    result["point"]    = hitPoint;
+			                                                    result["distance"] = hitDistance;
+			                                                    result["fraction"] = (maxDistance > 0.0f) ? (hitDistance / maxDistance) : 0.0f;
+			                                                    return sol::make_object(GetScriptManager().lua, result);
 		                                                    });
 
 		// Provide access to the main PhysicsManager

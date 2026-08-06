@@ -69,6 +69,10 @@ namespace Engine {
 		std::shared_ptr<PhysicsSystem>    GetPhysicsSystem();
 		std::shared_ptr<CharacterVirtual> GetCharacter();
 
+		/// Closest-hit raycast. Direction is normalized internally; length is maxDistance.
+		/// Returns true and writes hit point / distance when something is hit.
+		bool Raycast(const glm::vec3& origin, const glm::vec3& direction, float maxDistance, glm::vec3& outHitPoint, float& outDistance) const;
+
 		BPLayerInterfaceImpl              broad_phase_layer_interface;
 		ObjectVsBroadPhaseLayerFilterImpl object_vs_broadphase_layer_filter;
 		ObjectLayerPairFilterImpl         object_vs_object_layer_filter;

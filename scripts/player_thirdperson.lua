@@ -11,14 +11,19 @@
 
 variables = {
     -- Camera orbit
-    CAMERA_DISTANCE     = 5.0,
-    CAMERA_MIN_DISTANCE = 2.0,
-    CAMERA_MAX_DISTANCE = 12.0,
-    CAMERA_HEIGHT       = 1.2,
-    CAMERA_PITCH_MIN    = -30.0,
-    CAMERA_PITCH_MAX    = 60.0,
-    MOUSE_SENSITIVITY   = 0.12,
-    ZOOM_SENSITIVITY    = 0.5,
+    CAMERA_DISTANCE          = 5.0,
+    CAMERA_MIN_DISTANCE      = 2.0,
+    CAMERA_MAX_DISTANCE      = 12.0,
+    CAMERA_HEIGHT            = 1.2,
+    CAMERA_PITCH_MIN         = -30.0,
+    CAMERA_PITCH_MAX         = 60.0,
+    -- Pull camera slightly off the hit surface so the near plane doesn't clip
+    CAMERA_COLLISION_OFFSET   = 0.2,
+    CAMERA_COLLISION_MIN_DIST = 0.25,
+    -- Snap in on collision; ease out when space opens up (units/sec)
+    CAMERA_ZOOM_OUT_SPEED     = 4.0,
+    MOUSE_SENSITIVITY         = 0.12,
+    ZOOM_SENSITIVITY          = 0.5,
 
     -- Projectiles from capsule head along look yaw
     SHOOT_HEAD_HEIGHT    = 1.1,
@@ -46,15 +51,16 @@ variables = {
     victorySound    = sound(),
 }
 
-local orbitYaw      = -90.0
-local orbitPitch    = 15.0
-local orbitDistance = nil
-local faceYaw       = 0.0
-local currentClip   = nil
-local wasMoving     = false
-local wasRunning    = false
-local wasGrounded   = true
-local visualEntity  = nil -- child with AnimationComponent + SkinnedMesh
+local orbitYaw         = -90.0
+local orbitPitch       = 15.0
+local orbitDistance    = nil
+local currentCameraDist = nil -- actual distance after collision (snaps in, eases out)
+local faceYaw          = 0.0
+local currentClip      = nil
+local wasMoving        = false
+local wasRunning       = false
+local wasGrounded      = true
+local visualEntity     = nil -- child with AnimationComponent + SkinnedMesh
 
 local function clamp(v, lo, hi)
     if v < lo then return lo end
@@ -175,6 +181,7 @@ end
 
 function Start()
     orbitDistance = variables.CAMERA_DISTANCE
+    currentCameraDist = orbitDistance
     local camera = getCamera()
     orbitYaw   = camera.yaw
     orbitPitch = clamp(camera.pitch, variables.CAMERA_PITCH_MIN, variables.CAMERA_PITCH_MAX)
@@ -369,7 +376,36 @@ function LateUpdate()
     )
 
     local front = camera:getFront()
-    local dist = orbitDistance or variables.CAMERA_DISTANCE
+    local desiredDist = orbitDistance or variables.CAMERA_DISTANCE
+    if currentCameraDist == nil then
+        currentCameraDist = desiredDist
+    end
+
+    -- Ray from orbit pivot toward the desired camera position (-look direction).
+    -- maxAllowed is how far we can be this frame without clipping.
+    local maxAllowed = desiredDist
+    local toCamera = vec3(-front.x, -front.y, -front.z)
+    local hit = getPhysics():raycast(pivot, toCamera, desiredDist)
+    if hit then
+        local skin = variables.CAMERA_COLLISION_OFFSET or 0.2
+        local minD = variables.CAMERA_COLLISION_MIN_DIST or 0.25
+        maxAllowed = math.max(hit.distance - skin, minD)
+    end
+
+    -- Snap in immediately when geometry is closer; ease out when space opens up.
+    if maxAllowed < currentCameraDist then
+        currentCameraDist = maxAllowed
+    else
+        local zoomOutSpeed = variables.CAMERA_ZOOM_OUT_SPEED or 4.0
+        local step = zoomOutSpeed * deltaTime
+        if currentCameraDist + step < maxAllowed then
+            currentCameraDist = currentCameraDist + step
+        else
+            currentCameraDist = maxAllowed
+        end
+    end
+
+    local dist = currentCameraDist
     camera:setPosition(vec3(
         pivot.x - front.x * dist,
         pivot.y - front.y * dist,
