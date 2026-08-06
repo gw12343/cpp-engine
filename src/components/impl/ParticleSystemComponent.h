@@ -36,6 +36,10 @@ namespace Engine::Components {
 
 
 		Effekseer::Handle handle = -1;
+
+		// Cached for skipping SetLocation when the emitter is static.
+		glm::vec3 lastPos{0.f};
+		bool      posValid = false;
 	};
 } // namespace Engine::Components
 

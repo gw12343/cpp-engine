@@ -325,7 +325,8 @@ namespace Engine {
         }
 
 #ifndef GAME_BUILD
-        {
+        // Mouse picking is for editor selection — skip while actively playing (keep in EDITOR + PAUSED).
+        if (GetState() != PLAYING) {
             ZoneScopedN("Render Mouse Picking");
             DebugGroup group("Render Mouse Picking");
             Engine::Window::GetFramebuffer(Window::FramebufferID::MOUSE_PICKING)->Bind();

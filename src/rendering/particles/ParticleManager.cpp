@@ -1,6 +1,4 @@
-
 #include "ParticleManager.h"
-
 
 #include "core/EngineData.h"
 #include "components/impl/TransformComponent.h"
@@ -11,31 +9,28 @@
 #endif
 #include <Camera.h>
 
-#include "physics/PhysicsManager.h"
-
-
 #include "scripting/ScriptManager.h"
 #include "assets/AssetManager.h"
+#include "utils/Utils.h"
+
+#include <tracy/Tracy.hpp>
+
+#include <algorithm>
+#include <cmath>
+#include <glm/glm.hpp>
 
 namespace Engine {
-	static const int MAX_INSTANCES = 8000;
 
 	class ParticleManager::DebugTextureLoader : public Effekseer::TextureLoader {
 	  public:
-		explicit DebugTextureLoader(const EffekseerRendererGL::RendererRef& renderer) : m_renderer(renderer), m_internalLoader(renderer->CreateTextureLoader()) {}
+		explicit DebugTextureLoader(const EffekseerRendererGL::RendererRef& renderer)
+		    : m_renderer(renderer), m_internalLoader(renderer->CreateTextureLoader())
+		{
+		}
 
 		Effekseer::TextureRef Load(const EFK_CHAR* path, Effekseer::TextureType type) override
 		{
-			std::u16string u16Path(path);
-			std::string    pathStr(u16Path.begin(), u16Path.end());
-			GetParticleManager().log->debug("Effekseer trying to load texture: {}   (type: {})", pathStr, (type == Effekseer::TextureType::Normal ? "NORMAL" : (type == Effekseer::TextureType::Distortion ? "DISTORTION" : "COLOR")));
-
-			auto tex = m_internalLoader->Load(path, type);
-			if (!tex) {
-				GetParticleManager().log->error("Effekseer Failed to load texture: {}", pathStr);
-			}
-
-			return tex;
+			return m_internalLoader->Load(path, type);
 		}
 
 		void Unload(Effekseer::TextureRef data) override { m_internalLoader->Unload(data); }
@@ -45,21 +40,18 @@ namespace Engine {
 		Effekseer::TextureLoaderRef      m_internalLoader;
 	};
 
-    void ParticleManager::setLuaBindings() {
-        // Bind the PhysicsManager class
-        GetScriptManager().lua.new_usertype<ParticleManager>("ParticleManager",
-                                                             "playEffect",
-                                                             &ParticleManager::PlayEffect
-        );
-
-        // Provide access to the main PhysicsManager
-        GetScriptManager().lua.set_function("getParticleManager", []() -> ParticleManager & { return Engine::GetParticleManager(); });
-    }
+	void ParticleManager::setLuaBindings()
+	{
+		GetScriptManager().lua.new_usertype<ParticleManager>("ParticleManager", "playEffect", &ParticleManager::PlayEffect);
+		GetScriptManager().lua.set_function("getParticleManager", []() -> ParticleManager& { return Engine::GetParticleManager(); });
+	}
 
 	void ParticleManager::onInit()
 	{
-        ZoneScopedN("Initialize ParticleManager");
-		m_renderer = EffekseerRendererGL::Renderer::Create(MAX_INSTANCES, EffekseerRendererGL::OpenGLDeviceType::OpenGL3);
+		ZoneScopedN("Initialize ParticleManager");
+
+		// squareMaxCount sizes Effekseer's sprite GPU buffers.
+		m_renderer = EffekseerRendererGL::Renderer::Create(kSquareMax, EffekseerRendererGL::OpenGLDeviceType::OpenGL3);
 		if (!m_renderer) {
 			log->critical("Failed to create Effekseer renderer");
 			return;
@@ -68,53 +60,109 @@ namespace Engine {
 		ResetInternalManager();
 	}
 
-
-	void ParticleManager::onGameStart(){
-        auto view = GetCurrentSceneRegistry().view<Components::Transform, Components::ParticleSystem>();
-        for (auto [entity, transform, particleSystem] : view.each()) {
-            if (particleSystem.autoPlay && particleSystem.effect.IsValid()) {
-                Particle* particle = GetAssetManager().Get(particleSystem.effect);
-                if(!particle){
-                    GetParticleManager().log->error("Particle effect is invalid!");
-                    return;
-                }
-
-                // Get particle manager
-                const auto& manager = GetParticleManager().GetManager();
-
-                // Spawn particle system at transform
-                auto pos       = transform.GetWorldPosition();
-                particleSystem.handle         = manager->Play(particle->GetEffect(), pos.x, pos.y, pos.z);
-            }
-        }
-
-    }
-
-
-	void ParticleManager::onUpdate(float dt)
+	void ParticleManager::onGameStart()
 	{
-		ZoneScoped;
-		if (GetState() != PLAYING) return;
-
-		if (m_manager) {
-			m_manager->Update(dt * 60.0f);
-		}
-
-		// Update particles systems' locations
+		ZoneScopedN("ParticleManager onGameStart");
 		auto view = GetCurrentSceneRegistry().view<Components::Transform, Components::ParticleSystem>();
 		for (auto [entity, transform, particleSystem] : view.each()) {
-			auto pos = transform.GetWorldPosition();
+			if (!particleSystem.autoPlay || !particleSystem.effect.IsValid()) {
+				continue;
+			}
+			Particle* particle = GetAssetManager().Get(particleSystem.effect);
+			if (!particle || !particle->IsValid()) {
+				log->error("Particle effect is invalid (guid='{}')", particleSystem.effect.GetID());
+				continue;
+			}
 
-            if(particleSystem.looping && !m_manager->Exists(particleSystem.handle)){
-                Particle* particle = GetAssetManager().Get(particleSystem.effect);
-                if(particle) {
-                    particleSystem.handle = m_manager->Play(particle->GetEffect(), pos.x, pos.y, pos.z);
-                }
-            }
-			m_manager->SetLocation(particleSystem.handle, pos.x, pos.y, pos.z);
+			const auto pos        = transform.GetWorldPosition();
+			particleSystem.handle = m_manager->Play(particle->GetEffect(), pos.x, pos.y, pos.z);
+			particleSystem.lastPos  = pos;
+			particleSystem.posValid = true;
+		}
+
+		// Force Preupdate/Flip so first-frame Draw sees the new instances (Play defers setup to Flip).
+		if (m_manager) {
+			m_manager->Update(0.0f);
 		}
 	}
 
+	bool ParticleManager::HasActiveEffects() const
+	{
+		if (!m_manager) {
+			return false;
+		}
+		// Do NOT use GetTotalInstanceCount() alone — it can be 0 after Play until Preupdate.
+		// Handles live in DrawSets immediately after Play (Exists == true).
+		auto view = GetCurrentSceneRegistry().view<Components::ParticleSystem>();
+		for (auto entity : view) {
+			const auto& ps = view.get<Components::ParticleSystem>(entity);
+			if (ps.handle >= 0 && m_manager->Exists(ps.handle)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void ParticleManager::SyncEffectTransforms()
+	{
+		ZoneScopedN("Particle Sync Transforms");
+		if (!m_manager) {
+			return;
+		}
+
+		auto view = GetCurrentSceneRegistry().view<Components::Transform, Components::ParticleSystem>();
+		for (auto [entity, transform, ps] : view.each()) {
+			if (ps.handle >= 0 && !m_manager->Exists(ps.handle)) {
+				ps.handle   = -1;
+				ps.posValid = false;
+				continue;
+			}
+
+			if (ps.looping && ps.handle < 0 && ps.effect.IsValid()) {
+				Particle* particle = GetAssetManager().Get(ps.effect);
+				if (particle && particle->IsValid()) {
+					const auto pos = transform.GetWorldPosition();
+					ps.handle      = m_manager->Play(particle->GetEffect(), pos.x, pos.y, pos.z);
+					ps.lastPos     = pos;
+					ps.posValid    = true;
+				}
+				continue;
+			}
+
+			if (ps.handle < 0) {
+				continue;
+			}
+
+			const glm::vec3 pos = transform.GetWorldPosition();
+			if (!ps.posValid || glm::any(glm::greaterThan(glm::abs(pos - ps.lastPos), glm::vec3(1e-4f)))) {
+				m_manager->SetLocation(ps.handle, pos.x, pos.y, pos.z);
+				ps.lastPos  = pos;
+				ps.posValid = true;
+			}
+		}
+	}
+
+	void ParticleManager::onUpdate(float dt)
+	{
+		ZoneScopedN("ParticleManager Update");
+		if (GetState() != PLAYING || !m_manager) {
+			return;
+		}
+
+		SyncEffectTransforms();
+
+		if (!HasActiveEffects()) {
+			return;
+		}
+
+		// Effekseer units: 1.0 = 1/60s. Clamp to avoid multi-step death spiral at low FPS.
+		float deltaFrame = std::clamp(dt * 60.0f, 0.0f, 2.0f);
+
+		{
+			ZoneScopedN("Effekseer Manager::Update");
+			m_manager->Update(deltaFrame);
+		}
+	}
 
 	void ParticleManager::onShutdown()
 	{
@@ -122,49 +170,68 @@ namespace Engine {
 		m_renderer.Reset();
 	}
 
+	void ParticleManager::RestoreGLStateAfterParticles()
+	{
+		glUseProgram(0);
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		glDisable(GL_BLEND);
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LESS);
+		glDepthMask(GL_TRUE);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+	}
 
 	void ParticleManager::Render()
 	{
-		// Set up OpenGL state for Effekseer
+		ZoneScopedN("ParticleManager Render");
+		if (!m_renderer || !m_manager) {
+			return;
+		}
+
+		if (!HasActiveEffects()) {
+			return;
+		}
+
+		// Match prior working state setup (depth from bloom combine via gl_FragDepth).
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
-		//glEnable(GL_CULL_FACE);
-		glDisable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
 		glDepthMask(GL_FALSE);
-		if (m_renderer) {
-			::Effekseer::Matrix44 projMat = ConvertGLMToEffekseerMatrix(GetCamera().GetProjectionMatrix());
-			::Effekseer::Matrix44 viewMat = ConvertGLMToEffekseerMatrix(GetCamera().GetViewMatrix());
+		glDisable(GL_CULL_FACE);
 
+		m_renderer->SetProjectionMatrix(ConvertGLMToEffekseerMatrix(GetCamera().GetProjectionMatrix()));
+		m_renderer->SetCameraMatrix(ConvertGLMToEffekseerMatrix(GetCamera().GetViewMatrix()));
 
-			m_renderer->SetProjectionMatrix(projMat);
-			m_renderer->SetCameraMatrix(viewMat);
-
+		{
+			ZoneScopedN("Effekseer Draw");
 			m_renderer->BeginRendering();
 			m_manager->Draw();
 			m_renderer->EndRendering();
 		}
+
 		glDepthMask(GL_TRUE);
+		RestoreGLStateAfterParticles();
 	}
 
-
-//	Effekseer::Handle ParticleManager::PlayEffect(const std::u16string& path, float x, float y, float z)
-//	{
-//		Effekseer::RefPtr<Effekseer::Effect> effect = Effekseer::Effect::Create(m_manager, path.c_str());
-//		if (!effect) {
-//			log->critical("Failed to load particle effect: {}", std::string(path.begin(), path.end()));
-//			return -1;
-//		}
-//
-//		return m_manager->Play(effect, x, y, z);
-//	}
 	void ParticleManager::ResetInternalManager()
 	{
-		// Effekseer Effects are bound to a Manager instance. Creating a new manager
-		// invalidates all previously loaded Effect refs — reload every Particle asset.
-		m_manager = Effekseer::Manager::Create(MAX_INSTANCES);
+		ZoneScopedN("ResetInternalManager");
+
+		// Single-threaded manager (autoFlip). Worker threads were optional and can race Draw.
+		m_manager = Effekseer::Manager::Create(kMaxInstances, true);
+		if (!m_manager) {
+			log->error("Effekseer Manager not initialized!");
+			return;
+		}
+		log->info("Effekseer manager: maxInstances={}, squareMax={}", kMaxInstances, kSquareMax);
+
 		m_manager->SetSpriteRenderer(m_renderer->CreateSpriteRenderer());
 		m_manager->SetRibbonRenderer(m_renderer->CreateRibbonRenderer());
 		m_manager->SetRingRenderer(m_renderer->CreateRingRenderer());
@@ -174,22 +241,16 @@ namespace Engine {
 		auto textureLoader = Effekseer::MakeRefPtr<DebugTextureLoader>(m_renderer);
 		m_manager->SetTextureLoader(textureLoader);
 
-		if (!m_manager) {
-			log->error("Effekseer Manager not initialized!");
-			return;
-		}
-		log->info("Effekseer Manager initialized!");
-
-		// Clear instance handles — old handles are meaningless on the new manager.
 		if (GetCurrentScene()) {
 			auto view = GetCurrentSceneRegistry().view<Components::ParticleSystem>();
 			for (auto [entity, ps] : view.each()) {
-				ps.handle = -1;
+				ps.handle   = -1;
+				ps.posValid = false;
 			}
 		}
 
-		// Re-create Effect objects against the new manager.
-		auto& storage = GetAssetManager().GetStorage<Particle>();
+		// Effects are bound to a Manager — reload all Particle assets onto the new one.
+		auto& storage  = GetAssetManager().GetStorage<Particle>();
 		int   reloaded = 0;
 		for (auto& [guid, asset] : storage.guidToAsset) {
 			if (!asset) continue;
@@ -218,7 +279,6 @@ namespace Engine {
 			log->warn("Entity has no ParticleSystem; cannot play particle effect.");
 			return;
 		}
-
 		if (!entity.HasComponent<Components::Transform>()) {
 			log->warn("Entity has no Transform; cannot play particle effect.");
 			return;
@@ -235,7 +295,6 @@ namespace Engine {
 
 		Particle* particle = GetAssetManager().Get(ps.effect);
 		if (!particle || !particle->IsValid()) {
-			// Asset missing from cache (never loaded) or Effect ref dead after manager swap.
 			log->warn("Invalid particle effect guid='{}' on entity '{}'", ps.effect.GetID(), entity.GetName());
 			return;
 		}
@@ -244,10 +303,16 @@ namespace Engine {
 			manager->StopEffect(ps.handle);
 		}
 
-		ps.handle = manager->Play(particle->GetEffect(), pos.x, pos.y, pos.z);
+		ps.handle   = manager->Play(particle->GetEffect(), pos.x, pos.y, pos.z);
+		ps.lastPos  = pos;
+		ps.posValid = true;
 		if (ps.handle < 0) {
 			log->warn("Effekseer Play failed for '{}' (guid='{}')", entity.GetName(), ps.effect.GetID());
+			return;
 		}
+
+		// Make the new effect drawable this frame (Play defers instance setup to Flip/Preupdate).
+		manager->Update(0.0f);
 	}
 
 } // namespace Engine

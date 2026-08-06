@@ -107,8 +107,9 @@ namespace Engine {
 		modules.RegisterExternal(Get().gameUI);
 		// Animation before renderer so poses are current before PrepareSkinnedMeshes / draws.
 		modules.RegisterExternal(Get().animation);
-		modules.RegisterExternal(Get().renderer);
+		// Particles before renderer so Effekseer Update/Flip runs before Draw (autoFlip).
 		modules.RegisterExternal(Get().particle);
+		modules.RegisterExternal(Get().renderer);
 		modules.RegisterExternal(Get().terrain);
 		modules.RegisterExternal(Get().scene);
 

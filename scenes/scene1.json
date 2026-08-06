@@ -112,57 +112,6 @@
                     "scriptPath": "scripts/player_thirdperson.lua",
                     "variables": [
                         {
-                            "key": "SHOOT_HEAD_HEIGHT",
-                            "value": {
-                                "index": 0,
-                                "data": 1.100000023841858
-                            }
-                        },
-                        {
-                            "key": "shootSound",
-                            "value": {
-                                "index": 0,
-                                "data": 14.800000190734864
-                            }
-                        },
-                        {
-                            "key": "CAMERA_DISTANCE",
-                            "value": {
-                                "index": 0,
-                                "data": 5.0
-                            }
-                        },
-                        {
-                            "key": "CAMERA_PITCH_MIN",
-                            "value": {
-                                "index": 0,
-                                "data": -30.0
-                            }
-                        },
-                        {
-                            "key": "JUMP_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 8.0
-                            }
-                        },
-                        {
-                            "key": "BULLET_MATERIAL",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
-                                }
-                            }
-                        },
-                        {
-                            "key": "CAMERA_MAX_DISTANCE",
-                            "value": {
-                                "index": 0,
-                                "data": 12.0
-                            }
-                        },
-                        {
                             "key": "victorySound",
                             "value": {
                                 "index": 11,
@@ -172,38 +121,10 @@
                             }
                         },
                         {
-                            "key": "WALK_SPEED",
+                            "key": "GAMEPAD_LOOK_SENSITIVITY",
                             "value": {
                                 "index": 0,
-                                "data": 3.5999999046325685
-                            }
-                        },
-                        {
-                            "key": "MOUSE_SENSITIVITY",
-                            "value": {
-                                "index": 0,
-                                "data": 0.10000000149011612
-                            }
-                        },
-                        {
-                            "key": "CAMERA_PITCH_MAX",
-                            "value": {
-                                "index": 0,
-                                "data": 60.0
-                            }
-                        },
-                        {
-                            "key": "SHOOT_FORWARD_OFFSET",
-                            "value": {
-                                "index": 0,
-                                "data": 1.0
-                            }
-                        },
-                        {
-                            "key": "RUN_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 7.199999809265137
+                                "data": 2.5
                             }
                         },
                         {
@@ -216,80 +137,47 @@
                             }
                         },
                         {
-                            "key": "CAMERA_COLLISION_MIN_DIST",
+                            "key": "RUN_SPEED",
                             "value": {
                                 "index": 0,
-                                "data": 0.25
+                                "data": 7.199999809265137
                             }
                         },
                         {
-                            "key": "CAMERA_ZOOM_OUT_SPEED",
+                            "key": "CAMERA_PITCH_MIN",
                             "value": {
                                 "index": 0,
-                                "data": 4.0
+                                "data": -30.0
                             }
                         },
                         {
-                            "key": "CAMERA_COLLISION_OFFSET",
+                            "key": "CAMERA_DISTANCE",
                             "value": {
                                 "index": 0,
-                                "data": 0.20000000298023225
+                                "data": 5.0
                             }
                         },
                         {
-                            "key": "SHOOT_POWER",
+                            "key": "CAMERA_MAX_DISTANCE",
                             "value": {
                                 "index": 0,
-                                "data": 14.800000190734864
+                                "data": 12.0
                             }
                         },
                         {
-                            "key": "SKELETON",
+                            "key": "BULLET_MATERIAL",
                             "value": {
-                                "index": 1,
-                                "data": "resources/animations/skeleton.ozz"
+                                "index": 7,
+                                "data": {
+                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
+                                }
                             }
                         },
                         {
-                            "key": "GAMEPAD_LOOK_SENSITIVITY",
-                            "value": {
-                                "index": 0,
-                                "data": 2.5
-                            }
-                        },
-                        {
-                            "key": "CAMERA_MIN_DISTANCE",
+                            "key": "JUMP_POWER",
                             "value": {
                                 "index": 0,
-                                "data": 2.0
-                            }
-                        },
-                        {
-                            "key": "RUN_ANIM",
-                            "value": {
-                                "index": 1,
-                                "data": "resources/animations/run_inplace.anim"
-                            }
-                        },
-                        {
-                            "key": "WALK_ANIM",
-                            "value": {
-                                "index": 1,
-                                "data": "resources/animations/walk_inplace.anim"
-                            }
-                        },
-                        {
-                            "key": "ANIM_FADE",
-                            "value": {
-                                "index": 0,
-                                "data": 0.20000000298023225
-                            }
-                        },
-                        {
-                            "key": "JUMP_ANIM",
-                            "value": {
-                                "index": 1,
-                                "data": "resources/animations/Jump.anim"
+                                "data": 8.0
                             }
                         },
                         {
@@ -304,6 +192,76 @@
                             "value": {
                                 "index": 0,
                                 "data": 0.5
+                            }
+                        },
+                        {
+                            "key": "SKELETON",
+                            "value": {
+                                "index": 1,
+                                "data": "resources/animations/skeleton.ozz"
+                            }
+                        },
+                        {
+                            "key": "CAMERA_PITCH_MAX",
+                            "value": {
+                                "index": 0,
+                                "data": 60.0
+                            }
+                        },
+                        {
+                            "key": "CAMERA_MIN_DISTANCE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
+                            }
+                        },
+                        {
+                            "key": "MOUSE_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.10000000149011612
+                            }
+                        },
+                        {
+                            "key": "WALK_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 3.5999999046325685
+                            }
+                        },
+                        {
+                            "key": "JUMP_ANIM",
+                            "value": {
+                                "index": 1,
+                                "data": "resources/animations/Jump.anim"
+                            }
+                        },
+                        {
+                            "key": "ANIM_FADE",
+                            "value": {
+                                "index": 0,
+                                "data": 0.20000000298023225
+                            }
+                        },
+                        {
+                            "key": "RUN_ANIM",
+                            "value": {
+                                "index": 1,
+                                "data": "resources/animations/run_inplace.anim"
+                            }
+                        },
+                        {
+                            "key": "CAMERA_ZOOM_OUT_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 4.0
+                            }
+                        },
+                        {
+                            "key": "CAMERA_COLLISION_MIN_DIST",
+                            "value": {
+                                "index": 0,
+                                "data": 0.25
                             }
                         },
                         {
@@ -325,6 +283,48 @@
                             "value": {
                                 "index": 0,
                                 "data": 381.6000061035156
+                            }
+                        },
+                        {
+                            "key": "SHOOT_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 14.800000190734864
+                            }
+                        },
+                        {
+                            "key": "SHOOT_HEAD_HEIGHT",
+                            "value": {
+                                "index": 0,
+                                "data": 1.100000023841858
+                            }
+                        },
+                        {
+                            "key": "shootSound",
+                            "value": {
+                                "index": 0,
+                                "data": 14.800000190734864
+                            }
+                        },
+                        {
+                            "key": "CAMERA_COLLISION_OFFSET",
+                            "value": {
+                                "index": 0,
+                                "data": 0.20000000298023225
+                            }
+                        },
+                        {
+                            "key": "SHOOT_FORWARD_OFFSET",
+                            "value": {
+                                "index": 0,
+                                "data": 1.0
+                            }
+                        },
+                        {
+                            "key": "WALK_ANIM",
+                            "value": {
+                                "index": 1,
+                                "data": "resources/animations/walk_inplace.anim"
                             }
                         }
                     ]

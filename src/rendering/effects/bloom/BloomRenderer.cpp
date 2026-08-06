@@ -175,10 +175,11 @@ namespace Engine {
 
         GetWindow().SetFullViewport();
 
+        // Write GBuffer depth into GAME_OUT (shader sets gl_FragDepth from depthTex).
+        // Gizmos and particles both depend on this for correct depth testing.
         glEnable(GL_DEPTH_TEST);
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_ALWAYS);
-
 
         // Render fullscreen quad
         glBindVertexArray(GetRenderer().quadVAO);
