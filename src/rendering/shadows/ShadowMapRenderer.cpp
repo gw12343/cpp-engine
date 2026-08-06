@@ -17,6 +17,8 @@
 #include "animation/AnimationManager.h"
 #include "components/impl/AnimationComponent.h"
 
+#include <tracy/Tracy.hpp>
+
 namespace Engine {
 
 	unsigned int ShadowMapRenderer::lightFBO;
@@ -166,76 +168,85 @@ namespace Engine {
 
 	void ShadowMapRenderer::RenderShadowMaps()
 	{
-		m_depthShader.Bind();
+		ZoneScopedN("ShadowMapRenderer::RenderShadowMaps");
 
-		const auto lightMatrices = getLightSpaceMatrices();
-		glBindBuffer(GL_UNIFORM_BUFFER, matricesUBO);
-		for (size_t i = 0; i < lightMatrices.size(); ++i) {
-			glBufferSubData(GL_UNIFORM_BUFFER, static_cast<GLintptr>(i * sizeof(glm::mat4x4)), sizeof(glm::mat4x4), glm::value_ptr(lightMatrices[i]));
-		}
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, lightFBO);
-		glViewport(0, 0, GetRenderSettings()->depthMapResolution, GetRenderSettings()->depthMapResolution);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-		auto view = GetCurrentSceneRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer, Engine::Components::ShadowCaster>();
-
-		for (auto [entity, metadata, transform, renderer, shadowCaster] : view.each()) {
-			if (!renderer.model.IsValid()) continue;
-
-			auto* model = GetAssetManager().Get(renderer.model);
-			if (!model) continue;
-
-			glm::mat4 modelMatrix = CalculateModelMatrix(transform);
-			m_depthShader.SetMat4("model", &modelMatrix);
-			model->Draw(m_depthShader, true, true);
+		std::vector<glm::mat4> lightMatrices;
+		{
+			ZoneScopedN("Shadow CSM Light Matrices");
+			lightMatrices = getLightSpaceMatrices();
 		}
 
-		m_animationDepthShader.Bind();
+		{
+			ZoneScopedN("Shadow FBO Setup");
+			m_depthShader.Bind();
 
-		glBindBuffer(GL_UNIFORM_BUFFER, matricesUBO);
-		for (size_t i = 0; i < lightMatrices.size(); ++i) {
-			glBufferSubData(GL_UNIFORM_BUFFER, static_cast<GLintptr>(i * sizeof(glm::mat4x4)), sizeof(glm::mat4x4), glm::value_ptr(lightMatrices[i]));
+			glBindBuffer(GL_UNIFORM_BUFFER, matricesUBO);
+			for (size_t i = 0; i < lightMatrices.size(); ++i) {
+				glBufferSubData(GL_UNIFORM_BUFFER, static_cast<GLintptr>(i * sizeof(glm::mat4x4)), sizeof(glm::mat4x4), glm::value_ptr(lightMatrices[i]));
+			}
+			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, lightFBO);
+			glViewport(0, 0, GetRenderSettings()->depthMapResolution, GetRenderSettings()->depthMapResolution);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		}
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
+		{
+			ZoneScopedN("Shadow Static Models");
+			auto view = GetCurrentSceneRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer, Engine::Components::ShadowCaster>();
 
-		auto viewAnim = GetCurrentSceneRegistry().view<Engine::Components::EntityMetadata, Components::SkinnedMeshComponent, Components::Transform, Components::ShadowCaster>();
-		for (auto entity : viewAnim) {
-			Entity e(entity, GetCurrentScene());
-			auto&  skinnedMeshComponent   = e.GetComponent<Components::SkinnedMeshComponent>();
-			if (!skinnedMeshComponent.meshes || !skinnedMeshComponent.skinning_matrices) {
-				continue;
+			for (auto [entity, metadata, transform, renderer, shadowCaster] : view.each()) {
+				if (!renderer.model.IsValid()) continue;
+
+				auto* model = GetAssetManager().Get(renderer.model);
+				if (!model) continue;
+
+				glm::mat4 modelMatrix = CalculateModelMatrix(transform);
+				m_depthShader.SetMat4("model", &modelMatrix);
+				model->Draw(m_depthShader, true, true);
 			}
-			if (!e.HasComponent<Components::AnimationComponent>()) {
-				continue;
+		}
+
+		{
+			ZoneScopedN("Shadow Skinned Meshes");
+			m_animationDepthShader.Bind();
+
+			glBindBuffer(GL_UNIFORM_BUFFER, matricesUBO);
+			for (size_t i = 0; i < lightMatrices.size(); ++i) {
+				glBufferSubData(GL_UNIFORM_BUFFER, static_cast<GLintptr>(i * sizeof(glm::mat4x4)), sizeof(glm::mat4x4), glm::value_ptr(lightMatrices[i]));
 			}
-			auto&  animationComponent = e.GetComponent<Components::AnimationComponent>();
-			if (!animationComponent.model_pose) {
-				continue;
-			}
+			glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-			const ozz::math::Float4x4 model = FromMatrix(e.GetComponent<Components::Transform>().GetWorldMatrix());
-
-
-			// Render each mesh
-			for (const Engine::AnimatedMesh& mesh : *skinnedMeshComponent.meshes) {
-				// Render the mesh
-
-				// Builds skinning matrices, based on the output of the animation stage
-				// The mesh might not use (aka be skinned by) all skeleton joints. We
-				// use the joint remapping table (available from the mesh object) to
-				// reorder model-space matrices and build skinning ones
-				for (size_t i = 0; i < mesh.joint_remaps.size(); ++i) {
-					(*skinnedMeshComponent.skinning_matrices)[i] = (*animationComponent.model_pose)[mesh.joint_remaps[i]] * mesh.inverse_bind_poses[i];
+			auto viewAnim = GetCurrentSceneRegistry().view<Engine::Components::EntityMetadata, Components::SkinnedMeshComponent, Components::Transform, Components::ShadowCaster>();
+			for (auto entity : viewAnim) {
+				ZoneScopedN("Shadow Skinned Entity");
+				Entity e(entity, GetCurrentScene());
+				auto&  skinnedMeshComponent = e.GetComponent<Components::SkinnedMeshComponent>();
+				if (!skinnedMeshComponent.meshes || !skinnedMeshComponent.skinning_matrices) {
+					continue;
+				}
+				if (!e.HasComponent<Components::AnimationComponent>()) {
+					continue;
+				}
+				auto& animationComponent = e.GetComponent<Components::AnimationComponent>();
+				if (!animationComponent.model_pose) {
+					continue;
 				}
 
-				GetAnimationManager().renderer_->DrawSkinnedMeshShadows(&m_animationDepthShader, mesh, ozz::make_span(*skinnedMeshComponent.skinning_matrices), model);
+				const ozz::math::Float4x4 model = FromMatrix(e.GetComponent<Components::Transform>().GetWorldMatrix());
+
+				for (const Engine::AnimatedMesh& mesh : *skinnedMeshComponent.meshes) {
+					{
+						ZoneScopedN("Shadow Build Skinning Matrices");
+						for (size_t i = 0; i < mesh.joint_remaps.size(); ++i) {
+							(*skinnedMeshComponent.skinning_matrices)[i] = (*animationComponent.model_pose)[mesh.joint_remaps[i]] * mesh.inverse_bind_poses[i];
+						}
+					}
+
+					GetAnimationManager().renderer_->DrawSkinnedMeshShadows(&m_animationDepthShader, mesh, ozz::make_span(*skinnedMeshComponent.skinning_matrices), model);
+				}
 			}
 		}
-
 
 		// Unbind shadow buffer now
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);

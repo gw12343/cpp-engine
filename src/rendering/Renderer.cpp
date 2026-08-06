@@ -463,31 +463,31 @@ namespace Engine {
     }
 
     void Renderer::RenderEntitiesMousePicking() {
+        ZoneScopedN("RenderEntitiesMousePicking");
         glDisable(GL_CULL_FACE);
 
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        {
+            ZoneScopedN("Mouse Picking Clear + Shader Setup");
+            glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        GetMousePickingShader().Bind();
+            GetMousePickingShader().Bind();
 
-        ENGINE_GLCheckError();
-        glm::mat4 V = GetCamera().GetViewMatrix();
-        GetMousePickingShader().SetMat4("view", &V);
-        glm::mat4 proj = GetCamera().GetProjectionMatrix();
-        GetMousePickingShader().SetMat4("projection", &proj);
+            ENGINE_GLCheckError();
+            glm::mat4 V = GetCamera().GetViewMatrix();
+            GetMousePickingShader().SetMat4("view", &V);
+            glm::mat4 proj = GetCamera().GetProjectionMatrix();
+            GetMousePickingShader().SetMat4("projection", &proj);
+            ENGINE_GLCheckError();
+        }
 
-
-        ENGINE_GLCheckError();
         {
             ZoneScopedN("Model Renderer Mouse Picking");
-            // Create a view for entities with Transform and ModelRenderer components
-
             auto view = GetCurrentSceneRegistry().view<Engine::Components::EntityMetadata, Engine::Components::Transform, Engine::Components::ModelRenderer>();
             for (auto [entity, metadata, transform, renderer]: view.each()) {
                 glm::vec3 encodedColor = EncodeEntityID(entity);
                 GetMousePickingShader().SetVec3("entityIDColor", encodedColor);
                 if (!renderer.visible) continue;
-                // Draw model
                 renderer.Draw(GetMousePickingShader(), transform, false);
             }
         }
@@ -496,6 +496,7 @@ namespace Engine {
             ZoneScopedN("Skinned Mesh Mouse Picking");
             auto view = GetCurrentSceneRegistry().view<Components::SkinnedMeshComponent, Components::Transform>();
             for (auto entity: view) {
+                ZoneScopedN("MousePick Skinned Entity");
                 Entity e(entity, GetCurrentScene());
                 auto &skinnedMeshComponent = e.GetComponent<Components::SkinnedMeshComponent>();
                 if (!skinnedMeshComponent.meshes || !skinnedMeshComponent.skinning_matrices) {
@@ -513,17 +514,13 @@ namespace Engine {
 
                 glm::vec3 encodedColor = EncodeEntityID(entity);
 
-                // Render each mesh
                 for (const Engine::AnimatedMesh &mesh: *skinnedMeshComponent.meshes) {
-                    // Render the mesh
-
-                    // Builds skinning matrices, based on the output of the animation stage
-                    // The mesh might not use (aka be skinned by) all skeleton joints. We
-                    // use the joint remapping table (available from the mesh object) to
-                    // reorder model-space matrices and build skinning ones
-                    for (size_t i = 0; i < mesh.joint_remaps.size(); ++i) {
-                        (*skinnedMeshComponent.skinning_matrices)[i] =
-                                (*animationComponent.model_pose)[mesh.joint_remaps[i]] * mesh.inverse_bind_poses[i];
+                    {
+                        ZoneScopedN("MousePick Build Skinning Matrices");
+                        for (size_t i = 0; i < mesh.joint_remaps.size(); ++i) {
+                            (*skinnedMeshComponent.skinning_matrices)[i] =
+                                    (*animationComponent.model_pose)[mesh.joint_remaps[i]] * mesh.inverse_bind_poses[i];
+                        }
                     }
                     GetAnimationManager().renderer_->DrawSkinnedMeshMousePicking(encodedColor, mesh, ozz::make_span(
                             *skinnedMeshComponent.skinning_matrices), transform);

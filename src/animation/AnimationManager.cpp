@@ -103,10 +103,12 @@ namespace Engine {
 
     void AnimationManager::Render()
     {
+        ZoneScopedN("AnimationManager::Render (GBuffer)");
         auto view = GetCurrentSceneRegistry().view<Components::SkinnedMeshComponent,
                 Components::AnimationComponent,
                 Components::Transform>();
         for (auto entity : view) {
+            ZoneScopedN("GBuffer Skinned Entity");
             Entity e(entity, GetCurrentScene());
             auto&  skinnedMeshComponent = e.GetComponent<Components::SkinnedMeshComponent>();
             auto&  animationComponent   = e.GetComponent<Components::AnimationComponent>();
@@ -117,9 +119,12 @@ namespace Engine {
                 continue;
 
             for (const Engine::AnimatedMesh& mesh : *skinnedMeshComponent.meshes) {
-                for (size_t i = 0; i < mesh.joint_remaps.size(); ++i) {
-                    (*skinnedMeshComponent.skinning_matrices)[i] =
-                            (*animationComponent.model_pose)[mesh.joint_remaps[i]] * mesh.inverse_bind_poses[i];
+                {
+                    ZoneScopedN("GBuffer Build Skinning Matrices");
+                    for (size_t i = 0; i < mesh.joint_remaps.size(); ++i) {
+                        (*skinnedMeshComponent.skinning_matrices)[i] =
+                                (*animationComponent.model_pose)[mesh.joint_remaps[i]] * mesh.inverse_bind_poses[i];
+                    }
                 }
                 renderer_->DrawSkinnedMesh(mesh, ozz::make_span(*skinnedMeshComponent.skinning_matrices),
                                            transform, skinnedMeshComponent.meshMaterial, render_options_);
