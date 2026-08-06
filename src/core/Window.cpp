@@ -1,5 +1,6 @@
 #include "Window.h"
 #include "EngineData.h"
+#include "Input.h"
 #include "rendering/ui/GameUIManager.h"
 
 #include <backends/imgui_impl_glfw.h>
@@ -7,6 +8,7 @@
 
 #include <imgui.h>
 #include <spdlog/spdlog.h>
+#include <cfloat>
 #include <utility>
 
 #include "scripting/ScriptManager.h"
@@ -15,6 +17,45 @@
 #include "imguizmo/ImGuizmo.h"
 #include "rendering/Renderer.h"
 namespace Engine {
+
+	namespace {
+		// Tracks whether we (play-mode capture) currently own the ImGui block flags,
+		// so we don't clobber editor RMB fly-cam's NoMouse handling in Camera.
+		bool g_imguiBlockedForPlayCapture = false;
+
+		void UpdateImGuiPlayModeInputBlock()
+		{
+			ImGuiIO& io = ImGui::GetIO();
+
+			// Scripts set the game cursor mode before Window::onUpdate (ScriptManager runs first).
+			const bool playing  = GetState() == PLAYING;
+			const bool captured = GetInput().GetCursorModeGame() == GLFW_CURSOR_DISABLED;
+			const bool wantBlock = playing && captured;
+
+			if (wantBlock) {
+				io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
+				io.ConfigFlags |= ImGuiConfigFlags_NoKeyboard;
+				io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableKeyboard;
+				io.ConfigFlags &= ~ImGuiConfigFlags_NavEnableGamepad;
+
+				// Drop residual events so held WASD / sticks don't drive UI next frame.
+				if (!g_imguiBlockedForPlayCapture) {
+					io.ClearInputKeys();
+					io.ClearInputMouse();
+				}
+				g_imguiBlockedForPlayCapture = true;
+			}
+			else if (g_imguiBlockedForPlayCapture) {
+				io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+				io.ConfigFlags &= ~ImGuiConfigFlags_NoKeyboard;
+				io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+				io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+				io.ClearInputKeys();
+				io.ClearInputMouse();
+				g_imguiBlockedForPlayCapture = false;
+			}
+		}
+	} // namespace
 
 	static const ImWchar icons_ranges[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
 
@@ -205,8 +246,19 @@ namespace Engine {
 			}
 		}
 
+		// While playing with a captured cursor, keep mouse/keyboard/gamepad off ImGui
+		// so editor panels don't steal WASD, look, or pad navigation.
+		UpdateImGuiPlayModeInputBlock();
+
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
+		// Backend may have re-injected events this frame — wipe them while blocked.
+		if (g_imguiBlockedForPlayCapture) {
+			ImGuiIO& io = ImGui::GetIO();
+			io.ClearInputKeys();
+			io.ClearInputMouse();
+			io.AddMousePosEvent(-FLT_MAX, -FLT_MAX);
+		}
 		ImGui::NewFrame();
 		ImGuizmo::BeginFrame();
 

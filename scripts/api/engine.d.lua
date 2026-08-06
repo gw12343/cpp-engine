@@ -262,6 +262,53 @@ function Input:setCursorMode(mode) end
 ---@return integer
 function Input:getCursorMode() end
 
+--- Smoothed virtual axis in [-1, 1] (Unity GetAxis). Built-ins: "Horizontal", "Vertical", "Mouse X", "Mouse Y", "Look Horizontal", "Look Vertical".
+---@param name string
+---@return number
+function Input:getAxis(name) end
+
+--- Instant virtual axis in [-1, 1] (Unity GetAxisRaw). Prefer for movement.
+---@param name string
+---@return number
+function Input:getAxisRaw(name) end
+
+--- True if a mapped gamepad is connected (optional GLFW joystick id).
+---@param jid? integer
+---@return boolean
+function Input:isGamepadConnected(jid) end
+
+--- Human-readable gamepad name, or empty string.
+---@param jid? integer
+---@return string
+function Input:getGamepadName(jid) end
+
+--- Gamepad axis after deadzone (GAMEPAD_AXIS_*).
+---@param axis integer
+---@param jid? integer
+---@return number
+function Input:getGamepadAxis(axis, jid) end
+
+---@param button integer
+---@param jid? integer
+---@return boolean
+function Input:isGamepadButtonPressed(button, jid) end
+
+---@param button integer
+---@param jid? integer
+---@return boolean
+function Input:isGamepadButtonPressedThisFrame(button, jid) end
+
+---@param button integer
+---@param jid? integer
+---@return boolean
+function Input:isGamepadButtonReleasedThisFrame(button, jid) end
+
+---@param deadzone number
+function Input:setGamepadDeadzone(deadzone) end
+
+---@return number
+function Input:getGamepadDeadzone() end
+
 ---@return Input
 function getInput() end
 
@@ -378,6 +425,36 @@ MOUSE_RIGHT = 1
 CURSOR_NORMAL = 212993
 CURSOR_HIDDEN = 212994
 CURSOR_DISABLED = 212995
+
+-- Gamepad buttons (Xbox layout via GLFW)
+GAMEPAD_A = 0
+GAMEPAD_B = 1
+GAMEPAD_X = 2
+GAMEPAD_Y = 3
+GAMEPAD_LEFT_BUMPER = 4
+GAMEPAD_RIGHT_BUMPER = 5
+GAMEPAD_BACK = 6
+GAMEPAD_START = 7
+GAMEPAD_GUIDE = 8
+GAMEPAD_LEFT_THUMB = 9
+GAMEPAD_RIGHT_THUMB = 10
+GAMEPAD_DPAD_UP = 11
+GAMEPAD_DPAD_RIGHT = 12
+GAMEPAD_DPAD_DOWN = 13
+GAMEPAD_DPAD_LEFT = 14
+-- PlayStation aliases
+GAMEPAD_CROSS = 0
+GAMEPAD_CIRCLE = 1
+GAMEPAD_SQUARE = 2
+GAMEPAD_TRIANGLE = 3
+
+-- Gamepad axes
+GAMEPAD_AXIS_LEFT_X = 0
+GAMEPAD_AXIS_LEFT_Y = 1
+GAMEPAD_AXIS_RIGHT_X = 2
+GAMEPAD_AXIS_RIGHT_Y = 3
+GAMEPAD_AXIS_LEFT_TRIGGER = 4
+GAMEPAD_AXIS_RIGHT_TRIGGER = 5
 
 --------------------------------------------------------------------------------
 -- Window / UI / animation / particles

@@ -18,7 +18,32 @@
 #include "components/impl/EntityMetadataComponent.h"
 #include "components/AllComponents.h"
 #include "rendering/ui/IconsFontAwesome6.h"
+
+#include <cstdio>
+
 namespace Engine {
+
+	namespace {
+		void DrawViewportFpsOverlay(const ImVec2& viewportTopLeft)
+		{
+			const ImGuiIO& io  = ImGui::GetIO();
+			const float    fps = io.Framerate;
+			const float    ms  = (fps > 0.0f) ? (1000.0f / fps) : 0.0f;
+
+			char buf[64];
+			std::snprintf(buf, sizeof(buf), "%.0f FPS  (%.1f ms)", fps, ms);
+
+			const ImVec2 textSize = ImGui::CalcTextSize(buf);
+			const float  pad     = 6.0f;
+			const ImVec2 pos     = ImVec2(viewportTopLeft.x + 8.0f, viewportTopLeft.y + 8.0f);
+			const ImVec2 min     = ImVec2(pos.x - pad * 0.5f, pos.y - 2.0f);
+			const ImVec2 max     = ImVec2(pos.x + textSize.x + pad * 0.5f, pos.y + textSize.y + 2.0f);
+
+			ImDrawList* dl = ImGui::GetWindowDrawList();
+			dl->AddRectFilled(min, max, IM_COL32(0, 0, 0, 150), 4.0f);
+			dl->AddText(pos, IM_COL32(180, 255, 120, 255), buf);
+		}
+	} // namespace
 
 	ImGuizmo::OPERATION SceneViewWindow::mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
 	ImGuizmo::MODE      SceneViewWindow::mCurrentGizmoMode      = ImGuizmo::LOCAL;
@@ -57,6 +82,9 @@ namespace Engine {
 		ImGui::Image((ImTextureID) tex, ImVec2(width, height), ImVec2(0, 1), ImVec2(1, 0));
 
 		GetWindow().UpdateViewportSize((int) width, (int) height, (int) topLeft.x, (int) topLeft.y);
+
+		// FPS overlay (editor / play / paused — always on the viewport)
+		DrawViewportFpsOverlay(topLeft);
 
 		Entity* selectedEntity = &GetUI().m_selectedEntity;
 

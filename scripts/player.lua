@@ -110,21 +110,9 @@ function Update()
     local inMovementDirection = vec3(0, 0, 0)
     local front = camera:getFront()
 
-    local xAxis = 0
-    local yAxis = 0
-
-    if input:isKeyPressed(KEY_W) then
-        yAxis = yAxis + 1
-    end
-    if input:isKeyPressed(KEY_S) then
-        yAxis = yAxis - 1
-    end
-    if input:isKeyPressed(KEY_A) then
-        xAxis = xAxis - 1
-    end
-    if input:isKeyPressed(KEY_D) then
-        xAxis = xAxis + 1
-    end
+    -- Unity-style axes: WASD/arrows + left stick + d-pad
+    local xAxis = input:getAxisRaw("Horizontal")
+    local yAxis = input:getAxisRaw("Vertical")
 
     front.y = 0.0
     front = front:normalize()
@@ -152,12 +140,13 @@ function Update()
     local ground_velocity = cr:getGroundVelocity()
     local new_velocity = vec3(0, 0, 0)
     local moving_towards_ground = (current_vertical_velocity_mag - ground_velocity.y) < 0.1
-    local inJump = input:isKeyPressed(KEY_SPACE)
+    local inJump = input:isKeyPressed(KEY_SPACE) or input:isGamepadButtonPressed(GAMEPAD_A)
 
     local moveSpeed = variables.WALK_SPEED
-    if input:isKeyPressed(KEY_LEFT_SHIFT) and cr:isOnGround() then
+    local sprint = (input:isKeyPressed(KEY_LEFT_SHIFT) or input:isGamepadButtonPressed(GAMEPAD_LEFT_BUMPER)) and cr:isOnGround()
+    if sprint then
         if yAxis > 0 then
-            if xAxis == 0 then
+            if math.abs(xAxis) < 0.1 then
                 moveSpeed = variables.RUN_SPEED
             else
                 moveSpeed = variables.WALK_SPEED + (variables.RUN_SPEED - variables.WALK_SPEED) / 2

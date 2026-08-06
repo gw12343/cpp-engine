@@ -3,11 +3,11 @@
 -- (same skeleton/mesh as AnimatedEntity).
 --
 -- Controls:
---   WASD           move (relative to camera yaw)
---   Left Shift     run
---   Space          jump
---   Mouse          orbit camera
---   E              shoot
+--   WASD / left stick / d-pad   move (camera-relative; Horizontal/Vertical axes)
+--   Left Shift / LB             run
+--   Space / A                   jump
+--   Mouse / right stick         orbit camera
+--   E / X / RB                  shoot
 
 variables = {
     -- Camera orbit
@@ -23,6 +23,8 @@ variables = {
     -- Snap in on collision; ease out when space opens up (units/sec)
     CAMERA_ZOOM_OUT_SPEED     = 4.0,
     MOUSE_SENSITIVITY         = 0.12,
+    -- Right-stick look (degrees contribution per frame at full deflection)
+    GAMEPAD_LOOK_SENSITIVITY  = 2.5,
     ZOOM_SENSITIVITY          = 0.5,
 
     -- Projectiles from capsule head along look yaw
@@ -269,9 +271,13 @@ function Update()
     local cr = gameObject:GetPlayerControllerComponent()
     input:setCursorMode(CURSOR_DISABLED)
 
+    -- Look: mouse + right stick (Look Horizontal / Look Vertical axes)
     local mouseDelta = input:getMouseDelta()
-    orbitYaw   = orbitYaw + mouseDelta.x * variables.MOUSE_SENSITIVITY
-    orbitPitch = orbitPitch + mouseDelta.y * variables.MOUSE_SENSITIVITY
+    local padLookX = input:getAxisRaw("Look Horizontal")
+    local padLookY = input:getAxisRaw("Look Vertical")
+    local padSens = variables.GAMEPAD_LOOK_SENSITIVITY or 2.5
+    orbitYaw   = orbitYaw + mouseDelta.x * variables.MOUSE_SENSITIVITY + padLookX * padSens
+    orbitPitch = orbitPitch + mouseDelta.y * variables.MOUSE_SENSITIVITY + padLookY * padSens
     orbitPitch = clamp(orbitPitch, variables.CAMERA_PITCH_MIN, variables.CAMERA_PITCH_MAX)
 
     camera.yaw   = orbitYaw
@@ -280,19 +286,16 @@ function Update()
     -- Same camera-relative basis as scripts/player.lua (FPS):
     --   front.xz = (cos yaw, sin yaw)   -- Camera::UpdateCameraVectors
     --   right    = cross(front, up).xz = (-sin yaw, cos yaw)
-    --   move     = front * forwardAxis + right * strafeAxis
+    --   move     = front * Vertical + right * Horizontal
     local yawRad = math.rad(orbitYaw)
     local camForwardX = math.cos(yawRad)
     local camForwardZ = math.sin(yawRad)
     local camRightX   = -math.sin(yawRad)
     local camRightZ   =  math.cos(yawRad)
 
-    local xAxis = 0.0 -- A/D strafe
-    local yAxis = 0.0 -- W/S forward
-    if input:isKeyPressed(KEY_W) then yAxis = yAxis + 1.0 end
-    if input:isKeyPressed(KEY_S) then yAxis = yAxis - 1.0 end
-    if input:isKeyPressed(KEY_A) then xAxis = xAxis - 1.0 end
-    if input:isKeyPressed(KEY_D) then xAxis = xAxis + 1.0 end
+    -- Unity-style axes: keyboard WASD/arrows + left stick + d-pad
+    local xAxis = input:getAxisRaw("Horizontal") -- strafe
+    local yAxis = input:getAxisRaw("Vertical")   -- forward
 
     local moveX = camForwardX * yAxis + camRightX * xAxis
     local moveZ = camForwardZ * yAxis + camRightZ * xAxis
@@ -305,8 +308,9 @@ function Update()
     end
 
     local moving = moveLen > 0.1
-    -- Sprint in any move direction (forward, strafe, diagonal, back)
-    local wantRun = input:isKeyPressed(KEY_LEFT_SHIFT) and cr:isOnGround() and moving
+    -- Sprint: Left Shift or left bumper
+    local wantRun = (input:isKeyPressed(KEY_LEFT_SHIFT) or input:isGamepadButtonPressed(GAMEPAD_LEFT_BUMPER))
+        and cr:isOnGround() and moving
     local moveSpeed = wantRun and variables.RUN_SPEED or variables.WALK_SPEED
     local running = wantRun
 
@@ -326,7 +330,8 @@ function Update()
     local ground_velocity = cr:getGroundVelocity()
     local new_velocity = vec3(0, 0, 0)
     local moving_towards_ground = (current_vertical_velocity_mag - ground_velocity.y) < 0.1
-    local inJump = input:isKeyPressed(KEY_SPACE)
+    -- Jump: Space or gamepad A
+    local inJump = input:isKeyPressed(KEY_SPACE) or input:isGamepadButtonPressed(GAMEPAD_A)
     local grounded = cr:isOnGround() and moving_towards_ground
 
     if grounded then
@@ -359,7 +364,10 @@ function Update()
 
     updateLocomotionAnim(moving, running, cr:isOnGround())
 
-    if input:isKeyPressedThisFrame(KEY_E) then
+    -- Shoot: E or gamepad X / right bumper
+    if input:isKeyPressedThisFrame(KEY_E)
+        or input:isGamepadButtonPressedThisFrame(GAMEPAD_X)
+        or input:isGamepadButtonPressedThisFrame(GAMEPAD_RIGHT_BUMPER) then
         ShootObject("resources/models/sphere.obj", SphereShape(0.25), variables.SHOOT_POWER, 0.5)
     end
 end

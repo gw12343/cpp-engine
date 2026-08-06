@@ -508,6 +508,8 @@ rb:setSphereShape(SphereShape(0.25))
 local input = getInput()
 ```
 
+### Keyboard & mouse
+
 | Method | Description |
 |--------|-------------|
 | `isKeyPressed(key)` | Held |
@@ -520,6 +522,94 @@ local input = getInput()
 | `setMousePosition(vec2)` | Warp cursor |
 | `setCursorMode(mode)` | Cursor mode |
 | `getCursorMode()` | Current mode |
+
+### Virtual axes (Unity-style)
+
+Named axes combine keyboard, d-pad, and analog sticks. Values are in **[-1, 1]** (except mouse axes, which are pixel deltas).
+
+| Method | Description |
+|--------|-------------|
+| `getAxis(name)` | Smoothed axis (sensitivity / gravity, like Unity `Input.GetAxis`) |
+| `getAxisRaw(name)` | Instant value, no smoothing (like Unity `Input.GetAxisRaw`) — prefer for movement |
+
+#### Built-in axis names
+
+| Name | Positive | Negative | Also from gamepad |
+|------|----------|----------|-------------------|
+| `"Horizontal"` | `D` / Right arrow | `A` / Left arrow | Left stick X, d-pad L/R |
+| `"Vertical"` | `W` / Up arrow | `S` / Down arrow | Left stick Y (up = +1), d-pad U/D |
+| `"Mouse X"` | | | Mouse delta X (pixels this frame) |
+| `"Mouse Y"` | | | Mouse delta Y (pixels this frame) |
+| `"Look Horizontal"` | | | Right stick X |
+| `"Look Vertical"` | | | Right stick Y (up = +1) |
+
+Stick axes use a default **deadzone** of `0.2` (tunable via `setGamepadDeadzone`).
+
+```lua
+-- Movement (keyboard + left stick + d-pad)
+local h = input:getAxisRaw("Horizontal")
+local v = input:getAxisRaw("Vertical")
+
+-- Camera look: mouse + right stick
+local lookX = input:getMouseDelta().x * mouseSens
+          + input:getAxisRaw("Look Horizontal") * padSens
+local lookY = input:getMouseDelta().y * mouseSens
+          + input:getAxisRaw("Look Vertical") * padSens
+```
+
+Unknown axis names return `0`.
+
+### Gamepad
+
+Uses GLFW’s Xbox-layout gamepad mapping. The first connected mapped pad is the default device.
+
+| Method | Description |
+|--------|-------------|
+| `isGamepadConnected([jid])` | Any / specific joystick present as a gamepad |
+| `getGamepadName([jid])` | Human-readable name, or `""` |
+| `getGamepadAxis(axis [, jid])` | Raw axis after deadzone (triggers: leave as reported) |
+| `isGamepadButtonPressed(button [, jid])` | Held |
+| `isGamepadButtonPressedThisFrame(button [, jid])` | Edge press (primary pad) |
+| `isGamepadButtonReleasedThisFrame(button [, jid])` | Edge release (primary pad) |
+| `setGamepadDeadzone(n)` / `getGamepadDeadzone()` | Stick deadzone in `[0, 0.95]` |
+
+`jid` is a GLFW joystick id (`0` = first). Omit for the active pad.
+
+#### Button constants
+
+| Constant | Xbox / typical |
+|----------|----------------|
+| `GAMEPAD_A` | A / Cross |
+| `GAMEPAD_B` | B / Circle |
+| `GAMEPAD_X` | X / Square |
+| `GAMEPAD_Y` | Y / Triangle |
+| `GAMEPAD_LEFT_BUMPER` / `GAMEPAD_RIGHT_BUMPER` | LB / RB |
+| `GAMEPAD_BACK` / `GAMEPAD_START` / `GAMEPAD_GUIDE` | Select / Start / Guide |
+| `GAMEPAD_LEFT_THUMB` / `GAMEPAD_RIGHT_THUMB` | Stick click |
+| `GAMEPAD_DPAD_UP` / `DOWN` / `LEFT` / `RIGHT` | D-pad |
+| `GAMEPAD_CROSS` / `CIRCLE` / `SQUARE` / `TRIANGLE` | PlayStation aliases |
+
+#### Axis constants
+
+| Constant | Description |
+|----------|-------------|
+| `GAMEPAD_AXIS_LEFT_X` / `LEFT_Y` | Left stick |
+| `GAMEPAD_AXIS_RIGHT_X` / `RIGHT_Y` | Right stick |
+| `GAMEPAD_AXIS_LEFT_TRIGGER` / `RIGHT_TRIGGER` | Triggers |
+
+```lua
+if input:isGamepadConnected() then
+    info("Pad: " .. input:getGamepadName())
+end
+
+if input:isKeyPressed(KEY_SPACE) or input:isGamepadButtonPressed(GAMEPAD_A) then
+    -- jump
+end
+
+if input:isGamepadButtonPressedThisFrame(GAMEPAD_X) then
+    -- shoot
+end
+```
 
 ### Key / mouse / cursor constants
 
@@ -534,11 +624,14 @@ Keys mirror GLFW: `KEY_W`, `KEY_A`, `KEY_S`, `KEY_D`, `KEY_SPACE`, `KEY_LEFT_SHI
 
 ```lua
 input:setCursorMode(CURSOR_DISABLED)
-if input:isKeyPressedThisFrame(KEY_E) then
+local h = input:getAxisRaw("Horizontal")
+local v = input:getAxisRaw("Vertical")
+if input:isKeyPressedThisFrame(KEY_E) or input:isGamepadButtonPressedThisFrame(GAMEPAD_X) then
     -- shoot
 end
-local mouseDelta = input:getMouseDelta()
 ```
+
+See `scripts/player_thirdperson.lua` and `scripts/player.lua` for full movement + look wiring.
 
 ---
 
