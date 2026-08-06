@@ -1944,6 +1944,194 @@ namespace Engine{
 		return true;
 	}
 
+	bool RendererImpl::DrawSkinnedMeshCached(const SkinnedMeshFrameCache& cache, const AnimatedMesh& mesh, const ozz::math::Float4x4& transform, MaterialHandle material, const Options& options)
+	{
+		ZoneScopedN("DrawSkinnedMeshCached (GBuffer)");
+		if (!cache.valid || cache.vertex_count <= 0) {
+			return false;
+		}
+		if (options.skip_skinning || !mesh.skinned()) {
+			return DrawMesh(mesh, transform, material, options);
+		}
+
+		const int     vertex_count     = cache.vertex_count;
+		const GLsizei positions_stride = sizeof(float) * 3;
+		const GLsizei normals_stride   = sizeof(float) * 3;
+		const GLsizei colors_stride    = sizeof(uint8_t) * 4;
+		const GLsizei uvs_stride       = options.texture ? sizeof(float) * 2 : 0;
+		const GLsizei positions_offset = cache.positionsOffset();
+		const GLsizei normals_offset   = cache.normalsOffset();
+		const GLsizei colors_offset    = cache.colorsOffset();
+		const GLsizei uvs_offset       = cache.uvsOffset();
+		const GLsizei vbo_size         = static_cast<GLsizei>(cache.vbo.size());
+
+		if (options.wireframe) {
+			GL(PolygonMode(GL_FRONT_AND_BACK, GL_LINE));
+		}
+
+		if (options.triangles) {
+			{
+				ZoneScopedN("GBuffer Upload Cached VBO/IBO");
+				GL(BindBuffer(GL_ARRAY_BUFFER, dynamic_array_bo_));
+				GL(BufferData(GL_ARRAY_BUFFER, vbo_size, nullptr, GL_STREAM_DRAW));
+				GL(BufferSubData(GL_ARRAY_BUFFER, 0, vbo_size, cache.vbo.data()));
+
+				GL(BindBuffer(GL_ELEMENT_ARRAY_BUFFER, dynamic_index_bo_));
+				const AnimatedMesh::TriangleIndices& indices = mesh.triangle_indices;
+				GL(BufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(AnimatedMesh::TriangleIndices::value_type), array_begin(indices), GL_STREAM_DRAW));
+			}
+
+			AnimationShader* shader = nullptr;
+			{
+				ZoneScopedN("GBuffer Bind Shader + Texture");
+				Material* mat_ptr        = GetAssetManager().Get(material);
+				const bool valid_material = mat_ptr != nullptr;
+				if (options.texture) {
+					shader = ambient_textured_shader.get();
+					ambient_textured_shader->Bind(transform, Engine::FromMatrix(GetCamera().GetViewMatrix()), Engine::FromMatrix(GetCamera().GetProjectionMatrix()), positions_stride, positions_offset, normals_stride, normals_offset, colors_stride, colors_offset, false, uvs_stride, uvs_offset);
+					if (valid_material) {
+						if (GetAssetManager().Get(mat_ptr->GetDiffuseTexture())) {
+							GL(BindTexture(GL_TEXTURE_2D, GetAssetManager().Get(mat_ptr->GetDiffuseTexture())->GetID()));
+						}
+					}
+				}
+				else {
+					GetAnimationManager().log->error("unimpl");
+					shader = ambient_shader.get();
+				}
+			}
+
+			{
+				ZoneScopedN("GBuffer DrawElements");
+				GLenum attachments[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
+				glDrawBuffers(4, attachments);
+				const AnimatedMesh::TriangleIndices& indices = mesh.triangle_indices;
+				GL(DrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_SHORT, 0));
+			}
+
+			GL(BindBuffer(GL_ARRAY_BUFFER, 0));
+			GL(BindTexture(GL_TEXTURE_2D, 0));
+			GL(BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+			if (shader) {
+				shader->Unbind();
+			}
+		}
+
+		if (options.wireframe) {
+			GL(PolygonMode(GL_FRONT_AND_BACK, GL_FILL));
+		}
+		(void)vertex_count;
+		return true;
+	}
+
+	bool RendererImpl::DrawSkinnedMeshMousePickingCached(glm::vec3 entityColor, const SkinnedMeshFrameCache& cache, const AnimatedMesh& mesh, const ozz::math::Float4x4& transform)
+	{
+		ZoneScopedN("DrawSkinnedMeshMousePickingCached");
+		if (!cache.valid || cache.vertex_count <= 0) {
+			return false;
+		}
+
+		const GLsizei positions_stride = sizeof(float) * 3;
+		const GLsizei normals_stride   = sizeof(float) * 3;
+		const GLsizei colors_stride    = sizeof(uint8_t) * 4;
+		const GLsizei positions_offset = cache.positionsOffset();
+		const GLsizei normals_offset   = cache.normalsOffset();
+		const GLsizei colors_offset    = cache.colorsOffset();
+		const GLsizei vbo_size         = static_cast<GLsizei>(cache.vbo.size());
+
+		{
+			ZoneScopedN("MousePick Upload Cached VBO/IBO");
+			GL(BindBuffer(GL_ARRAY_BUFFER, dynamic_array_bo_));
+			GL(BufferData(GL_ARRAY_BUFFER, vbo_size, nullptr, GL_STREAM_DRAW));
+			GL(BufferSubData(GL_ARRAY_BUFFER, 0, vbo_size, cache.vbo.data()));
+
+			GL(BindBuffer(GL_ELEMENT_ARRAY_BUFFER, dynamic_index_bo_));
+			const AnimatedMesh::TriangleIndices& indices = mesh.triangle_indices;
+			GL(BufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(AnimatedMesh::TriangleIndices::value_type), array_begin(indices), GL_STREAM_DRAW));
+		}
+
+		{
+			ZoneScopedN("MousePick Bind Shader + Draw");
+			m_animation_mouse_picking_shader.Bind();
+
+			GL(EnableVertexAttribArray(0));
+			GL(VertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, positions_stride, GL_PTR_OFFSET(positions_offset)));
+			GL(EnableVertexAttribArray(1));
+			GL(VertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, normals_stride, GL_PTR_OFFSET(normals_offset)));
+			GL(EnableVertexAttribArray(2));
+			GL(VertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, true, colors_stride, GL_PTR_OFFSET(colors_offset)));
+
+			UniformMat4(transform, glGetUniformLocation(m_animation_mouse_picking_shader.GetProgramID(), "u_model"));
+			UniformMat4(GetCamera().view_proj(), glGetUniformLocation(m_animation_mouse_picking_shader.GetProgramID(), "u_viewproj"));
+			m_animation_mouse_picking_shader.SetVec3("entityIDColor", entityColor);
+
+			const AnimatedMesh::TriangleIndices& indices = mesh.triangle_indices;
+			GL(DrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_SHORT, nullptr));
+		}
+
+		GL(BindBuffer(GL_ARRAY_BUFFER, 0));
+		GL(BindTexture(GL_TEXTURE_2D, 0));
+		GL(BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+		glUseProgram(0);
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
+		glDisableVertexAttribArray(2);
+		return true;
+	}
+
+	bool RendererImpl::DrawSkinnedMeshShadowsCached(Engine::Shader* shadowShader, const SkinnedMeshFrameCache& cache, const AnimatedMesh& mesh, const ozz::math::Float4x4& transform)
+	{
+		ZoneScopedN("DrawSkinnedMeshShadowsCached");
+		if (!cache.valid || cache.vertex_count <= 0 || !shadowShader) {
+			return false;
+		}
+
+		const GLsizei positions_stride = sizeof(float) * 3;
+		const GLsizei normals_stride   = sizeof(float) * 3;
+		const GLsizei colors_stride    = sizeof(uint8_t) * 4;
+		const GLsizei positions_offset = cache.positionsOffset();
+		const GLsizei normals_offset   = cache.normalsOffset();
+		const GLsizei colors_offset    = cache.colorsOffset();
+		const GLsizei vbo_size         = static_cast<GLsizei>(cache.vbo.size());
+
+		{
+			ZoneScopedN("Shadow Upload Cached VBO/IBO");
+			GL(BindBuffer(GL_ARRAY_BUFFER, dynamic_array_bo_));
+			GL(BufferData(GL_ARRAY_BUFFER, vbo_size, nullptr, GL_STREAM_DRAW));
+			GL(BufferSubData(GL_ARRAY_BUFFER, 0, vbo_size, cache.vbo.data()));
+
+			GL(BindBuffer(GL_ELEMENT_ARRAY_BUFFER, dynamic_index_bo_));
+			const AnimatedMesh::TriangleIndices& indices = mesh.triangle_indices;
+			GL(BufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(AnimatedMesh::TriangleIndices::value_type), array_begin(indices), GL_STREAM_DRAW));
+		}
+
+		{
+			ZoneScopedN("Shadow Bind Shader + Draw");
+			shadowShader->Bind();
+
+			GL(EnableVertexAttribArray(0));
+			GL(VertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, positions_stride, GL_PTR_OFFSET(positions_offset)));
+			GL(EnableVertexAttribArray(1));
+			GL(VertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, normals_stride, GL_PTR_OFFSET(normals_offset)));
+			GL(EnableVertexAttribArray(2));
+			GL(VertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, true, colors_stride, GL_PTR_OFFSET(colors_offset)));
+
+			UniformMat4(transform, glGetUniformLocation(shadowShader->GetProgramID(), "model"));
+
+			const AnimatedMesh::TriangleIndices& indices = mesh.triangle_indices;
+			GL(DrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_SHORT, nullptr));
+		}
+
+		GL(BindBuffer(GL_ARRAY_BUFFER, 0));
+		GL(BindTexture(GL_TEXTURE_2D, 0));
+		GL(BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+		glUseProgram(0);
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
+		glDisableVertexAttribArray(2);
+		return true;
+	}
+
 	RendererImpl::ScratchBuffer::ScratchBuffer() : buffer_(nullptr), size_(0)
 	{
 	}

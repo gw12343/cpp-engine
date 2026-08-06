@@ -15,6 +15,7 @@
 
 
 #include "scripting/ScriptManager.h"
+#include "assets/AssetManager.h"
 
 namespace Engine {
 	static const int MAX_INSTANCES = 8000;
@@ -161,6 +162,8 @@ namespace Engine {
 //	}
 	void ParticleManager::ResetInternalManager()
 	{
+		// Effekseer Effects are bound to a Manager instance. Creating a new manager
+		// invalidates all previously loaded Effect refs — reload every Particle asset.
 		m_manager = Effekseer::Manager::Create(MAX_INSTANCES);
 		m_manager->SetSpriteRenderer(m_renderer->CreateSpriteRenderer());
 		m_manager->SetRibbonRenderer(m_renderer->CreateRibbonRenderer());
@@ -171,44 +174,80 @@ namespace Engine {
 		auto textureLoader = Effekseer::MakeRefPtr<DebugTextureLoader>(m_renderer);
 		m_manager->SetTextureLoader(textureLoader);
 
-
 		if (!m_manager) {
 			log->error("Effekseer Manager not initialized!");
 			return;
 		}
-		else {
-			log->info("Effekseer Manager initialized!");
+		log->info("Effekseer Manager initialized!");
+
+		// Clear instance handles — old handles are meaningless on the new manager.
+		if (GetCurrentScene()) {
+			auto view = GetCurrentSceneRegistry().view<Components::ParticleSystem>();
+			for (auto [entity, ps] : view.each()) {
+				ps.handle = -1;
+			}
+		}
+
+		// Re-create Effect objects against the new manager.
+		auto& storage = GetAssetManager().GetStorage<Particle>();
+		int   reloaded = 0;
+		for (auto& [guid, asset] : storage.guidToAsset) {
+			if (!asset) continue;
+			const std::string& path = asset->GetPath();
+			if (path.empty()) {
+				log->warn("Particle {} has empty path; cannot rebind to new manager", guid);
+				continue;
+			}
+			if (!asset->LoadFromFile(path)) {
+				log->error("Failed to reload particle effect after manager reset: {}", path);
+				continue;
+			}
+			++reloaded;
+		}
+		if (reloaded > 0) {
+			log->info("Rebound {} particle effect(s) to new Effekseer manager", reloaded);
 		}
 	}
 
-    void ParticleManager::PlayEffect(Entity &entity) {
-        const auto& manager = GetManager();
-        ENGINE_VERIFY(manager != nullptr, "ParticleSystem::RenderInspector: Failed to get Effekseer manager");
+	void ParticleManager::PlayEffect(Entity& entity)
+	{
+		const auto& manager = GetManager();
+		ENGINE_VERIFY(manager != nullptr, "ParticleManager::PlayEffect: Effekseer manager is null");
 
-        if(!entity.HasComponent<Components::ParticleSystem>()){
-            log->warn("Entity has no particle system; cannot play particle effect.");
-            return;
-        }
+		if (!entity.HasComponent<Components::ParticleSystem>()) {
+			log->warn("Entity has no ParticleSystem; cannot play particle effect.");
+			return;
+		}
 
-        if(!entity.HasComponent<Components::Transform>()){
-            log->warn("Entity has no transform; cannot play particle effect.");
-            return;
-        }
+		if (!entity.HasComponent<Components::Transform>()) {
+			log->warn("Entity has no Transform; cannot play particle effect.");
+			return;
+		}
 
-        auto& ps = entity.GetComponent<Components::ParticleSystem>();
-        auto& tr = entity.GetComponent<Components::Transform>();
+		auto& ps  = entity.GetComponent<Components::ParticleSystem>();
+		auto& tr  = entity.GetComponent<Components::Transform>();
+		auto  pos = tr.GetWorldPosition();
 
-        manager->StopEffect(ps.handle);
-        auto      pos       = tr.GetWorldPosition();
+		if (!ps.effect.IsValid()) {
+			log->warn("ParticleSystem on '{}' has empty effect handle", entity.GetName());
+			return;
+		}
 
-        Particle* particle  = GetAssetManager().Get(ps.effect);
+		Particle* particle = GetAssetManager().Get(ps.effect);
+		if (!particle || !particle->IsValid()) {
+			// Asset missing from cache (never loaded) or Effect ref dead after manager swap.
+			log->warn("Invalid particle effect guid='{}' on entity '{}'", ps.effect.GetID(), entity.GetName());
+			return;
+		}
 
-        if(!particle){
-            log->warn("Invalid particle effect.");
-            return;
-        }
-        ps.handle = manager->Play(particle->GetEffect(), pos.x, pos.y, pos.z);
-    }
+		if (ps.handle >= 0 && manager->Exists(ps.handle)) {
+			manager->StopEffect(ps.handle);
+		}
 
+		ps.handle = manager->Play(particle->GetEffect(), pos.x, pos.y, pos.z);
+		if (ps.handle < 0) {
+			log->warn("Effekseer Play failed for '{}' (guid='{}')", entity.GetName(), ps.effect.GetID());
+		}
+	}
 
 } // namespace Engine

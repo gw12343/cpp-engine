@@ -4,6 +4,7 @@
 #define GLFW_INCLUDE_NONE
 #include "AnimatedMesh.h"
 #include "Camera.h"
+#include "animation/SkinnedMeshCache.h"
 #include "ozz/animation/runtime/skeleton.h"
 
 #include "ozz/base/containers/vector.h"
@@ -129,6 +130,11 @@ namespace Engine
 		virtual bool DrawSkinnedMesh(const Engine::AnimatedMesh& _mesh, ozz::span<ozz::math::Float4x4> _skinning_matrices, const ozz::math::Float4x4& _transform, MaterialHandle _material, const Options& _options = Options());
 		bool         DrawSkinnedMeshMousePicking(glm::vec3 entityColor, const Engine::AnimatedMesh& _mesh, ozz::span<ozz::math::Float4x4> _skinning_matrices, const ozz::math::Float4x4& _transform);
 		bool         DrawSkinnedMeshShadows(Engine::Shader* shadowShader, const Engine::AnimatedMesh& _mesh, ozz::span<ozz::math::Float4x4> _skinning_matrices, const ozz::math::Float4x4& _transform);
+
+		/// Draw using a once-per-frame CPU skin cache (no SkinningJob).
+		bool DrawSkinnedMeshCached(const SkinnedMeshFrameCache& cache, const AnimatedMesh& mesh, const ozz::math::Float4x4& transform, MaterialHandle material, const Options& options = Options());
+		bool DrawSkinnedMeshMousePickingCached(glm::vec3 entityColor, const SkinnedMeshFrameCache& cache, const AnimatedMesh& mesh, const ozz::math::Float4x4& transform);
+		bool DrawSkinnedMeshShadowsCached(Engine::Shader* shadowShader, const SkinnedMeshFrameCache& cache, const AnimatedMesh& mesh, const ozz::math::Float4x4& transform);
 
 		virtual bool DrawMesh(const Engine::AnimatedMesh& _mesh, const ozz::math::Float4x4& _transform, MaterialHandle _material, const Options& _options = Options());
 

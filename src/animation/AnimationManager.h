@@ -35,6 +35,11 @@ namespace Engine {
 		void Render();
 		void RenderDebug() const;
 
+		/// Once per frame: build skinning matrices + CPU-skin every skinned mesh (parallelized).
+		/// Call before shadow / GBuffer / mouse-pick draws that need skinned geometry.
+		void PrepareSkinnedMeshes();
+		[[nodiscard]] uint64_t GetPoseGeneration() const { return pose_generation_; }
+
 		bool&                  GetDrawSkeleton() { return draw_skeleton_; }
 		bool&                  GetDrawMesh() { return draw_mesh_; }
 		bool                   GetDrawSkeletonValue() const { return draw_skeleton_; }
@@ -74,7 +79,9 @@ namespace Engine {
 		bool                      draw_mesh_     = true;
 		RendererImpl::Options render_options_;
 
-		// Renderer
+		/// Bumped each animation update; PrepareSkinnedMeshes rebuilds when this changes.
+		uint64_t pose_generation_    = 0;
+		uint64_t skinned_generation_ = ~uint64_t{0};
 	};
 
 } // namespace Engine

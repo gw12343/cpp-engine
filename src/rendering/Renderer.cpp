@@ -240,6 +240,9 @@ namespace Engine {
 
         PreRender();
 
+        // CPU-skin all characters once; shadow / GBuffer / pick reuse the cache.
+        GetAnimationManager().PrepareSkinnedMeshes();
+
         // Shadows
         RenderShadowMaps();
 
@@ -494,19 +497,16 @@ namespace Engine {
 
         {
             ZoneScopedN("Skinned Mesh Mouse Picking");
+            GetAnimationManager().PrepareSkinnedMeshes();
             auto view = GetCurrentSceneRegistry().view<Components::SkinnedMeshComponent, Components::Transform>();
             for (auto entity: view) {
                 ZoneScopedN("MousePick Skinned Entity");
                 Entity e(entity, GetCurrentScene());
-                auto &skinnedMeshComponent = e.GetComponent<Components::SkinnedMeshComponent>();
-                if (!skinnedMeshComponent.meshes || !skinnedMeshComponent.skinning_matrices) {
+                auto &skinned = e.GetComponent<Components::SkinnedMeshComponent>();
+                if (!skinned.meshes || skinned.skin_frame_cache.empty()) {
                     continue;
                 }
                 if (!e.HasComponent<Components::AnimationComponent>()) {
-                    continue;
-                }
-                auto &animationComponent = e.GetComponent<Components::AnimationComponent>();
-                if (!animationComponent.model_pose) {
                     continue;
                 }
                 const ozz::math::Float4x4 transform = FromMatrix(
@@ -514,16 +514,11 @@ namespace Engine {
 
                 glm::vec3 encodedColor = EncodeEntityID(entity);
 
-                for (const Engine::AnimatedMesh &mesh: *skinnedMeshComponent.meshes) {
-                    {
-                        ZoneScopedN("MousePick Build Skinning Matrices");
-                        for (size_t i = 0; i < mesh.joint_remaps.size(); ++i) {
-                            (*skinnedMeshComponent.skinning_matrices)[i] =
-                                    (*animationComponent.model_pose)[mesh.joint_remaps[i]] * mesh.inverse_bind_poses[i];
-                        }
-                    }
-                    GetAnimationManager().renderer_->DrawSkinnedMeshMousePicking(encodedColor, mesh, ozz::make_span(
-                            *skinnedMeshComponent.skinning_matrices), transform);
+                for (size_t mi = 0; mi < skinned.meshes->size(); ++mi) {
+                    const auto& mesh  = (*skinned.meshes)[mi];
+                    const auto& cache = skinned.skin_frame_cache[mi];
+                    if (!cache.valid) continue;
+                    GetAnimationManager().renderer_->DrawSkinnedMeshMousePickingCached(encodedColor, cache, mesh, transform);
                 }
             }
         }

@@ -27,6 +27,8 @@ namespace Engine::Components {
 			delete meshes;
 			meshes = nullptr;
 		}
+		skin_frame_cache.clear();
+		skin_cache_frame = 0;
 	}
 
 	void SkinnedMeshComponent::FreeSkinningMatrices()
@@ -57,6 +59,11 @@ namespace Engine::Components {
 		}
 
 		skinning_matrices->resize(num_skinning_matrices);
+
+		// One frame cache slot per mesh
+		skin_frame_cache.clear();
+		skin_frame_cache.resize(meshes->size());
+		skin_cache_frame = 0;
 	}
 
 	bool SkinnedMeshComponent::TryLoadMeshes()

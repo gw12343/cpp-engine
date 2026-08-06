@@ -1,24 +1,13 @@
+-- Replay this entity's particle effect on GameReset (e.g. key R).
+
 function Start()
-	print("particle started!")
-	subscribe("GameReset", function()
-        if gameObject:HasParticleSystem() then
-            info("has particle")
-            --local pr = gameObject:GetParticleSystem()
-
-
-            local pm  = getParticleManager();
-
-            pm:playEffect(gameObject)
-
-            --pr:play()
-
-        else
-            info("has no particle")
+    subscribe("GameReset", function()
+        if not gameObject:HasParticleSystem() then
+            return
         end
-
+        getParticleManager():playEffect(gameObject)
     end)
 end
-
 
 function Update()
 end

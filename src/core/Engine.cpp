@@ -105,8 +105,9 @@ namespace Engine {
 		modules.RegisterExternal(Get().ui);
 #endif
 		modules.RegisterExternal(Get().gameUI);
-		modules.RegisterExternal(Get().renderer);
+		// Animation before renderer so poses are current before PrepareSkinnedMeshes / draws.
 		modules.RegisterExternal(Get().animation);
+		modules.RegisterExternal(Get().renderer);
 		modules.RegisterExternal(Get().particle);
 		modules.RegisterExternal(Get().terrain);
 		modules.RegisterExternal(Get().scene);

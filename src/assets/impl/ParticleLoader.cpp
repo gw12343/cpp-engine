@@ -18,4 +18,9 @@ namespace Engine {
 
 		return particle;
 	}
+
+	bool ParticleLoader::Reload(Particle& asset, const std::string& path)
+	{
+		return asset.LoadFromFile(path);
+	}
 } // namespace Engine

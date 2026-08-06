@@ -28,9 +28,12 @@ namespace Engine {
 			ImGuiIO& io = ImGui::GetIO();
 
 			// Scripts set the game cursor mode before Window::onUpdate (ScriptManager runs first).
-			const bool playing  = GetState() == PLAYING;
-			const bool captured = GetInput().GetCursorModeGame() == GLFW_CURSOR_DISABLED;
-			const bool wantBlock = playing && captured;
+			// Hold Escape to free the cursor and let ImGui take mouse/keyboard/gamepad
+			// (player scripts re-assert CURSOR_DISABLED every frame, so we must key off Escape here).
+			const bool playing     = GetState() == PLAYING;
+			const bool escapeHeld  = GetInput().IsKeyPressed(GLFW_KEY_ESCAPE);
+			const bool captured    = GetInput().GetCursorModeGame() == GLFW_CURSOR_DISABLED;
+			const bool wantBlock   = playing && captured && !escapeHeld;
 
 			if (wantBlock) {
 				io.ConfigFlags |= ImGuiConfigFlags_NoMouse;

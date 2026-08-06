@@ -376,6 +376,7 @@ namespace Engine {
 	{
 		ZoneScoped;
 		if (GetState() == PLAYING) {
+			// Hold Escape: free cursor for ImGui (overrides script setCursorMode(DISABLED)).
 			if (IsKeyPressed(GLFW_KEY_ESCAPE)) {
 				m_gameCursorMode = GLFW_CURSOR_NORMAL;
 			}
@@ -480,6 +481,11 @@ namespace Engine {
 
 	void Input::SetCursorModeGame(int mode)
 	{
+		// While Escape is held in play mode, ignore recapture so ImGui can use the mouse.
+		if (GetState() == PLAYING && mode == GLFW_CURSOR_DISABLED && IsKeyPressed(GLFW_KEY_ESCAPE)) {
+			m_gameCursorMode = GLFW_CURSOR_NORMAL;
+			return;
+		}
 		m_gameCursorMode = mode;
 	}
 

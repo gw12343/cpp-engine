@@ -2,6 +2,7 @@
 
 #include "AnimationUtils.h"
 #include "Animation.h"
+#include "SkinnedMeshCache.h"
 #include "core/Entity.h"
 #include "core/EngineData.h"
 
@@ -20,194 +21,253 @@
 #include "scripting/ScriptManager.h"
 #include <algorithm>
 #include <cmath>
+#include <tracy/Tracy.hpp>
+#include <vector>
 
 namespace Engine {
 
-    void AnimationManager::setLuaBindings()
-    {
-        auto& lua = GetScriptManager().lua;
+	void AnimationManager::setLuaBindings()
+	{
+		auto& lua = GetScriptManager().lua;
 
-        lua.new_usertype<AnimationManager>(
-            "AnimationManager",
-            "getDrawSkeleton", &AnimationManager::GetDrawSkeletonValue,
-            "setDrawSkeleton", &AnimationManager::SetDrawSkeleton,
-            "getDrawMesh", &AnimationManager::GetDrawMeshValue,
-            "setDrawMesh", &AnimationManager::SetDrawMesh,
-            "drawSkeleton",
-            sol::property(&AnimationManager::GetDrawSkeletonValue, &AnimationManager::SetDrawSkeleton),
-            "drawMesh",
-            sol::property(&AnimationManager::GetDrawMeshValue, &AnimationManager::SetDrawMesh));
+		lua.new_usertype<AnimationManager>(
+		    "AnimationManager",
+		    "getDrawSkeleton",
+		    &AnimationManager::GetDrawSkeletonValue,
+		    "setDrawSkeleton",
+		    &AnimationManager::SetDrawSkeleton,
+		    "getDrawMesh",
+		    &AnimationManager::GetDrawMeshValue,
+		    "setDrawMesh",
+		    &AnimationManager::SetDrawMesh,
+		    "drawSkeleton",
+		    sol::property(&AnimationManager::GetDrawSkeletonValue, &AnimationManager::SetDrawSkeleton),
+		    "drawMesh",
+		    sol::property(&AnimationManager::GetDrawMeshValue, &AnimationManager::SetDrawMesh));
 
-        lua.set_function("getAnimationManager", []() -> AnimationManager& {
-            return Engine::GetAnimationManager();
-        });
+		lua.set_function("getAnimationManager", []() -> AnimationManager& { return Engine::GetAnimationManager(); });
 
-        lua.set_function("loadAnimation", [](const std::string& path) -> AnimationHandle {
-            return GetAssetManager().Load<Animation>(path);
-        });
-    }
+		lua.set_function("loadAnimation", [](const std::string& path) -> AnimationHandle { return GetAssetManager().Load<Animation>(path); });
+	}
 
-    void AnimationManager::onInit()
-    {
-        draw_skeleton_ = false;
-        draw_mesh_     = true;
+	void AnimationManager::onInit()
+	{
+		draw_skeleton_ = false;
+		draw_mesh_     = true;
 
-        render_options_.triangles     = true;
-        render_options_.texture       = true;
-        render_options_.vertices      = false;
-        render_options_.normals       = false;
-        render_options_.tangents      = false;
-        render_options_.binormals     = false;
-        render_options_.colors        = true;
-        render_options_.wireframe     = false;
-        render_options_.skip_skinning = false;
+		render_options_.triangles     = true;
+		render_options_.texture       = true;
+		render_options_.vertices      = false;
+		render_options_.normals       = false;
+		render_options_.tangents      = false;
+		render_options_.binormals     = false;
+		render_options_.colors        = true;
+		render_options_.wireframe     = false;
+		render_options_.skip_skinning = false;
 
-        renderer_ = ozz::make_unique<RendererImpl>();
+		renderer_ = ozz::make_unique<RendererImpl>();
 
-        if (!renderer_->Initialize()) {
-            log->error("Failed to initialize animation renderer");
-        } else {
-            log->info("Initialized animated renderer");
-        }
-    }
+		if (!renderer_->Initialize()) {
+			log->error("Failed to initialize animation renderer");
+		}
+		else {
+			log->info("Initialized animated renderer");
+		}
+	}
 
-    void AnimationManager::onShutdown()
-    {
-        if (Get().assetManager) {
-            GetAssetManager().UnloadAll<Animation>();
-        }
+	void AnimationManager::onShutdown()
+	{
+		if (Get().assetManager) {
+			GetAssetManager().UnloadAll<Animation>();
+		}
 
-        renderer_.reset();
-        loaded_skeletons_.clear();
-    }
+		renderer_.reset();
+		loaded_skeletons_.clear();
+	}
 
-    void AnimationManager::onUpdate(float deltaTime)
-    {
-        ZoneScopedN("Animation Update");
+	void AnimationManager::onUpdate(float deltaTime)
+	{
+		ZoneScopedN("Animation Update");
 
-        auto animationView =
-            GetCurrentSceneRegistry().view<Components::EntityMetadata, Components::AnimationComponent>();
+		auto animationView = GetCurrentSceneRegistry().view<Components::EntityMetadata, Components::AnimationComponent>();
 
-        for (auto [entity, metadata, ac] : animationView.each()) {
-            if (!ac.skeleton) continue;
+		for (auto [entity, metadata, ac] : animationView.each()) {
+			if (!ac.skeleton) continue;
 
-            // Advance time only while playing; always evaluate pose for editor display.
-            const float dt = (GetState() == PLAYING) ? deltaTime : 0.f;
-            if (ac.IsPlaying()) {
-                ac.UpdatePlayback(dt);
-            } else if (ac.local_pose && ac.model_pose) {
-                ac.EvaluatePose();
-            }
-        }
-    }
+			// Advance time only while playing; always evaluate pose for editor display.
+			const float dt = (GetState() == PLAYING) ? deltaTime : 0.f;
+			if (ac.IsPlaying()) {
+				ac.UpdatePlayback(dt);
+			}
+			else if (ac.local_pose && ac.model_pose) {
+				ac.EvaluatePose();
+			}
+		}
 
-    void AnimationManager::Render()
-    {
-        ZoneScopedN("AnimationManager::Render (GBuffer)");
-        auto view = GetCurrentSceneRegistry().view<Components::SkinnedMeshComponent,
-                Components::AnimationComponent,
-                Components::Transform>();
-        for (auto entity : view) {
-            ZoneScopedN("GBuffer Skinned Entity");
-            Entity e(entity, GetCurrentScene());
-            auto&  skinnedMeshComponent = e.GetComponent<Components::SkinnedMeshComponent>();
-            auto&  animationComponent   = e.GetComponent<Components::AnimationComponent>();
-            const ozz::math::Float4x4 transform = FromMatrix(e.GetComponent<Components::Transform>().GetWorldMatrix());
+		// Invalidate skinned caches for the upcoming render.
+		++pose_generation_;
+	}
 
-            if (!skinnedMeshComponent.visible) continue;
-            if (!animationComponent.model_pose || !skinnedMeshComponent.meshes || !skinnedMeshComponent.skinning_matrices)
-                continue;
+	void AnimationManager::PrepareSkinnedMeshes()
+	{
+		ZoneScopedN("PrepareSkinnedMeshes");
 
-            for (const Engine::AnimatedMesh& mesh : *skinnedMeshComponent.meshes) {
-                {
-                    ZoneScopedN("GBuffer Build Skinning Matrices");
-                    for (size_t i = 0; i < mesh.joint_remaps.size(); ++i) {
-                        (*skinnedMeshComponent.skinning_matrices)[i] =
-                                (*animationComponent.model_pose)[mesh.joint_remaps[i]] * mesh.inverse_bind_poses[i];
-                    }
-                }
-                renderer_->DrawSkinnedMesh(mesh, ozz::make_span(*skinnedMeshComponent.skinning_matrices),
-                                           transform, skinnedMeshComponent.meshMaterial, render_options_);
-            }
-        }
-    }
+		// Already skinned for this pose generation (shadow / GBuffer / pick share one build).
+		if (skinned_generation_ == pose_generation_) {
+			return;
+		}
+		skinned_generation_ = pose_generation_;
 
-    void AnimationManager::RenderDebug() const
-    {
-        // auto view = GetCurrentSceneRegistry().view<Components::AnimationComponent, Components::Transform>();
-        // for (auto entity : view) {
-        //     Entity e(entity, GetCurrentScene());
-        //     auto&  animationComponent = e.GetComponent<Components::AnimationComponent>();
-        //     const ozz::math::Float4x4 transform = FromMatrix(e.GetComponent<Components::Transform>().GetWorldMatrix());
-        //
-        //     if (!animationComponent.skeleton || !animationComponent.model_pose) continue;
-        //     renderer_->DrawPosture(*animationComponent.skeleton,
-        //                            ozz::make_span(*animationComponent.model_pose),
-        //                            transform, true);
-        // }
-    }
+		struct EntitySkinWork {
+			Components::SkinnedMeshComponent* skinned = nullptr;
+			Components::AnimationComponent*   anim    = nullptr;
+		};
 
-    ozz::animation::Skeleton* AnimationManager::LoadSkeletonFromPath(const std::string& path)
-    {
-        auto it = loaded_skeletons_.find(path);
-        if (it != loaded_skeletons_.end()) {
-            return it->second.get();
-        }
+		std::vector<EntitySkinWork> work;
+		{
+			ZoneScopedN("Collect Skinned Entities");
+			auto view = GetCurrentSceneRegistry().view<Components::SkinnedMeshComponent, Components::AnimationComponent, Components::Transform>();
+			work.reserve(32);
+			for (auto entity : view) {
+				Entity e(entity, GetCurrentScene());
+				auto&  skinned = e.GetComponent<Components::SkinnedMeshComponent>();
+				auto&  anim    = e.GetComponent<Components::AnimationComponent>();
+				if (!anim.model_pose || !skinned.meshes || !skinned.skinning_matrices) {
+					continue;
+				}
+				if (skinned.meshes->empty()) {
+					continue;
+				}
+				// Ensure cache slots match mesh count
+				if (skinned.skin_frame_cache.size() != skinned.meshes->size()) {
+					skinned.skin_frame_cache.clear();
+					skinned.skin_frame_cache.resize(skinned.meshes->size());
+				}
+				// Invalidate caches until rebuilt
+				for (auto& c : skinned.skin_frame_cache) {
+					c.valid = false;
+				}
+				skinned.skin_cache_frame = pose_generation_;
+				work.push_back(EntitySkinWork{&skinned, &anim});
+			}
+		}
 
-        auto skeleton = std::make_unique<ozz::animation::Skeleton>();
-        if (!LoadSkeleton(path.c_str(), skeleton.get())) {
-            log->error("Failed to load skeleton from path: {}", path);
-            return nullptr;
-        }
+		if (work.empty()) {
+			return;
+		}
 
-        ozz::animation::Skeleton* result = skeleton.get();
-        loaded_skeletons_[path]          = std::move(skeleton);
-        return result;
-    }
+		// Parallel per-entity (ozz multithread sample style: std::async divide-and-conquer).
+		// Each entity owns distinct skinning_matrices + skin_frame_cache → no shared writes.
+		const int entityCount = static_cast<int>(work.size());
+		ParallelForIndex(entityCount, /*grain=*/1, [&](int ei) {
+			ZoneScopedN("Skin Entity");
+			auto& skinned = *work[static_cast<size_t>(ei)].skinned;
+			auto& anim    = *work[static_cast<size_t>(ei)].anim;
 
-    ozz::animation::Animation* AnimationManager::LoadAnimationFromPath(const std::string& path)
-    {
-        auto animation = new ozz::animation::Animation();
-        if (!LoadAnimation(path.c_str(), animation)) {
-            log->error("Failed to load animation from path: {}", path);
-            delete animation;
-            return nullptr;
-        }
-        return animation;
-    }
+			for (size_t mi = 0; mi < skinned.meshes->size(); ++mi) {
+				const AnimatedMesh& mesh = (*skinned.meshes)[mi];
+				{
+					ZoneScopedN("Build Skinning Matrices");
+					// Joint remap * inverse bind → matrices consumed by SkinningJob
+					for (size_t j = 0; j < mesh.joint_remaps.size(); ++j) {
+						(*skinned.skinning_matrices)[j] = (*anim.model_pose)[mesh.joint_remaps[j]] * mesh.inverse_bind_poses[j];
+					}
+				}
+				// Parallelizes parts internally
+				SkinAnimatedMeshToCache(mesh, ozz::make_span(*skinned.skinning_matrices), skinned.skin_frame_cache[mi]);
+			}
+		});
+	}
 
-    std::vector<ozz::math::SoaTransform>* AnimationManager::AllocateLocalPose(const ozz::animation::Skeleton* skeleton)
-    {
-        if (!skeleton) {
-            GetAnimationManager().log->error("Cannot allocate local pose for null skeleton");
-            return nullptr;
-        }
-        auto local_pose = new std::vector<ozz::math::SoaTransform>();
-        local_pose->resize(skeleton->num_soa_joints());
-        return local_pose;
-    }
+	void AnimationManager::Render()
+	{
+		ZoneScopedN("AnimationManager::Render (GBuffer)");
+		PrepareSkinnedMeshes();
 
-    std::vector<ozz::math::Float4x4>* AnimationManager::AllocateModelPose(const ozz::animation::Skeleton* skeleton)
-    {
-        if (!skeleton) {
-            GetAnimationManager().log->error("Cannot allocate model pose for null skeleton");
-            return nullptr;
-        }
-        auto model_pose = new std::vector<ozz::math::Float4x4>();
-        model_pose->resize(skeleton->num_joints());
-        return model_pose;
-    }
+		auto view = GetCurrentSceneRegistry().view<Components::SkinnedMeshComponent, Components::AnimationComponent, Components::Transform>();
+		for (auto entity : view) {
+			ZoneScopedN("GBuffer Skinned Entity");
+			Entity e(entity, GetCurrentScene());
+			auto&  skinned = e.GetComponent<Components::SkinnedMeshComponent>();
+			if (!skinned.visible) continue;
+			if (!skinned.meshes || skinned.skin_frame_cache.empty()) continue;
 
-    ozz::vector<AnimatedMesh>* AnimationManager::LoadMeshesFromPath(std::string path)
-    {
-        auto meshes = new ozz::vector<Engine::AnimatedMesh>();
-        if (!LoadMeshes(path.c_str(), meshes)) {
-            GetAnimationManager().log->error("Failed to load meshes from path: {}", path);
-            delete meshes;
-            return nullptr;
-        }
-        return meshes;
-    }
+			const ozz::math::Float4x4 transform = FromMatrix(e.GetComponent<Components::Transform>().GetWorldMatrix());
+
+			for (size_t mi = 0; mi < skinned.meshes->size(); ++mi) {
+				const auto& mesh  = (*skinned.meshes)[mi];
+				const auto& cache = skinned.skin_frame_cache[mi];
+				if (!cache.valid) continue;
+				renderer_->DrawSkinnedMeshCached(cache, mesh, transform, skinned.meshMaterial, render_options_);
+			}
+		}
+	}
+
+	void AnimationManager::RenderDebug() const
+	{
+	}
+
+	ozz::animation::Skeleton* AnimationManager::LoadSkeletonFromPath(const std::string& path)
+	{
+		auto it = loaded_skeletons_.find(path);
+		if (it != loaded_skeletons_.end()) {
+			return it->second.get();
+		}
+
+		auto skeleton = std::make_unique<ozz::animation::Skeleton>();
+		if (!LoadSkeleton(path.c_str(), skeleton.get())) {
+			log->error("Failed to load skeleton from path: {}", path);
+			return nullptr;
+		}
+
+		ozz::animation::Skeleton* result = skeleton.get();
+		loaded_skeletons_[path]          = std::move(skeleton);
+		return result;
+	}
+
+	ozz::animation::Animation* AnimationManager::LoadAnimationFromPath(const std::string& path)
+	{
+		auto animation = new ozz::animation::Animation();
+		if (!LoadAnimation(path.c_str(), animation)) {
+			log->error("Failed to load animation from path: {}", path);
+			delete animation;
+			return nullptr;
+		}
+		return animation;
+	}
+
+	std::vector<ozz::math::SoaTransform>* AnimationManager::AllocateLocalPose(const ozz::animation::Skeleton* skeleton)
+	{
+		if (!skeleton) {
+			GetAnimationManager().log->error("Cannot allocate local pose for null skeleton");
+			return nullptr;
+		}
+		auto local_pose = new std::vector<ozz::math::SoaTransform>();
+		local_pose->resize(skeleton->num_soa_joints());
+		return local_pose;
+	}
+
+	std::vector<ozz::math::Float4x4>* AnimationManager::AllocateModelPose(const ozz::animation::Skeleton* skeleton)
+	{
+		if (!skeleton) {
+			GetAnimationManager().log->error("Cannot allocate model pose for null skeleton");
+			return nullptr;
+		}
+		auto model_pose = new std::vector<ozz::math::Float4x4>();
+		model_pose->resize(skeleton->num_joints());
+		return model_pose;
+	}
+
+	ozz::vector<AnimatedMesh>* AnimationManager::LoadMeshesFromPath(std::string path)
+	{
+		auto meshes = new ozz::vector<Engine::AnimatedMesh>();
+		if (!LoadMeshes(path.c_str(), meshes)) {
+			GetAnimationManager().log->error("Failed to load meshes from path: {}", path);
+			delete meshes;
+			return nullptr;
+		}
+		return meshes;
+	}
 
 } // namespace Engine
 

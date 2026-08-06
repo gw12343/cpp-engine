@@ -6,6 +6,7 @@
 
 #include "core/Engine.h"
 #include "core/Entity.h"
+#include "core/EngineData.h"
 
 
 
@@ -25,7 +26,16 @@ namespace Engine::Components {
     {
         auto& lua = GetScriptManager().lua;
 
-        lua.new_usertype<ParticleSystem>("ParticleSystem");
+        lua.new_usertype<ParticleSystem>("ParticleSystem",
+                                         "autoPlay",
+                                         &ParticleSystem::autoPlay,
+                                         "looping",
+                                         &ParticleSystem::looping,
+                                         "play",
+                                         [](ParticleSystem& self, Entity entity) {
+	                                         // Prefer calling through the manager so handles stay consistent.
+	                                         GetParticleManager().PlayEffect(entity);
+                                         });
     }
 
 	void ParticleSystem::OnRemoved(Entity& entity)

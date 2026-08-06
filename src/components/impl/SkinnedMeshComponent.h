@@ -6,6 +6,7 @@
 #define CPP_ENGINE_SKINNEDMESHCOMPONENT_H
 
 #include <animation/rendering/AnimatedMesh.h>
+#include <animation/SkinnedMeshCache.h>
 
 #include "components/Components.h"
 #include "rendering/Renderer.h"
@@ -18,6 +19,9 @@ namespace Engine::Components {
 	  public:
 		ozz::vector<Engine::AnimatedMesh>*        meshes            = nullptr;
 		std::vector<ozz::math::Float4x4>* skinning_matrices = nullptr;
+		/// One CPU-skinned VBO cache per mesh, rebuilt once per frame.
+		std::vector<SkinnedMeshFrameCache> skin_frame_cache;
+		uint64_t                           skin_cache_frame = 0;
 		std::string                       meshPath;
         bool visible = true;
 

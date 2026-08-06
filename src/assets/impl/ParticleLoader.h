@@ -14,5 +14,6 @@ namespace Engine {
 	class ParticleLoader : public IAssetLoader<Particle> {
 	  public:
 		std::unique_ptr<Particle> LoadFromFile(const std::string& path) override;
+		bool                      Reload(Particle& asset, const std::string& path) override;
 	};
 } // namespace Engine
