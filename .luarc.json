@@ -1,0 +1,16 @@
+{
+  "runtime.version": "Lua 5.4",
+  "workspace.library": ["scripts/api"],
+  "diagnostics.globals": [
+    "gameObject",
+    "deltaTime",
+    "variables",
+    "Start",
+    "Update",
+    "LateUpdate",
+    "OnCollisionEnter",
+    "OnPlayerCollisionEnter",
+    "EditorInit",
+    "EditorUpdate"
+  ]
+}

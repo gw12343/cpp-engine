@@ -69,9 +69,9 @@ local function clamp(v, lo, hi)
 end
 
 local function atan2(y, x)
-    if math.atan2 then
-        return math.atan2(y, x)
-    end
+    --if math.atan2 then
+    --    return math.atan2(y, x)
+    --end
     return math.atan(y, x)
 end
 

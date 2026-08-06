@@ -112,31 +112,61 @@
                     "scriptPath": "scripts/player_thirdperson.lua",
                     "variables": [
                         {
-                            "key": "MOUSE_SENSITIVITY",
+                            "key": "ANIM_FADE",
                             "value": {
                                 "index": 0,
-                                "data": 0.10000000149011612
+                                "data": 0.20000000298023225
                             }
                         },
                         {
-                            "key": "WALK_SPEED",
+                            "key": "CAMERA_COLLISION_MIN_DIST",
                             "value": {
                                 "index": 0,
-                                "data": 3.5999999046325685
+                                "data": 0.25
                             }
                         },
                         {
-                            "key": "CAMERA_DISTANCE",
+                            "key": "CAMERA_ZOOM_OUT_SPEED",
                             "value": {
                                 "index": 0,
-                                "data": 5.0
+                                "data": 4.0
                             }
                         },
                         {
-                            "key": "CAMERA_PITCH_MIN",
+                            "key": "WALK_ANIM",
+                            "value": {
+                                "index": 1,
+                                "data": "resources/animations/walk_inplace.anim"
+                            }
+                        },
+                        {
+                            "key": "victorySound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                }
+                            }
+                        },
+                        {
+                            "key": "SHOOT_FORWARD_OFFSET",
                             "value": {
                                 "index": 0,
-                                "data": -30.0
+                                "data": 1.0
+                            }
+                        },
+                        {
+                            "key": "SHOOT_HEAD_HEIGHT",
+                            "value": {
+                                "index": 0,
+                                "data": 1.100000023841858
+                            }
+                        },
+                        {
+                            "key": "shootSound",
+                            "value": {
+                                "index": 0,
+                                "data": 14.800000190734864
                             }
                         },
                         {
@@ -163,50 +193,6 @@
                             }
                         },
                         {
-                            "key": "IDLE_ANIM",
-                            "value": {
-                                "index": 1,
-                                "data": "resources/animations/idle.ozz"
-                            }
-                        },
-                        {
-                            "key": "CAMERA_COLLISION_OFFSET",
-                            "value": {
-                                "index": 0,
-                                "data": 0.20000000298023225
-                            }
-                        },
-                        {
-                            "key": "victorySound",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
-                                }
-                            }
-                        },
-                        {
-                            "key": "SHOOT_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 14.800000190734864
-                            }
-                        },
-                        {
-                            "key": "TURN_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 381.6000061035156
-                            }
-                        },
-                        {
-                            "key": "WALK_ANIM",
-                            "value": {
-                                "index": 1,
-                                "data": "resources/animations/walk_inplace.anim"
-                            }
-                        },
-                        {
                             "key": "RUN_SPEED",
                             "value": {
                                 "index": 0,
@@ -223,10 +209,10 @@
                             }
                         },
                         {
-                            "key": "ZOOM_SENSITIVITY",
+                            "key": "SHOOT_POWER",
                             "value": {
                                 "index": 0,
-                                "data": 0.5
+                                "data": 14.800000190734864
                             }
                         },
                         {
@@ -237,24 +223,10 @@
                             }
                         },
                         {
-                            "key": "shootSound",
+                            "key": "RUN_ANIM",
                             "value": {
-                                "index": 0,
-                                "data": 14.800000190734864
-                            }
-                        },
-                        {
-                            "key": "SHOOT_HEAD_HEIGHT",
-                            "value": {
-                                "index": 0,
-                                "data": 1.100000023841858
-                            }
-                        },
-                        {
-                            "key": "SHOOT_FORWARD_OFFSET",
-                            "value": {
-                                "index": 0,
-                                "data": 1.0
+                                "index": 1,
+                                "data": "resources/animations/run_inplace.anim"
                             }
                         },
                         {
@@ -265,31 +237,10 @@
                             }
                         },
                         {
-                            "key": "ANIM_FADE",
-                            "value": {
-                                "index": 0,
-                                "data": 0.20000000298023225
-                            }
-                        },
-                        {
-                            "key": "RUN_ANIM",
+                            "key": "IDLE_ANIM",
                             "value": {
                                 "index": 1,
-                                "data": "resources/animations/run_inplace.anim"
-                            }
-                        },
-                        {
-                            "key": "CAMERA_PITCH_MAX",
-                            "value": {
-                                "index": 0,
-                                "data": 60.0
-                            }
-                        },
-                        {
-                            "key": "CAMERA_MIN_DISTANCE",
-                            "value": {
-                                "index": 0,
-                                "data": 2.0
+                                "data": "resources/animations/idle.ozz"
                             }
                         },
                         {
@@ -307,17 +258,66 @@
                             }
                         },
                         {
-                            "key": "CAMERA_COLLISION_MIN_DIST",
+                            "key": "CAMERA_PITCH_MIN",
                             "value": {
                                 "index": 0,
-                                "data": 0.25
+                                "data": -30.0
                             }
                         },
                         {
-                            "key": "CAMERA_ZOOM_OUT_SPEED",
+                            "key": "CAMERA_DISTANCE",
                             "value": {
                                 "index": 0,
-                                "data": 4.0
+                                "data": 5.0
+                            }
+                        },
+                        {
+                            "key": "CAMERA_COLLISION_OFFSET",
+                            "value": {
+                                "index": 0,
+                                "data": 0.20000000298023225
+                            }
+                        },
+                        {
+                            "key": "TURN_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 381.6000061035156
+                            }
+                        },
+                        {
+                            "key": "MOUSE_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.10000000149011612
+                            }
+                        },
+                        {
+                            "key": "WALK_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 3.5999999046325685
+                            }
+                        },
+                        {
+                            "key": "CAMERA_PITCH_MAX",
+                            "value": {
+                                "index": 0,
+                                "data": 60.0
+                            }
+                        },
+                        {
+                            "key": "CAMERA_MIN_DISTANCE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
+                            }
+                        },
+                        {
+                            "key": "ZOOM_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.5
                             }
                         }
                     ]
