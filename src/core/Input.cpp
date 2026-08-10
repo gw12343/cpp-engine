@@ -380,7 +380,13 @@ namespace Engine {
 			if (IsKeyPressed(GLFW_KEY_ESCAPE)) {
 				m_gameCursorMode = GLFW_CURSOR_NORMAL;
 			}
-			glfwSetInputMode(GetWindow().GetNativeWindow(), GLFW_CURSOR, m_gameCursorMode);
+			GLFWwindow* win = GetWindow().GetNativeWindow();
+			glfwSetInputMode(win, GLFW_CURSOR, m_gameCursorMode);
+			// Raw deltas avoid integer cursor quantization so look speed matches across FPS.
+			if (glfwRawMouseMotionSupported()) {
+				const int raw = (m_gameCursorMode == GLFW_CURSOR_DISABLED) ? GLFW_TRUE : GLFW_FALSE;
+				glfwSetInputMode(win, GLFW_RAW_MOUSE_MOTION, raw);
+			}
 		}
 
 		m_lastMousePosition = m_mousePosition;
@@ -496,7 +502,12 @@ namespace Engine {
 
 	void Input::SetCursorMode(int mode)
 	{
-		glfwSetInputMode(GetWindow().GetNativeWindow(), GLFW_CURSOR, mode);
+		GLFWwindow* win = GetWindow().GetNativeWindow();
+		glfwSetInputMode(win, GLFW_CURSOR, mode);
+		if (glfwRawMouseMotionSupported()) {
+			const int raw = (mode == GLFW_CURSOR_DISABLED) ? GLFW_TRUE : GLFW_FALSE;
+			glfwSetInputMode(win, GLFW_RAW_MOUSE_MOTION, raw);
+		}
 	}
 
 	int Input::GetCursorMode()

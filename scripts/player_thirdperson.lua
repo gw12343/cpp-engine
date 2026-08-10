@@ -15,7 +15,7 @@ variables = {
     CAMERA_MIN_DISTANCE      = 2.0,
     CAMERA_MAX_DISTANCE      = 12.0,
     CAMERA_HEIGHT            = 1.2,
-    CAMERA_PITCH_MIN         = -30.0,
+    CAMERA_PITCH_MIN         = -60.0, -- more negative = look down on player more
     CAMERA_PITCH_MAX         = 60.0,
     -- Pull camera slightly off the hit surface so the near plane doesn't clip
     CAMERA_COLLISION_OFFSET   = 0.2,
@@ -23,7 +23,8 @@ variables = {
     -- Snap in on collision; ease out when space opens up (units/sec)
     CAMERA_ZOOM_OUT_SPEED     = 4.0,
     MOUSE_SENSITIVITY         = 0.12,
-    -- Right-stick look (degrees contribution per frame at full deflection)
+    -- Right-stick look (degrees per frame at 60 FPS, full deflection).
+    -- Scaled by deltaTime*60 so rotation speed is the same at any framerate.
     GAMEPAD_LOOK_SENSITIVITY  = 2.5,
     ZOOM_SENSITIVITY          = 0.5,
 
@@ -272,10 +273,12 @@ function Update()
     input:setCursorMode(CURSOR_DISABLED)
 
     -- Look: mouse + right stick (Look Horizontal / Look Vertical axes)
+    -- Mouse delta is pixels this frame (already frame-rate independent).
+    -- Stick is continuous [-1,1], so scale by dt*60 to match "per frame @ 60fps" sens.
     local mouseDelta = input:getMouseDelta()
     local padLookX = input:getAxisRaw("Look Horizontal")
     local padLookY = input:getAxisRaw("Look Vertical")
-    local padSens = variables.GAMEPAD_LOOK_SENSITIVITY or 2.5
+    local padSens = (variables.GAMEPAD_LOOK_SENSITIVITY or 2.5) * deltaTime * 60.0
     orbitYaw   = orbitYaw + mouseDelta.x * variables.MOUSE_SENSITIVITY + padLookX * padSens
     orbitPitch = orbitPitch + mouseDelta.y * variables.MOUSE_SENSITIVITY + padLookY * padSens
     orbitPitch = clamp(orbitPitch, variables.CAMERA_PITCH_MIN, variables.CAMERA_PITCH_MAX)
