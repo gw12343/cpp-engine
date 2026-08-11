@@ -112,71 +112,6 @@
                     "scriptPath": "scripts/player_thirdperson.lua",
                     "variables": [
                         {
-                            "key": "JUMP_ANIM",
-                            "value": {
-                                "index": 1,
-                                "data": "resources/animations/Jump.anim"
-                            }
-                        },
-                        {
-                            "key": "victorySound",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
-                                }
-                            }
-                        },
-                        {
-                            "key": "CAMERA_PITCH_MIN",
-                            "value": {
-                                "index": 0,
-                                "data": -60.0
-                            }
-                        },
-                        {
-                            "key": "CAMERA_DISTANCE",
-                            "value": {
-                                "index": 0,
-                                "data": 5.0
-                            }
-                        },
-                        {
-                            "key": "GAMEPAD_LOOK_SENSITIVITY",
-                            "value": {
-                                "index": 0,
-                                "data": 2.5
-                            }
-                        },
-                        {
-                            "key": "CAMERA_COLLISION_MIN_DIST",
-                            "value": {
-                                "index": 0,
-                                "data": 0.25
-                            }
-                        },
-                        {
-                            "key": "CAMERA_ZOOM_OUT_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 4.0
-                            }
-                        },
-                        {
-                            "key": "TURN_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 381.6000061035156
-                            }
-                        },
-                        {
-                            "key": "ZOOM_SENSITIVITY",
-                            "value": {
-                                "index": 0,
-                                "data": 0.5
-                            }
-                        },
-                        {
                             "key": "RUN_SPEED",
                             "value": {
                                 "index": 0,
@@ -189,6 +124,52 @@
                                 "index": 12,
                                 "data": {
                                     "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
+                                }
+                            }
+                        },
+                        {
+                            "key": "MOUSE_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.10000000149011612
+                            }
+                        },
+                        {
+                            "key": "WALK_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 3.5999999046325685
+                            }
+                        },
+                        {
+                            "key": "CAMERA_MAX_DISTANCE",
+                            "value": {
+                                "index": 0,
+                                "data": 12.0
+                            }
+                        },
+                        {
+                            "key": "BULLET_MATERIAL",
+                            "value": {
+                                "index": 7,
+                                "data": {
+                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
+                                }
+                            }
+                        },
+                        {
+                            "key": "JUMP_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 8.0
+                            }
+                        },
+                        {
+                            "key": "victorySound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
                                 }
                             }
                         },
@@ -207,72 +188,7 @@
                             }
                         },
                         {
-                            "key": "JUMP_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 8.0
-                            }
-                        },
-                        {
-                            "key": "BULLET_MATERIAL",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
-                                }
-                            }
-                        },
-                        {
-                            "key": "CAMERA_MAX_DISTANCE",
-                            "value": {
-                                "index": 0,
-                                "data": 12.0
-                            }
-                        },
-                        {
-                            "key": "CAMERA_HEIGHT",
-                            "value": {
-                                "index": 0,
-                                "data": 1.2000000476837159
-                            }
-                        },
-                        {
-                            "key": "GRAVITY_SCALE",
-                            "value": {
-                                "index": 0,
-                                "data": 2.0
-                            }
-                        },
-                        {
-                            "key": "MOUSE_SENSITIVITY",
-                            "value": {
-                                "index": 0,
-                                "data": 0.10000000149011612
-                            }
-                        },
-                        {
-                            "key": "WALK_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 3.5999999046325685
-                            }
-                        },
-                        {
-                            "key": "SHOOT_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 14.800000190734864
-                            }
-                        },
-                        {
-                            "key": "CAMERA_MIN_DISTANCE",
-                            "value": {
-                                "index": 0,
-                                "data": 2.0
-                            }
-                        },
-                        {
-                            "key": "CAMERA_COLLISION_OFFSET",
+                            "key": "ANIM_FADE",
                             "value": {
                                 "index": 0,
                                 "data": 0.20000000298023225
@@ -286,31 +202,59 @@
                             }
                         },
                         {
-                            "key": "CAMERA_PITCH_MAX",
+                            "key": "SHOOT_POWER",
                             "value": {
                                 "index": 0,
-                                "data": 60.0
+                                "data": 14.800000190734864
                             }
                         },
                         {
-                            "key": "ANIM_FADE",
+                            "key": "CAMERA_COLLISION_OFFSET",
                             "value": {
                                 "index": 0,
                                 "data": 0.20000000298023225
                             }
                         },
                         {
-                            "key": "RUN_ANIM",
+                            "key": "CAMERA_MIN_DISTANCE",
                             "value": {
-                                "index": 1,
-                                "data": "resources/animations/run_inplace.anim"
+                                "index": 0,
+                                "data": 2.0
                             }
                         },
                         {
-                            "key": "WALK_ANIM",
+                            "key": "GRAVITY_SCALE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
+                            }
+                        },
+                        {
+                            "key": "CAMERA_HEIGHT",
+                            "value": {
+                                "index": 0,
+                                "data": 1.2000000476837159
+                            }
+                        },
+                        {
+                            "key": "GAMEPAD_LOOK_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 2.5
+                            }
+                        },
+                        {
+                            "key": "SHOOT_FORWARD_OFFSET",
+                            "value": {
+                                "index": 0,
+                                "data": 1.0
+                            }
+                        },
+                        {
+                            "key": "FALL_IDLE_ANIM",
                             "value": {
                                 "index": 1,
-                                "data": "resources/animations/walk_inplace.anim"
+                                "data": "resources/animations/fall_idle.anim"
                             }
                         },
                         {
@@ -321,10 +265,73 @@
                             }
                         },
                         {
-                            "key": "SHOOT_FORWARD_OFFSET",
+                            "key": "CAMERA_COLLISION_MIN_DIST",
                             "value": {
                                 "index": 0,
-                                "data": 1.0
+                                "data": 0.25
+                            }
+                        },
+                        {
+                            "key": "CAMERA_ZOOM_OUT_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 4.0
+                            }
+                        },
+                        {
+                            "key": "RUN_ANIM",
+                            "value": {
+                                "index": 1,
+                                "data": "resources/animations/run_inplace.anim"
+                            }
+                        },
+                        {
+                            "key": "CAMERA_PITCH_MAX",
+                            "value": {
+                                "index": 0,
+                                "data": 60.0
+                            }
+                        },
+                        {
+                            "key": "WALK_ANIM",
+                            "value": {
+                                "index": 1,
+                                "data": "resources/animations/walk_inplace.anim"
+                            }
+                        },
+                        {
+                            "key": "CAMERA_DISTANCE",
+                            "value": {
+                                "index": 0,
+                                "data": 5.0
+                            }
+                        },
+                        {
+                            "key": "CAMERA_PITCH_MIN",
+                            "value": {
+                                "index": 0,
+                                "data": -60.0
+                            }
+                        },
+                        {
+                            "key": "FALL_LAND_ANIM",
+                            "value": {
+                                "index": 1,
+                                "data": "resources/animations/fall_land.anim"
+                            }
+                        },
+                        {
+                            "key": "TURN_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 381.6000061035156
+                            }
+                        },
+                        {
+                            "key": "ZOOM_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.5
                             }
                         }
                     ]
@@ -19399,6 +19406,104 @@
         },
         {
             "EntityMetadata": {
+                "name": "Copy of Floor",
+                "tag": "",
+                "active": true,
+                "guid": "7b5340ffa6ca9d1d634d080906a96a3f",
+                "parentEntity": {
+                    "guid": ""
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 4.431706428527832,
+                        "y": 2.6803765296936037,
+                        "z": 9.526468276977539
+                    },
+                    "rotation": {
+                        "x": 0.9901502132415772,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 0.1400091052055359
+                    },
+                    "scale": {
+                        "x": 5.0,
+                        "y": 5.0,
+                        "z": 5.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "e319e2b8747bee49f54e67e706d42f67"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "76bde2dbec495706c2a748e69fe779af"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 1,
+                    "mass": 1.0,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 0.0,
+                    "shapeType": "Box",
+                    "shapeSize": {
+                        "x": 2.5,
+                        "y": 2.5,
+                        "z": 2.5
+                    },
+                    "meshSelection": [],
+                    "colliderModel": {
+                        "guid": ""
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
                 "name": "GameMaster",
                 "tag": "",
                 "active": true,
@@ -19441,6 +19546,202 @@
             },
             "RigidBodyComponent": {
                 "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Copy of Floor",
+                "tag": "",
+                "active": true,
+                "guid": "8cd4a91e1386b33c622be48489fcb957",
+                "parentEntity": {
+                    "guid": ""
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 4.431708335876465,
+                        "y": -0.16190028190612794,
+                        "z": 3.0467774868011476
+                    },
+                    "rotation": {
+                        "x": 0.9901502132415772,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 0.1400091052055359
+                    },
+                    "scale": {
+                        "x": 5.0,
+                        "y": 5.0,
+                        "z": 5.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "e319e2b8747bee49f54e67e706d42f67"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "76bde2dbec495706c2a748e69fe779af"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 1,
+                    "mass": 1.0,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 0.0,
+                    "shapeType": "Box",
+                    "shapeSize": {
+                        "x": 2.5,
+                        "y": 2.5,
+                        "z": 2.5
+                    },
+                    "meshSelection": [],
+                    "colliderModel": {
+                        "guid": ""
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Copy of Floor",
+                "tag": "",
+                "active": true,
+                "guid": "b9d24eaab12b52bf2d07a4980ad0d319",
+                "parentEntity": {
+                    "guid": ""
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 4.431703090667725,
+                        "y": 5.6151838302612309,
+                        "z": 17.847129821777345
+                    },
+                    "rotation": {
+                        "x": 0.9901502132415772,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 0.1400091052055359
+                    },
+                    "scale": {
+                        "x": 5.0,
+                        "y": 5.0,
+                        "z": 5.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "e319e2b8747bee49f54e67e706d42f67"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "76bde2dbec495706c2a748e69fe779af"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 1,
+                    "mass": 1.0,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 0.0,
+                    "shapeType": "Box",
+                    "shapeSize": {
+                        "x": 2.5,
+                        "y": 2.5,
+                        "z": 2.5
+                    },
+                    "meshSelection": [],
+                    "colliderModel": {
+                        "guid": ""
+                    }
+                }
             },
             "AudioSource": {
                 "nullopt": true
@@ -19523,7 +19824,7 @@
                     "playbackSpeed": 1.0,
                     "current": {
                         "clip": {
-                            "guid": "519f849885f9ab879ccc06d94dce0248"
+                            "guid": "6aabb45678e009fee64af203d7c42fef"
                         },
                         "time": 0.0,
                         "speed": 1.0,

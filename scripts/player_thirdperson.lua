@@ -40,12 +40,13 @@ variables = {
     TURN_SPEED    = 540.0, -- deg/sec when lerping face toward move dir
 
     -- Locomotion clips (same set as AnimatedEntity / animation_example)
-    IDLE_ANIM = "resources/animations/idle.ozz",
-    WALK_ANIM = "resources/animations/walk_inplace.anim",
-    RUN_ANIM  = "resources/animations/run_inplace.anim",
-    JUMP_ANIM = "resources/animations/Jump.anim",
-    ANIM_FADE = 0.2,
-    SKELETON  = "resources/animations/skeleton.ozz",
+    IDLE_ANIM      = "resources/animations/idle.ozz",
+    WALK_ANIM      = "resources/animations/walk_inplace.anim",
+    RUN_ANIM       = "resources/animations/run_inplace.anim",
+    FALL_IDLE_ANIM = "resources/animations/fall_idle.anim", -- loop while airborne
+    FALL_LAND_ANIM = "resources/animations/fall_land.anim", -- one-shot on touchdown
+    ANIM_FADE      = 0.2,
+    SKELETON       = "resources/animations/skeleton.ozz",
 
     SHOOT_POWER     = 15,
     BULLET_PARENT   = ehandle(),
@@ -127,12 +128,12 @@ local function anim()
     return v:GetAnimationComponent()
 end
 
-local function playClip(path, fade, loop)
+local function playClip(path, fade, loop, force)
     local ac = anim()
     if not ac then
         return
     end
-    if currentClip == path then
+    if not force and currentClip == path then
         return
     end
     currentClip = path
@@ -147,15 +148,41 @@ local function playClip(path, fade, loop)
     ac:play(path, shouldLoop, f)
 end
 
+local function locomotionTarget(moving, running)
+    if not moving then
+        return variables.IDLE_ANIM
+    elseif running then
+        return variables.RUN_ANIM
+    end
+    return variables.WALK_ANIM
+end
+
+local function isLandClipFinished()
+    local ac = anim()
+    if not ac then
+        return true
+    end
+    local len = ac:getLength()
+    if len <= 0.0 then
+        return true
+    end
+    -- Start blending into locomotion slightly before the clip ends
+    local fade = variables.ANIM_FADE or 0.2
+    return ac:getTime() >= math.max(0.0, len - fade)
+end
+
 local function updateLocomotionAnim(moving, running, grounded)
     if not hasAnim() then
         return
     end
 
-    -- Airborne: play jump clip (non-looping; holds last frame at end)
+    local fallIdle = variables.FALL_IDLE_ANIM
+    local fallLand = variables.FALL_LAND_ANIM
+
+    -- Airborne: loop fall pose (covers jump + walk-off)
     if not grounded then
-        if currentClip ~= variables.JUMP_ANIM then
-            playClip(variables.JUMP_ANIM, variables.ANIM_FADE, false)
+        if currentClip ~= fallIdle then
+            playClip(fallIdle, variables.ANIM_FADE, true)
         end
         wasGrounded = false
         wasMoving = moving
@@ -163,16 +190,24 @@ local function updateLocomotionAnim(moving, running, grounded)
         return
     end
 
-    local target
-    if not moving then
-        target = variables.IDLE_ANIM
-    elseif running then
-        target = variables.RUN_ANIM
-    else
-        target = variables.WALK_ANIM
+    -- Touchdown: play one-shot land recovery
+    if not wasGrounded then
+        playClip(fallLand, variables.ANIM_FADE * 0.5, false, true)
+        wasGrounded = true
+        wasMoving = moving
+        wasRunning = running
+        return
     end
 
-    -- Only crossfade when state changes (including landing off jump)
+    -- Hold land until it finishes (or nearly finishes for crossfade)
+    if currentClip == fallLand and not isLandClipFinished() then
+        wasGrounded = true
+        wasMoving = moving
+        wasRunning = running
+        return
+    end
+
+    local target = locomotionTarget(moving, running)
     if target ~= currentClip then
         playClip(target, variables.ANIM_FADE, true)
     end
