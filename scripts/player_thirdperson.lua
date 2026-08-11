@@ -190,17 +190,22 @@ local function updateLocomotionAnim(moving, running, grounded)
         return
     end
 
-    -- Touchdown: play one-shot land recovery
+    -- Touchdown: plant if standing still; if already moving, go straight to walk/run
+    -- so the land pose doesn't lock and slide under the character.
     if not wasGrounded then
-        playClip(fallLand, variables.ANIM_FADE * 0.5, false, true)
+        if moving then
+            playClip(locomotionTarget(moving, running), variables.ANIM_FADE, true)
+        else
+            playClip(fallLand, variables.ANIM_FADE * 0.5, false, true)
+        end
         wasGrounded = true
         wasMoving = moving
         wasRunning = running
         return
     end
 
-    -- Hold land until it finishes (or nearly finishes for crossfade)
-    if currentClip == fallLand and not isLandClipFinished() then
+    -- Hold land only while idle. Moving cancels land immediately (no foot slide).
+    if currentClip == fallLand and not isLandClipFinished() and not moving then
         wasGrounded = true
         wasMoving = moving
         wasRunning = running

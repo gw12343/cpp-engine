@@ -23,7 +23,7 @@
                 "data": {
                     "position": {
                         "x": 0.0,
-                        "y": -0.7562770247459412,
+                        "y": -0.8500000238418579,
                         "z": 0.0
                     },
                     "rotation": {
@@ -112,56 +112,10 @@
                     "scriptPath": "scripts/player_thirdperson.lua",
                     "variables": [
                         {
-                            "key": "RUN_SPEED",
+                            "key": "TURN_SPEED",
                             "value": {
                                 "index": 0,
-                                "data": 7.199999809265137
-                            }
-                        },
-                        {
-                            "key": "BULLET_PARENT",
-                            "value": {
-                                "index": 12,
-                                "data": {
-                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
-                                }
-                            }
-                        },
-                        {
-                            "key": "MOUSE_SENSITIVITY",
-                            "value": {
-                                "index": 0,
-                                "data": 0.10000000149011612
-                            }
-                        },
-                        {
-                            "key": "WALK_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 3.5999999046325685
-                            }
-                        },
-                        {
-                            "key": "CAMERA_MAX_DISTANCE",
-                            "value": {
-                                "index": 0,
-                                "data": 12.0
-                            }
-                        },
-                        {
-                            "key": "BULLET_MATERIAL",
-                            "value": {
-                                "index": 7,
-                                "data": {
-                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
-                                }
-                            }
-                        },
-                        {
-                            "key": "JUMP_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 8.0
+                                "data": 381.6000061035156
                             }
                         },
                         {
@@ -171,6 +125,34 @@
                                 "data": {
                                     "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
                                 }
+                            }
+                        },
+                        {
+                            "key": "FALL_IDLE_ANIM",
+                            "value": {
+                                "index": 1,
+                                "data": "resources/animations/fall_idle.anim"
+                            }
+                        },
+                        {
+                            "key": "CAMERA_DISTANCE",
+                            "value": {
+                                "index": 0,
+                                "data": 5.0
+                            }
+                        },
+                        {
+                            "key": "FALL_LAND_ANIM",
+                            "value": {
+                                "index": 1,
+                                "data": "resources/animations/fall_land.anim"
+                            }
+                        },
+                        {
+                            "key": "CAMERA_PITCH_MIN",
+                            "value": {
+                                "index": 0,
+                                "data": -60.0
                             }
                         },
                         {
@@ -188,13 +170,6 @@
                             }
                         },
                         {
-                            "key": "ANIM_FADE",
-                            "value": {
-                                "index": 0,
-                                "data": 0.20000000298023225
-                            }
-                        },
-                        {
                             "key": "SKELETON",
                             "value": {
                                 "index": 1,
@@ -202,24 +177,26 @@
                             }
                         },
                         {
-                            "key": "SHOOT_POWER",
+                            "key": "CAMERA_MAX_DISTANCE",
                             "value": {
                                 "index": 0,
-                                "data": 14.800000190734864
+                                "data": 12.0
                             }
                         },
                         {
-                            "key": "CAMERA_COLLISION_OFFSET",
+                            "key": "JUMP_POWER",
                             "value": {
                                 "index": 0,
-                                "data": 0.20000000298023225
+                                "data": 8.0
                             }
                         },
                         {
-                            "key": "CAMERA_MIN_DISTANCE",
+                            "key": "BULLET_MATERIAL",
                             "value": {
-                                "index": 0,
-                                "data": 2.0
+                                "index": 7,
+                                "data": {
+                                    "guid": "a9dfb812233c1829cad774e7b2670a02"
+                                }
                             }
                         },
                         {
@@ -237,45 +214,61 @@
                             }
                         },
                         {
-                            "key": "GAMEPAD_LOOK_SENSITIVITY",
+                            "key": "SHOOT_POWER",
                             "value": {
                                 "index": 0,
-                                "data": 2.5
+                                "data": 14.800000190734864
                             }
                         },
                         {
-                            "key": "SHOOT_FORWARD_OFFSET",
+                            "key": "ZOOM_SENSITIVITY",
                             "value": {
                                 "index": 0,
-                                "data": 1.0
+                                "data": 0.5
                             }
                         },
                         {
-                            "key": "FALL_IDLE_ANIM",
-                            "value": {
-                                "index": 1,
-                                "data": "resources/animations/fall_idle.anim"
-                            }
-                        },
-                        {
-                            "key": "IDLE_ANIM",
-                            "value": {
-                                "index": 1,
-                                "data": "resources/animations/idle.ozz"
-                            }
-                        },
-                        {
-                            "key": "CAMERA_COLLISION_MIN_DIST",
+                            "key": "MOUSE_SENSITIVITY",
                             "value": {
                                 "index": 0,
-                                "data": 0.25
+                                "data": 0.10000000149011612
                             }
                         },
                         {
-                            "key": "CAMERA_ZOOM_OUT_SPEED",
+                            "key": "WALK_SPEED",
                             "value": {
                                 "index": 0,
-                                "data": 4.0
+                                "data": 3.5999999046325685
+                            }
+                        },
+                        {
+                            "key": "BULLET_PARENT",
+                            "value": {
+                                "index": 12,
+                                "data": {
+                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
+                                }
+                            }
+                        },
+                        {
+                            "key": "RUN_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 7.199999809265137
+                            }
+                        },
+                        {
+                            "key": "ANIM_FADE",
+                            "value": {
+                                "index": 0,
+                                "data": 0.20000000298023225
+                            }
+                        },
+                        {
+                            "key": "CAMERA_MIN_DISTANCE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
                             }
                         },
                         {
@@ -286,13 +279,6 @@
                             }
                         },
                         {
-                            "key": "CAMERA_PITCH_MAX",
-                            "value": {
-                                "index": 0,
-                                "data": 60.0
-                            }
-                        },
-                        {
                             "key": "WALK_ANIM",
                             "value": {
                                 "index": 1,
@@ -300,38 +286,52 @@
                             }
                         },
                         {
-                            "key": "CAMERA_DISTANCE",
-                            "value": {
-                                "index": 0,
-                                "data": 5.0
-                            }
-                        },
-                        {
-                            "key": "CAMERA_PITCH_MIN",
-                            "value": {
-                                "index": 0,
-                                "data": -60.0
-                            }
-                        },
-                        {
-                            "key": "FALL_LAND_ANIM",
+                            "key": "IDLE_ANIM",
                             "value": {
                                 "index": 1,
-                                "data": "resources/animations/fall_land.anim"
+                                "data": "resources/animations/idle.ozz"
                             }
                         },
                         {
-                            "key": "TURN_SPEED",
+                            "key": "CAMERA_ZOOM_OUT_SPEED",
                             "value": {
                                 "index": 0,
-                                "data": 381.6000061035156
+                                "data": 4.0
                             }
                         },
                         {
-                            "key": "ZOOM_SENSITIVITY",
+                            "key": "CAMERA_COLLISION_MIN_DIST",
                             "value": {
                                 "index": 0,
-                                "data": 0.5
+                                "data": 0.25
+                            }
+                        },
+                        {
+                            "key": "GAMEPAD_LOOK_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 2.5
+                            }
+                        },
+                        {
+                            "key": "CAMERA_PITCH_MAX",
+                            "value": {
+                                "index": 0,
+                                "data": 60.0
+                            }
+                        },
+                        {
+                            "key": "SHOOT_FORWARD_OFFSET",
+                            "value": {
+                                "index": 0,
+                                "data": 1.0
+                            }
+                        },
+                        {
+                            "key": "CAMERA_COLLISION_OFFSET",
+                            "value": {
+                                "index": 0,
+                                "data": 0.20000000298023225
                             }
                         }
                     ]
@@ -19259,12 +19259,12 @@
                         "x": 0.0,
                         "y": 0.0,
                         "z": 0.0,
-                        "w": 0.9999999403953552
+                        "w": 1.0
                     },
                     "scale": {
-                        "x": 100.0,
+                        "x": 50.0,
                         "y": 1.0,
-                        "z": 100.0
+                        "z": 50.0
                     }
                 }
             },
@@ -19281,7 +19281,7 @@
                     "backfaceCulling": true,
                     "materialOverrides": [
                         {
-                            "guid": "76bde2dbec495706c2a748e69fe779af"
+                            "guid": "48ac579eaa8ac969e99c1fca5ab57c90"
                         }
                     ]
                 }
@@ -19688,9 +19688,9 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": 4.431703090667725,
-                        "y": 5.6151838302612309,
-                        "z": 17.847129821777345
+                        "x": 4.431704044342041,
+                        "y": 6.440588474273682,
+                        "z": 19.082374572753908
                     },
                     "rotation": {
                         "x": 0.9901502132415772,
@@ -19824,7 +19824,7 @@
                     "playbackSpeed": 1.0,
                     "current": {
                         "clip": {
-                            "guid": "6aabb45678e009fee64af203d7c42fef"
+                            "guid": "519f849885f9ab879ccc06d94dce0248"
                         },
                         "time": 0.0,
                         "speed": 1.0,
@@ -20087,20 +20087,20 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": -48.45905303955078,
-                        "y": 6.273026943206787,
-                        "z": -2.111436605453491
+                        "x": 0.6334333419799805,
+                        "y": 11.889890670776368,
+                        "z": 25.239513397216798
                     },
                     "rotation": {
-                        "x": 0.7071056365966797,
+                        "x": 0.0,
                         "y": 0.0,
                         "z": 0.0,
-                        "w": 0.7071079015731812
+                        "w": 1.0
                     },
                     "scale": {
-                        "x": 100.0,
-                        "y": 0.9999264478683472,
-                        "z": 99.9908447265625
+                        "x": 50.0,
+                        "y": 22.45680046081543,
+                        "z": 1.5334298610687256
                     }
                 }
             },
