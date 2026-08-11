@@ -19419,7 +19419,8 @@
                 "nullopt": true
             },
             "ShadowCaster": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {}
             },
             "Transform": {
                 "nullopt": false,
@@ -19455,7 +19456,7 @@
                     "backfaceCulling": true,
                     "materialOverrides": [
                         {
-                            "guid": "76bde2dbec495706c2a748e69fe779af"
+                            "guid": "ffe66a5c0ceb5801f42602858d1a6256"
                         }
                     ]
                 }
@@ -19584,7 +19585,8 @@
                 "nullopt": true
             },
             "ShadowCaster": {
-                "nullopt": true
+                "nullopt": false,
+                "data": {}
             },
             "Transform": {
                 "nullopt": false,
@@ -19620,7 +19622,7 @@
                     "backfaceCulling": true,
                     "materialOverrides": [
                         {
-                            "guid": "76bde2dbec495706c2a748e69fe779af"
+                            "guid": "ffe66a5c0ceb5801f42602858d1a6256"
                         }
                     ]
                 }
@@ -19672,7 +19674,7 @@
                 "name": "Copy of Floor",
                 "tag": "",
                 "active": true,
-                "guid": "b9d24eaab12b52bf2d07a4980ad0d319",
+                "guid": "8ff172d61d1f5b9da7b394d268e4ec4a",
                 "parentEntity": {
                     "guid": ""
                 },
@@ -19683,6 +19685,105 @@
             },
             "ShadowCaster": {
                 "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": -24.5,
+                        "y": 10.499923706054688,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 20.0,
+                        "z": 50.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "e319e2b8747bee49f54e67e706d42f67"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "9d47718ceee1b16bc66fa294bc7ad47d"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 1,
+                    "mass": 1.0,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 0.0,
+                    "shapeType": "Box",
+                    "shapeSize": {
+                        "x": 0.5,
+                        "y": 10.0,
+                        "z": 25.0
+                    },
+                    "meshSelection": [],
+                    "colliderModel": {
+                        "guid": ""
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Copy of Floor",
+                "tag": "",
+                "active": true,
+                "guid": "b9d24eaab12b52bf2d07a4980ad0d319",
+                "parentEntity": {
+                    "guid": ""
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": false,
+                "data": {}
             },
             "Transform": {
                 "nullopt": false,
@@ -19718,7 +19819,7 @@
                     "backfaceCulling": true,
                     "materialOverrides": [
                         {
-                            "guid": "76bde2dbec495706c2a748e69fe779af"
+                            "guid": "ffe66a5c0ceb5801f42602858d1a6256"
                         }
                     ]
                 }
@@ -20087,9 +20188,9 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": 0.6334333419799805,
-                        "y": 11.889890670776368,
-                        "z": 25.239513397216798
+                        "x": 0.0,
+                        "y": 10.5,
+                        "z": -24.5
                     },
                     "rotation": {
                         "x": 0.0,
@@ -20099,8 +20200,8 @@
                     },
                     "scale": {
                         "x": 50.0,
-                        "y": 22.45680046081543,
-                        "z": 1.5334298610687256
+                        "y": 20.0,
+                        "z": 1.0
                     }
                 }
             },
@@ -20117,7 +20218,7 @@
                     "backfaceCulling": true,
                     "materialOverrides": [
                         {
-                            "guid": "76bde2dbec495706c2a748e69fe779af"
+                            "guid": "9d47718ceee1b16bc66fa294bc7ad47d"
                         }
                     ]
                 }
@@ -20132,9 +20233,9 @@
                     "gravityFactor": 0.0,
                     "shapeType": "Box",
                     "shapeSize": {
-                        "x": 50.0,
-                        "y": 0.4999910295009613,
-                        "z": 49.99898147583008
+                        "x": 25.0,
+                        "y": 10.0,
+                        "z": 0.5
                     },
                     "meshSelection": [],
                     "colliderModel": {
