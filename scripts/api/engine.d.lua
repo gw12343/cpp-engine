@@ -173,6 +173,7 @@ function TriangleShape(a, b, c) end
 --- Result of PhysicsManager:raycast on hit (nil on miss).
 ---@class RaycastHit
 ---@field point vec3 World hit position
+---@field normal vec3 Surface normal at hit (world space)
 ---@field distance number Distance from origin along the ray
 ---@field fraction number distance / maxDistance in [0, 1]
 
@@ -635,6 +636,14 @@ function RigidBodyComponent:setCollisionShape(...) end
 function RigidBodyComponent:setCollisionShapeRef(...) end
 
 ---@class PlayerControllerComponent
+---@field setClimbing fun(self: PlayerControllerComponent, climbing: boolean)
+---@field isClimbing fun(self: PlayerControllerComponent): boolean
+---@field getCapsuleRadius fun(self: PlayerControllerComponent): number
+---@field getCapsuleHalfHeight fun(self: PlayerControllerComponent): number
+---@field getClimbNormal fun(self: PlayerControllerComponent): vec3
+---@field getClimbPoint fun(self: PlayerControllerComponent): vec3
+---@field hasClimbSurface fun(self: PlayerControllerComponent): boolean
+---@field probeClimbSurface fun(self: PlayerControllerComponent, dir: vec3, maxDist: number, minNormalY?: number, maxNormalY?: number): boolean
 local PlayerControllerComponent = {}
 
 ---@return boolean
@@ -665,12 +674,44 @@ function PlayerControllerComponent:setRotationEuler(euler) end
 ---@param worldDir vec3
 function PlayerControllerComponent:setFacingDirection(worldDir) end
 
+--- BOTW-style climb: zero gravity / no stick-to-floor while true.
+---@param climbing boolean
+function PlayerControllerComponent:setClimbing(climbing) end
+
+---@return boolean
+function PlayerControllerComponent:isClimbing() end
+
+---@return number
+function PlayerControllerComponent:getCapsuleRadius() end
+
+---@return number
+function PlayerControllerComponent:getCapsuleHalfHeight() end
+
+---@return vec3
+function PlayerControllerComponent:getClimbNormal() end
+
+---@return vec3
+function PlayerControllerComponent:getClimbPoint() end
+
+---@return boolean
+function PlayerControllerComponent:hasClimbSurface() end
+
+--- Raycast for a steep wall along dir. Optional normal.y band (default mild overhang..not floor).
+---@param dir vec3
+---@param maxDist number
+---@param minNormalY? number
+---@param maxNormalY? number
+---@return boolean
+function PlayerControllerComponent:probeClimbSurface(dir, maxDist, minNormalY, maxNormalY) end
+
 ---@class AnimationComponent
 ---@field skeletonPath string
 ---@field defaultFadeDuration number
 ---@field playbackSpeed number
 ---@field speed number
 ---@field looping boolean
+--- When true, hips/root model translation is forced to skeleton rest (cancels Mixamo float).
+---@field counteractRootOffset boolean
 local AnimationComponent = {}
 
 ---@param path string

@@ -23,14 +23,15 @@ namespace Engine::Components {
 
 	AnimationComponent::AnimationComponent(const AnimationComponent& other)
 	{
-		skeletonPath         = other.skeletonPath;
-		defaultFadeDuration  = other.defaultFadeDuration;
-		playbackSpeed        = other.playbackSpeed;
-		current.clip         = other.current.clip;
-		current.time         = other.current.time;
-		current.speed        = other.current.speed;
-		current.looping      = other.current.looping;
-		current.active       = other.current.active;
+		skeletonPath          = other.skeletonPath;
+		defaultFadeDuration   = other.defaultFadeDuration;
+		playbackSpeed         = other.playbackSpeed;
+		counteractRootOffset  = other.counteractRootOffset;
+		current.clip          = other.current.clip;
+		current.time          = other.current.time;
+		current.speed         = other.current.speed;
+		current.looping       = other.current.looping;
+		current.active        = other.current.active;
 		// Runtime buffers rebuilt in OnAdded
 	}
 
@@ -40,15 +41,17 @@ namespace Engine::Components {
 			skeletonPath         = other.skeletonPath;
 			defaultFadeDuration  = other.defaultFadeDuration;
 			playbackSpeed        = other.playbackSpeed;
+			counteractRootOffset = other.counteractRootOffset;
 			current.clip         = other.current.clip;
 			current.time         = other.current.time;
 			current.speed        = other.current.speed;
 			current.looping      = other.current.looping;
 			current.active       = other.current.active;
 			from.Deactivate();
-			isFading     = false;
-			blendWeight  = 1.f;
-			fadeElapsed  = 0.f;
+			isFading       = false;
+			blendWeight    = 1.f;
+			fadeElapsed    = 0.f;
+			restRootValid  = false;
 		}
 		return *this;
 	}
@@ -103,6 +106,7 @@ namespace Engine::Components {
 
 		if (skeleton) {
 			EnsurePoseBuffers();
+			CacheRestRootModelTranslation();
 			if (current.clip.IsValid()) {
 				if (PrepareTrack(current)) {
 					// Keep serialized time; clamp to clip length after prepare
@@ -156,8 +160,9 @@ namespace Engine::Components {
 
 	void AnimationComponent::SetSkeleton(const std::string& path)
 	{
-		skeletonPath = path;
-		skeleton     = nullptr;
+		skeletonPath  = path;
+		skeleton      = nullptr;
+		restRootValid = false;
 		if (!skeletonPath.empty()) {
 			skeleton = GetAnimationManager().LoadSkeletonFromPath(skeletonPath);
 		}
@@ -169,12 +174,86 @@ namespace Engine::Components {
 
 		if (skeleton) {
 			EnsurePoseBuffers();
+			CacheRestRootModelTranslation();
 			if (current.active) {
 				PrepareTrack(current);
 			}
 			if (from.active) {
 				PrepareTrack(from);
 			}
+		}
+	}
+
+	void AnimationComponent::CacheRestRootModelTranslation()
+	{
+		restRootValid = false;
+		if (!skeleton) return;
+
+		const int numSoa = skeleton->num_soa_joints();
+		const int numJ   = skeleton->num_joints();
+		if (numSoa <= 0 || numJ <= 0) return;
+
+		// LTM of bind/rest pose → model-space hips (joint 0) position.
+		std::vector<ozz::math::SoaTransform> restLocal(static_cast<size_t>(numSoa));
+		const auto                           restSpan = skeleton->joint_rest_poses();
+		for (int i = 0; i < numSoa; ++i) {
+			restLocal[static_cast<size_t>(i)] = restSpan[i];
+		}
+		std::vector<ozz::math::Float4x4> restModel(static_cast<size_t>(numJ));
+		ozz::animation::LocalToModelJob  ltm;
+		ltm.skeleton = skeleton;
+		ltm.input    = ozz::make_span(restLocal);
+		ltm.output   = ozz::make_span(restModel);
+		if (!ltm.Run()) return;
+
+		float t[4];
+		ozz::math::StorePtrU(restModel[0].cols[3], t);
+		restRootX     = t[0];
+		restRootY     = t[1];
+		restRootZ     = t[2];
+		restRootValid = true;
+	}
+
+	void AnimationComponent::ApplyRootOffsetCounteract()
+	{
+		if (!counteractRootOffset || !restRootValid || !model_pose || model_pose->empty() || !skeleton) {
+			return;
+		}
+		if (static_cast<int>(model_pose->size()) < skeleton->num_joints()) {
+			return;
+		}
+
+		// Animated root (hips) model translation.
+		float rt[4] = {0.f, 0.f, 0.f, 1.f};
+		ozz::math::StorePtrU((*model_pose)[0].cols[3], rt);
+		if (!std::isfinite(rt[0]) || !std::isfinite(rt[1]) || !std::isfinite(rt[2])) {
+			return;
+		}
+
+		// Delta from bind pose — base/root offset baked into the clip (e.g. Mixamo
+		// climb_down floating high). Subtract from every joint so the mesh drops
+		// back onto the capsule without changing relative limb pose.
+		const float dx = rt[0] - restRootX;
+		const float dy = rt[1] - restRootY;
+		const float dz = rt[2] - restRootZ;
+		if (!std::isfinite(dx) || !std::isfinite(dy) || !std::isfinite(dz)) {
+			return;
+		}
+		if (dx * dx + dy * dy + dz * dz < 1e-12f) {
+			return;
+		}
+
+		for (ozz::math::Float4x4& m : *model_pose) {
+			float t[4] = {0.f, 0.f, 0.f, 1.f};
+			ozz::math::StorePtrU(m.cols[3], t);
+			if (!std::isfinite(t[0]) || !std::isfinite(t[1]) || !std::isfinite(t[2])) {
+				continue;
+			}
+			t[0] -= dx;
+			t[1] -= dy;
+			t[2] -= dz;
+			t[3] = 1.f;
+			m.cols[3] = ozz::math::simd_float4::LoadPtrU(t);
 		}
 	}
 
@@ -410,7 +489,10 @@ namespace Engine::Components {
 		ltm.output   = ozz::make_span(*model_pose);
 		if (!ltm.Run()) {
 			GetDefaultLogger()->error("LocalToModel failed");
+			return;
 		}
+
+		ApplyRootOffsetCounteract();
 	}
 
 	void AnimationComponent::AddBindings()
@@ -425,6 +507,8 @@ namespace Engine::Components {
 		    &AnimationComponent::defaultFadeDuration,
 		    "playbackSpeed",
 		    &AnimationComponent::playbackSpeed,
+		    "counteractRootOffset",
+		    &AnimationComponent::counteractRootOffset,
 		    "setSkeleton",
 		    &AnimationComponent::SetSkeleton,
 
@@ -497,6 +581,10 @@ namespace Engine::Components {
 		ImGui::Text("Joints: %d", JointCount());
 		LeftLabelSliderFloat("Playback Speed", &playbackSpeed, 0.f, 3.f);
 		LeftLabelSliderFloat("Default Fade", &defaultFadeDuration, 0.f, 2.f);
+		LeftLabelCheckbox("Counteract Root Offset", &counteractRootOffset);
+		if (restRootValid) {
+			ImGui::Text("Rest root: (%.2f, %.2f, %.2f)", restRootX, restRootY, restRootZ);
+		}
 
 		ImGui::Separator();
 		ImGui::Text("Current Clip");

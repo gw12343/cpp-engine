@@ -34,6 +34,29 @@ namespace Engine::Components {
 		// Face a world-space direction on XZ (y ignored). Uses the same yaw basis as
 		// the engine camera: flat forward = (cos yaw, sin yaw).
 		void SetFacingDirection(glm::vec3 worldDir);
+
+		// --- Climbing (BOTW-style wall attach; physics only) ---
+		void SetClimbing(bool climbing);
+		bool IsClimbing() const;
+
+		/// Capsule radius used for wall stick distance (matches CharacterVirtual shape).
+		float GetCapsuleRadius() const;
+		/// Cylinder half-height (not full height) of the standing capsule.
+		float GetCapsuleHalfHeight() const;
+
+		/// Last successful climb probe normal / point (updated by ProbeClimbSurface).
+		glm::vec3 GetClimbNormal() const { return mClimbNormal; }
+		glm::vec3 GetClimbPoint() const { return mClimbPoint; }
+		bool      HasClimbSurface() const { return mHasClimbSurface; }
+
+		/// Raycast from chest along worldDir for a climbable surface.
+		/// Returns true and fills point/normal/distance when a steep-enough wall is hit.
+		bool ProbeClimbSurface(glm::vec3 worldDir, float maxDistance, float minNormalY, float maxNormalY);
+
+	  private:
+		glm::vec3 mClimbNormal{0.f, 0.f, 1.f};
+		glm::vec3 mClimbPoint{0.f};
+		bool      mHasClimbSurface = false;
 	};
 } // namespace Engine::Components
 

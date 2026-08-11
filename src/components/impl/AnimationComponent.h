@@ -26,6 +26,11 @@ namespace Engine::Components {
 		float       defaultFadeDuration = 0.2f;
 		float       playbackSpeed       = 1.f; // global multiplier
 
+		// When true, root (hips) model translation is forced back to the skeleton rest
+		// position every frame — cancels Mixamo base/root height offsets (e.g. climb_down).
+		// Enable from script for in-place climb clips; leave false for normal locomotion.
+		bool counteractRootOffset = false;
+
 		// Serialized playback state (current clip only — crossfade is runtime)
 		AnimationTrack current{};
 
@@ -39,6 +44,10 @@ namespace Engine::Components {
 		float          fadeDuration = 0.2f;
 		float          fadeElapsed  = 0.f;
 		bool           isFading     = false;
+
+		// Rest-pose hips/root model translation (cached when skeleton loads).
+		bool      restRootValid = false;
+		float     restRootX = 0.f, restRootY = 0.f, restRootZ = 0.f;
 
 		AnimationComponent() = default;
 		AnimationComponent(const AnimationComponent& other);
@@ -96,6 +105,8 @@ namespace Engine::Components {
 	  private:
 		void EnsurePoseBuffers();
 		bool PrepareTrack(AnimationTrack& track);
+		void CacheRestRootModelTranslation();
+		void ApplyRootOffsetCounteract();
 
 		// Resolve engine asset from a track's handle (null if missing/invalid).
 		static Animation* ResolveClip(const AnimationTrack& track);

@@ -7,6 +7,7 @@
 #include "Jolt/Physics/Character/CharacterVirtual.h"
 #include "Jolt/Physics/Collision/RayCast.h"
 #include "Jolt/Physics/Collision/CastResult.h"
+#include "Jolt/Physics/Body/BodyLock.h"
 #include <cstdarg>
 #include <cfloat>
 
@@ -33,6 +34,12 @@ namespace Engine {
 	}
 
 	bool PhysicsManager::Raycast(const glm::vec3& origin, const glm::vec3& direction, float maxDistance, glm::vec3& outHitPoint, float& outDistance) const
+	{
+		glm::vec3 unusedNormal{};
+		return Raycast(origin, direction, maxDistance, outHitPoint, unusedNormal, outDistance);
+	}
+
+	bool PhysicsManager::Raycast(const glm::vec3& origin, const glm::vec3& direction, float maxDistance, glm::vec3& outHitPoint, glm::vec3& outNormal, float& outDistance) const
 	{
 		if (!physics || maxDistance <= 0.0f) {
 			return false;
@@ -64,6 +71,13 @@ namespace Engine {
 		const RVec3 point = ray.GetPointOnRay(hit.mFraction);
 		outHitPoint       = glm::vec3(point.GetX(), point.GetY(), point.GetZ());
 		outDistance       = hit.mFraction * maxDistance;
+
+		outNormal = -dir;
+		const BodyLockRead lock(physics->GetBodyLockInterface(), hit.mBodyID);
+		if (lock.Succeeded()) {
+			const Vec3 n = lock.GetBody().GetWorldSpaceSurfaceNormal(hit.mSubShapeID2, point);
+			outNormal    = glm::normalize(glm::vec3(n.GetX(), n.GetY(), n.GetZ()));
+		}
 		return true;
 	}
 
@@ -201,16 +215,18 @@ namespace Engine {
 			                                                    auto g = physics->GetGravity();
 			                                                    return glm::vec3(g.GetX(), g.GetY(), g.GetZ());
 		                                                    },
-		                                                    // Closest-hit raycast: returns nil or { point, distance, fraction }
+		                                                    // Closest-hit raycast: returns nil or { point, normal, distance, fraction }
 		                                                    "raycast",
 		                                                    [](PhysicsManager& self, const glm::vec3& origin, const glm::vec3& direction, float maxDistance) -> sol::object {
 			                                                    glm::vec3 hitPoint{};
+			                                                    glm::vec3 hitNormal{};
 			                                                    float     hitDistance = 0.0f;
-			                                                    if (!self.Raycast(origin, direction, maxDistance, hitPoint, hitDistance)) {
+			                                                    if (!self.Raycast(origin, direction, maxDistance, hitPoint, hitNormal, hitDistance)) {
 				                                                    return sol::make_object(GetScriptManager().lua, sol::nil);
 			                                                    }
 			                                                    sol::table result = GetScriptManager().lua.create_table();
 			                                                    result["point"]    = hitPoint;
+			                                                    result["normal"]   = hitNormal;
 			                                                    result["distance"] = hitDistance;
 			                                                    result["fraction"] = (maxDistance > 0.0f) ? (hitDistance / maxDistance) : 0.0f;
 			                                                    return sol::make_object(GetScriptManager().lua, result);
@@ -404,6 +420,16 @@ namespace Engine {
 	std::shared_ptr<CharacterVirtual> PhysicsManager::GetCharacter()
 	{
 		return character;
+	}
+
+	PlayerController* PhysicsManager::GetPlayerController()
+	{
+		return controller.get();
+	}
+
+	const PlayerController* PhysicsManager::GetPlayerController() const
+	{
+		return controller.get();
 	}
 
 

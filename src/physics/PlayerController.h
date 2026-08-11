@@ -35,8 +35,13 @@ namespace Engine {
 		void                              Update(std::shared_ptr<CharacterVirtual> mCharacter, std::shared_ptr<PhysicsSystem> physics, std::shared_ptr<TempAllocatorImpl> allocater, float dt);
 		glm::vec3                         GetPlayerPosition();
 
+		/// BOTW-style climb: while true, ExtendedUpdate uses zero gravity and no floor stick.
+		void SetClimbing(bool climbing) { mClimbing = climbing; }
+		bool IsClimbing() const { return mClimbing; }
+
 	  private:
 		std::shared_ptr<CharacterVirtual> mCharacter;
+		bool                              mClimbing = false;
 	};
 } // namespace Engine
 

@@ -40,6 +40,8 @@ using namespace JPH::literals;
 
 namespace Engine {
 
+	class PlayerController;
+
 	void      DecomposeMatrix(const JPH::RMat44& mat, glm::vec3& position, glm::quat& rotation, glm::vec3& scale);
 	glm::mat4 CalculateModelMatrix(Engine::Components::Transform& transform);
 
@@ -68,10 +70,15 @@ namespace Engine {
 		void                              SyncCharacterEntities();
 		std::shared_ptr<PhysicsSystem>    GetPhysicsSystem();
 		std::shared_ptr<CharacterVirtual> GetCharacter();
+		PlayerController*                 GetPlayerController();
+		const PlayerController*           GetPlayerController() const;
 
 		/// Closest-hit raycast. Direction is normalized internally; length is maxDistance.
 		/// Returns true and writes hit point / distance when something is hit.
 		bool Raycast(const glm::vec3& origin, const glm::vec3& direction, float maxDistance, glm::vec3& outHitPoint, float& outDistance) const;
+
+		/// Same as Raycast, also writes outward surface normal at the hit (world space).
+		bool Raycast(const glm::vec3& origin, const glm::vec3& direction, float maxDistance, glm::vec3& outHitPoint, glm::vec3& outNormal, float& outDistance) const;
 
 		BPLayerInterfaceImpl              broad_phase_layer_interface;
 		ObjectVsBroadPhaseLayerFilterImpl object_vs_broadphase_layer_filter;

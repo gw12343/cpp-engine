@@ -88,24 +88,32 @@ namespace Engine {
 
 	void PlayerController::Update(std::shared_ptr<CharacterVirtual> mCharacter, std::shared_ptr<PhysicsSystem> physics, std::shared_ptr<TempAllocatorImpl> allocater, float dt)
 	{
-		Vec3 mDesiredVelocity = Vec3::sZero();
-
 		// Keep character upright. Do not overwrite yaw — gameplay scripts set facing
-		// (needed for third-person / animated characters).
+		// (needed for third-person / animated characters). Climbing also stays upright
+		// (BOTW-style: body up, movement projected onto the wall plane).
 		Quat character_up_rotation = Quat::sEulerAngles(Vec3(sUpRotationX, 0, sUpRotationZ));
 		mCharacter->SetUp(character_up_rotation.RotateAxisY());
 
-		// A cheaper way to update the character's ground velocity,
-		// the platforms that the character is standing on may have changed velocity
 		mCharacter->UpdateGroundVelocity();
 
-
-		// Settings for our update function
 		CharacterVirtual::ExtendedUpdateSettings update_settings;
-		update_settings.mStickToFloorStepDown = -mCharacter->GetUp() * update_settings.mStickToFloorStepDown.Length();
-		update_settings.mWalkStairsStepUp     = mCharacter->GetUp() * update_settings.mWalkStairsStepUp.Length();
-		// Update the character position
-		mCharacter->ExtendedUpdate(dt, Vec3(0, -9.8, 0), update_settings, physics->GetDefaultBroadPhaseLayerFilter(Layers::MOVING), physics->GetDefaultLayerFilter(Layers::MOVING), {}, {}, *allocater);
+		Vec3                                     gravity(0, -9.8f, 0);
+
+		if (mClimbing) {
+			// Attached to a wall: no gravity pull, no stick-to-floor / stair walk.
+			// Script drives velocity along the wall; we only resolve collisions.
+			gravity                                     = Vec3::sZero();
+			update_settings.mStickToFloorStepDown       = Vec3::sZero();
+			update_settings.mWalkStairsStepUp           = Vec3::sZero();
+			update_settings.mWalkStairsStepForwardTest  = 0.0f;
+			update_settings.mWalkStairsMinStepForward   = 0.0f;
+		}
+		else {
+			update_settings.mStickToFloorStepDown = -mCharacter->GetUp() * update_settings.mStickToFloorStepDown.Length();
+			update_settings.mWalkStairsStepUp     = mCharacter->GetUp() * update_settings.mWalkStairsStepUp.Length();
+		}
+
+		mCharacter->ExtendedUpdate(dt, gravity, update_settings, physics->GetDefaultBroadPhaseLayerFilter(Layers::MOVING), physics->GetDefaultLayerFilter(Layers::MOVING), {}, {}, *allocater);
 	}
 
 
