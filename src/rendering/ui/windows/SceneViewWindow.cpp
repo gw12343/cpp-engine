@@ -14,12 +14,12 @@
 
 
 
-#include "glm/gtx/matrix_decompose.inl"
 #include "components/impl/EntityMetadataComponent.h"
 #include "components/AllComponents.h"
 #include "rendering/ui/IconsFontAwesome6.h"
 
 #include <cstdio>
+#include <cmath>
 
 namespace Engine {
 
@@ -42,6 +42,37 @@ namespace Engine {
 			ImDrawList* dl = ImGui::GetWindowDrawList();
 			dl->AddRectFilled(min, max, IM_COL32(0, 0, 0, 150), 4.0f);
 			dl->AddText(pos, IM_COL32(180, 255, 120, 255), buf);
+		}
+
+		// Extract TRS from a column-major affine matrix without glm::decompose
+		// (glm::decompose param order is easy to swap and can flip rotations).
+		void ExtractTRS(const glm::mat4& m, glm::vec3& translation, glm::quat& rotation, glm::vec3& scale)
+		{
+			translation = glm::vec3(m[3]);
+
+			const float sx = glm::length(glm::vec3(m[0]));
+			const float sy = glm::length(glm::vec3(m[1]));
+			const float sz = glm::length(glm::vec3(m[2]));
+			scale          = glm::vec3(sx, sy, sz);
+
+			glm::mat3 rot(1.0f);
+			const float eps = 1e-8f;
+			rot[0]          = (sx > eps) ? (glm::vec3(m[0]) / sx) : glm::vec3(1.f, 0.f, 0.f);
+			rot[1]          = (sy > eps) ? (glm::vec3(m[1]) / sy) : glm::vec3(0.f, 1.f, 0.f);
+			rot[2]          = (sz > eps) ? (glm::vec3(m[2]) / sz) : glm::vec3(0.f, 0.f, 1.f);
+
+			// Handle reflection (negative scale) so quat_cast stays valid
+			if (glm::determinant(rot) < 0.0f) {
+				scale.x = -scale.x;
+				rot[0]  = -rot[0];
+			}
+
+			rotation = glm::normalize(glm::quat_cast(rot));
+		}
+
+		glm::mat4 ComposeTRS(const glm::vec3& translation, const glm::quat& rotation, const glm::vec3& scale)
+		{
+			return glm::translate(glm::mat4(1.0f), translation) * glm::mat4_cast(rotation) * glm::scale(glm::mat4(1.0f), scale);
 		}
 	} // namespace
 
@@ -97,58 +128,75 @@ namespace Engine {
 				if (selectedEntity->HasComponent<Components::Transform>()) {
 					auto& tr = selectedEntity->GetComponent<Components::Transform>();
 
+					ImGuizmo::SetOrthographic(false);
+					ImGuizmo::SetDrawlist(ImGui::GetCurrentWindow()->DrawList);
 					ImGuizmo::SetRect(topLeft.x, topLeft.y, width, height);
 
+					// Copies — ImGuizmo may write view; keep camera matrices intact
 					glm::mat4 view       = GetCamera().GetViewMatrix();
 					glm::mat4 projection = GetCamera().GetProjectionMatrix();
+					glm::mat4 model      = tr.GetWorldMatrix();
 
-					glm::mat4 model = tr.GetWorldMatrix();
+					// Hold Ctrl (or Super) to snap translate / rotate / scale.
+					const bool snapHeld = GetInput().IsKeyPressed(GLFW_KEY_LEFT_CONTROL) ||
+					                      GetInput().IsKeyPressed(GLFW_KEY_RIGHT_CONTROL) ||
+					                      GetInput().IsKeyPressed(GLFW_KEY_LEFT_SUPER) ||
+					                      GetInput().IsKeyPressed(GLFW_KEY_RIGHT_SUPER);
 
-					ImGuizmo::SetDrawlist(ImGui::GetCurrentWindow()->DrawList);
-					ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), mCurrentGizmoOperation, mCurrentGizmoMode, glm::value_ptr(model));
+					// ImGuizmo: translate uses xyz snap; rotate uses degrees in .x; scale uses .x
+					float snapValues[3] = {0.5f, 0.5f, 0.5f};
+					if (mCurrentGizmoOperation == ImGuizmo::ROTATE) {
+						snapValues[0] = snapValues[1] = snapValues[2] = 15.0f; // degrees
+					}
+					else if (mCurrentGizmoOperation == ImGuizmo::SCALE ||
+					         mCurrentGizmoOperation == ImGuizmo::SCALEU ||
+					         mCurrentGizmoOperation == ImGuizmo::BOUNDS) {
+						snapValues[0] = snapValues[1] = snapValues[2] = 0.1f;
+					}
 
-					if (ImGuizmo::IsUsingAny()) {
-						glm::vec3 outTranslation, outScale, skew;
-						glm::vec4 perspective;
-						glm::quat outRotation;
+					// Manipulate returns true only when the matrix changes this frame.
+					// Do NOT re-decompose every IsUsing frame — that causes rotation drift.
+					const bool changed = ImGuizmo::Manipulate(
+					    glm::value_ptr(view),
+					    glm::value_ptr(projection),
+					    mCurrentGizmoOperation,
+					    mCurrentGizmoMode,
+					    glm::value_ptr(model),
+					    nullptr,
+					    snapHeld ? snapValues : nullptr);
 
-						glm::decompose(model, outScale, outRotation, outTranslation, skew, perspective);
+					if (changed) {
+						glm::vec3 worldPos, worldScale;
+						glm::quat worldRot;
+						ExtractTRS(model, worldPos, worldRot, worldScale);
 
-						tr.SetWorldPosition(outTranslation);
-						tr.SetWorldRotation(outRotation);
-						tr.SetWorldScale(outScale);
+						// Keep TRS + world matrix consistent with the gizmo matrix
+						tr.SetWorldPosition(worldPos);
+						tr.SetWorldRotation(worldRot);
+						tr.SetWorldScale(worldScale);
+						tr.SetWorldMatrix(ComposeTRS(worldPos, worldRot, worldScale));
 
-
-						//  Apply to local transform, respecting hierarchy
+						// Local = parent^-1 * world (hierarchy)
 						if (meta.parentEntity.IsValid()) {
-							// Child: convert world to local
 							auto parentEntity = GetCurrentScene()->Get(meta.parentEntity);
 							if (parentEntity && parentEntity.HasComponent<Components::Transform>()) {
-								auto&     parentTr  = parentEntity.GetComponent<Components::Transform>();
-								glm::mat4 parentInv = glm::inverse(parentTr.GetWorldMatrix());
+								auto&     parentTr    = parentEntity.GetComponent<Components::Transform>();
+								glm::mat4 localMatrix = glm::inverse(parentTr.GetWorldMatrix()) * model;
 
-								glm::mat4 localMatrix = parentInv * model;
-
-								glm::vec3 skewLocal;
-								glm::vec4 perspLocal;
+								glm::vec3 localPos, localScale;
 								glm::quat localRot;
-								glm::vec3 localTrans, localScale;
-								glm::decompose(localMatrix, localScale, localRot, localTrans, skewLocal, perspLocal);
+								ExtractTRS(localMatrix, localPos, localRot, localScale);
 
-								tr.SetLocalPosition(localTrans);
+								tr.SetLocalPosition(localPos);
 								tr.SetLocalRotation(localRot);
 								tr.SetLocalScale(localScale);
 							}
 						}
 						else {
-							// No hierarchy component: local equal to world
-							tr.SetLocalPosition(tr.GetWorldPosition());
-							tr.SetLocalRotation(tr.GetWorldRotation());
-							tr.SetLocalScale(tr.GetWorldScale());
+							tr.SetLocalPosition(worldPos);
+							tr.SetLocalRotation(worldRot);
+							tr.SetLocalScale(worldScale);
 						}
-
-						// Rebuild world matrix to stay consistent
-						tr.SetWorldMatrix(glm::translate(glm::mat4(1.0f), tr.GetWorldPosition()) * glm::toMat4(tr.GetWorldRotation()) * glm::scale(glm::mat4(1.0f), tr.GetWorldScale()));
 
 						tr.SyncWithPhysics(*selectedEntity);
 					}

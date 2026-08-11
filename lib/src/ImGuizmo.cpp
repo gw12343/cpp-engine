@@ -1349,7 +1349,8 @@ namespace IMGUIZMO_NAMESPACE {
 				circlePos[i]  = worldToPos(pos, gContext.mMVP);
 			}
 			if (!gContext.mbUsing || usingAxis) {
-				drawList->AddPolyline(circlePos, circleMul * halfCircleSegmentCount + 1, colors[3 - axis], false, gContext.mStyle.RotationLineThickness);
+				// ImGui 1.92.8+: AddPolyline(..., thickness, flags) — thickness before flags
+				drawList->AddPolyline(circlePos, circleMul * halfCircleSegmentCount + 1, colors[3 - axis], gContext.mStyle.RotationLineThickness, ImDrawFlags_None);
 			}
 
 			float radiusAxis = sqrtf((ImLengthSqr(worldToPos(gContext.mModel.v.position, gContext.mViewProjection) - circlePos[0])));
@@ -1375,7 +1376,8 @@ namespace IMGUIZMO_NAMESPACE {
 				circlePos[i] = worldToPos(pos + gContext.mModel.v.position, gContext.mViewProjection);
 			}
 			drawList->AddConvexPolyFilled(circlePos, halfCircleSegmentCount + 1, GetColorU32(ROTATION_USING_FILL));
-			drawList->AddPolyline(circlePos, halfCircleSegmentCount + 1, GetColorU32(ROTATION_USING_BORDER), true, gContext.mStyle.RotationLineThickness);
+			// ImGui 1.92.8+: closed polylines use ImDrawFlags_Closed (was bool true / 1)
+			drawList->AddPolyline(circlePos, halfCircleSegmentCount + 1, GetColorU32(ROTATION_USING_BORDER), gContext.mStyle.RotationLineThickness, ImDrawFlags_Closed);
 
 			ImVec2 destinationPosOnScreen = circlePos[1];
 			char   tmps[512];
@@ -1611,7 +1613,8 @@ namespace IMGUIZMO_NAMESPACE {
 						screenQuadPts[j]     = worldToPos(cornerWorldPos, gContext.mMVP);
 					}
 
-					drawList->AddPolyline(screenQuadPts, 4, GetColorU32(DIRECTION_X + i), ImDrawFlags_Closed, 1.0f);
+					// ImGui 1.92.8+: thickness then flags (order was swapped)
+					drawList->AddPolyline(screenQuadPts, 4, GetColorU32(DIRECTION_X + i), 1.0f, ImDrawFlags_Closed);
 
 					drawList->AddConvexPolyFilled(screenQuadPts, 4, colors[i + 4]);
 				}
