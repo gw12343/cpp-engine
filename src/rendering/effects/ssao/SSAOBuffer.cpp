@@ -9,6 +9,9 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+#include <cmath>
+#include <vector>
+
 
 namespace Engine {
     void SSAOBuffer::Resize(int w, int h, bool halfRes)
@@ -20,17 +23,17 @@ namespace Engine {
 
         /* ---------------- SSAO Noise Texture ---------------------*/
 
+        // Deterministic 4x4 rotation noise (stable across resizes — random noise
+        // retiled every resize can look like crawling striations).
         std::vector<glm::vec3> noise;
+        noise.reserve(16);
         for (int i = 0; i < 16; i++)
         {
-            glm::vec3 n = glm::normalize(glm::vec3(
-                    glm::linearRand(-1.0f, 1.0f),
-                    glm::linearRand(-1.0f, 1.0f),
-                    0.0f
-            ));
+            // Evenly spaced angles + slight jitter for less obvious tiling
+            float angle = (float(i) / 16.0f) * 6.2831853f + float(i % 3) * 0.17f;
+            glm::vec3 n(std::cos(angle), std::sin(angle), 0.0f);
             noise.push_back(n);
         }
-
 
         glGenTextures(1, &noiseTex);
         glBindTexture(GL_TEXTURE_2D, noiseTex);

@@ -156,7 +156,9 @@ void main()
     float shininess = max(material.g * 256.0, 1.0);
 
 /* -------- SSAO -------- */
-    float ao = min(texture(ssaoBlurTex, TexCoords).r, 0.65);
+    // 1 = unoccluded. Soften so AO never fully blacks out flat walls.
+    float aoRaw = texture(ssaoBlurTex, TexCoords).r;
+    float ao    = mix(0.55, 1.0, clamp(aoRaw, 0.0, 1.0));
 
 /* -------- Ambient -------- */
     vec3 ambient = 0.45 * Albedo * ao;

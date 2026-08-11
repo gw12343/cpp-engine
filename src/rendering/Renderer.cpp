@@ -23,6 +23,7 @@
 #include "components/impl/AnimationComponent.h"
 #include "Texture.h"
 
+#include <random>
 
 #define RENDER_STEP(name) ZoneScopedN(name); DebugGroup group(name);
 
@@ -76,15 +77,18 @@ namespace Engine {
             ssaoKernel.clear();
             ssaoKernel.reserve(32);
 
+            // Fixed seed so kernel is stable between runs (less shimmer).
+            std::mt19937 rng(1337u);
+            std::uniform_real_distribution<float> dist01(0.0f, 1.0f);
             for (int i = 0; i < 32; i++) {
-                // Random hemisphere vector
+                // Hemisphere sample (z >= 0 in tangent space)
                 glm::vec3 sample = glm::normalize(glm::vec3(
-                        glm::linearRand(-1.0f, 1.0f),
-                        glm::linearRand(-1.0f, 1.0f),
-                        glm::linearRand(0.0f, 1.0f)
+                        dist01(rng) * 2.0f - 1.0f,
+                        dist01(rng) * 2.0f - 1.0f,
+                        dist01(rng) // 0..1 hemisphere
                 ));
 
-                // Scale samples so more are near origin
+                // Accelerate distribution toward the origin
                 float scale = (float) i / 32.0f;
                 scale = glm::mix(0.1f, 1.0f, scale * scale);
 
@@ -350,15 +354,15 @@ namespace Engine {
 
     void Renderer::RenderSSAO() {
         RENDER_STEP("Render SSAO Pass");
-        GetWindow().GetSSAOBuffer()->BindSSAO();
+        auto ssaoBuf = GetWindow().GetSSAOBuffer();
+        ssaoBuf->BindSSAO();
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(1.f, 1.f, 1.f, 1.f); // unoccluded default
+        glClear(GL_COLOR_BUFFER_BIT);
         glDisable(GL_CULL_FACE);
-
         glDisable(GL_DEPTH_TEST);
         glDepthMask(GL_FALSE);
         glDisable(GL_BLEND);
-        glDisable(GL_CULL_FACE);
 
         m_ssaoShader.Bind();
 
@@ -367,54 +371,61 @@ namespace Engine {
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, GetWindow().GetGBuffer()->GetNormal());
         glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, GetWindow().GetSSAOBuffer()->noiseTex);
+        glBindTexture(GL_TEXTURE_2D, ssaoBuf->noiseTex);
 
-
-        glm::mat4 V = GetCamera().GetViewMatrix();
-        m_ssaoShader.SetMat4("view", &V);
-        glm::mat4 proj = GetCamera().GetProjectionMatrix();
+        glm::mat4 V       = GetCamera().GetViewMatrix();
+        glm::mat4 proj    = GetCamera().GetProjectionMatrix();
         glm::mat4 projInv = glm::inverse(proj);
+        m_ssaoShader.SetMat4("view", &V);
         m_ssaoShader.SetMat4("projection", &proj);
         m_ssaoShader.SetMat4("invProjection", &projInv);
-
 
         m_ssaoShader.SetInt("gDepth", 0);
         m_ssaoShader.SetInt("gNormal", 1);
         m_ssaoShader.SetInt("noiseTex", 2);
 
-
         int loc = glGetUniformLocation(m_ssaoShader.GetProgramID(), "samples");
         glUniform3fv(loc, 32, &ssaoKernel[0].x);
 
-        m_ssaoShader.SetVec2("screenSize", glm::vec2(GetWindow().GetWidth(), GetWindow().GetHeight()));
+        // Noise tile scale must use SSAO FBO size, not OS window size.
+        m_ssaoShader.SetVec2("screenSize", glm::vec2(static_cast<float>(ssaoBuf->width), static_cast<float>(ssaoBuf->height)));
 
-        // Draw Quad
         glBindVertexArray(quadVAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
 
         glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
         GetWindow().SetFullViewport();
     }
 
     void Renderer::RenderSSAOBlur() {
         RENDER_STEP("Render SSAO Blur Pass");
-        GetWindow().GetSSAOBuffer()->BindBlur();
+        auto ssaoBuf = GetWindow().GetSSAOBuffer();
+        ssaoBuf->BindBlur();
+
+        glClearColor(1.f, 1.f, 1.f, 1.f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST);
+        glDepthMask(GL_FALSE);
 
         m_ssaoBlurShader.Bind();
         m_ssaoBlurShader.SetInt("ssaoInput", 0);
+        m_ssaoBlurShader.SetInt("gDepth", 1);
 
-        glBindTextureUnit(0, GetWindow().GetSSAOBuffer()->ssaoTex);
-        m_ssaoBlurShader.SetVec2("screenSize", glm::vec2(GetWindow().GetWidth(), GetWindow().GetHeight()));
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, ssaoBuf->ssaoTex);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, GetWindow().GetGBuffer()->GetDepth());
 
+        m_ssaoBlurShader.SetVec2("screenSize", glm::vec2(static_cast<float>(ssaoBuf->width), static_cast<float>(ssaoBuf->height)));
 
-
-        // Draw Quad
         glBindVertexArray(quadVAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
 
         glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
         GetWindow().SetFullViewport();
     }
 

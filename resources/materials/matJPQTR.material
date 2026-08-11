@@ -25,8 +25,8 @@
     "properties": {
         "shininess": 410.5050048828125,
         "textureScale": [
-            1.0,
-            1.0
+            10.0,
+            10.0
         ]
     },
     "textures": {
