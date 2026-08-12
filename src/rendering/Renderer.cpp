@@ -551,6 +551,13 @@ namespace Engine {
             ZoneScopedN("Gizmo Mouse Picking");
             RenderGizmos(true);
         }
+
+        {
+            ZoneScopedN("Text3D Mouse Picking");
+            if (m_text3DRenderer) {
+                m_text3DRenderer->RenderMousePicking();
+            }
+        }
     }
 
     void Renderer::RenderShadowMaps() {
