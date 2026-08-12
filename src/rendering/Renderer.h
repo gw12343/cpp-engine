@@ -7,6 +7,7 @@
 #include "core/Window.h"
 #include "rendering/shadows/ShadowMapRenderer.h"
 #include "rendering/effects/bloom/BloomRenderer.h"
+#include "rendering/text/Text3DRenderer.h"
 
 
 
@@ -30,6 +31,7 @@ namespace Engine {
 
         void RenderLightingPass();
         void RenderBloomPass();
+		void RenderText3D();
 		void RenderEntitiesMousePicking();
 		void RenderEntitiesGBuffer();
 		void RenderSSAO();
@@ -51,6 +53,7 @@ namespace Engine {
     private:
 		std::shared_ptr<ShadowMapRenderer> m_shadowRenderer;
 		std::shared_ptr<BloomRenderer> m_bloomRenderer;
+		std::unique_ptr<Text3DRenderer> m_text3DRenderer;
 
 		Engine::Shader          m_shader;
 		Engine::Shader          m_mousePickingShader;

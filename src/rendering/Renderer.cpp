@@ -36,6 +36,7 @@ namespace Engine {
 
         m_shadowRenderer = std::make_shared<ShadowMapRenderer>();
         m_bloomRenderer = std::make_shared<BloomRenderer>();
+        m_text3DRenderer = std::make_unique<Text3DRenderer>();
 
         {
             ZoneScopedN("Initialize BloomRenderer");
@@ -44,6 +45,10 @@ namespace Engine {
         {
             ZoneScopedN("Load Shaders");
             ReloadShaders();
+        }
+        {
+            ZoneScopedN("Initialize Text3DRenderer");
+            m_text3DRenderer->Initialize();
         }
         {
             ZoneScopedN("Load Skybox");
@@ -154,6 +159,10 @@ namespace Engine {
         Rendering::Mesh::CleanAllMeshes();
 
         m_skybox.reset();
+        if (m_text3DRenderer) {
+            m_text3DRenderer->Shutdown();
+            m_text3DRenderer.reset();
+        }
         m_bloomRenderer.reset();
         m_shadowRenderer.reset();
 
@@ -320,6 +329,10 @@ namespace Engine {
             GetParticleManager().Render();
         }
 
+        {
+            RENDER_STEP("Render Text3D");
+            RenderText3D();
+        }
 
         {
             ZoneScopedN("Render RmlUi");
@@ -616,6 +629,16 @@ namespace Engine {
         }
 
         m_bloomRenderer->ReloadShaders();
+
+        if (m_text3DRenderer) {
+            m_text3DRenderer->ReloadShaders();
+        }
+    }
+
+    void Renderer::RenderText3D() {
+        if (m_text3DRenderer) {
+            m_text3DRenderer->Render();
+        }
     }
 
     std::shared_ptr<ShadowMapRenderer> Renderer::GetShadowRenderer() {

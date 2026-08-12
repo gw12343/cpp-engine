@@ -89,6 +89,9 @@
             },
             "GizmoComponent": {
                 "nullopt": true
+            },
+            "Text3DComponent": {
+                "nullopt": true
             }
         },
         {
@@ -112,52 +115,10 @@
                     "scriptPath": "scripts/player_thirdperson.lua",
                     "variables": [
                         {
-                            "key": "CAMERA_DISTANCE",
+                            "key": "CAMERA_COLLISION_MIN_DIST",
                             "value": {
                                 "index": 0,
-                                "data": 5.0
-                            }
-                        },
-                        {
-                            "key": "CAMERA_PITCH_MIN",
-                            "value": {
-                                "index": 0,
-                                "data": -60.0
-                            }
-                        },
-                        {
-                            "key": "FALL_LAND_ANIM",
-                            "value": {
-                                "index": 1,
-                                "data": "resources/animations/fall_land.anim"
-                            }
-                        },
-                        {
-                            "key": "CLIMB_PROBE_DIST",
-                            "value": {
-                                "index": 0,
-                                "data": 1.149999976158142
-                            }
-                        },
-                        {
-                            "key": "CLIMB_UP_ANIM",
-                            "value": {
-                                "index": 1,
-                                "data": "resources/animations/climb_up.anim"
-                            }
-                        },
-                        {
-                            "key": "WALK_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 3.5999999046325685
-                            }
-                        },
-                        {
-                            "key": "MOUSE_SENSITIVITY",
-                            "value": {
-                                "index": 0,
-                                "data": 0.10000000149011612
+                                "data": 0.25
                             }
                         },
                         {
@@ -168,13 +129,6 @@
                             }
                         },
                         {
-                            "key": "CAMERA_COLLISION_MIN_DIST",
-                            "value": {
-                                "index": 0,
-                                "data": 0.25
-                            }
-                        },
-                        {
                             "key": "CAMERA_ZOOM_OUT_SPEED",
                             "value": {
                                 "index": 0,
@@ -182,24 +136,38 @@
                             }
                         },
                         {
-                            "key": "CAMERA_PITCH_MAX",
+                            "key": "CLIMB_INTO_DOT",
                             "value": {
                                 "index": 0,
-                                "data": 60.0
+                                "data": 0.25
                             }
                         },
                         {
-                            "key": "IDLE_ANIM",
+                            "key": "SHOOT_HEAD_HEIGHT",
                             "value": {
-                                "index": 1,
-                                "data": "resources/animations/idle.ozz"
+                                "index": 0,
+                                "data": 1.100000023841858
                             }
                         },
                         {
-                            "key": "CLIMB_MANTLE_ARC",
+                            "key": "CLIMB_MAX_NORMAL_Y",
                             "value": {
                                 "index": 0,
-                                "data": 0.20000000298023225
+                                "data": 0.550000011920929
+                            }
+                        },
+                        {
+                            "key": "shootSound",
+                            "value": {
+                                "index": 0,
+                                "data": 14.800000190734864
+                            }
+                        },
+                        {
+                            "key": "SHOOT_FORWARD_OFFSET",
+                            "value": {
+                                "index": 0,
+                                "data": 1.0
                             }
                         },
                         {
@@ -217,20 +185,6 @@
                             }
                         },
                         {
-                            "key": "FALL_IDLE_ANIM",
-                            "value": {
-                                "index": 1,
-                                "data": "resources/animations/fall_idle.anim"
-                            }
-                        },
-                        {
-                            "key": "RUN_ANIM",
-                            "value": {
-                                "index": 1,
-                                "data": "resources/animations/run_inplace.anim"
-                            }
-                        },
-                        {
                             "key": "CLIMB_MANTLE_DOWN",
                             "value": {
                                 "index": 0,
@@ -238,24 +192,17 @@
                             }
                         },
                         {
-                            "key": "ZOOM_SENSITIVITY",
-                            "value": {
-                                "index": 0,
-                                "data": 0.5
-                            }
-                        },
-                        {
-                            "key": "CLIMB_MANTLE_MIN_NY",
-                            "value": {
-                                "index": 0,
-                                "data": 0.6499999761581421
-                            }
-                        },
-                        {
-                            "key": "CAMERA_COLLISION_OFFSET",
+                            "key": "CLIMB_MANTLE_ARC",
                             "value": {
                                 "index": 0,
                                 "data": 0.20000000298023225
+                            }
+                        },
+                        {
+                            "key": "GAMEPAD_LOOK_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 2.5
                             }
                         },
                         {
@@ -263,13 +210,6 @@
                             "value": {
                                 "index": 0,
                                 "data": 8.0
-                            }
-                        },
-                        {
-                            "key": "CAMERA_MAX_DISTANCE",
-                            "value": {
-                                "index": 0,
-                                "data": 12.0
                             }
                         },
                         {
@@ -282,40 +222,94 @@
                             }
                         },
                         {
-                            "key": "victorySound",
+                            "key": "CAMERA_MAX_DISTANCE",
                             "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
-                                }
+                                "index": 0,
+                                "data": 12.0
                             }
                         },
                         {
-                            "key": "shootSound",
+                            "key": "CLIMB_PROBE_DIST",
                             "value": {
                                 "index": 0,
-                                "data": 14.800000190734864
+                                "data": 1.149999976158142
                             }
                         },
                         {
-                            "key": "CLIMB_MAX_NORMAL_Y",
+                            "key": "CAMERA_DISTANCE",
                             "value": {
                                 "index": 0,
-                                "data": 0.550000011920929
+                                "data": 5.0
                             }
                         },
                         {
-                            "key": "SHOOT_HEAD_HEIGHT",
+                            "key": "FALL_LAND_ANIM",
                             "value": {
-                                "index": 0,
-                                "data": 1.100000023841858
+                                "index": 1,
+                                "data": "resources/animations/fall_land.anim"
                             }
                         },
                         {
-                            "key": "SHOOT_POWER",
+                            "key": "CAMERA_PITCH_MIN",
                             "value": {
                                 "index": 0,
-                                "data": 14.800000190734864
+                                "data": -60.0
+                            }
+                        },
+                        {
+                            "key": "CLIMB_TOP_PROBE",
+                            "value": {
+                                "index": 0,
+                                "data": 0.8500000238418579
+                            }
+                        },
+                        {
+                            "key": "CLIMB_LOST_MAX",
+                            "value": {
+                                "index": 0,
+                                "data": 8.0
+                            }
+                        },
+                        {
+                            "key": "CAMERA_MIN_DISTANCE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
+                            }
+                        },
+                        {
+                            "key": "TURN_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 381.6000061035156
+                            }
+                        },
+                        {
+                            "key": "CAMERA_COLLISION_OFFSET",
+                            "value": {
+                                "index": 0,
+                                "data": 0.20000000298023225
+                            }
+                        },
+                        {
+                            "key": "ZOOM_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.5
+                            }
+                        },
+                        {
+                            "key": "CLIMB_STICK_SKIN",
+                            "value": {
+                                "index": 0,
+                                "data": 0.05999999865889549
+                            }
+                        },
+                        {
+                            "key": "RUN_ANIM",
+                            "value": {
+                                "index": 1,
+                                "data": "resources/animations/run_inplace.anim"
                             }
                         },
                         {
@@ -333,24 +327,31 @@
                             }
                         },
                         {
-                            "key": "CLIMB_LOST_MAX",
-                            "value": {
-                                "index": 0,
-                                "data": 8.0
-                            }
-                        },
-                        {
-                            "key": "CLIMB_DOWN_ANIM",
+                            "key": "IDLE_ANIM",
                             "value": {
                                 "index": 1,
-                                "data": "resources/animations/climb_down.anim"
+                                "data": "resources/animations/idle.ozz"
                             }
                         },
                         {
-                            "key": "CLIMB_MIN_NORMAL_Y",
+                            "key": "WALK_SPEED",
                             "value": {
                                 "index": 0,
-                                "data": -0.25
+                                "data": 3.5999999046325685
+                            }
+                        },
+                        {
+                            "key": "MOUSE_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.10000000149011612
+                            }
+                        },
+                        {
+                            "key": "RUN_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 7.199999809265137
                             }
                         },
                         {
@@ -370,10 +371,26 @@
                             }
                         },
                         {
-                            "key": "RUN_SPEED",
+                            "key": "victorySound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                }
+                            }
+                        },
+                        {
+                            "key": "SHOOT_POWER",
                             "value": {
                                 "index": 0,
-                                "data": 7.199999809265137
+                                "data": 14.800000190734864
+                            }
+                        },
+                        {
+                            "key": "FALL_IDLE_ANIM",
+                            "value": {
+                                "index": 1,
+                                "data": "resources/animations/fall_idle.anim"
                             }
                         },
                         {
@@ -381,6 +398,34 @@
                             "value": {
                                 "index": 0,
                                 "data": 0.20000000298023225
+                            }
+                        },
+                        {
+                            "key": "CAMERA_PITCH_MAX",
+                            "value": {
+                                "index": 0,
+                                "data": 60.0
+                            }
+                        },
+                        {
+                            "key": "CLIMB_UP_ANIM",
+                            "value": {
+                                "index": 1,
+                                "data": "resources/animations/climb_up.anim"
+                            }
+                        },
+                        {
+                            "key": "CLIMB_DOWN_ANIM",
+                            "value": {
+                                "index": 1,
+                                "data": "resources/animations/climb_down.anim"
+                            }
+                        },
+                        {
+                            "key": "CLIMB_MIN_NORMAL_Y",
+                            "value": {
+                                "index": 0,
+                                "data": -0.25
                             }
                         },
                         {
@@ -398,17 +443,10 @@
                             }
                         },
                         {
-                            "key": "CAMERA_MIN_DISTANCE",
+                            "key": "CLIMB_MANTLE_MIN_NY",
                             "value": {
                                 "index": 0,
-                                "data": 2.0
-                            }
-                        },
-                        {
-                            "key": "GRAVITY_SCALE",
-                            "value": {
-                                "index": 0,
-                                "data": 2.0
+                                "data": 0.6499999761581421
                             }
                         },
                         {
@@ -419,45 +457,10 @@
                             }
                         },
                         {
-                            "key": "CLIMB_INTO_DOT",
+                            "key": "GRAVITY_SCALE",
                             "value": {
                                 "index": 0,
-                                "data": 0.25
-                            }
-                        },
-                        {
-                            "key": "CLIMB_TOP_PROBE",
-                            "value": {
-                                "index": 0,
-                                "data": 0.8500000238418579
-                            }
-                        },
-                        {
-                            "key": "CLIMB_STICK_SKIN",
-                            "value": {
-                                "index": 0,
-                                "data": 0.05999999865889549
-                            }
-                        },
-                        {
-                            "key": "TURN_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 381.6000061035156
-                            }
-                        },
-                        {
-                            "key": "SHOOT_FORWARD_OFFSET",
-                            "value": {
-                                "index": 0,
-                                "data": 1.0
-                            }
-                        },
-                        {
-                            "key": "GAMEPAD_LOOK_SENSITIVITY",
-                            "value": {
-                                "index": 0,
-                                "data": 2.5
+                                "data": 2.0
                             }
                         }
                     ]
@@ -531,6 +534,9 @@
             },
             "GizmoComponent": {
                 "nullopt": true
+            },
+            "Text3DComponent": {
+                "nullopt": true
             }
         },
         {
@@ -581,6 +587,9 @@
                 "nullopt": true
             },
             "GizmoComponent": {
+                "nullopt": true
+            },
+            "Text3DComponent": {
                 "nullopt": true
             }
         },
@@ -654,6 +663,9 @@
                 "nullopt": true
             },
             "GizmoComponent": {
+                "nullopt": true
+            },
+            "Text3DComponent": {
                 "nullopt": true
             }
         },
@@ -19339,6 +19351,9 @@
             },
             "GizmoComponent": {
                 "nullopt": true
+            },
+            "Text3DComponent": {
+                "nullopt": true
             }
         },
         {
@@ -19427,6 +19442,9 @@
                         "z": 0.5714285373687744
                     }
                 }
+            },
+            "Text3DComponent": {
+                "nullopt": true
             }
         },
         {
@@ -19525,6 +19543,103 @@
             },
             "GizmoComponent": {
                 "nullopt": true
+            },
+            "Text3DComponent": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "Text",
+                "tag": "",
+                "active": true,
+                "guid": "68fc2cdf7be87576e72a5ffd492bc8f3",
+                "parentEntity": {
+                    "guid": ""
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 16.373958587646486,
+                        "y": 15.3284912109375,
+                        "z": -23.955463409423829
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": true
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            },
+            "Text3DComponent": {
+                "nullopt": false,
+                "data": {
+                    "text": "The quick brown fox jumped over the moon",
+                    "fontPath": "resources/fonts/Roboto-Regular.ttf",
+                    "size": 1.840000033378601,
+                    "atlasPixelHeight": 64,
+                    "color": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0,
+                        "w": 1.0
+                    },
+                    "billboard": false,
+                    "billboardYLock": false,
+                    "alignment": 2,
+                    "letterSpacing": 0.0,
+                    "outlineWidth": 0.09700000286102295,
+                    "outlineColor": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                }
             }
         },
         {
@@ -19600,6 +19715,9 @@
                 "nullopt": true
             },
             "GizmoComponent": {
+                "nullopt": true
+            },
+            "Text3DComponent": {
                 "nullopt": true
             }
         },
@@ -19680,6 +19798,9 @@
             },
             "GizmoComponent": {
                 "nullopt": true
+            },
+            "Text3DComponent": {
+                "nullopt": true
             }
         },
         {
@@ -19709,15 +19830,15 @@
                         "z": -9.744749069213868
                     },
                     "rotation": {
-                        "x": 0.7175782918930054,
-                        "y": -0.3738084137439728,
-                        "z": 0.5709443688392639,
-                        "w": 0.1391797661781311
+                        "x": 0.2870433032512665,
+                        "y": -0.6105590462684631,
+                        "z": 0.6056170463562012,
+                        "w": 0.42196187376976015
                     },
                     "scale": {
-                        "x": 5.000190734863281,
-                        "y": 5.0004119873046879,
-                        "z": 5.000274658203125
+                        "x": 5.0002031326293949,
+                        "y": 5.000439643859863,
+                        "z": 5.000289440155029
                     }
                 }
             },
@@ -19778,6 +19899,9 @@
                 "nullopt": true
             },
             "GizmoComponent": {
+                "nullopt": true
+            },
+            "Text3DComponent": {
                 "nullopt": true
             }
         },
@@ -19846,6 +19970,9 @@
             },
             "GizmoComponent": {
                 "nullopt": true
+            },
+            "Text3DComponent": {
+                "nullopt": true
             }
         },
         {
@@ -19875,15 +20002,15 @@
                         "z": -14.471881866455079
                     },
                     "rotation": {
-                        "x": 0.906067430973053,
+                        "x": 0.7198745608329773,
                         "y": 0.0,
                         "z": 0.0,
-                        "w": 0.4231334626674652
+                        "w": 0.6941041946411133
                     },
                     "scale": {
                         "x": 5.0,
-                        "y": 5.000010013580322,
-                        "z": 5.000010013580322
+                        "y": 5.000026702880859,
+                        "z": 5.000026702880859
                     }
                 }
             },
@@ -19944,6 +20071,9 @@
                 "nullopt": true
             },
             "GizmoComponent": {
+                "nullopt": true
+            },
+            "Text3DComponent": {
                 "nullopt": true
             }
         },
@@ -20043,6 +20173,9 @@
             },
             "GizmoComponent": {
                 "nullopt": true
+            },
+            "Text3DComponent": {
+                "nullopt": true
             }
         },
         {
@@ -20072,15 +20205,15 @@
                         "z": -3.8941502571105959
                     },
                     "rotation": {
-                        "x": 0.8664992451667786,
-                        "y": 0.07560795545578003,
-                        "z": -0.26686063408851626,
-                        "w": 0.4150276184082031
+                        "x": -0.7051515579223633,
+                        "y": -0.31660032272338869,
+                        "z": 0.5606048107147217,
+                        "w": -0.29706519842147829
                     },
                     "scale": {
-                        "x": 4.999999046325684,
-                        "y": 5.000081539154053,
-                        "z": 5.00007963180542
+                        "x": 5.000109672546387,
+                        "y": 5.000269889831543,
+                        "z": 5.000212669372559
                     }
                 }
             },
@@ -20141,6 +20274,9 @@
                 "nullopt": true
             },
             "GizmoComponent": {
+                "nullopt": true
+            },
+            "Text3DComponent": {
                 "nullopt": true
             }
         },
@@ -20230,6 +20366,9 @@
                         "z": 0.5433388948440552
                     }
                 }
+            },
+            "Text3DComponent": {
+                "nullopt": true
             }
         },
         {
@@ -20284,6 +20423,9 @@
                 "nullopt": true
             },
             "GizmoComponent": {
+                "nullopt": true
+            },
+            "Text3DComponent": {
                 "nullopt": true
             }
         },
@@ -20343,6 +20485,9 @@
                 }
             },
             "GizmoComponent": {
+                "nullopt": true
+            },
+            "Text3DComponent": {
                 "nullopt": true
             }
         },
@@ -20442,6 +20587,9 @@
             },
             "GizmoComponent": {
                 "nullopt": true
+            },
+            "Text3DComponent": {
+                "nullopt": true
             }
         },
         {
@@ -20530,6 +20678,9 @@
                         "z": 0.5714285373687744
                     }
                 }
+            },
+            "Text3DComponent": {
+                "nullopt": true
             }
         }
     ]
