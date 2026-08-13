@@ -3,21 +3,24 @@
 #include "Input.h"
 #include "rendering/ui/GameUIManager.h"
 
-#include <backends/imgui_impl_glfw.h>
-#include <backends/imgui_impl_opengl3.h>
-
-#include <imgui.h>
 #include <spdlog/spdlog.h>
 #include <cfloat>
 #include <utility>
 
 #include "scripting/ScriptManager.h"
+#include "rendering/Renderer.h"
+
+#ifndef GAME_BUILD
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
+#include <imgui.h>
 #include "rendering/ui/IconsFontAwesome6.h"
 #include "imguizmo/ImGuizmo.h"
-#include "imguizmo/ImGuizmo.h"
-#include "rendering/Renderer.h"
+#endif
+
 namespace Engine {
 
+#ifndef GAME_BUILD
 	namespace {
 		// Tracks whether we (play-mode capture) currently own the ImGui block flags,
 		// so we don't clobber editor RMB fly-cam's NoMouse handling in Camera.
@@ -86,6 +89,7 @@ namespace Engine {
 	    ICON_FA_BORDER_TOP_LEFT,
 	    ICON_FA_UP_RIGHT_AND_DOWN_LEFT_FROM_CENTER,
 	};
+#endif // !GAME_BUILD
 
 	std::map<Window::FramebufferID, std::shared_ptr<Framebuffer>> Window::m_frameBuffers;
     std::shared_ptr<GBuffer> Window::m_gbuffer;
@@ -127,7 +131,10 @@ namespace Engine {
 
 		InitGLFW();
 		InitGLAD();
+#ifndef GAME_BUILD
+		// Editor only — game builds use RmlUI for HUD, not ImGui.
 		InitImGui();
+#endif
 
         // Debug Support — async messages only. SYNCHRONOUS forces a CPU/GPU pipeline
         // stall around GL calls and tanks editor framerate for little benefit day-to-day.
@@ -195,6 +202,7 @@ namespace Engine {
 	}
 
 
+#ifndef GAME_BUILD
 	bool Window::InitImGui()
 	{
 		IMGUI_CHECKVERSION();
@@ -255,6 +263,7 @@ namespace Engine {
 
 		return true;
 	}
+#endif // !GAME_BUILD
 
 	void Window::OnFilesDropped(int count, const char** paths)
 	{
@@ -294,6 +303,13 @@ namespace Engine {
 			}
 		}
 
+#ifdef GAME_BUILD
+		// Fullscreen game viewport — no editor chrome / ImGui frame.
+		targetX      = 0;
+		targetY      = 0;
+		targetWidth  = GetWidth();
+		targetHeight = GetHeight();
+#else
 		// While playing with a captured cursor, keep mouse/keyboard/gamepad off ImGui
 		// so editor panels don't steal WASD, look, or pad navigation.
 		UpdateImGuiPlayModeInputBlock();
@@ -309,12 +325,6 @@ namespace Engine {
 		}
 		ImGui::NewFrame();
 		ImGuizmo::BeginFrame();
-
-#ifdef GAME_BUILD
-		targetX      = 0;
-		targetY      = 0;
-		targetWidth  = GetWidth();
-		targetHeight = GetHeight();
 #endif
 	}
 
@@ -364,10 +374,12 @@ void Window::onGameStart()
 
 	void Window::onShutdown()
 	{
+#ifndef GAME_BUILD
 		log->info("Shutting down ImGui context");
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
+#endif
 
 		for (auto& [id, fb] : m_frameBuffers) {
 			if (fb) {
