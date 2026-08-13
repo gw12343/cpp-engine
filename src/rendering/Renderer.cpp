@@ -342,8 +342,10 @@ namespace Engine {
         }
 
 #ifndef GAME_BUILD
-        // Mouse picking is for editor selection — skip while actively playing (keep in EDITOR + PAUSED).
-        if (GetState() != PLAYING) {
+        // Mouse picking FBO is only sampled on click (SceneViewWindow). Still rebuild
+        // every editor frame so the click reads current geometry — but skip entirely
+        // while playing, and when the cursor is outside the game viewport (no selection).
+        if (GetState() != PLAYING && GetInput().IsMousePositionInViewport()) {
             ZoneScopedN("Render Mouse Picking");
             DebugGroup group("Render Mouse Picking");
             Engine::Window::GetFramebuffer(Window::FramebufferID::MOUSE_PICKING)->Bind();

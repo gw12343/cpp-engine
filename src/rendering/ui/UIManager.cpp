@@ -380,7 +380,7 @@ namespace Engine::UI {
 	{
         ZoneScopedN("OnUpdate UI manager");
 		m_selectedTheme = GetState() == EDITOR ? 2 : 0;
-		GetRenderer().PreRender();
+		// Do not clear the default framebuffer here — Renderer owns the game pass.
 		float h      = RenderMainMenuBar();
 		float height = RenderTopBar(h) + h;
 		BeginDockspace(height);

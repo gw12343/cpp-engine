@@ -142,6 +142,16 @@ namespace Engine {
 		}
 		grain = std::max(1, grain);
 
+		// std::async has high overhead for tiny batches (1 skinned character, few parts).
+		// Keep the work on this thread unless there is enough to justify a fork.
+		constexpr int kMinAsyncItems = 4;
+		if (count < kMinAsyncItems) {
+			for (int i = 0; i < count; ++i) {
+				fn(i);
+			}
+			return;
+		}
+
 		std::function<void(int, int)> rec = [&](int begin, int n) {
 			if (n <= grain) {
 				for (int i = 0; i < n; ++i) {

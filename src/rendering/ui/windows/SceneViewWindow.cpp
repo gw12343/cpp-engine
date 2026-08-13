@@ -236,25 +236,25 @@ namespace Engine {
 		bool b = (mouse.x >= min.x && mouse.x < max.x && mouse.y >= min.y && mouse.y < max.y);
 		ImGui::End();
 
-		if (GetState() != PLAYING && GetInput().IsMousePositionInViewport()) {
+		// GPU readback is a full pipeline stall — only pick on click, never every frame.
+		if (GetState() != PLAYING && GetInput().IsMousePositionInViewport() &&
+		    !GetUI().m_inspectorRenderer->m_openPopup && GetInput().IsMouseClicked(0) && !ImGuizmo::IsOver()) {
 			Engine::Window::GetFramebuffer(Window::FramebufferID::MOUSE_PICKING)->Bind();
 			glm::vec2 pos = GetInput().GetMousePositionInViewportScaledFlipped();
 
 			GLfloat pixelData[3];
 			glReadPixels(static_cast<GLint>(pos.x), static_cast<GLint>(pos.y), 1, 1, GL_RGB, GL_FLOAT, pixelData);
 
-			uint32_t entityID = (static_cast<uint32_t>(pixelData[0] * 255.0f)) | (static_cast<uint32_t>(pixelData[1] * 255.0f) << 8) | (static_cast<uint32_t>(pixelData[2] * 255.0f) << 16);
+			uint32_t entityID = (static_cast<uint32_t>(pixelData[0] * 255.0f)) |
+			                    (static_cast<uint32_t>(pixelData[1] * 255.0f) << 8) |
+			                    (static_cast<uint32_t>(pixelData[2] * 255.0f) << 16);
 
-
-			if (!GetUI().m_inspectorRenderer->m_openPopup && GetInput().IsMouseClicked(0) && !ImGuizmo::IsOver()) {
-				if (entityID != 0xFFFFFF) {
-					*selectedEntity = Entity{static_cast<entt::entity>(entityID), GetCurrentScene()};
-				}
-				else {
-					*selectedEntity = Entity();
-				}
+			if (entityID != 0xFFFFFF) {
+				*selectedEntity = Entity{static_cast<entt::entity>(entityID), GetCurrentScene()};
 			}
-
+			else {
+				*selectedEntity = Entity();
+			}
 
 			Engine::Framebuffer::Unbind();
 		}

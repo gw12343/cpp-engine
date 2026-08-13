@@ -104,12 +104,12 @@ namespace Engine {
 		InitGLAD();
 		InitImGui();
 
-        // Debug Support
+        // Debug Support — async messages only. SYNCHRONOUS forces a CPU/GPU pipeline
+        // stall around GL calls and tanks editor framerate for little benefit day-to-day.
 #ifndef GAME_BUILD
         glEnable(GL_DEBUG_OUTPUT);
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        // glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); // enable only when debugging GL errors
         glDebugMessageCallback(GLDebugCallback, nullptr);
-
 
         glDebugMessageControl(
                 GL_DONT_CARE,
@@ -236,8 +236,6 @@ namespace Engine {
 	void Window::onUpdate(float dt)
 	{
 		ZoneScoped;
-		glfwPollEvents();
-
 		glfwPollEvents();
 
 		// Age out unclaimed OS drops so they don't stick forever.
