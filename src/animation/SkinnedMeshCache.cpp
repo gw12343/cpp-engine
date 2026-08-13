@@ -1,5 +1,8 @@
 #include "SkinnedMeshCache.h"
 
+#include "core/EngineData.h"
+#include "core/ThreadPool.h"
+
 #include "ozz/base/maths/math_ex.h"
 #include "ozz/base/memory/allocator.h"
 #include "ozz/base/platform.h"
@@ -10,7 +13,6 @@
 #include <algorithm>
 #include <atomic>
 #include <cstring>
-#include <future>
 #include <vector>
 
 namespace Engine {
@@ -104,27 +106,24 @@ namespace Engine {
 				}
 			}
 
-			{
-				ZoneScopedN("SkinningJob::Run");
-				if (!skinning_job.Run()) {
-					return false;
-				}
+			if (!skinning_job.Run()) {
+				return false;
 			}
 
-			// Colors (not skinned)
-			uint8_t* color_dst = vbo_base + colors_offset + processed * colors_stride;
-			if (part_vertex_count == part.colors.size() / AnimatedMesh::Part::kColorsCpnts) {
-				std::memcpy(color_dst, part.colors.data(), part_vertex_count * colors_stride);
+			// Colors
+			uint8_t* out_c = vbo_base + colors_offset + processed * colors_stride;
+			if (part.colors.size() / AnimatedMesh::Part::kColorsCpnts == part_vertex_count) {
+				std::memcpy(out_c, part.colors.data(), part_vertex_count * colors_stride);
 			}
 			else {
-				for (size_t j = 0; j < part_vertex_count; ++j) {
-					std::memcpy(color_dst + j * colors_stride, kWhite, 4);
+				for (size_t v = 0; v < part_vertex_count; ++v) {
+					std::memcpy(out_c + v * colors_stride, kWhite, 4);
 				}
 			}
 
-			// UVs (not skinned)
+			// UVs
 			float* uv_dst = reinterpret_cast<float*>(vbo_base + uvs_offset + processed * uvs_stride);
-			if (part_vertex_count == part.uvs.size() / AnimatedMesh::Part::kUVsCpnts) {
+			if (part.uvs.size() / AnimatedMesh::Part::kUVsCpnts == part_vertex_count) {
 				std::memcpy(uv_dst, part.uvs.data(), part_vertex_count * uvs_stride);
 			}
 			else {
@@ -137,34 +136,18 @@ namespace Engine {
 
 	void ParallelForIndex(int count, int grain, const std::function<void(int)>& fn)
 	{
-		if (count <= 0) {
-			return;
-		}
+		if (count <= 0 || !fn) return;
 		grain = std::max(1, grain);
 
-		// std::async has high overhead for tiny batches (1 skinned character, few parts).
-		// Keep the work on this thread unless there is enough to justify a fork.
-		constexpr int kMinAsyncItems = 4;
-		if (count < kMinAsyncItems) {
-			for (int i = 0; i < count; ++i) {
-				fn(i);
-			}
+		if (Get().threadPool && GetThreadPool().IsRunning()) {
+			GetThreadPool().ParallelForIndex(count, grain, fn);
 			return;
 		}
 
-		std::function<void(int, int)> rec = [&](int begin, int n) {
-			if (n <= grain) {
-				for (int i = 0; i < n; ++i) {
-					fn(begin + i);
-				}
-				return;
-			}
-			const int half = n / 2;
-			auto      fut  = std::async(std::launch::async, [&, begin, half, n]() { rec(begin + half, n - half); });
-			rec(begin, half);
-			fut.get();
-		};
-		rec(0, count);
+		// Fallback: serial (or tiny std::async fork if large and no pool)
+		for (int i = 0; i < count; ++i) {
+			fn(i);
+		}
 	}
 
 	bool SkinAnimatedMeshToCache(const AnimatedMesh& mesh, ozz::span<const ozz::math::Float4x4> skinning_matrices, SkinnedMeshFrameCache& out)
@@ -201,12 +184,10 @@ namespace Engine {
 			return false;
 		}
 
-		// Parallel skin parts (ozz multithread sample: split with std::async).
-		// Each part writes to a non-overlapping vertex range → no locks needed.
+		// Parallel skin parts — each writes a non-overlapping vertex range.
 		std::atomic<bool> ok{true};
 		const int         n = static_cast<int>(ranges.size());
-		// grain 1: one SkinningJob per async leaf when few parts (typical character ~6 parts)
-		ParallelForIndex(n, 1, [&](int i) {
+		ParallelForIndex(n, /*grain=*/1, [&](int i) {
 			if (!SkinPart(mesh, ranges[static_cast<size_t>(i)], skinning_matrices, out.vbo.data(), vertex_count)) {
 				ok.store(false, std::memory_order_relaxed);
 			}

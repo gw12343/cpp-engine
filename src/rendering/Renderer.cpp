@@ -357,6 +357,10 @@ namespace Engine {
 
         Engine::Framebuffer::Unbind();
 
+        // Kick the driver so the deferred/shadow/lighting work can execute on the GPU
+        // while the CPU finalizes ImGui draw lists in PostRender (reduces SwapBuffers wait).
+        glFlush();
+
         {
             ZoneScopedN("Post Render");
             PostRender();

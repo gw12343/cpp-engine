@@ -54,6 +54,7 @@
 
 
 #include "TracyClient.cpp"
+#include "core/ThreadPool.h"
 
 #include <fstream>
 #include <nlohmann/json.hpp>
@@ -71,6 +72,12 @@ namespace Engine {
 		Get().manager   = m_moduleManager.get();
 
 		Get().renderSettings = new RenderSettings();
+
+		// Global worker pool for CPU jobs (animation, skinning, transforms, physics sync).
+		// OpenGL stays on the main thread.
+		Get().threadPool = std::make_unique<ThreadPool>();
+		GetDefaultLogger()->info("ThreadPool started with {} workers", GetThreadPool().WorkerCount());
+
 		// Initialize asset loaders
 		Get().assetManager = std::make_shared<AssetManager>();
 		GetAssetManager().RegisterLoader<Texture>(std::make_unique<TextureLoader>());
@@ -362,6 +369,10 @@ namespace Engine {
 		data.renderer.reset();
 		data.window.reset();
 		data.scene.reset();
+		if (data.threadPool) {
+			data.threadPool->Shutdown();
+			data.threadPool.reset();
+		}
 		data.assetManager.reset();
 		delete data.renderSettings;
 		data.renderSettings = nullptr;
