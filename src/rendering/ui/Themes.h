@@ -159,8 +159,9 @@ namespace Engine {
 				style.ScrollbarSize = 14.0f;
 				style.GrabMinSize   = 10.0f;
 
-				style.AntiAliasedLines = true;
-				style.AntiAliasedFill  = true;
+				// Keep UI AA off — large savings in ImGui vertex count / PostRender draw.
+				style.AntiAliasedLines = false;
+				style.AntiAliasedFill  = false;
 				break;
 			case 2:
 				// Base color scheme

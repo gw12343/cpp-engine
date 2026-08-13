@@ -6,6 +6,7 @@
 
 #include "utils/Logger.h"
 #include "RenderSettings.h"
+#include "core/ThreadPool.h"
 #include "entt/entt.hpp"
 
 #ifndef GAME_BUILD
@@ -59,6 +60,7 @@ namespace Engine {
 		std::shared_ptr<Camera>                  camera;
 		std::shared_ptr<Input>                   input;
 		std::shared_ptr<GameUIManager>           gameUI;
+		std::unique_ptr<ThreadPool>              threadPool;
 		EngineState                              state;
         RenderSettings*                          renderSettings;
 		ModuleManager*                           manager;
@@ -144,6 +146,11 @@ namespace Engine {
 	inline auto& GetGameUIManager()
 	{
 		return *Get().gameUI;
+	}
+
+	inline ThreadPool& GetThreadPool()
+	{
+		return *Get().threadPool;
 	}
 
 	entt::registry& GetCurrentSceneRegistry();

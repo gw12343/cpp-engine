@@ -11,6 +11,10 @@
 #include "components/impl/RigidBodyComponent.h"
 
 #include "components/impl/EntityMetadataComponent.h"
+#include "core/ThreadPool.h"
+#include "core/EngineData.h"
+#include <vector>
+
 namespace Engine {
 
 	// Module overrides
@@ -62,15 +66,21 @@ namespace Engine {
 	}
 	void SceneManager::UpdateTransforms()
 	{
+		// Each root hierarchy is independent — process roots in parallel.
+		std::vector<Entity> roots;
+		roots.reserve(64);
+
 		auto view = GetCurrentSceneRegistry().view<Components::EntityMetadata, Components::Transform>();
 		for (auto [entity, metadata, transform] : view.each()) {
-			Entity e{entity, GetCurrentScene()};
-
-
 			if (!metadata.parentEntity.IsValid()) {
-				UpdateTransformRecursive(e, glm::mat4(1.0f), false);
+				roots.emplace_back(entity, GetCurrentScene());
 			}
 		}
+
+		const int n = static_cast<int>(roots.size());
+		GetThreadPool().ParallelForIndex(n, /*minPerTask=*/2, [&](int i) {
+			UpdateTransformRecursive(roots[static_cast<size_t>(i)], glm::mat4(1.0f), false);
+		});
 	}
 	void SceneManager::UpdateTransformRecursive(Entity entity, const glm::mat4& parentMatrix, bool hasParent)
 	{

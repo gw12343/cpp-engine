@@ -60,7 +60,32 @@ namespace Engine {
 		}
 	} // namespace
 
-	static const ImWchar icons_ranges[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
+	// Only the icons actually referenced by editor UI / COMPONENT_LIST.
+	// Loading ICON_MIN_FA..ICON_MAX_FA bloats the font atlas to thousands of glyphs
+	// and makes ImGui_ImplOpenGL3_RenderDrawData much more expensive.
+	static const char* const kUsedFaIcons[] = {
+	    ICON_FA_SCROLL,
+	    ICON_FA_MOON,
+	    ICON_FA_MAXIMIZE,
+	    ICON_FA_MAP,
+	    ICON_FA_CUBE,
+	    ICON_FA_CUBES_STACKED,
+	    ICON_FA_VOLUME_HIGH,
+	    ICON_FA_STAR_HALF_STROKE,
+	    ICON_FA_WINDOW_MAXIMIZE,
+	    ICON_FA_GLOBE,
+	    ICON_FA_FONT,
+	    ICON_FA_PLAY,
+	    ICON_FA_PAUSE,
+	    ICON_FA_STOP,
+	    ICON_FA_TRASH,
+	    ICON_FA_PALETTE,
+	    ICON_FA_MAGNIFYING_GLASS,
+	    ICON_FA_ROTATE,
+	    ICON_FA_ARROWS_UP_DOWN_LEFT_RIGHT,
+	    ICON_FA_BORDER_TOP_LEFT,
+	    ICON_FA_UP_RIGHT_AND_DOWN_LEFT_FROM_CENTER,
+	};
 
 	std::map<Window::FramebufferID, std::shared_ptr<Framebuffer>> Window::m_frameBuffers;
     std::shared_ptr<GBuffer> Window::m_gbuffer;
@@ -178,24 +203,46 @@ namespace Engine {
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     // Enable Docking
+		// Slightly cheaper docking/nav defaults
+		io.ConfigWindowsResizeFromEdges = true;
+		io.ConfigMemoryCompactTimer     = 60.0f;
+
 		ImGui_ImplGlfw_InitForOpenGL(m_window, true);
-		ImGui_ImplOpenGL3_Init("#version 150");
+		// Desktop GL 3.3 core path (VtxOffset for large meshes, less legacy state).
+		ImGui_ImplOpenGL3_Init("#version 330");
 
 		ImGui::StyleColorsDark();
+		// AA lines/fills inflate vertex counts for every window chrome draw.
+		ImGuiStyle& style       = ImGui::GetStyle();
+		style.AntiAliasedLines  = false;
+		style.AntiAliasedFill   = false;
+		style.AntiAliasedLinesUseTex = false;
 
-		// Load Roboto 12pt (approx. 24px)
+		// Load Roboto
 		ImFontConfig roboto_config;
 		roboto_config.MergeMode  = false;
 		roboto_config.PixelSnapH = true;
-		ImFont* roboto_font      = io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Regular.ttf", 18.0f, &roboto_config, io.Fonts->GetGlyphRangesDefault());
+		// Lower oversampling → smaller atlas, faster UI text batches.
+		roboto_config.OversampleH = 1;
+		roboto_config.OversampleV = 1;
+		io.Fonts->AddFontFromFileTTF("resources/fonts/Roboto-Regular.ttf", 18.0f, &roboto_config, io.Fonts->GetGlyphRangesDefault());
 
-		// Load Font Awesome and merge into Roboto
+		// Merge only FA icons we actually use (not the entire 0xe005..0xf8ff plane).
+		static ImVector<ImWchar> faRanges;
+		{
+			ImFontGlyphRangesBuilder builder;
+			for (const char* icon : kUsedFaIcons) {
+				builder.AddText(icon);
+			}
+			builder.BuildRanges(&faRanges);
+		}
 		ImFontConfig fa_config;
-		fa_config.MergeMode        = true; // Important
+		fa_config.MergeMode        = true;
 		fa_config.PixelSnapH       = true;
-		fa_config.GlyphMinAdvanceX = 12.0f; // Adjust icon spacing if needed
-		io.Fonts->AddFontFromFileTTF("resources/fonts/fa-solid-900.ttf", 18.0f, &fa_config, icons_ranges);
-
+		fa_config.GlyphMinAdvanceX = 12.0f;
+		fa_config.OversampleH      = 1;
+		fa_config.OversampleV      = 1;
+		io.Fonts->AddFontFromFileTTF("resources/fonts/fa-solid-900.ttf", 18.0f, &fa_config, faRanges.Data);
 
 		io.FontGlobalScale = 1.0f;
 		ImGuizmo::SetImGuiContext(ImGui::GetCurrentContext());
@@ -282,10 +329,31 @@ void Window::onGameStart()
 
 	void Window::SwapBuffers() const
 	{
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		ZoneScopedN("PostRender");
 
-		glfwSwapBuffers(m_window);
+#ifndef GAME_BUILD
+		{
+			ZoneScopedN("ImGui::Render");
+			// Pure CPU: finalize draw lists. GPU can still be finishing the game pass
+			// (caller should glFlush before this when possible).
+			ImGui::Render();
+		}
+		{
+			ZoneScopedN("ImGui OpenGL Draw");
+			ImDrawData* drawData = ImGui::GetDrawData();
+			if (drawData && drawData->CmdListsCount > 0 && drawData->TotalVtxCount > 0) {
+				// UI always composites onto the default framebuffer.
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				glViewport(0, 0, m_width, m_height);
+				ImGui_ImplOpenGL3_RenderDrawData(drawData);
+			}
+		}
+#endif
+
+		{
+			ZoneScopedN("glfwSwapBuffers");
+			glfwSwapBuffers(m_window);
+		}
 	}
 
 

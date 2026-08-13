@@ -14,6 +14,8 @@
 #include "PlayerController.h"
 #include "components/impl/PlayerControllerComponent.h"
 #include "components/impl/EntityMetadataComponent.h"
+#include "core/ThreadPool.h"
+#include <vector>
 
 using namespace JPH;
 using namespace JPH::literals;
@@ -363,10 +365,30 @@ namespace Engine {
 
 	void PhysicsManager::SyncPhysicsEntities()
 	{
-		auto           physicsView    = GetCurrentSceneRegistry().view<Engine::Components::Transform, Engine::Components::RigidBodyComponent>();
-		BodyInterface& body_interface = physics->GetBodyInterface();
+		if (!physics) return;
 
+		struct SyncItem {
+			entt::entity                          entity{};
+			Components::Transform*                tr = nullptr;
+			Components::RigidBodyComponent*       rb = nullptr;
+		};
+
+		std::vector<SyncItem> items;
+		items.reserve(64);
+		auto physicsView = GetCurrentSceneRegistry().view<Engine::Components::Transform, Engine::Components::RigidBodyComponent>();
 		for (auto [entity, tr, rb] : physicsView.each()) {
+			if (rb.bodyID.IsInvalid()) continue;
+			items.push_back(SyncItem{entity, &tr, &rb});
+		}
+
+		// Jolt Get* body queries are multi-thread safe; each item writes only its own Transform.
+		BodyInterface& body_interface = physics->GetBodyInterface();
+		const int      n              = static_cast<int>(items.size());
+		GetThreadPool().ParallelForIndex(n, /*minPerTask=*/4, [&](int i) {
+			auto& item = items[static_cast<size_t>(i)];
+			auto& tr   = *item.tr;
+			auto& rb   = *item.rb;
+
 			RMat44    tform = body_interface.GetCenterOfMassTransform(rb.bodyID);
 			glm::vec3 scl;
 			glm::vec3 worldPos;
@@ -374,10 +396,8 @@ namespace Engine {
 
 			DecomposeMatrix(tform, worldPos, worldRot, scl);
 
-			// Apply center of mass offset for convex hull shapes
 			if (rb.centerOfMassOffset.LengthSq() > 0.0f) {
-				// Convert offset from local-space to world-space (rotated) and subtract from position
-				glm::vec3 offsetGlm = glm::vec3(rb.centerOfMassOffset.GetX(), rb.centerOfMassOffset.GetY(), rb.centerOfMassOffset.GetZ());
+				glm::vec3 offsetGlm     = glm::vec3(rb.centerOfMassOffset.GetX(), rb.centerOfMassOffset.GetY(), rb.centerOfMassOffset.GetZ());
 				glm::vec3 rotatedOffset = worldRot * offsetGlm;
 				worldPos -= rotatedOffset;
 			}
@@ -385,36 +405,37 @@ namespace Engine {
 			tr.SetWorldPosition(worldPos);
 			tr.SetWorldRotation(worldRot);
 
-			auto hr = GetCurrentSceneRegistry().get<Components::EntityMetadata>(entity);
+			auto& hr = GetCurrentSceneRegistry().get<Components::EntityMetadata>(item.entity);
 
 			if (!hr.parentEntity.IsValid()) {
-				// Root entity: local == world
 				tr.SetWorldPosition(worldPos);
 				tr.SetLocalPosition(worldPos);
-				
 				tr.SetWorldRotation(worldRot);
 				tr.SetLocalRotation(worldRot);
 			}
 			else {
-				// Child entity: convert world -> local using parent's world matrix
 				auto parentEntity = GetCurrentScene()->Get(hr.parentEntity);
 				if (parentEntity && parentEntity.HasComponent<Components::Transform>()) {
 					auto&     parentTr  = parentEntity.GetComponent<Components::Transform>();
 					glm::mat4 parentInv = glm::inverse(parentTr.GetWorldMatrix());
 
-					glm::mat4 worldMatrix = glm::translate(glm::mat4(1.0f), worldPos) * glm::toMat4(worldRot) * glm::scale(glm::mat4(1.0f), tr.GetWorldScale());
+					glm::mat4 worldMatrix = glm::translate(glm::mat4(1.0f), worldPos) * glm::toMat4(worldRot) *
+					                        glm::scale(glm::mat4(1.0f), tr.GetWorldScale());
 
 					glm::mat4 localMatrix = parentInv * worldMatrix;
 
 					tr.SetLocalPosition(glm::vec3(localMatrix[3]));
 					tr.SetLocalRotation(glm::quat_cast(localMatrix));
-					tr.SetLocalScale(glm::vec3(glm::length(glm::vec3(localMatrix[0])), glm::length(glm::vec3(localMatrix[1])), glm::length(glm::vec3(localMatrix[2]))));
+					tr.SetLocalScale(glm::vec3(glm::length(glm::vec3(localMatrix[0])),
+					                           glm::length(glm::vec3(localMatrix[1])),
+					                           glm::length(glm::vec3(localMatrix[2]))));
 				}
 			}
 
 			// Update world matrix for consistency (optional if Scene::UpdateTransforms runs afterward)
-			tr.SetWorldMatrix(glm::translate(glm::mat4(1.0f), tr.GetWorldPosition()) * glm::toMat4(tr.GetWorldRotation()) * glm::scale(glm::mat4(1.0f), tr.GetWorldScale()));
-		}
+			tr.SetWorldMatrix(glm::translate(glm::mat4(1.0f), tr.GetWorldPosition()) * glm::toMat4(tr.GetWorldRotation()) *
+			                  glm::scale(glm::mat4(1.0f), tr.GetWorldScale()));
+		});
 	}
 
 	std::shared_ptr<CharacterVirtual> PhysicsManager::GetCharacter()
