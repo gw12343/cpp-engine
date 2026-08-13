@@ -125,6 +125,8 @@ namespace Engine::Components {
 		LeftLabelCheckbox("Visible", &visible);
 
 		LeftLabelInputText("Mesh Path", &meshPath);
+		ImGui::SameLine();
+		BrowsePathButton("mesh", "ozz,fbx", "resources/animations", &meshPath);
 		if (ImGui::Button("Load Mesh")) {
 			TryLoadMeshes();
 		}

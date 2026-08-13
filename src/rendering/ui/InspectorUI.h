@@ -70,6 +70,8 @@ namespace Engine {
 
 
 	bool ComponentHeader(const char* name, bool* removeRequested);
+
+	bool BrowsePathButton(const char* id, const char* filter, const char* defaultPath, std::string* path);
 } // namespace Engine
 
 #endif // CPP_ENGINE_INSPECTORUI_H

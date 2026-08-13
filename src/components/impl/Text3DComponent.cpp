@@ -17,6 +17,8 @@ namespace Engine::Components {
 	{
 		LeftLabelInputText("Text", &text);
 		LeftLabelInputText("Font", &fontPath);
+		ImGui::SameLine();
+		BrowsePathButton("font", "ttf,otf", "resources/fonts", &fontPath);
 		LeftLabelDragFloat("Size", &size, 0.01f);
 		if (size < 0.001f) size = 0.001f;
 

@@ -57,22 +57,71 @@ namespace Engine::Components {
 	{
 		bool updatePhysicsPositionManually = false;
 
-		glm::vec3 displayPos = localPosition;
+		static bool         showWorld = false;
+		static entt::entity eulerEnt  = entt::null;
+		static glm::vec3    cachedEuler(0.0f);
+
+		ImGui::Checkbox("World Space", &showWorld);
+
+		glm::vec3& pos   = showWorld ? worldPosition : localPosition;
+		glm::quat  rot   = showWorld ? GetWorldRotation() : GetLocalRotation();
+		glm::vec3& scale = showWorld ? worldScale : localScale;
+
+		glm::vec3 displayPos = pos;
+		ImGui::PushID("pos");
 		if (LeftLabelDragFloat3("Position", glm::value_ptr(displayPos), 0.1f)) {
-			localPosition                 = displayPos;
+			pos                           = displayPos;
 			updatePhysicsPositionManually = true;
 		}
-
-		glm::vec3 eulerAngles = glm::degrees(glm::eulerAngles(localRotation));
-		if (LeftLabelDragFloat3("Rotation", glm::value_ptr(eulerAngles), 1.0f)) {
-			localRotation                 = glm::quat(glm::radians(eulerAngles));
+		ImGui::SameLine();
+		if (ImGui::SmallButton("0##pos")) {
+			pos                           = glm::vec3(0.0f);
 			updatePhysicsPositionManually = true;
 		}
+		ImGui::PopID();
 
+		if (entity.GetENTTHandle() != eulerEnt || !ImGui::IsItemActive()) {
+			if (entity.GetENTTHandle() != eulerEnt) {
+				eulerEnt     = entity.GetENTTHandle();
+				cachedEuler  = glm::degrees(glm::eulerAngles(rot));
+			}
+			else if (!ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+				cachedEuler = glm::degrees(glm::eulerAngles(rot));
+			}
+		}
 
-		if(LeftLabelDragFloat3("Scale", glm::value_ptr(localScale), 0.1f)){
-            updatePhysicsPositionManually = true;
-        }
+		ImGui::PushID("rot");
+		if (LeftLabelDragFloat3("Rotation", glm::value_ptr(cachedEuler), 1.0f)) {
+			rot                           = glm::quat(glm::radians(cachedEuler));
+			if (showWorld) SetWorldRotation(rot);
+			else SetLocalRotation(rot);
+			updatePhysicsPositionManually = true;
+		}
+		ImGui::SameLine();
+		if (ImGui::SmallButton("0##rot")) {
+			rot                           = glm::quat(1, 0, 0, 0);
+			cachedEuler                   = glm::vec3(0.0f);
+			if (showWorld) SetWorldRotation(rot);
+			else SetLocalRotation(rot);
+			updatePhysicsPositionManually = true;
+		}
+		ImGui::PopID();
+
+		ImGui::PushID("scl");
+		if (LeftLabelDragFloat3("Scale", glm::value_ptr(scale), 0.1f)) {
+			updatePhysicsPositionManually = true;
+		}
+		ImGui::SameLine();
+		if (ImGui::SmallButton("1##scl")) {
+			scale                         = glm::vec3(1.0f);
+			updatePhysicsPositionManually = true;
+		}
+		ImGui::PopID();
+
+		if (showWorld && updatePhysicsPositionManually) {
+			entity.SetWorldTransform(worldPosition, GetWorldRotation(), worldScale);
+			updatePhysicsPositionManually = true;
+		}
 
 		if (updatePhysicsPositionManually) {
 			auto& em           = entity.GetComponent<EntityMetadata>();

@@ -3,8 +3,10 @@
 //
 
 
+#include "InspectorUI.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "rendering/Renderer.h"
+#include <nfd.h>
 
 #include "string"
 #include "imgui_internal.h"
@@ -276,56 +278,78 @@ namespace Engine {
 #define LL_ASSET_DEF(name, atype, an, nameA)                                                                                                                                                                                                   \
 	bool LeftLabelAsset##name(const char* label, AssetHandle<atype>* assetRef)                                                                                                                                                                 \
 	{                                                                                                                                                                                                                                          \
-		bool        used  = false;                                                                                                                                                                                                             \
-		std::string newID = assetRef->GetID();                                                                                                                                                                                                 \
-		if (LeftLabelInputText(label, &newID)) {                                                                                                                                                                                               \
-			*assetRef = AssetHandle<atype>(newID);                                                                                                                                                                                             \
-			used      = true;                                                                                                                                                                                                                  \
+		bool used = false;                                                                                                                                                                                                                     \
+		ImGui::PushID(label);                                                                                                                                                                                                                  \
+		ImGui::Columns(2, nullptr, false);                                                                                                                                                                                                     \
+		ImGui::SetColumnWidth(0, 100.0f);                                                                                                                                                                                                      \
+		ImGui::AlignTextToFramePadding();                                                                                                                                                                                                      \
+		ImGui::TextUnformatted(label);                                                                                                                                                                                                         \
+		ImGui::NextColumn();                                                                                                                                                                                                                   \
+		std::string preview = "None";                                                                                                                                                                                                          \
+		bool        valid   = false;                                                                                                                                                                                                           \
+		if (assetRef->IsValid()) {                                                                                                                                                                                                             \
+			atype* assetPtr = GetAssetManager().Get(*assetRef);                                                                                                                                                                                \
+			if (assetPtr != nullptr) {                                                                                                                                                                                                         \
+				preview = nameA;                                                                                                                                                                                                               \
+				valid   = true;                                                                                                                                                                                                                \
+			}                                                                                                                                                                                                                                  \
+			else {                                                                                                                                                                                                                             \
+				preview = "Missing";                                                                                                                                                                                                           \
+			}                                                                                                                                                                                                                                  \
 		}                                                                                                                                                                                                                                      \
-                                                                                                                                                                                                                                               \
-                                                                                                                                                                                                                                               \
+		ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 52.0f);                                                                                                                                                                     \
+		ImGui::PushStyleColor(ImGuiCol_Text, valid ? ImVec4(0.5f, 1.f, 0.5f, 1.f) : ImVec4(1.f, 0.85f, 0.3f, 1.f));                                                                                                                            \
+		ImGui::InputText("##id", &preview, ImGuiInputTextFlags_ReadOnly);                                                                                                                                                                      \
+		ImGui::PopStyleColor();                                                                                                                                                                                                                \
 		if (ImGui::BeginDragDropTarget()) {                                                                                                                                                                                                    \
 			struct PayloadData {                                                                                                                                                                                                               \
 				const char* type;                                                                                                                                                                                                              \
 				char        id[64];                                                                                                                                                                                                            \
 			};                                                                                                                                                                                                                                 \
-                                                                                                                                                                                                                                               \
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(an)) {                                                                                                                                                              \
 				if (payload->DataSize == sizeof(PayloadData)) {                                                                                                                                                                                \
 					const PayloadData* data = static_cast<const PayloadData*>(payload->Data);                                                                                                                                                  \
 					if (std::strcmp(data->type, #atype) == 0) {                                                                                                                                                                                \
 						*assetRef = AssetHandle<atype>(data->id);                                                                                                                                                                              \
-						newID     = data->id;                                                                                                                                                                                                  \
 						used      = true;                                                                                                                                                                                                      \
 					}                                                                                                                                                                                                                          \
 				}                                                                                                                                                                                                                              \
 			}                                                                                                                                                                                                                                  \
 			ImGui::EndDragDropTarget();                                                                                                                                                                                                        \
 		}                                                                                                                                                                                                                                      \
-		ImGui::Indent(120);                                                                                                                                                                                                                    \
-		bool drawDefault = false;                                                                                                                                                                                                              \
-		if (assetRef->IsValid()) {                                                                                                                                                                                                             \
-			atype* assetPtr = GetAssetManager().Get(*assetRef);                                                                                                                                                                                \
-			if (assetPtr != nullptr) {                                                                                                                                                                                                         \
-				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));                                                                                                                                                                \
-				ImGui::Text("^^^ %s: %s", #name, nameA);                                                                                                                                                                                       \
-				ImGui::PopStyleColor();                                                                                                                                                                                                        \
+		ImGui::SameLine();                                                                                                                                                                                                                     \
+		if (ImGui::Button("...")) {                                                                                                                                                                                                            \
+			ImGui::OpenPopup("##asset_browse");                                                                                                                                                                                                \
+		}                                                                                                                                                                                                                                      \
+		ImGui::SameLine();                                                                                                                                                                                                                     \
+		if (ImGui::Button("X")) {                                                                                                                                                                                                              \
+			*assetRef = AssetHandle<atype>();                                                                                                                                                                                                  \
+			used      = true;                                                                                                                                                                                                                  \
+		}                                                                                                                                                                                                                                      \
+		if (ImGui::BeginPopup("##asset_browse")) {                                                                                                                                                                                              \
+			static char filter[128] = "";                                                                                                                                                                                                      \
+			ImGui::InputTextWithHint("##af", "Filter...", filter, IM_ARRAYSIZE(filter));                                                                                                                                                       \
+			auto& storage = GetAssetManager().GetStorage<atype>();                                                                                                                                                                             \
+			ImGui::BeginChild("##alist", ImVec2(280, 220), true);                                                                                                                                                                              \
+			for (const auto& [guid, asset] : storage.guidToAsset) {                                                                                                                                                                            \
+				if (!asset) continue;                                                                                                                                                                                                          \
+				AssetHandle<atype> h(guid);                                                                                                                                                                                                    \
+				atype*             assetPtr = asset.get();                                                                                                                                                                                     \
+				std::string        shown    = nameA;                                                                                                                                                                                           \
+				if (filter[0] && shown.find(filter) == std::string::npos) continue;                                                                                                                                                            \
+				if (ImGui::Selectable(shown.c_str())) {                                                                                                                                                                                        \
+					*assetRef = h;                                                                                                                                                                                                             \
+					used      = true;                                                                                                                                                                                                          \
+					ImGui::CloseCurrentPopup();                                                                                                                                                                                                \
+				}                                                                                                                                                                                                                              \
 			}                                                                                                                                                                                                                                  \
-			else {                                                                                                                                                                                                                             \
-				drawDefault = true;                                                                                                                                                                                                            \
-			}                                                                                                                                                                                                                                  \
+			ImGui::EndChild();                                                                                                                                                                                                                 \
+			ImGui::EndPopup();                                                                                                                                                                                                                 \
 		}                                                                                                                                                                                                                                      \
-		else {                                                                                                                                                                                                                                 \
-			drawDefault = true;                                                                                                                                                                                                                \
-		}                                                                                                                                                                                                                                      \
-		if (drawDefault) {                                                                                                                                                                                                                     \
-			ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 0, 255));                                                                                                                                                                  \
-			ImGui::Text("^^^ Invalid %s", #name);                                                                                                                                                                                              \
-			ImGui::PopStyleColor();                                                                                                                                                                                                            \
-		}                                                                                                                                                                                                                                      \
-		ImGui::Unindent(120);                                                                                                                                                                                                                  \
+		ImGui::Columns(1);                                                                                                                                                                                                                     \
+		ImGui::PopID();                                                                                                                                                                                                                        \
 		return used;                                                                                                                                                                                                                           \
-	}                                                                                                                                                                                                                                          \
+	} \
 	bool LeftLabelAssetVector##name(const char* label, std::vector<AssetHandle<atype>>& assetRef)                                                                                                                                              \
 	{                                                                                                                                                                                                                                          \
 		if (LeftLabelEditVector<AssetHandle<atype>>(label, assetRef, [](AssetHandle<atype>& val) {                                                                                                                                             \
@@ -413,6 +437,23 @@ namespace Engine {
 		return false;
 	}
 
+
+	bool BrowsePathButton(const char* id, const char* filter, const char* defaultPath, std::string* path)
+	{
+		ImGui::PushID(id);
+		bool changed = false;
+		if (ImGui::Button("Browse...")) {
+			nfdchar_t*  outPath = nullptr;
+			nfdresult_t result  = NFD_OpenDialog(filter, defaultPath, &outPath);
+			if (result == NFD_OKAY && outPath) {
+				*path = outPath;
+				free(outPath);
+				changed = true;
+			}
+		}
+		ImGui::PopID();
+		return changed;
+	}
 
 	bool ComponentHeader(const char* name, bool* removeRequested)
 	{
