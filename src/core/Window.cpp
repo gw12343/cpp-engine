@@ -16,6 +16,10 @@
 #include "imguizmo/ImGuizmo.h"
 #include "imguizmo/ImGuizmo.h"
 #include "rendering/Renderer.h"
+
+#ifndef GAME_BUILD
+#include <stb/stb_image.h>
+#endif
 namespace Engine {
 
 	namespace {
@@ -143,6 +147,25 @@ namespace Engine {
 			glfwTerminate();
 			return false;
 		}
+
+#ifndef GAME_BUILD
+		// Editor window icon (taskbar / title bar on Windows)
+		{
+			int iconW = 0, iconH = 0, iconChannels = 0;
+			unsigned char* iconPixels = stbi_load("resources/engine/icon.png", &iconW, &iconH, &iconChannels, 4);
+			if (iconPixels) {
+				GLFWimage icon{};
+				icon.width  = iconW;
+				icon.height = iconH;
+				icon.pixels = iconPixels;
+				glfwSetWindowIcon(m_window, 1, &icon);
+				stbi_image_free(iconPixels);
+			}
+			else {
+				spdlog::warn("Failed to load window icon: resources/engine/icon.png");
+			}
+		}
+#endif
 
 		// Set resize callback
 		glfwSetWindowSizeCallback(m_window, [](GLFWwindow* window, int width, int height) {

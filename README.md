@@ -1,4 +1,4 @@
-# cpp-engine
+![cpp-engine](docs/logo-wide.png)
 
 A modern C++ game engine with physics, audio, animation, and rendering capabilities.
 
