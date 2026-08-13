@@ -108,7 +108,7 @@ namespace Engine {
 			work.push_back(AnimWork{&ac});
 		}
 
-		const float dt      = (GetState() == PLAYING) ? deltaTime : 0.f;
+		const float dt      = IsSimulating() ? deltaTime : 0.f;
 		const int   n       = static_cast<int>(work.size());
 		// Pose sampling is relatively heavy — parallelize even modest counts.
 		GetThreadPool().ParallelForIndex(n, /*minPerTask=*/1, [&](int i) {

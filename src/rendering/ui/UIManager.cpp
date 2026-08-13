@@ -1,6 +1,8 @@
 #include "UIManager.h"
+#include "EditorSession.h"
 
 #include "components/Components.h"
+#include "components/AllComponents.h"
 #include "core/EngineData.h"
 
 #include "rendering/Renderer.h"
@@ -37,6 +39,7 @@
 
 
 #include <nfd.h>
+#include <cstdio>
 
 #include <RmlUi/Core.h>
 
@@ -145,66 +148,21 @@ namespace Engine::UI {
 	void Play()
 	{
 #ifndef GAME_BUILD
-		if (GetState() != PLAYING) {
-			GetCamera().SaveEditorLocation();
-			bool wasPaused = GetState() == PAUSED;
-			if (GetState() == EDITOR) {
-				SCENE_LOADER::SerializeScene(GetSceneManager().GetActiveScene(), "scenes/scene1.json");
-			}
-			SetState(PLAYING);
-			
-			if (!wasPaused) {
-				// StartGame() calls ScriptManager::onGameStart() which clears ALL event subscriptions
-				// So we must call resetDocuments() AFTER, not before
-				Get().manager->StartGame();
-				GetGameUIManager().resetDocuments();
-			}
-		}
+		GetEditor().Play();
 #endif
 	}
 
 	void Pause()
 	{
 #ifndef GAME_BUILD
-		if (GetState() == PLAYING) {
-			GetCamera().LoadEditorLocation();
-			SetState(PAUSED);
-		}
+		GetEditor().Pause();
 #endif
 	}
 
 	void Stop()
 	{
 #ifndef GAME_BUILD
-
-		// unload scene, load backup
-		if (GetState() != EDITOR) {
-			GetCamera().LoadEditorLocation();
-			GetUI().m_selectedEntity = Entity();
-			GetParticleManager().ResetInternalManager();
-			
-			// Clear event subscriptions when stopping the game
-			GetScriptManager().GetEventBus().ClearAllSubscriptions();
-			
-			{
-				//  clear scene
-				auto& physics = GetPhysics();
-
-				BodyIDVector outBodies;
-				physics.GetPhysicsSystem()->GetBodies(outBodies);
-
-				for (auto body : outBodies) {
-					if (physics.GetPhysicsSystem()->GetBodyInterface().IsAdded(body)) {
-						physics.GetPhysicsSystem()->GetBodyInterface().RemoveBody(body);
-					}
-				}
-			}
-			GetAssetManager().Unload<Scene>(GetSceneManager().GetActiveScene());
-			SetState(EDITOR);
-			GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>("scenes/scene1.json"));
-			GetGameUIManager().resetDocuments();
-			
-		}
+		GetEditor().Stop();
 #endif
 	}
 
@@ -214,7 +172,13 @@ namespace Engine::UI {
 		float height = 0.0f;
 		ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4(0, 0, 0, 0));
 		if (ImGui::BeginMainMenuBar()) {
+			auto& editor = GetEditor();
 			if (ImGui::BeginMenu("File")) {
+				if (ImGui::MenuItem("New Scene", "Ctrl+N")) editor.NewScene();
+				if (ImGui::MenuItem("Open Scene...", "Ctrl+O")) editor.OpenSceneDialog();
+				if (ImGui::MenuItem("Save Scene", "Ctrl+S")) editor.SaveScene();
+				if (ImGui::MenuItem("Save Scene As...")) editor.SaveSceneAs();
+				ImGui::Separator();
 				if (ImGui::MenuItem("Build Game")) {
 					std::string path = SelectFolder();
 					BuildGame(path);
@@ -229,9 +193,26 @@ namespace Engine::UI {
 
 
 			if (ImGui::BeginMenu("View")) {
+				ImGui::MenuItem("Hierarchy", nullptr, &editor.showHierarchy);
+				ImGui::MenuItem("Inspector", nullptr, &editor.showInspector);
+				ImGui::MenuItem("Assets", nullptr, &editor.showAssets);
+				ImGui::MenuItem("Console", nullptr, &editor.showConsole);
+				ImGui::MenuItem("Material Editor", nullptr, &editor.showMaterialEditor);
+				ImGui::Separator();
+				ImGui::MenuItem("Animation", nullptr, &editor.showAnimation);
+				ImGui::MenuItem("Audio Debug", nullptr, &editor.showAudioDebug);
+				ImGui::MenuItem("GBuffer Debug", nullptr, &editor.showGBufferDebug);
+				ImGui::MenuItem("Model Debug", nullptr, &editor.showModelDebug);
+				ImGui::Separator();
+				ImGui::MenuItem("Editor Settings", nullptr, &editor.showSettings);
 				static bool showDemo = false;
 				if (ImGui::MenuItem("ImGui Demo", nullptr, showDemo)) showDemo = !showDemo;
 				if (showDemo) ImGui::ShowDemoWindow(&showDemo);
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Help")) {
+				ImGui::MenuItem("Keyboard Shortcuts", "F1", &editor.showShortcuts);
 				ImGui::EndMenu();
 			}
 
@@ -309,6 +290,16 @@ namespace Engine::UI {
 
 			SceneViewWindow::mCurrentGizmoMode = (current == 0 ? ImGuizmo::MODE::LOCAL : ImGuizmo::MODE::WORLD);
 
+			ImGui::SameLine();
+			auto& editor = GetEditor();
+			ImGui::Checkbox("Snap", &editor.snapEnabled);
+			if (editor.snapEnabled) {
+				ImGui::SameLine();
+				ImGui::SetNextItemWidth(50);
+				ImGui::DragFloat("##snapT", &editor.snapTranslate, 0.05f, 0.01f, 10.0f, "%.2f");
+				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Translate snap");
+			}
+
 
 			// --- Center Play Controls ---
 			float windowWidth        = ImGui::GetWindowSize().x;
@@ -365,6 +356,21 @@ namespace Engine::UI {
 			if (startStop) {
 				Stop();
 			}
+
+			ImGui::SameLine();
+			const bool canStep = GetState() == PAUSED || GetState() == PLAYING;
+			if (!canStep) {
+				ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+				ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.25f);
+			}
+			if (ImGui::Button(ICON_FA_FORWARD_STEP "##step")) {
+				GetEditor().Step();
+			}
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Step one frame (F10 while paused)");
+			if (!canStep) {
+				ImGui::PopStyleVar();
+				ImGui::PopItemFlag();
+			}
 		}
 
 		float barHeight = ImGui::GetWindowHeight();
@@ -376,30 +382,114 @@ namespace Engine::UI {
 
 	bool consoleOpen = true;
 
+	Entity UIManager::DuplicateEntity(Entity source)
+	{
+		if (!source || !source.IsValid()) {
+			return Entity();
+		}
+
+		std::string newName = source.GetName();
+		if (newName.rfind("Copy of ", 0) != 0) {
+			newName = "Copy of " + newName;
+		}
+
+		Entity copy = Entity::Create(newName, source.m_scene);
+
+#define X(type, name, fancy)                                                                                                                                                                                                                   \
+		if (source.HasComponent<type>()) {                                                                                                                                                                                                     \
+			copy.AddComponent<type>(source.GetComponent<type>());                                                                                                                                                                              \
+		}
+		COMPONENT_LIST
+#undef X
+
+		auto& srcMeta = source.GetComponent<Components::EntityMetadata>();
+		if (srcMeta.parentEntity.IsValid()) {
+			copy.SetParent(srcMeta.parentEntity);
+		}
+
+		if (copy.HasComponent<Components::Transform>()) {
+			auto& tr = copy.GetComponent<Components::Transform>();
+			tr.SetLocalPosition(tr.GetLocalPosition() + glm::vec3(1.0f, 0.0f, 0.0f));
+		}
+
+		GetEditor().MarkDirty();
+		return copy;
+	}
+
+	void UIManager::FlushHierarchyCommands()
+	{
+		if (m_hierarchyCommand == HierarchyCommand::None || !m_hierarchyCommandEntity.IsValid()) {
+			m_hierarchyCommand       = HierarchyCommand::None;
+			m_hierarchyCommandEntity = Entity();
+			return;
+		}
+
+		Entity target = m_hierarchyCommandEntity;
+		const HierarchyCommand cmd = m_hierarchyCommand;
+		m_hierarchyCommand       = HierarchyCommand::None;
+		m_hierarchyCommandEntity = Entity();
+
+		switch (cmd) {
+			case HierarchyCommand::Delete:
+				if (m_selectedEntity == target) {
+					m_selectedEntity = Entity();
+				}
+				if (target.HasComponent<Components::EntityMetadata>() &&
+				    m_renamingGuid == target.GetComponent<Components::EntityMetadata>().guid) {
+					m_renamingGuid.clear();
+				}
+				target.Destroy();
+				break;
+			case HierarchyCommand::Duplicate:
+				m_selectedEntity = DuplicateEntity(target);
+				break;
+			case HierarchyCommand::CreateChild: {
+				Entity child = Entity::Create("New Entity", target.m_scene);
+				child.SetParent(target.GetEntityHandle());
+				m_selectedEntity = child;
+				GetEditor().MarkDirty();
+				break;
+			}
+			case HierarchyCommand::None:
+				break;
+		}
+	}
+
 	void UIManager::onUpdate(float dt)
 	{
         ZoneScopedN("OnUpdate UI manager");
-		m_selectedTheme = GetState() == EDITOR ? 2 : 0;
-		// Do not clear the default framebuffer here — Renderer owns the game pass.
+		auto& editor = GetEditor();
+		m_selectedTheme = editor.theme;
+		editor.HandleShortcuts();
+
 		float h      = RenderMainMenuBar();
 		float height = RenderTopBar(h) + h;
 		BeginDockspace(height);
 
 		m_overSceneView = SceneViewWindow::DrawSceneViewWindow();
-		RenderHierarchyWindow();
-		m_inspectorRenderer->RenderInspectorWindow(&m_selectedEntity);
-		m_materialEditor->RenderMaterialEditor(m_selectedMaterial);
+		if (editor.showHierarchy) RenderHierarchyWindow();
+		if (editor.showInspector) m_inspectorRenderer->RenderInspectorWindow(&m_selectedEntity);
+		if (editor.showMaterialEditor) m_materialEditor->RenderMaterialEditor(m_selectedMaterial);
 
-		DrawAnimationWindow();
-		DrawAudioDebugWindow();
-        RenderModelDebug(m_selectedModel);
-        RenderGBufferDebug(GetWindow().GetGBuffer());
-		DrawConsoleWindow(Logger::getImGuiSink(), &consoleOpen);
+		if (editor.showAnimation) DrawAnimationWindow();
+		if (editor.showAudioDebug) DrawAudioDebugWindow();
+        if (editor.showModelDebug) RenderModelDebug(m_selectedModel);
+        if (editor.showGBufferDebug) RenderGBufferDebug(GetWindow().GetGBuffer());
+		if (editor.showConsole) DrawConsoleWindow(Logger::getImGuiSink(), &editor.showConsole);
 
-		m_uiAssetRenderer->RenderAssetWindow();
-		// RenderAudioDebugUI();
+		if (editor.showAssets) m_uiAssetRenderer->RenderAssetWindow();
 
-		// Display pause overlay when physics is disabled
+		editor.DrawSettingsWindow();
+		editor.DrawShortcutsOverlay();
+		editor.DrawConfirmModals();
+
+		if (GetState() == PLAYING) {
+			ImGui::SetNextWindowPos(ImVec2(GetWindow().targetX + 10, GetWindow().targetY + 10), ImGuiCond_Always);
+			ImGui::SetNextWindowBgAlpha(0.45f);
+			ImGui::Begin("PlayBanner", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove);
+			ImGui::TextColored(ImVec4(0.4f, 1.0f, 0.5f, 1.0f), "PLAYING");
+			ImGui::End();
+		}
 		if (GetState() == PAUSED) {
 			RenderPauseOverlay();
 		}
@@ -407,9 +497,74 @@ namespace Engine::UI {
 		EndDockspace();
 	}
 
+	static const char* HierarchyTypeIcon(Entity entity)
+	{
+		if (entity.HasComponent<Components::ModelRenderer>()) return ICON_FA_CUBE;
+		if (entity.HasComponent<Components::SkinnedMeshComponent>()) return ICON_FA_PERSON;
+		if (entity.HasComponent<Components::AudioSource>()) return ICON_FA_VOLUME_HIGH;
+		if (entity.HasComponent<Components::LuaScript>()) return ICON_FA_SCROLL;
+		if (entity.HasComponent<Components::ParticleSystem>()) return ICON_FA_STAR;
+		if (entity.HasComponent<Components::TerrainRenderer>()) return ICON_FA_MOUNTAIN;
+		if (entity.HasComponent<Components::ShadowCaster>()) return ICON_FA_MOON;
+		if (entity.HasComponent<Components::PlayerControllerComponent>()) return ICON_FA_GAMEPAD;
+		if (entity.HasComponent<Components::Text3DComponent>()) return ICON_FA_FONT;
+		if (entity.HasComponent<Components::RmlUIComponent>()) return ICON_FA_WINDOW_MAXIMIZE;
+		if (entity.HasComponent<Components::AnimationComponent>()) return ICON_FA_FILM;
+		return ICON_FA_CUBE;
+	}
+
+	static bool HierarchyMatchesOrHasMatch(Entity entity, const char* filter)
+	{
+		if (!filter || filter[0] == '\0') return true;
+		if (!entity.HasComponent<Components::EntityMetadata>()) return false;
+		auto& meta = entity.GetComponent<Components::EntityMetadata>();
+		if (EditorSession::MatchesFilter(meta.name, filter) || EditorSession::MatchesFilter(meta.tag, filter)) {
+			return true;
+		}
+		for (auto& childHandle : meta.children) {
+			Entity child = GetCurrentScene()->Get(childHandle);
+			if (child && HierarchyMatchesOrHasMatch(child, filter)) return true;
+		}
+		return false;
+	}
+
+	void UIManager::DrawAddEntityMenu()
+	{
+		ImGui::Text("Add Entity");
+		ImGui::Separator();
+		if (ImGui::MenuItem("Empty Entity")) {
+			Entity entity    = Entity::Create("New Entity", GetCurrentScene());
+			m_selectedEntity = entity;
+			GetEditor().MarkDirty();
+		}
+
+		glm::vec3 position = GetCamera().GetPosition();
+		glm::vec3 forward  = GetCamera().GetFront();
+		glm::vec3 spawnPos = position + glm::vec3(forward.x * 3, forward.y * 3, forward.z * 3);
+
+		if (ImGui::MenuItem("Add Model")) {
+			Entity entity = Entity::Create("New Model", GetCurrentScene());
+			entity.AddComponent<Components::Transform>(spawnPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+			entity.AddComponent<Components::ModelRenderer>();
+			m_selectedEntity = entity;
+			GetEditor().MarkDirty();
+		}
+		if (ImGui::MenuItem("Add Particle System")) {
+			Entity entity = Entity::Create("New Particle System", GetCurrentScene());
+			entity.AddComponent<Components::Transform>(spawnPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+			entity.AddComponent<Components::ParticleSystem>();
+			m_selectedEntity = entity;
+			GetEditor().MarkDirty();
+		}
+	}
+
 	void UIManager::RenderHierarchyWindow()
 	{
 		ImGui::Begin("Hierarchy");
+
+		auto& editor = GetEditor();
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::InputTextWithHint("##hier_search", ICON_FA_MAGNIFYING_GLASS " Search...", editor.hierarchyFilter, IM_ARRAYSIZE(editor.hierarchyFilter));
 
 		// Get all entities with EntityMetadata component
 		auto view = GetCurrentSceneRegistry().view<Components::EntityMetadata>();
@@ -426,81 +581,53 @@ namespace Engine::UI {
 
 			// Only render root entities here
 			if (!metadata.parentEntity.IsValid()) {
-				RenderEntityTreeNode(e);
+				if (HierarchyMatchesOrHasMatch(e, editor.hierarchyFilter)) {
+					RenderEntityTreeNode(e);
+				}
 			}
 		}
 
-		// Create an invisible button that fills the remaining space to accept drops
+		// Fill leftover space so right-click / drop work all the way to the bottom.
+		// ContextWindow + NoOpenOverItems cannot open on this button, so the menu
+		// is attached to the drop zone itself.
 		ImVec2 contentRegionAvail = ImGui::GetContentRegionAvail();
-		if (contentRegionAvail.y > 0) {
-			ImGui::InvisibleButton("##HierarchyDropZone", contentRegionAvail);
+		if (contentRegionAvail.y < 8.0f) {
+			contentRegionAvail.y = 8.0f;
+		}
+		ImGui::InvisibleButton("##HierarchyDropZone", contentRegionAvail);
 
-			// Handle drop onto window background to unparent
-			if (ImGui::BeginDragDropTarget()) {
-				struct PayloadData {
-					const char* type;
-					char        id[64];
-				};
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_HANDLE")) {
-					if (payload->DataSize == sizeof(PayloadData)) {
-						const auto* data = static_cast<const PayloadData*>(payload->Data);
-						if (std::strcmp(data->type, "EntityHandle") == 0) {
-							std::string draggedGuid = data->id;
-							log->info("SETTING PARENT {}", draggedGuid);
+		if (ImGui::BeginDragDropTarget()) {
+			struct PayloadData {
+				const char* type;
+				char        id[64];
+			};
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_HANDLE")) {
+				if (payload->DataSize == sizeof(PayloadData)) {
+					const auto* data = static_cast<const PayloadData*>(payload->Data);
+					if (std::strcmp(data->type, "EntityHandle") == 0) {
+						std::string draggedGuid = data->id;
+						log->info("SETTING PARENT {}", draggedGuid);
 
-							EntityHandle parentHandle = EntityHandle();
-							EntityHandle childHandle  = EntityHandle(draggedGuid);
-							Entity       child        = GetCurrentScene()->Get(childHandle);
+						EntityHandle parentHandle = EntityHandle();
+						EntityHandle childHandle  = EntityHandle(draggedGuid);
+						Entity       child        = GetCurrentScene()->Get(childHandle);
 
-							_newChild    = child;
-							_newParent   = parentHandle;
-							changeParent = true;
-						}
+						_newChild    = child;
+						_newParent   = parentHandle;
+						changeParent = true;
 					}
 				}
-				ImGui::EndDragDropTarget();
 			}
+			ImGui::EndDragDropTarget();
+		}
+
+		if (ImGui::BeginPopupContextItem("HierarchyEmptyContext")) {
+			DrawAddEntityMenu();
+			ImGui::EndPopup();
 		}
 
 		if (ImGui::BeginPopupContextWindow("HierarchyContext", ImGuiPopupFlags_NoOpenOverItems | ImGuiPopupFlags_MouseButtonRight)) {
-			ImGui::Text("Add Entity");
-			ImGui::Separator();
-			if (ImGui::MenuItem("Empty Entity")) {
-				Entity entity    = Entity::Create("New Entity", GetCurrentScene());
-				m_selectedEntity = entity;
-			}
-
-			// Get position in front of camera
-			glm::vec3 position = GetCamera().GetPosition();
-			glm::vec3 forward  = GetCamera().GetFront();
-			glm::vec3 spawnPos = position + glm::vec3(forward.x * 3, forward.y * 3, forward.z * 3);
-
-			if (ImGui::MenuItem("Add Model")) {
-				Entity                        entity = Entity::Create("New Model", GetCurrentScene());
-				ModelHandle model;
-
-				if (!GetAssetManager().GetStorage<Rendering::Model>().guidToAsset.empty()) {
-					model = ModelHandle(GetAssetManager().GetStorage<Rendering::Model>().guidToAsset.begin()->first);
-				}
-
-				entity.AddComponent<Components::Transform>(spawnPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-				entity.AddComponent<Components::ModelRenderer>(model);
-				m_selectedEntity = entity;
-			}
-			if (ImGui::MenuItem("Add Particle System")) {
-				Entity                entity = Entity::Create("New Particle System", GetCurrentScene());
-				ParticleHandle particle;
-
-				if (!GetAssetManager().GetStorage<Particle>().guidToAsset.empty()) {
-					particle = ParticleHandle(GetAssetManager().GetStorage<Particle>().guidToAsset.begin()->first);
-				}
-
-				entity.AddComponent<Components::Transform>(spawnPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-				entity.AddComponent<Components::ParticleSystem>(particle);
-
-				m_selectedEntity = entity;
-			}
-
+			DrawAddEntityMenu();
 			ImGui::EndPopup();
 		}
 
@@ -508,6 +635,8 @@ namespace Engine::UI {
 		if (changeParent) {
 			_newChild.SetParent(_newParent);
 		}
+
+		FlushHierarchyCommands();
 	}
 
 	void UIManager::RenderEntityTreeNode(Entity entity)
@@ -525,7 +654,7 @@ namespace Engine::UI {
 		bool isSelected = (m_selectedEntity == entity);
 
 		// Set up tree node flags
-		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
 		if (isSelected) {
 			flags |= ImGuiTreeNodeFlags_Selected;
 		}
@@ -538,15 +667,26 @@ namespace Engine::UI {
 		// Push ID using GUID to keep tree state stable when name changes
 		ImGui::PushID(guid.c_str());
 
-		// Render the tree node with just the name (no ID suffix in display)
-		bool nodeOpen = ImGui::TreeNodeEx(metadata.name.c_str(), flags);
+		const float btnW     = ImGui::GetFrameHeight();
+		const float btnsWide = btnW * 2.0f + 4.0f;
+
+		char label[256];
+		std::snprintf(label, sizeof(label), "%s %s", HierarchyTypeIcon(entity), metadata.name.c_str());
+		// Later eye/lock buttons overlap this row — allow them to take the click.
+		ImGui::SetNextItemAllowOverlap();
+		bool nodeOpen = ImGui::TreeNodeEx(label, flags);
+
+		const ImVec2 nodeMin   = ImGui::GetItemRectMin();
+		const ImVec2 nodeSize  = ImGui::GetItemRectSize();
+		const ImVec2 afterNode = ImGui::GetCursorScreenPos();
+		const bool   overBtns  = ImGui::GetMousePos().x >= (nodeMin.x + nodeSize.x - btnsWide);
 
 		// Capture click against the tree node before drag-drop runs. Select on press
 		// (not release) so dropping onto a parent does not steal selection, and skip
 		// the expand arrow so OpenOnArrow still works.
 		const bool clickedArrow = ImGui::IsItemToggledOpen();
-		const bool leftClicked  = ImGui::IsItemClicked(ImGuiMouseButton_Left) && !clickedArrow;
-		const bool rightClicked = ImGui::IsItemClicked(ImGuiMouseButton_Right);
+		const bool leftClicked  = ImGui::IsItemClicked(ImGuiMouseButton_Left) && !clickedArrow && !overBtns;
+		const bool rightClicked = ImGui::IsItemClicked(ImGuiMouseButton_Right) && !overBtns;
 
 		// Handle drag source
 		bool isDragging = false;
@@ -562,7 +702,7 @@ namespace Engine::UI {
 			payload.id[sizeof(payload.id) - 1] = '\0';
 
 			ImGui::SetDragDropPayload("ENTITY_HANDLE", &payload, sizeof(payload));
-			ImGui::Text("Entity: %s", guid.c_str());
+			ImGui::Text("%s", metadata.name.c_str());
 
 			ImGui::EndDragDropSource();
 		}
@@ -599,12 +739,96 @@ namespace Engine::UI {
 		if (!isDragging && (leftClicked || rightClicked)) {
 			m_selectedEntity = entity;
 		}
+		if (!isDragging && leftClicked && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+			m_renamingGuid = guid;
+			strncpy(m_renameBuffer, metadata.name.c_str(), sizeof(m_renameBuffer) - 1);
+			m_renameBuffer[sizeof(m_renameBuffer) - 1] = '\0';
+			m_renameFocusRequested                     = true;
+		}
+
+		if (!isDragging) {
+			if (!overBtns) {
+				ImGui::OpenPopupOnItemClick("EntityContext", ImGuiPopupFlags_MouseButtonRight);
+			}
+			if (ImGui::BeginPopup("EntityContext")) {
+				ImGui::TextUnformatted(metadata.name.c_str());
+				ImGui::Separator();
+				if (ImGui::MenuItem("Rename")) {
+					m_renamingGuid = guid;
+					strncpy(m_renameBuffer, metadata.name.c_str(), sizeof(m_renameBuffer) - 1);
+					m_renameBuffer[sizeof(m_renameBuffer) - 1] = '\0';
+					m_renameFocusRequested                     = true;
+				}
+				if (ImGui::MenuItem("Duplicate")) {
+					m_hierarchyCommand       = HierarchyCommand::Duplicate;
+					m_hierarchyCommandEntity = entity;
+				}
+				if (ImGui::MenuItem("Create Child")) {
+					m_hierarchyCommand       = HierarchyCommand::CreateChild;
+					m_hierarchyCommandEntity = entity;
+				}
+				ImGui::Separator();
+				if (ImGui::MenuItem("Delete")) {
+					GetEditor().pendingDeleteEntity  = entity;
+					GetEditor().pendingConfirmDelete = true;
+				}
+				ImGui::EndPopup();
+			}
+		}
+
+		if (m_renamingGuid == guid) {
+			const float labelPad = ImGui::GetTreeNodeToLabelSpacing();
+			const float width    = nodeSize.x - labelPad;
+			ImGui::SetCursorScreenPos(ImVec2(nodeMin.x + labelPad, nodeMin.y));
+			ImGui::PushItemWidth(width > 40.0f ? width : 40.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2.0f, 0.0f));
+			if (m_renameFocusRequested) {
+				ImGui::SetKeyboardFocusHere();
+				m_renameFocusRequested = false;
+			}
+			const bool committed = ImGui::InputText("##hier_rename", m_renameBuffer, sizeof(m_renameBuffer),
+			                                        ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll);
+			if (committed) {
+				entity.SetName(m_renameBuffer);
+				m_renamingGuid.clear();
+			}
+			else if (ImGui::IsItemDeactivated()) {
+				if (!ImGui::IsKeyDown(ImGuiKey_Escape)) {
+					entity.SetName(m_renameBuffer);
+				}
+				m_renamingGuid.clear();
+			}
+			ImGui::PopStyleVar();
+			ImGui::PopItemWidth();
+			// Overlay must not shift child rows
+			ImGui::SetCursorScreenPos(afterNode);
+		}
+
+		{
+			ImGui::SetCursorScreenPos(ImVec2(nodeMin.x + nodeSize.x - btnsWide, nodeMin.y));
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1, 1, 1, 0.12f));
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+			if (ImGui::Button(metadata.active ? ICON_FA_EYE "##vis" : ICON_FA_EYE_SLASH "##vis", ImVec2(btnW, nodeSize.y))) {
+				metadata.active = !metadata.active;
+				GetEditor().MarkDirty();
+			}
+			ImGui::SameLine(0.0f, 4.0f);
+			const bool locked = GetEditor().IsEntityLocked(entity);
+			if (ImGui::Button(locked ? ICON_FA_LOCK "##lock" : ICON_FA_LOCK_OPEN "##lock", ImVec2(btnW, nodeSize.y))) {
+				GetEditor().ToggleEntityLocked(entity);
+			}
+			ImGui::PopStyleVar();
+			ImGui::PopStyleColor(2);
+			ImGui::SetCursorScreenPos(afterNode);
+		}
 
 		// Recursively render children
 		if (nodeOpen && !metadata.children.empty()) {
+			const char* filter = GetEditor().hierarchyFilter;
 			for (auto& childHandle : metadata.children) {
 				auto childEntity = GetCurrentScene()->Get(childHandle);
-				if (childEntity) {
+				if (childEntity && HierarchyMatchesOrHasMatch(childEntity, filter)) {
 					RenderEntityTreeNode(childEntity);
 				}
 			}
@@ -616,6 +840,7 @@ namespace Engine::UI {
 
 		if (changeParent) {
 			_newChild.SetParent(_newParent);
+			GetEditor().MarkDirty();
 		}
 	}
 
@@ -626,7 +851,7 @@ namespace Engine::UI {
 		ImGui::SetNextWindowBgAlpha(0.35f);
 		ImGui::Begin("PauseOverlay", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove);
 		ImGui::Text("GAME PAUSED");
-		ImGui::Text("Press PLAY to resume");
+		ImGui::Text("Play to resume  |  Step for one frame");
 		ImGui::End();
 	}
 
@@ -701,11 +926,9 @@ namespace Engine::UI {
     }
 
 
-    static bool gbufferDebug = true;
-
     void UIManager::RenderGBufferDebug(std::shared_ptr<GBuffer> gbuffer)
     {
-        ImGui::Begin("GBuffer Debug", &gbufferDebug);
+        ImGui::Begin("GBuffer Debug", &GetEditor().showGBufferDebug);
 
         const float previewSize = 400.0f;
 

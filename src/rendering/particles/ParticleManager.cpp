@@ -145,7 +145,7 @@ namespace Engine {
 	void ParticleManager::onUpdate(float dt)
 	{
 		ZoneScopedN("ParticleManager Update");
-		if (GetState() != PLAYING || !m_manager) {
+		if (!IsSimulating() || !m_manager) {
 			return;
 		}
 

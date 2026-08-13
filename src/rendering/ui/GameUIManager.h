@@ -18,6 +18,7 @@ namespace Engine {
 		void onGameStart() override;
 		void onShutdown() override;
 		void resetDocuments();
+		void CloseAllDocuments();
 		[[nodiscard]] std::string name() const override { return "GameUIManager"; }
 
 		void Render();
