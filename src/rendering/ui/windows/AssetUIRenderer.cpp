@@ -82,7 +82,16 @@ namespace Engine {
 		std::string ext      = filePath.extension().string();
 
 
-		if (owner) owner->RequestRefresh();
+		if (owner) {
+			owner->RequestRefresh();
+			if (action == efsw::Actions::Modified || action == efsw::Actions::Moved ||
+			    action == efsw::Actions::Delete || action == efsw::Actions::Add) {
+				owner->QueuePreviewInvalidation(filePath.string());
+				if (action == efsw::Actions::Moved && !oldFilename.empty()) {
+					owner->QueuePreviewInvalidation((fs::path(dir) / oldFilename).string());
+				}
+			}
+		}
 		switch (action) {
 			case efsw::Actions::Add:
 			case efsw::Actions::Modified:
@@ -128,6 +137,98 @@ namespace Engine {
 		m_queuedRefresh = true;
 	}
 
+	static std::string PreviewCacheKey(std::string p)
+	{
+		for (char& c : p) {
+			if (c == '\\') c = '/';
+		}
+		constexpr const char* meta = ".meta";
+		if (p.size() > 5 && p.compare(p.size() - 5, 5, meta) == 0) {
+			p.resize(p.size() - 5);
+		}
+		return p;
+	}
+
+	void AssetUIRenderer::QueuePreviewInvalidation(std::string path)
+	{
+		std::lock_guard<std::mutex> lock(m_previewMutex);
+		m_pendingPreviewInvalidations.push_back(std::move(path));
+	}
+
+	void AssetUIRenderer::InvalidatePreview(const std::string& path)
+	{
+		const std::string key = PreviewCacheKey(path);
+		const auto slash = key.find_last_of('/');
+		const std::string file = (slash == std::string::npos) ? key : key.substr(slash + 1);
+		if (file.empty()) {
+			return;
+		}
+
+		auto matches = [&](const std::string& k) {
+			const std::string n = PreviewCacheKey(k);
+			if (n == key) {
+				return true;
+			}
+			const auto s = n.find_last_of('/');
+			const std::string name = (s == std::string::npos) ? n : n.substr(s + 1);
+			return name == file;
+		};
+
+		auto eraseSet = [&](std::unordered_set<std::string>& set) {
+			for (auto it = set.begin(); it != set.end();) {
+				if (matches(*it)) {
+					it = set.erase(it);
+				} else {
+					++it;
+				}
+			}
+		};
+		auto eraseTex = [&]() {
+			for (auto it = m_texturePreviewIds.begin(); it != m_texturePreviewIds.end();) {
+				if (matches(it->first)) {
+					it = m_texturePreviewIds.erase(it);
+				} else {
+					++it;
+				}
+			}
+		};
+
+		eraseSet(m_loadedModelPaths);
+		eraseSet(m_loadedMaterialPaths);
+		eraseSet(m_failedPreviewPaths);
+		eraseTex();
+
+		auto dropGuid = [&](const std::string& p) {
+			auto model = GetAssetManager().GetHandleFromPath<Rendering::Model>(p);
+			if (model.IsValid()) {
+				m_modelPreviews.erase(model.GetID());
+			}
+			auto mat = GetAssetManager().GetHandleFromPath<Material>(p);
+			if (mat.IsValid()) {
+				m_materialPreviews.erase(mat.GetID());
+			}
+		};
+		dropGuid(path);
+		dropGuid(key);
+		std::string win = key;
+		for (char& c : win) {
+			if (c == '/') c = '\\';
+		}
+		dropGuid(win);
+	}
+
+	void AssetUIRenderer::FlushPreviewInvalidations()
+	{
+		std::vector<std::string> pending;
+		{
+			std::lock_guard<std::mutex> lock(m_previewMutex);
+			pending.swap(m_pendingPreviewInvalidations);
+		}
+		for (const auto& p : pending) {
+			InvalidatePreview(p);
+		}
+	}
+
 	void AssetUIRenderer::ApplyQueuedBrowserOps()
 	{
 		if (!m_queuedNavigate.empty()) {
@@ -154,6 +255,8 @@ namespace Engine {
 	void AssetUIRenderer::RenderAssetWindow()
 	{
 		ImGui::Begin("Assets");
+		m_previewBudget = 4;
+		FlushPreviewInvalidations();
 
 		if (m_fsDirty.exchange(false) && !m_renamingFile) {
 			RefreshCurrentDirectory();
@@ -400,18 +503,16 @@ namespace Engine {
 		float wrapWidth = iconSize;
 		ImVec2 textSize = ImGui::CalcTextSize(filename.c_str(), nullptr, false, wrapWidth);
 
-		void* iconID = GetIconForFile(path, ext, isDirectory);
-
 		// Card background and interaction
 		ImVec2 startPos = ImGui::GetCursorScreenPos();
 		ImVec2 itemSize(iconSize, iconSize + textSize.y + 7.0f);
+		const bool inView = ImGui::IsRectVisible(itemSize);
+
+		void* iconID = GetIconForFile(path, ext, isDirectory, inView);
 
 		std::string btnId = "card_" + path;
 		bool clicked = ImGui::InvisibleButton(btnId.c_str(), itemSize);
 		const bool cardHovered = ImGui::IsItemHovered();
-		if (cardHovered || m_selectedFile == path) {
-			m_previewRequested.insert(path);
-		}
 
 		// Double-click a folder to enter it. Check hover + double-click (not
 		// InvisibleButton's clicked, which fires on release after double-click expired).
@@ -602,93 +703,99 @@ namespace Engine {
 		ImGui::PopID();
 	}
 
-	void* AssetUIRenderer::GetIconForFile(const std::string& path, const std::string& extension, bool isDirectory)
+	void* AssetUIRenderer::GetIconForFile(const std::string& path, const std::string& extension, bool isDirectory, bool allowLoad)
 	{
 		if (isDirectory) {
 			return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_folderIconTexture->GetID()));
 		}
 
-		// Return appropriate icon based on file extension
-		if (extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".dds" || extension == ".tga") {
-			// For textures, show the actual texture
+		auto cachedTex = m_texturePreviewIds.find(path);
+		if (cachedTex != m_texturePreviewIds.end()) {
+			return reinterpret_cast<void*>(static_cast<intptr_t>(cachedTex->second));
+		}
+
+		const bool isTexture = (extension == ".png" || extension == ".jpg" || extension == ".jpeg" ||
+		                        extension == ".dds" || extension == ".tga");
+		if (isTexture) {
+			if (m_failedPreviewPaths.count(path) || !allowLoad || m_previewBudget <= 0) {
+				return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_fileIconTexture->GetID()));
+			}
+			--m_previewBudget;
 			try {
-				auto handle = GetAssetManager().Load<Texture>(path);
-				auto* tex = GetAssetManager().Get(handle);
+				auto  handle = GetAssetManager().Load<Texture>(path);
+				auto* tex    = GetAssetManager().Get(handle);
 				if (tex) {
+					m_texturePreviewIds[path] = tex->GetID();
 					return reinterpret_cast<void*>(static_cast<intptr_t>(tex->GetID()));
 				}
 			} catch (const std::exception& e) {
 				GetUI().log->warn("Failed to load texture for preview {}: {}", path, e.what());
 			}
+			m_failedPreviewPaths.insert(path);
 			return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_fileIconTexture->GetID()));
 		}
-		else if (extension == ".obj") {
-			if (m_previewRequested.find(path) == m_previewRequested.end()) {
-				return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_modelIconTexture->GetID()));
-			}
-			// For models, render preview with error handling
-			// Check if we've already tried to load this model
-			if (m_loadedModelPaths.find(path) == m_loadedModelPaths.end()) {
-				// First time seeing this model, try to load it
-				m_loadedModelPaths.insert(path);
-				try {
-					GetUI().log->debug("Loading model for preview: {}", path);
-					auto handle = GetAssetManager().Load<Rendering::Model>(path);
-					auto* model = GetAssetManager().Get(handle);
-					if (model) {
-						auto& preview = m_modelPreviews[handle.GetID()];
-						preview.width = static_cast<int>(MODEL_PREVIEW_SIZE);
-						preview.height = static_cast<int>(MODEL_PREVIEW_SIZE);
-						preview.Render(model, GetRenderer().GetModelPreviewShader());
-					}
-				} catch (const std::exception& e) {
-					GetUI().log->warn("Failed to load model for preview {}: {}", path, e.what());
-				}
-			}
-			
-			// Try to get the preview from cache
+
+		if (extension == ".obj") {
 			auto handle = GetAssetManager().GetHandleFromPath<Rendering::Model>(path);
 			if (handle.IsValid()) {
 				auto it = m_modelPreviews.find(handle.GetID());
-				if (it != m_modelPreviews.end()) {
+				if (it != m_modelPreviews.end() && it->second.texture) {
 					return reinterpret_cast<void*>(static_cast<intptr_t>(it->second.texture));
 				}
 			}
+			if (!allowLoad || m_failedPreviewPaths.count(path) || m_previewBudget <= 0) {
+				return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_modelIconTexture->GetID()));
+			}
+			--m_previewBudget;
+			try {
+				handle = GetAssetManager().Load<Rendering::Model>(path);
+				auto* model = GetAssetManager().Get(handle);
+				if (model) {
+					auto& preview  = m_modelPreviews[handle.GetID()];
+					preview.width  = static_cast<int>(MODEL_PREVIEW_SIZE);
+					preview.height = static_cast<int>(MODEL_PREVIEW_SIZE);
+					preview.initialized = false;
+					preview.Render(model, GetRenderer().GetModelPreviewShader());
+					if (preview.texture) {
+						return reinterpret_cast<void*>(static_cast<intptr_t>(preview.texture));
+					}
+				}
+			} catch (const std::exception& e) {
+				GetUI().log->warn("Failed to load model for preview {}: {}", path, e.what());
+			}
+			m_failedPreviewPaths.insert(path);
 			return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_modelIconTexture->GetID()));
 		}
-		else if (extension == ".material") {
-			if (m_previewRequested.find(path) == m_previewRequested.end()) {
-				return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_materialIconTexture->GetID()));
-			}
-			// For materials, render preview on sphere with error handling
-			// Check if we've already tried to load this material
 
-			if (m_loadedMaterialPaths.find(path) == m_loadedMaterialPaths.end()) {
-				// First time seeing this material, try to load it
-				m_loadedMaterialPaths.insert(path);
-				try {
-					auto handle = GetAssetManager().Load<Material>(path);
-					auto* mat = GetAssetManager().Get(handle);
-					if (mat) {
-						auto& preview = m_materialPreviews[handle.GetID()];
-						preview.width = static_cast<int>(MATERIAL_PREVIEW_SIZE);
-						preview.height = static_cast<int>(MATERIAL_PREVIEW_SIZE);
-						preview.Render(mat, GetRenderer().GetMaterialPreviewShader());
-					}
-				} catch (const std::exception& e) {
-					GetUI().log->warn("Failed to load material for preview {}: {}", path, e.what());
-				}
-			}
-			
-			// Try to get the preview from cache
+		if (extension == ".material") {
 			auto handle = GetAssetManager().GetHandleFromPath<Material>(path);
 			if (handle.IsValid()) {
 				auto it = m_materialPreviews.find(handle.GetID());
-				if (it != m_materialPreviews.end()) {
+				if (it != m_materialPreviews.end() && it->second.texture) {
 					return reinterpret_cast<void*>(static_cast<intptr_t>(it->second.texture));
 				}
 			}
-            GetDefaultLogger()->warn("got here");
+			if (!allowLoad || m_failedPreviewPaths.count(path) || m_previewBudget <= 0) {
+				return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_materialIconTexture->GetID()));
+			}
+			--m_previewBudget;
+			try {
+				handle = GetAssetManager().Load<Material>(path);
+				auto* mat = GetAssetManager().Get(handle);
+				if (mat) {
+					auto& preview  = m_materialPreviews[handle.GetID()];
+					preview.width  = static_cast<int>(MATERIAL_PREVIEW_SIZE);
+					preview.height = static_cast<int>(MATERIAL_PREVIEW_SIZE);
+					preview.initialized = false;
+					preview.Render(mat, GetRenderer().GetMaterialPreviewShader());
+					if (preview.texture) {
+						return reinterpret_cast<void*>(static_cast<intptr_t>(preview.texture));
+					}
+				}
+			} catch (const std::exception& e) {
+				GetUI().log->warn("Failed to load material for preview {}: {}", path, e.what());
+			}
+			m_failedPreviewPaths.insert(path);
 			return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_materialIconTexture->GetID()));
 		}
 		else if (extension == ".wav" || extension == ".mp3" || extension == ".ogg") {
@@ -851,6 +958,7 @@ namespace Engine {
 		}
 
 		GetUI().log->info("Deleted: {}", path);
+		InvalidatePreview(path);
 		QueueRefresh();
 	}
 
@@ -946,6 +1054,7 @@ namespace Engine {
 		m_rightClickedFile = newPath;
 
 		GetUI().log->info("Renamed: {} -> {}", oldPath, newPath);
+		InvalidatePreview(oldPath);
 		QueueRefresh();
 	}
 

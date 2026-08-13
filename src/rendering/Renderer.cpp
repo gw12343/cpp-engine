@@ -57,7 +57,7 @@ namespace Engine {
             ZoneScopedN("Load Skybox");
             m_skybox = std::make_unique<Skybox>();
 
-            const std::string p = "resources/textures/output2.hdr";
+            const std::string p = "resources/engine/editor_sky.hdr";
             if (!m_skybox->LoadFromFile(p)) {
                 log->error("Failed to load skybox");
                 return;

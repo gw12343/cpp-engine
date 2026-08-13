@@ -19,3 +19,5 @@ imgui.ini
 .clang-format
 debug
 out
+scenes/.play_snapshot.json
+scenes/.play_snapshot.json.meta
