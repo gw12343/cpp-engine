@@ -2,6 +2,7 @@
 
 #include "AnimationUtils.h"
 #include "Animation.h"
+#include "Skeleton.h"
 #include "SkinnedMeshCache.h"
 #include "core/Entity.h"
 #include "core/EngineData.h"
@@ -48,6 +49,7 @@ namespace Engine {
 		lua.set_function("getAnimationManager", []() -> AnimationManager& { return Engine::GetAnimationManager(); });
 
 		lua.set_function("loadAnimation", [](const std::string& path) -> AnimationHandle { return GetAssetManager().Load<Animation>(path); });
+		lua.set_function("loadSkeleton", [](const std::string& path) -> SkeletonReference { return GetAssetManager().Load<Skeleton>(path); });
 	}
 
 	void AnimationManager::onInit()
@@ -79,6 +81,7 @@ namespace Engine {
 	{
 		if (Get().assetManager) {
 			GetAssetManager().UnloadAll<Animation>();
+			GetAssetManager().UnloadAll<Skeleton>();
 		}
 
 		renderer_.reset();
@@ -209,20 +212,13 @@ namespace Engine {
 
 	ozz::animation::Skeleton* AnimationManager::LoadSkeletonFromPath(const std::string& path)
 	{
-		auto it = loaded_skeletons_.find(path);
-		if (it != loaded_skeletons_.end()) {
-			return it->second.get();
+		// Prefer the asset system so GUIDs / inspector / scripts share one cache.
+		const SkeletonReference handle = GetAssetManager().Load<Skeleton>(path);
+		if (Skeleton* asset = GetAssetManager().Get(handle)) {
+			return asset->Runtime();
 		}
-
-		auto skeleton = std::make_unique<ozz::animation::Skeleton>();
-		if (!LoadSkeleton(path.c_str(), skeleton.get())) {
-			log->error("Failed to load skeleton from path: {}", path);
-			return nullptr;
-		}
-
-		ozz::animation::Skeleton* result = skeleton.get();
-		loaded_skeletons_[path]          = std::move(skeleton);
-		return result;
+		log->error("Failed to load skeleton asset from path: {}", path);
+		return nullptr;
 	}
 
 	ozz::animation::Animation* AnimationManager::LoadAnimationFromPath(const std::string& path)

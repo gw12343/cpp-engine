@@ -33,6 +33,8 @@
 #include "assets/impl/MaterialLoader.h"
 #include "assets/impl/BinarySceneLoader.h"
 #include "assets/impl/AnimationLoader.h"
+#include "assets/impl/SkeletonLoader.h"
+#include "animation/Skeleton.h"
 #include "components/impl/AnimationComponent.h"
 #include "components/impl/EntityMetadataComponent.h"
 #include "core/Entity.h"
@@ -53,6 +55,8 @@
 
 #include "TracyClient.cpp"
 
+#include <fstream>
+#include <nlohmann/json.hpp>
 
 namespace fs = std::filesystem;
 
@@ -77,6 +81,7 @@ namespace Engine {
 		GetAssetManager().RegisterLoader<Particle>(std::make_unique<ParticleLoader>());
 		GetAssetManager().RegisterLoader<Material>(std::make_unique<MaterialLoader>());
 		GetAssetManager().RegisterLoader<Animation>(std::make_unique<AnimationLoader>());
+		GetAssetManager().RegisterLoader<Skeleton>(std::make_unique<SkeletonLoader>());
 
 		// Initialize Modules
 		Get().script    = std::make_shared<ScriptManager>();
@@ -162,12 +167,36 @@ namespace Engine {
 	{
 		using LoaderFn = std::function<void(const std::string&)>;
 
+		// .ozz is shared by clips / skeletons / skinned meshes — only auto-load
+		// files whose .meta type is Animation or Skeleton.
+		auto loadOzzByMeta = [](const std::string& p) {
+			const std::string metaPath = p + ".meta";
+			if (!fs::exists(metaPath)) return;
+			try {
+				std::ifstream file(metaPath);
+				nlohmann::json j;
+				file >> j;
+				if (!j.contains("type")) return;
+				const std::string type = j["type"].get<std::string>();
+				if (type.find("Skeleton") != std::string::npos) {
+					GetAssetManager().Load<Skeleton>(p);
+				}
+				else if (type.find("Animation") != std::string::npos && type.find("offline") == std::string::npos) {
+					GetAssetManager().Load<Animation>(p);
+				}
+			}
+			catch (...) {
+				// ignore malformed meta
+			}
+		};
+
 		std::unordered_map<std::string, LoaderFn> loaders = {
 		    {".png", [this](const std::string& p) { GetAssetManager().Load<Texture>(p); }},
 		    {".material", [this](const std::string& p) { GetAssetManager().Load<Material>(p); }},
 		    {".obj", [this](const std::string& p) { GetAssetManager().Load<Rendering::Model>(p); }},
 		    {".wav", [this](const std::string& p) { GetAssetManager().Load<Audio::SoundBuffer>(p); }},
 		    {".anim", [this](const std::string& p) { GetAssetManager().Load<Animation>(p); }},
+		    {".ozz", [loadOzzByMeta](const std::string& p) { loadOzzByMeta(p); }},
 		    {".bin", [this](const std::string& p) { GetAssetManager().Load<Terrain::TerrainTile>(p); }},
 		    {".efk", [this](const std::string& p) { GetAssetManager().Load<Particle>(p); }},
 		};

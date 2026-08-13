@@ -38,6 +38,7 @@ namespace Engine {
 			std::shared_ptr<Texture> m_audioIconTexture;
 			std::shared_ptr<Texture> m_terrainIconTexture;
 			std::shared_ptr<Texture> m_animationIconTexture;
+			std::shared_ptr<Texture> m_skeletonIconTexture;
 			std::shared_ptr<Texture> m_folderIconTexture;
 			std::shared_ptr<Texture> m_fileIconTexture;
 			std::shared_ptr<Texture> m_modelIconTexture;

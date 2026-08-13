@@ -28,6 +28,7 @@ namespace Engine
 	class Texture;
 	class Material;
 	class Animation;
+	class Skeleton;
 }
 
 namespace Engine {
@@ -54,6 +55,9 @@ namespace Engine {
 	using ParticleHandle = AssetHandle<Engine::Particle>;
 	using SoundHandle = AssetHandle<Engine::Audio::SoundBuffer>;
 	using AnimationHandle = AssetHandle<Engine::Animation>;
+	// Preferred name for skeleton assets (serializable handle).
+	using SkeletonReference = AssetHandle<Engine::Skeleton>;
+	using SkeletonHandle    = SkeletonReference;
 
 	using TextureHandleList = std::vector<TextureHandle>;
 	using ModelHandleList = std::vector<ModelHandle>;
@@ -63,6 +67,8 @@ namespace Engine {
 	using ParticleHandleList = std::vector<ParticleHandle>;
 	using SoundHandleList = std::vector<SoundHandle>;
 	using AnimationHandleList = std::vector<AnimationHandle>;
+	using SkeletonHandleList  = std::vector<SkeletonHandle>;
+	using SkeletonReferenceList = SkeletonHandleList;
 
 } // namespace Engine
 

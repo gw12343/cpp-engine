@@ -9,6 +9,7 @@
 
 #include "components/Components.h"
 #include "animation/Animation.h"
+#include "animation/Skeleton.h"
 #include "animation/AnimationPlayer.h"
 
 #include <ozz/animation/runtime/sampling_job.h>
@@ -22,9 +23,10 @@ namespace Engine::Components {
 
 	class AnimationComponent : public Component {
 	  public:
-		std::string skeletonPath;
-		float       defaultFadeDuration = 0.2f;
-		float       playbackSpeed       = 1.f; // global multiplier
+		// Serialized skeleton asset reference (not a raw path).
+		SkeletonReference skeletonRef{};
+		float             defaultFadeDuration = 0.2f;
+		float             playbackSpeed       = 1.f; // global multiplier
 
 		// When true, root (hips) model translation is forced back to the skeleton rest
 		// position every frame — cancels Mixamo base/root height offsets (e.g. climb_down).
@@ -34,7 +36,7 @@ namespace Engine::Components {
 		// Serialized playback state (current clip only — crossfade is runtime)
 		AnimationTrack current{};
 
-		// Runtime
+		// Runtime (resolved from skeletonRef; not serialized)
 		ozz::animation::Skeleton*             skeleton   = nullptr;
 		std::vector<ozz::math::SoaTransform>* local_pose = nullptr;
 		std::vector<ozz::math::Float4x4>*     model_pose = nullptr;
@@ -58,7 +60,7 @@ namespace Engine::Components {
 		template <class Archive>
 		void serialize(Archive& ar)
 		{
-			ar(CEREAL_NVP(skeletonPath),
+			ar(CEREAL_NVP(skeletonRef),
 			   CEREAL_NVP(defaultFadeDuration),
 			   CEREAL_NVP(playbackSpeed),
 			   CEREAL_NVP(current));
@@ -68,7 +70,10 @@ namespace Engine::Components {
 		void OnRemoved(Entity& entity) override;
 		void RenderInspector(Entity& entity) override;
 
+		// Bind skeleton by asset handle (preferred) or path (loads into asset system).
+		void SetSkeleton(const SkeletonReference& handle);
 		void SetSkeleton(const std::string& path);
+		[[nodiscard]] SkeletonReference GetSkeleton() const { return skeletonRef; }
 
 		// --- Playback API (Unity/Godot style) ---
 

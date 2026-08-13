@@ -21,9 +21,21 @@
 
 namespace Engine::Components {
 
+	namespace {
+		void ResolveRuntimeSkeleton(AnimationComponent& self)
+		{
+			self.skeleton = nullptr;
+			if (!self.skeletonRef.IsValid()) return;
+			Skeleton* asset = GetAssetManager().Get(self.skeletonRef);
+			if (asset && asset->IsValid()) {
+				self.skeleton = asset->Runtime();
+			}
+		}
+	} // namespace
+
 	AnimationComponent::AnimationComponent(const AnimationComponent& other)
 	{
-		skeletonPath          = other.skeletonPath;
+		skeletonRef           = other.skeletonRef;
 		defaultFadeDuration   = other.defaultFadeDuration;
 		playbackSpeed         = other.playbackSpeed;
 		counteractRootOffset  = other.counteractRootOffset;
@@ -38,7 +50,7 @@ namespace Engine::Components {
 	AnimationComponent& AnimationComponent::operator=(const AnimationComponent& other)
 	{
 		if (this != &other) {
-			skeletonPath         = other.skeletonPath;
+			skeletonRef          = other.skeletonRef;
 			defaultFadeDuration  = other.defaultFadeDuration;
 			playbackSpeed        = other.playbackSpeed;
 			counteractRootOffset = other.counteractRootOffset;
@@ -97,11 +109,9 @@ namespace Engine::Components {
 
 	void AnimationComponent::OnAdded(Entity& entity)
 	{
-		if (!skeletonPath.empty()) {
-			skeleton = GetAnimationManager().LoadSkeletonFromPath(skeletonPath);
-			if (!skeleton) {
-				spdlog::error("Failed to load skeleton from path: {}", skeletonPath);
-			}
+		ResolveRuntimeSkeleton(*this);
+		if (skeletonRef.IsValid() && !skeleton) {
+			spdlog::error("Failed to resolve skeleton asset: {}", skeletonRef.GetID());
 		}
 
 		if (skeleton) {
@@ -158,14 +168,12 @@ namespace Engine::Components {
 		}
 	}
 
-	void AnimationComponent::SetSkeleton(const std::string& path)
+	void AnimationComponent::SetSkeleton(const SkeletonReference& handle)
 	{
-		skeletonPath  = path;
+		skeletonRef   = handle;
 		skeleton      = nullptr;
 		restRootValid = false;
-		if (!skeletonPath.empty()) {
-			skeleton = GetAnimationManager().LoadSkeletonFromPath(skeletonPath);
-		}
+		ResolveRuntimeSkeleton(*this);
 
 		delete local_pose;
 		local_pose = nullptr;
@@ -182,6 +190,15 @@ namespace Engine::Components {
 				PrepareTrack(from);
 			}
 		}
+	}
+
+	void AnimationComponent::SetSkeleton(const std::string& path)
+	{
+		if (path.empty()) {
+			SetSkeleton(SkeletonReference{});
+			return;
+		}
+		SetSkeleton(GetAssetManager().Load<Skeleton>(path));
 	}
 
 	void AnimationComponent::CacheRestRootModelTranslation()
@@ -501,8 +518,12 @@ namespace Engine::Components {
 
 		lua.new_usertype<AnimationComponent>(
 		    "AnimationComponent",
-		    "skeletonPath",
-		    &AnimationComponent::skeletonPath,
+		    "skeleton",
+		    sol::property(&AnimationComponent::GetSkeleton,
+		                  [](AnimationComponent& self, const SkeletonReference& h) { self.SetSkeleton(h); }),
+		    "skeletonRef",
+		    sol::property(&AnimationComponent::GetSkeleton,
+		                  [](AnimationComponent& self, const SkeletonReference& h) { self.SetSkeleton(h); }),
 		    "defaultFadeDuration",
 		    &AnimationComponent::defaultFadeDuration,
 		    "playbackSpeed",
@@ -510,19 +531,13 @@ namespace Engine::Components {
 		    "counteractRootOffset",
 		    &AnimationComponent::counteractRootOffset,
 		    "setSkeleton",
-		    &AnimationComponent::SetSkeleton,
+		    sol::overload(
+		        [](AnimationComponent& self, const SkeletonReference& h) { self.SetSkeleton(h); },
+		        [](AnimationComponent& self, const std::string& path) { self.SetSkeleton(path); }),
 
+		    // Clips must be AnimationHandle assets (use loadAnimation(path) or inspector).
 		    "play",
 		    sol::overload(
-		        [](AnimationComponent& self, const std::string& path) {
-			        self.Play(path, true, -1.f);
-		        },
-		        [](AnimationComponent& self, const std::string& path, bool loop) {
-			        self.Play(path, loop, -1.f);
-		        },
-		        [](AnimationComponent& self, const std::string& path, bool loop, float fade) {
-			        self.Play(path, loop, fade);
-		        },
 		        [](AnimationComponent& self, const AnimationHandle& h) {
 			        self.Play(h, true, -1.f);
 		        },
@@ -533,15 +548,9 @@ namespace Engine::Components {
 			        self.Play(h, loop, fade);
 		        }),
 
-		    // Alias: crossfadeTo(path [, fade]) always loops
+		    // Alias: crossfadeTo(handle [, fade]) always loops
 		    "crossfadeTo",
 		    sol::overload(
-		        [](AnimationComponent& self, const std::string& path) {
-			        self.Play(path, true, self.defaultFadeDuration);
-		        },
-		        [](AnimationComponent& self, const std::string& path, float fade) {
-			        self.Play(path, true, fade);
-		        },
 		        [](AnimationComponent& self, const AnimationHandle& h) {
 			        self.Play(h, true, self.defaultFadeDuration);
 		        },
@@ -577,8 +586,10 @@ namespace Engine::Components {
 
 	void AnimationComponent::RenderInspector(Entity& entity)
 	{
-		ImGui::Text("Skeleton: %s", skeleton ? "Loaded" : "None");
-		ImGui::Text("Joints: %d", JointCount());
+		if (LeftLabelAssetSkeleton("Skeleton", &skeletonRef)) {
+			SetSkeleton(skeletonRef);
+		}
+		ImGui::Text("Runtime: %s  Joints: %d", skeleton ? "Loaded" : "None", JointCount());
 		LeftLabelSliderFloat("Playback Speed", &playbackSpeed, 0.f, 3.f);
 		LeftLabelSliderFloat("Default Fade", &defaultFadeDuration, 0.f, 2.f);
 		LeftLabelCheckbox("Counteract Root Offset", &counteractRootOffset);

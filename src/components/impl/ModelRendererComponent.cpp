@@ -19,7 +19,16 @@ namespace Engine::Components {
 	{
 		auto& lua = GetScriptManager().lua;
 
-		lua.new_usertype<ModelRenderer>("ModelRenderer",  "model", &ModelRenderer::model,  "setModel", &ModelRenderer::SetModel, "setMaterial", &ModelRenderer::SetMaterial);
+		lua.new_usertype<ModelRenderer>(
+		    "ModelRenderer",
+		    "model",
+		    &ModelRenderer::model,
+		    "setModel",
+		    sol::overload(
+		        [](ModelRenderer& self, const ModelHandle& h) { self.SetModel(h); },
+		        [](ModelRenderer& self, const std::string& path) { self.SetModel(path); }),
+		    "setMaterial",
+		    &ModelRenderer::SetMaterial);
 	}
 
 	void ModelRenderer::Draw(const Shader& shader, Components::Transform& transform, bool uploadMaterial)
@@ -40,12 +49,19 @@ namespace Engine::Components {
 
 	void ModelRenderer::SetModel(const std::string& path)
 	{
-		model = GetAssetManager().Load<Rendering::Model>(path);
+		SetModel(GetAssetManager().Load<Rendering::Model>(path));
+	}
+
+	void ModelRenderer::SetModel(const ModelHandle& handle)
+	{
+		model = handle;
 		if (model.IsValid()) {
 			Rendering::Model* m = GetAssetManager().Get(model);
-			if (m != NULL) {
+			if (m != nullptr) {
 				materialOverrides.resize(m->GetMeshes().size());
 			}
+		} else {
+			materialOverrides.clear();
 		}
 	}
 

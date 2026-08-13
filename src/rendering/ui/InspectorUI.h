@@ -63,6 +63,7 @@ namespace Engine {
 	LL_ASSET(Particle, Particle);
 	LL_ASSET(Material, Material);
 	LL_ASSET(Animation, Animation);
+	LL_ASSET(Skeleton, Skeleton);
 
 	bool LeftLabelEntity(const char* label, EntityHandle* assetRef);
 	bool LeftLabelEntityVector(const char* label, std::vector<EntityHandle>& assetRef);

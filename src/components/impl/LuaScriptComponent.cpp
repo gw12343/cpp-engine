@@ -153,6 +153,8 @@ namespace Engine::Components {
 							ASSET_CHK(Terrain, Terrain::TerrainTile)
 							ASSET_CHK(Particle, Particle)
 							ASSET_CHK(Sound, Audio::SoundBuffer)
+							ASSET_CHK(Animation, Animation)
+							ASSET_CHK(Skeleton, Skeleton)
 							else if (obj.is<EntityHandle>())
 							{
 								auto handle = obj.as<EntityHandle>();
@@ -190,6 +192,8 @@ namespace Engine::Components {
 							ASSET_VEC_CHK(Terrain, Terrain::TerrainTile)
 							ASSET_VEC_CHK(Particle, Particle)
 							ASSET_VEC_CHK(Sound, Audio::SoundBuffer)
+							ASSET_VEC_CHK(Animation, Animation)
+							ASSET_VEC_CHK(Skeleton, Skeleton)
 
 							break;
 						}
@@ -249,6 +253,12 @@ namespace Engine::Components {
 			else if (kv.second.is<SoundHandle>()) {
 				cppVariables[key] = kv.second.as<SoundHandle>();
 			}
+			else if (kv.second.is<AnimationHandle>()) {
+				cppVariables[key] = kv.second.as<AnimationHandle>();
+			}
+			else if (kv.second.is<SkeletonReference>()) {
+				cppVariables[key] = kv.second.as<SkeletonReference>();
+			}
 			else if (kv.second.is<EntityHandle>()) {
 				cppVariables[key] = kv.second.as<EntityHandle>();
 			}
@@ -275,6 +285,12 @@ namespace Engine::Components {
 			}
 			else if (kv.second.is<SoundHandleList>()) {
 				cppVariables[key] = kv.second.as<SoundHandleList>();
+			}
+			else if (kv.second.is<AnimationHandleList>()) {
+				cppVariables[key] = kv.second.as<AnimationHandleList>();
+			}
+			else if (kv.second.is<SkeletonHandleList>()) {
+				cppVariables[key] = kv.second.as<SkeletonHandleList>();
 			}
 			else {
 				SPDLOG_WARN("TRYING TO LOAD INVALID VAR VALUE FROM LUA");

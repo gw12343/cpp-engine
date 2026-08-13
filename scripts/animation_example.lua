@@ -12,10 +12,11 @@
 --   K              toggle skeleton debug draw
 
 variables = {
-    idleAnim = "resources/animations/idle.ozz",
-    walkAnim = "resources/animations/walk_inplace.anim",
-    runAnim  = "resources/animations/run_inplace.anim",
-    jumpAnim = "resources/animations/Jump.anim",
+    -- AnimationHandle assets — assign clips in the inspector (or scene JSON).
+    idleAnim = animation(),
+    walkAnim = animation(),
+    runAnim  = animation(),
+    jumpAnim = animation(),
     fade     = 0.25,
 }
 
@@ -29,14 +30,30 @@ local function anim()
     return gameObject:GetAnimationComponent()
 end
 
-local function playClip(path, fade, loop)
+local function sameClip(a, b)
+    if a == nil or b == nil then
+        return false
+    end
+    if not a.isValid or not b.isValid then
+        return a == b
+    end
+    if not a:isValid() or not b:isValid() then
+        return false
+    end
+    return a:getGuid() == b:getGuid()
+end
+
+local function playClip(clip, fade, loop)
     if not hasAnim() then
         return
     end
-    if currentClip == path then
+    if clip == nil or (clip.isValid and not clip:isValid()) then
         return
     end
-    currentClip = path
+    if sameClip(currentClip, clip) then
+        return
+    end
+    currentClip = clip
     local f = fade
     if f == nil then
         f = variables.fade
@@ -45,8 +62,10 @@ local function playClip(path, fade, loop)
     if loop ~= nil then
         shouldLoop = loop
     end
-    anim():play(path, shouldLoop, f)
-    info("play -> " .. path)
+    anim():play(clip, shouldLoop, f)
+    if clip.getGuid then
+        info("play -> " .. clip:getGuid())
+    end
 end
 
 function Start()
@@ -56,8 +75,9 @@ function Start()
     end
 
     local ac = anim()
-    if ac.skeletonPath == nil or ac.skeletonPath == "" then
-        ac:setSkeleton("resources/animations/skeleton.ozz")
+    if not ac:hasSkeleton() then
+        -- Prefer loadSkeleton so the asset is registered with a GUID.
+        ac:setSkeleton(loadSkeleton("resources/animations/skeleton.ozz"))
     end
 
     ac.defaultFadeDuration = variables.fade
@@ -89,10 +109,10 @@ function Update()
         playClip(variables.jumpAnim, variables.fade, false)
     end
 
-    if currentClip ~= variables.idleAnim then
+    if not sameClip(currentClip, variables.idleAnim) then
         if input:isKeyPressed(KEY_LEFT_SHIFT) then
             playClip(variables.runAnim)
-        elseif currentClip == variables.runAnim and not input:isKeyPressed(KEY_3) then
+        elseif sameClip(currentClip, variables.runAnim) and not input:isKeyPressed(KEY_3) then
             playClip(variables.walkAnim)
         end
     end

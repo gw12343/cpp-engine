@@ -12,12 +12,15 @@
 
 #include "rendering/particles/Particle.h"
 #include "animation/Animation.h"
+#include "animation/Skeleton.h"
 #include "rendering/ui/UIManager.h"
 
 
 #include <functional>
 #include <algorithm>
 #include <cstring>
+#include <fstream>
+#include <nlohmann/json.hpp>
 
 #define DEFAULT_ICON_SIZE 128.0f
 namespace fs = std::filesystem;
@@ -313,11 +316,49 @@ namespace Engine {
 			
 			auto handle = GetAssetManager().Load<Animation>(path);
 			strncpy(payload.id, handle.GetID().c_str(), sizeof(payload.id));
-		}else if (ext == ".efk") {
+		} else if (ext == ".ozz") {
+			// Shared extension: prefer meta type, else filename heuristic for skeletons.
+			bool asSkeleton = false;
+			const std::string metaPath = path + ".meta";
+			if (fs::exists(metaPath)) {
+				try {
+					std::ifstream file(metaPath);
+					nlohmann::json j;
+					file >> j;
+					if (j.contains("type")) {
+						const std::string type = j["type"].get<std::string>();
+						if (type.find("Skeleton") != std::string::npos) asSkeleton = true;
+						else if (type.find("Animation") != std::string::npos) asSkeleton = false;
+						else {
+							// Unknown meta (mesh etc.) — try skeleton name heuristic only.
+							const std::string lower = filename;
+							asSkeleton = lower.find("skeleton") != std::string::npos || lower.find("skel") != std::string::npos;
+						}
+					}
+				} catch (...) {
+					asSkeleton = filename.find("skeleton") != std::string::npos;
+				}
+			} else {
+				asSkeleton = filename.find("skeleton") != std::string::npos || filename.find("skel") != std::string::npos;
+			}
+
+			if (asSkeleton) {
+				payloadType = "ASSET_SKELETON";
+				assetType   = "Skeleton";
+				auto handle = GetAssetManager().Load<Skeleton>(path);
+				strncpy(payload.id, handle.GetID().c_str(), sizeof(payload.id));
+			} else {
+				// Animation clip ozz (e.g. idle.ozz) — only if meta says Animation
+				payloadType = "ASSET_ANIMATION";
+				assetType   = "Animation";
+				auto handle = GetAssetManager().Load<Animation>(path);
+				strncpy(payload.id, handle.GetID().c_str(), sizeof(payload.id));
+			}
+		} else if (ext == ".efk") {
             payloadType = "ASSET_PARTICLE";
             assetType = "Particle";
 
-            auto handle = GetAssetManager().Load<Animation>(path);
+            auto handle = GetAssetManager().Load<Particle>(path);
             strncpy(payload.id, handle.GetID().c_str(), sizeof(payload.id));
         }
 
@@ -513,6 +554,33 @@ namespace Engine {
 		else if (extension == ".anim") {
 			return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_animationIconTexture->GetID()));
 		}
+		else if (extension == ".ozz") {
+			// Skeleton vs animation clip vs skinned mesh — pick icon from meta when present.
+			const std::string metaPath = path + ".meta";
+			if (fs::exists(metaPath)) {
+				try {
+					std::ifstream file(metaPath);
+					nlohmann::json j;
+					file >> j;
+					if (j.contains("type")) {
+						const std::string type = j["type"].get<std::string>();
+						if (type.find("Skeleton") != std::string::npos && GetUI().m_skeletonIconTexture) {
+							return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_skeletonIconTexture->GetID()));
+						}
+						if (type.find("Animation") != std::string::npos) {
+							return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_animationIconTexture->GetID()));
+						}
+					}
+				} catch (...) {
+				}
+			}
+			const fs::path p(path);
+			const std::string name = p.filename().string();
+			if ((name.find("skeleton") != std::string::npos || name.find("skel") != std::string::npos) && GetUI().m_skeletonIconTexture) {
+				return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_skeletonIconTexture->GetID()));
+			}
+			return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_fileIconTexture->GetID()));
+		}
 		else if (extension == ".bin") {
 			return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_terrainIconTexture->GetID()));
 		}
@@ -612,6 +680,11 @@ namespace Engine {
 		} else if (ext == ".anim") {
 			auto handle = GetAssetManager().GetHandleFromPath<Animation>(path);
 			if (handle.IsValid()) GetAssetManager().Unload(handle);
+		} else if (ext == ".ozz") {
+			auto skel = GetAssetManager().GetHandleFromPath<Skeleton>(path);
+			if (skel.IsValid()) GetAssetManager().Unload(skel);
+			auto anim = GetAssetManager().GetHandleFromPath<Animation>(path);
+			if (anim.IsValid()) GetAssetManager().Unload(anim);
 		}
 
 		// Delete the file

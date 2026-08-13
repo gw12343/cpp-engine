@@ -59,17 +59,18 @@ variables = {
     CLIMB_MAX_NORMAL_Y    = 0.55, -- reject walkable floors / shallow slopes
 
 
-    -- Locomotion clips (same set as AnimatedEntity / animation_example)
-    IDLE_ANIM      = "resources/animations/idle.ozz",
-    WALK_ANIM      = "resources/animations/walk_inplace.anim",
-    RUN_ANIM       = "resources/animations/run_inplace.anim",
-    FALL_IDLE_ANIM = "resources/animations/fall_idle.anim", -- loop while airborne
-    FALL_LAND_ANIM = "resources/animations/fall_land.anim", -- one-shot on touchdown
-    -- Climbing (drop Mixamo exports here later; same skeleton as idle/walk)
-    CLIMB_UP_ANIM   = "resources/animations/climb_up.anim",
-    CLIMB_DOWN_ANIM = "resources/animations/climb_down.anim",
+    -- Locomotion clips — AnimationHandle assets (assign in inspector / scene).
+    IDLE_ANIM      = animation(),
+    WALK_ANIM      = animation(),
+    RUN_ANIM       = animation(),
+    FALL_IDLE_ANIM = animation(), -- loop while airborne
+    FALL_LAND_ANIM = animation(), -- one-shot on touchdown
+    -- Climbing
+    CLIMB_UP_ANIM   = animation(),
+    CLIMB_DOWN_ANIM = animation(),
     ANIM_FADE      = 0.2,
-    SKELETON       = "resources/animations/skeleton.ozz",
+    -- SkeletonReference asset — assign in inspector / scene JSON.
+    SKELETON       = skeleton(),
 
     SHOOT_POWER     = 15,
     BULLET_PARENT   = ehandle(),
@@ -207,15 +208,31 @@ local function anim()
     return v:GetAnimationComponent()
 end
 
-local function playClip(path, fade, loop, force)
+local function sameClip(a, b)
+    if a == nil or b == nil then
+        return false
+    end
+    if not a.isValid or not b.isValid then
+        return a == b
+    end
+    if not a:isValid() or not b:isValid() then
+        return false
+    end
+    return a:getGuid() == b:getGuid()
+end
+
+local function playClip(clip, fade, loop, force)
     local ac = anim()
     if not ac then
         return
     end
-    if not force and currentClip == path then
+    if clip == nil or (clip.isValid and not clip:isValid()) then
         return
     end
-    currentClip = path
+    if not force and sameClip(currentClip, clip) then
+        return
+    end
+    currentClip = clip
     local f = fade
     if f == nil then
         f = variables.ANIM_FADE
@@ -224,7 +241,7 @@ local function playClip(path, fade, loop, force)
     if loop ~= nil then
         shouldLoop = loop
     end
-    ac:play(path, shouldLoop, f)
+    ac:play(clip, shouldLoop, f)
 end
 
 local function setClipSpeed(speed)
@@ -452,8 +469,8 @@ local function updateClimbAnim(climbVert)
     if not hasAnim() then
         return
     end
-    local upClip = variables.CLIMB_UP_ANIM or "resources/animations/climb_up.anim"
-    local downClip = variables.CLIMB_DOWN_ANIM or "resources/animations/climb_down.anim"
+    local upClip = variables.CLIMB_UP_ANIM
+    local downClip = variables.CLIMB_DOWN_ANIM
     local thr = 0.2
 
     -- Always counteract root on climb clips (up and down both offset on Mixamo).
@@ -550,8 +567,10 @@ function Start()
 
     local ac = anim()
     if ac then
-        if ac.skeletonPath == nil or ac.skeletonPath == "" then
-            ac:setSkeleton(variables.SKELETON)
+        if variables.SKELETON and variables.SKELETON.isValid and variables.SKELETON:isValid() then
+            if not ac:hasSkeleton() then
+                ac:setSkeleton(variables.SKELETON)
+            end
         end
         ac.defaultFadeDuration = variables.ANIM_FADE
         playClip(variables.IDLE_ANIM, 0.0)

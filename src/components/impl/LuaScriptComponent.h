@@ -34,27 +34,32 @@ namespace Engine {
 } // namespace Engine
 
 namespace Engine {
-	using ScriptVariable = std::variant<float,
-	                                    std::string,
-	                                    glm::vec3,
-	                                    int,
-	                                    bool,
-	                                    TextureHandle,
-	                                    ModelHandle,
-	                                    MaterialHandle,
-	                                    SceneHandle,
-	                                    AssetHandle<Terrain ::TerrainTile>,
-	                                    ParticleHandle,
-	                                    SoundHandle,
-	                                    EntityHandle,
-	                                    std::vector<EntityHandle>,
-	                                    std::vector<TextureHandle>,
-	                                    std::vector<ModelHandle>,
-	                                    std::vector<MaterialHandle>,
-	                                    std::vector<SceneHandle>,
-	                                    std::vector<TerrainHandle>,
-	                                    std::vector<ParticleHandle>,
-	                                    SoundHandleList>;
+	// Indices are serialized into scenes — append new types only at the end.
+	using ScriptVariable = std::variant<float,                                    // 0
+	                                    std::string,                              // 1
+	                                    glm::vec3,                                // 2
+	                                    int,                                      // 3
+	                                    bool,                                     // 4
+	                                    TextureHandle,                            // 5
+	                                    ModelHandle,                              // 6
+	                                    MaterialHandle,                           // 7
+	                                    SceneHandle,                              // 8
+	                                    AssetHandle<Terrain::TerrainTile>,        // 9
+	                                    ParticleHandle,                           // 10
+	                                    SoundHandle,                              // 11
+	                                    EntityHandle,                             // 12
+	                                    std::vector<EntityHandle>,                // 13
+	                                    std::vector<TextureHandle>,               // 14
+	                                    std::vector<ModelHandle>,                 // 15
+	                                    std::vector<MaterialHandle>,              // 16
+	                                    std::vector<SceneHandle>,                 // 17
+	                                    std::vector<TerrainHandle>,               // 18
+	                                    std::vector<ParticleHandle>,              // 19
+	                                    SoundHandleList,                          // 20
+	                                    AnimationHandle,                          // 21
+	                                    AnimationHandleList,                      // 22
+	                                    SkeletonReference,                        // 23
+	                                    SkeletonHandleList>;                      // 24
 
 	namespace Components {
 

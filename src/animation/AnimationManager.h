@@ -67,12 +67,8 @@ namespace Engine {
 		ozz::unique_ptr<RendererImpl> renderer_;
 
 	  private:
-		// Map to store loaded skeletons
+		// Map to store loaded skeletons (legacy; primary cache is AssetManager)
 		std::unordered_map<std::string, std::unique_ptr<ozz::animation::Skeleton>> loaded_skeletons_;
-
-		// Map to store loaded animations
-		// std::unordered_map<std::string, std::unique_ptr<ozz::animation::Animation>> loaded_animations_;
-
 
 		// Rendering options
 		bool                      draw_skeleton_ = false;

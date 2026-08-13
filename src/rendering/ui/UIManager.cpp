@@ -80,6 +80,7 @@ namespace Engine::UI {
 		m_audioIconTexture     = std::make_shared<Texture>();
 		m_terrainIconTexture   = std::make_shared<Texture>();
 		m_animationIconTexture = std::make_shared<Texture>();
+		m_skeletonIconTexture  = std::make_shared<Texture>();
 		m_folderIconTexture    = std::make_shared<Texture>();
 		m_fileIconTexture      = std::make_shared<Texture>();
 		m_modelIconTexture     = std::make_shared<Texture>();
@@ -90,6 +91,7 @@ namespace Engine::UI {
 		m_audioIconTexture->LoadFromFile("resources/engine/speaker.png");
 		m_terrainIconTexture->LoadFromFile("resources/engine/mountain.png");
 		m_animationIconTexture->LoadFromFile("resources/engine/animation.png");
+		m_skeletonIconTexture->LoadFromFile("resources/engine/skeleton.png");
 		m_folderIconTexture->LoadFromFile("resources/engine/folder.png");
 		m_fileIconTexture->LoadFromFile("resources/engine/file.png");
 		m_modelIconTexture->LoadFromFile("resources/engine/model.png");

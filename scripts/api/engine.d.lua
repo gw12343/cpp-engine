@@ -518,6 +518,26 @@ function getAnimationManager() end
 ---@return AnimationHandle
 function loadAnimation(path) end
 
+---@param path string
+---@return SkeletonReference
+function loadSkeleton(path) end
+
+---@class SkeletonReference
+local SkeletonReference = {}
+
+---@return string
+function SkeletonReference:getGuid() end
+
+---@return boolean
+function SkeletonReference:isValid() end
+
+function SkeletonReference:clear() end
+
+--- Empty handle, or from GUID string.
+---@param guid? string
+---@return SkeletonReference
+function skeleton(guid) end
+
 ---@class ParticleManager
 local ParticleManager = {}
 
@@ -705,7 +725,8 @@ function PlayerControllerComponent:hasClimbSurface() end
 function PlayerControllerComponent:probeClimbSurface(dir, maxDist, minNormalY, maxNormalY) end
 
 ---@class AnimationComponent
----@field skeletonPath string
+---@field skeleton SkeletonReference
+---@field skeletonRef SkeletonReference
 ---@field defaultFadeDuration number
 ---@field playbackSpeed number
 ---@field speed number
@@ -714,17 +735,20 @@ function PlayerControllerComponent:probeClimbSurface(dir, maxDist, minNormalY, m
 ---@field counteractRootOffset boolean
 local AnimationComponent = {}
 
----@param path string
-function AnimationComponent:setSkeleton(path) end
+---@param handle_or_path SkeletonReference|string
+function AnimationComponent:setSkeleton(handle_or_path) end
 
----@param path_or_handle string|AnimationHandle
+---@return boolean
+function AnimationComponent:hasSkeleton() end
+
+---@param handle AnimationHandle
 ---@param loop? boolean
 ---@param fade? number
-function AnimationComponent:play(path_or_handle, loop, fade) end
+function AnimationComponent:play(handle, loop, fade) end
 
----@param path_or_handle string|AnimationHandle
+---@param handle AnimationHandle
 ---@param fade? number
-function AnimationComponent:crossfadeTo(path_or_handle, fade) end
+function AnimationComponent:crossfadeTo(handle, fade) end
 
 function AnimationComponent:stop() end
 
