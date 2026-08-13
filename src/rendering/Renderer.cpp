@@ -19,6 +19,9 @@
 #include "rendering/ui/RmlUiBackend.h"
 #include "rendering/ui/GameUIManager.h"
 #include "scripting/ScriptManager.h"
+#ifndef GAME_BUILD
+#include "rendering/ui/EditorSession.h"
+#endif
 
 #include "components/impl/AnimationComponent.h"
 #include "Texture.h"
@@ -307,6 +310,35 @@ namespace Engine {
 #ifndef GAME_BUILD
         {
             if (GetState() == EDITOR || GetState() == PAUSED) {
+                if (UI::GetEditor().showGrid && GetAnimationManager().renderer_) {
+                    ZoneScopedN("Render Editor Grid");
+                    DebugGroup group("Render Editor Grid");
+                    glEnable(GL_DEPTH_TEST);
+                    glDepthMask(GL_FALSE);
+                    glDepthFunc(GL_LEQUAL);
+
+                    constexpr int   cells = 20;
+                    constexpr float size  = 1.0f;
+                    const float     half  = cells * size * 0.5f;
+                    ozz::math::Float3 verts[(cells + 1) * 4];
+                    int n = 0;
+                    for (int i = 0; i <= cells; ++i) {
+                        const float t = -half + static_cast<float>(i) * size;
+                        verts[n++] = ozz::math::Float3(-half, 0.f, t);
+                        verts[n++] = ozz::math::Float3( half, 0.f, t);
+                        verts[n++] = ozz::math::Float3(t, 0.f, -half);
+                        verts[n++] = ozz::math::Float3(t, 0.f,  half);
+                    }
+                    const Color gridCol{0.32f, 0.33f, 0.35f, 1.f};
+                    GetAnimationManager().renderer_->DrawLines(
+                        ozz::span<const ozz::math::Float3>(verts, static_cast<size_t>(n)),
+                        gridCol,
+                        ozz::math::Float4x4::identity());
+
+                    glDepthMask(GL_TRUE);
+                    glDepthFunc(GL_LESS);
+                }
+
                 {
                     ZoneScopedN("Render Gizmos");
                     DebugGroup group("Render Gizmos");
