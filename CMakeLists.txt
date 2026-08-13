@@ -196,6 +196,14 @@ set(RMLUI_STATIC_LIB ON CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(glfw cereal spdlog nativefiledialog jolt ozz imgui effekseer lua sol2 nlohmann_json efsw tracy dds_image)
 
+if (NOT TARGET dds_image)
+    message(FATAL_ERROR "dds_image FetchContent target missing — cannot build Texture DDS support")
+endif()
+# Ensure the include dir is always available (FetchContent var can be empty in some generators).
+if (dds_image_SOURCE_DIR)
+    target_include_directories(dds_image INTERFACE "${dds_image_SOURCE_DIR}/include")
+    message(STATUS "dds_image includes: ${dds_image_SOURCE_DIR}/include")
+endif()
 target_compile_features(dds_image INTERFACE cxx_std_20)
 target_compile_definitions(dds_image INTERFACE DDS_CPP_20=1)
 
@@ -305,8 +313,11 @@ function(setup_executable TARGET_NAME GAME_BUILD_FLAG)
             ${CMAKE_CURRENT_SOURCE_DIR}/src
             ${lua_SOURCE_DIR}/src
             ${rmlui_SOURCE_DIR}/Include
-            ${dds_image_SOURCE_DIR}/include
     )
+    # dds.hpp: prefer FetchContent include; lib/include is a vendored fallback.
+    if (dds_image_SOURCE_DIR)
+        target_include_directories(${TARGET_NAME} PRIVATE "${dds_image_SOURCE_DIR}/include")
+    endif()
 
     # Effekseer
     target_include_directories(${TARGET_NAME} PRIVATE
