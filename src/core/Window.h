@@ -72,7 +72,9 @@ namespace Engine {
 		void        OnFilesDropped(int count, const char** paths);
 		bool        InitGLFW();
 		static bool InitGLAD();
+#ifndef GAME_BUILD
 		bool        InitImGui();
+#endif
 
 	};
 } // namespace Engine

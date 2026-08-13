@@ -20,6 +20,7 @@
 #include "ozz/animation/runtime/local_to_model_job.h"
 #include "assets/AssetManager.h"
 #include "scripting/ScriptManager.h"
+#include "core/ThreadPool.h"
 #include <algorithm>
 #include <cmath>
 #include <tracy/Tracy.hpp>
@@ -92,20 +93,34 @@ namespace Engine {
 	{
 		ZoneScopedN("Animation Update");
 
+		// Collect independent AnimationComponents, then evaluate poses in parallel.
+		// Each component owns its pose buffers — no shared writes.
+		struct AnimWork {
+			Components::AnimationComponent* ac = nullptr;
+		};
+		std::vector<AnimWork> work;
+		work.reserve(32);
+
 		auto animationView = GetCurrentSceneRegistry().view<Components::EntityMetadata, Components::AnimationComponent>();
-
 		for (auto [entity, metadata, ac] : animationView.each()) {
+			if (!metadata.active) continue;
 			if (!ac.skeleton) continue;
+			work.push_back(AnimWork{&ac});
+		}
 
-			// Advance time only while playing; always evaluate pose for editor display.
-			const float dt = (GetState() == PLAYING) ? deltaTime : 0.f;
+		const float dt      = (GetState() == PLAYING) ? deltaTime : 0.f;
+		const int   n       = static_cast<int>(work.size());
+		// Pose sampling is relatively heavy — parallelize even modest counts.
+		GetThreadPool().ParallelForIndex(n, /*minPerTask=*/1, [&](int i) {
+			ZoneScopedN("Anim Pose Entity");
+			auto& ac = *work[static_cast<size_t>(i)].ac;
 			if (ac.IsPlaying()) {
 				ac.UpdatePlayback(dt);
 			}
 			else if (ac.local_pose && ac.model_pose) {
 				ac.EvaluatePose();
 			}
-		}
+		});
 
 		// Invalidate skinned caches for the upcoming render.
 		++pose_generation_;
@@ -159,10 +174,9 @@ namespace Engine {
 			return;
 		}
 
-		// Parallel per-entity (ozz multithread sample style: std::async divide-and-conquer).
-		// Each entity owns distinct skinning_matrices + skin_frame_cache → no shared writes.
+		// Parallel per-entity via global ThreadPool (each entity owns its buffers).
 		const int entityCount = static_cast<int>(work.size());
-		ParallelForIndex(entityCount, /*grain=*/1, [&](int ei) {
+		GetThreadPool().ParallelForIndex(entityCount, /*minPerTask=*/1, [&](int ei) {
 			ZoneScopedN("Skin Entity");
 			auto& skinned = *work[static_cast<size_t>(ei)].skinned;
 			auto& anim    = *work[static_cast<size_t>(ei)].anim;
@@ -171,12 +185,11 @@ namespace Engine {
 				const AnimatedMesh& mesh = (*skinned.meshes)[mi];
 				{
 					ZoneScopedN("Build Skinning Matrices");
-					// Joint remap * inverse bind → matrices consumed by SkinningJob
 					for (size_t j = 0; j < mesh.joint_remaps.size(); ++j) {
 						(*skinned.skinning_matrices)[j] = (*anim.model_pose)[mesh.joint_remaps[j]] * mesh.inverse_bind_poses[j];
 					}
 				}
-				// Parallelizes parts internally
+				// Parts of a mesh also parallelize via ParallelForIndex → ThreadPool.
 				SkinAnimatedMeshToCache(mesh, ozz::make_span(*skinned.skinning_matrices), skinned.skin_frame_cache[mi]);
 			}
 		});

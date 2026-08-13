@@ -158,91 +158,66 @@ namespace Engine::Components {
 
 
 
-        //TODO MOVE THIS, idk where maybe a editor only module
+#ifndef GAME_BUILD
+		// Editor-only debug ImGui from Lua. Game builds have no ImGui frame cycle —
+		// calling Begin without NewFrame/Render corrupts font stacks and crashes.
+		sol::table imgui = lua.create_named_table("imgui");
 
-        sol::table imgui = lua.create_named_table("imgui");
+		imgui.set_function("Begin",
+		                   [](const char* name, sol::optional<int> flags) {
+			                   if (flags)
+				                   return ImGui::Begin(name, nullptr, *flags);
+			                   return ImGui::Begin(name);
+		                   });
 
+		imgui.set_function("End", []() { ImGui::End(); });
 
+		imgui.set_function("Text", [](const char* text) { ImGui::TextUnformatted(text); });
 
-        imgui.set_function("Begin",
-                           [](const char* name, sol::optional<int> flags) {
-                               if (flags)
-                                   return ImGui::Begin(name, nullptr, *flags);
-                               return ImGui::Begin(name);
-                           }
-        );
+		imgui.set_function("Button", [](const char* label) { return ImGui::Button(label); });
 
-        imgui.set_function("End", []() {
-            ImGui::End();
-        });
+		imgui.set_function("SameLine", []() { ImGui::SameLine(); });
 
+		imgui.set_function("Separator", []() { ImGui::Separator(); });
 
-        imgui.set_function("Text",
-                           [](const char* text) {
-                               ImGui::TextUnformatted(text);
-                           }
-        );
+		imgui.set_function("Checkbox",
+		                   [](const char* label, sol::table value) {
+			                   bool v       = value["v"];
+			                   bool changed = ImGui::Checkbox(label, &v);
+			                   value["v"]   = v;
+			                   return changed;
+		                   });
 
-        imgui.set_function("Button",
-                           [](const char* label) {
-                               return ImGui::Button(label);
-                           }
-        );
+		imgui.set_function("SliderFloat",
+		                   [](const char* label, sol::table value, float min, float max) {
+			                   float v      = value["v"];
+			                   bool changed = ImGui::SliderFloat(label, &v, min, max);
+			                   value["v"]   = v;
+			                   return changed;
+		                   });
 
-        imgui.set_function("SameLine", []() {
-            ImGui::SameLine();
-        });
+		imgui.set_function("SliderInt",
+		                   [](const char* label, sol::table value, int min, int max) {
+			                   int  v       = value["v"];
+			                   bool changed = ImGui::SliderInt(label, &v, min, max);
+			                   value["v"]   = v;
+			                   return changed;
+		                   });
 
-        imgui.set_function("Separator", []() {
-            ImGui::Separator();
-        });
+		imgui["WindowFlags"] = lua.create_table_with(
+		    "None", ImGuiWindowFlags_None,
+		    "NoTitleBar", ImGuiWindowFlags_NoTitleBar,
+		    "NoResize", ImGuiWindowFlags_NoResize,
+		    "NoMove", ImGuiWindowFlags_NoMove,
+		    "NoCollapse", ImGuiWindowFlags_NoCollapse);
 
+		imgui[sol::meta_function::new_index] =
+		    [](sol::table, sol::object key, sol::object) {
+			    throw std::runtime_error(
+			        "Attempt to modify read-only imgui binding: " + key.as<std::string>());
+		    };
+#endif
 
-        imgui.set_function("Checkbox",
-                           [](const char* label, sol::table value) {
-                               bool v = value["v"];
-                               bool changed = ImGui::Checkbox(label, &v);
-                               value["v"] = v;
-                               return changed;
-                           }
-        );
-
-        imgui.set_function("SliderFloat",
-                           [](const char* label, sol::table value, float min, float max) {
-                               float v = value["v"];
-                               bool changed = ImGui::SliderFloat(label, &v, min, max);
-                               value["v"] = v;
-                               return changed;
-                           }
-        );
-
-        imgui.set_function("SliderInt",
-                           [](const char* label, sol::table value, int min, int max) {
-                               int v = value["v"];
-                               bool changed = ImGui::SliderInt(label, &v, min, max);
-                               value["v"] = v;
-                               return changed;
-                           }
-        );
-
-
-        imgui["WindowFlags"] = lua.create_table_with(
-                "None",      ImGuiWindowFlags_None,
-                "NoTitleBar",ImGuiWindowFlags_NoTitleBar,
-                "NoResize",  ImGuiWindowFlags_NoResize,
-                "NoMove",    ImGuiWindowFlags_NoMove,
-                "NoCollapse",ImGuiWindowFlags_NoCollapse
-        );
-
-
-        imgui[sol::meta_function::new_index] =
-                [](sol::table, sol::object key, sol::object) {
-                    throw std::runtime_error(
-                            "Attempt to modify read-only imgui binding: " +
-                            key.as<std::string>()
-                    );
-                };
-
-    }
+	}
 
 } // namespace Engine::Components
