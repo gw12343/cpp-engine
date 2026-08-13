@@ -541,6 +541,13 @@ namespace Engine::UI {
 		// Render the tree node with just the name (no ID suffix in display)
 		bool nodeOpen = ImGui::TreeNodeEx(metadata.name.c_str(), flags);
 
+		// Capture click against the tree node before drag-drop runs. Select on press
+		// (not release) so dropping onto a parent does not steal selection, and skip
+		// the expand arrow so OpenOnArrow still works.
+		const bool clickedArrow = ImGui::IsItemToggledOpen();
+		const bool leftClicked  = ImGui::IsItemClicked(ImGuiMouseButton_Left) && !clickedArrow;
+		const bool rightClicked = ImGui::IsItemClicked(ImGuiMouseButton_Right);
+
 		// Handle drag source
 		bool isDragging = false;
 		if (ImGui::BeginDragDropSource()) {
@@ -587,9 +594,9 @@ namespace Engine::UI {
 			ImGui::EndDragDropTarget();
 		}
 
-
-		// Handle selection - only when released and not dragging
-		if (ImGui::IsItemClicked(ImGuiMouseButton_Right) && !isDragging) {
+		// Select on press. While a drag is active, BeginDragDropSource is true so we
+		// skip — that keeps reparent drops from changing selection to the target.
+		if (!isDragging && (leftClicked || rightClicked)) {
 			m_selectedEntity = entity;
 		}
 
