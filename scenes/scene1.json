@@ -74,7 +74,7 @@
                 "nullopt": false,
                 "data": {
                     "visible": true,
-                    "meshPath": "resources/animations/s.ozz",
+                    "meshPath": "assets/animations/s.ozz",
                     "meshMaterial": {
                         "guid": "48ac579eaa8ac969e99c1fca5ab57c90"
                     }
@@ -20313,7 +20313,7 @@
             "RmlUIComponent": {
                 "nullopt": false,
                 "data": {
-                    "documentPath": "resources/ui/crosshair.rml",
+                    "documentPath": "assets/ui/crosshair.rml",
                     "isVisible": true
                 }
             },

@@ -22,7 +22,7 @@ namespace Engine::Terrain {
             TextureHandle tex2 = GetAssetManager().Load<Texture>("resources/textures/Terrain Dirt.png");
             TextureHandle tex3 = GetAssetManager().Load<Texture>("resources/textures/Terrain Sand.png");
             TextureHandle tex4 = GetAssetManager().Load<Texture>("resources/textures/Terrain Rock.png");
-            TextureHandle tex5 = GetAssetManager().Load<Texture>("resources/textures/white.png");
+            TextureHandle tex5 = GetAssetManager().Load<Texture>("resources/engine/white.png");
 
 
             tile->diffuseTextures.clear();

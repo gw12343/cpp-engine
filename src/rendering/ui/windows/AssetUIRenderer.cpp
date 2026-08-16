@@ -64,13 +64,13 @@ namespace Engine {
 		}                                                                                                                                                                                                                                      \
 	}
 
-	DELETE_IF(Material, Material, ".material", "resources/materials/")
-	DELETE_IF(Model, Rendering::Model, ".obj", "resources/models/")
-	DELETE_IF(Particle, Particle, ".efk", "resources/particles/")
-	DELETE_IF(Sound, Audio::SoundBuffer, ".wav", "resources/sounds/")
-	DELETE_IF(Terrain, Terrain::TerrainTile, ".bin", "resources/terrain/")
-	DELETE_IF(Texture, Texture, ".png", "resources/textures/")
-	DELETE_IF(Animation, Animation, ".anim", "resources/animations/")
+	DELETE_IF(Material, Material, ".material", "assets/materials/")
+	DELETE_IF(Model, Rendering::Model, ".obj", "assets/models/")
+	DELETE_IF(Particle, Particle, ".efk", "assets/particles/")
+	DELETE_IF(Sound, Audio::SoundBuffer, ".wav", "assets/sounds/")
+	DELETE_IF(Terrain, Terrain::TerrainTile, ".bin", "assets/terrain/")
+	DELETE_IF(Texture, Texture, ".png", "assets/textures/")
+	DELETE_IF(Animation, Animation, ".anim", "assets/animations/")
 
 
 	void AssetWatcher::handleFileAction(efsw::WatchID watchid, const std::string& dir,
