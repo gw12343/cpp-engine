@@ -85,7 +85,7 @@ namespace Engine {
 		// Kinematic / static bodies follow the authored transform (including parented
 		// platforms). Dynamic bodies are written the other way in PhysicsManager.
 		// Sequential: Jolt BodyInterface is not safe to call from the transform workers.
-		if (GetState() == PLAYING) {
+		if (IsSimulating()) {
 			auto kinematicView = GetCurrentSceneRegistry().view<Components::Transform, Components::RigidBodyComponent>();
 			for (auto [entity, transform, rb] : kinematicView.each()) {
 				if (rb.bodyID.IsInvalid()) continue;

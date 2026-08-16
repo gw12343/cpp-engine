@@ -15,6 +15,9 @@
 #include "animation/Skeleton.h"
 #include "rendering/ui/UIManager.h"
 #include "rendering/ui/EditorSession.h"
+#include "assets/Prefab.h"
+#include "core/Entity.h"
+#include "core/Input.h"
 #include "rendering/ui/IconsFontAwesome6.h"
 
 
@@ -207,6 +210,10 @@ namespace Engine {
 			if (mat.IsValid()) {
 				m_materialPreviews.erase(mat.GetID());
 			}
+			auto prefab = GetAssetManager().GetHandleFromPath<Prefab>(p);
+			if (prefab.IsValid()) {
+				m_prefabPreviews.erase(prefab.GetID());
+			}
 		};
 		dropGuid(path);
 		dropGuid(key);
@@ -264,6 +271,13 @@ namespace Engine {
 
 		if (ImGui::Button("Up")) {
 			GoUp();
+		}
+		// Mouse X1 (side back) — same as Up, when this window is hovered.
+		if (!m_renamingFile && ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows) && !ImGui::GetIO().WantTextInput &&
+		    !ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel)) {
+			if (ImGui::IsMouseClicked(3) || GetInput().IsMouseClicked(GLFW_MOUSE_BUTTON_4)) {
+				GoUp();
+			}
 		}
 		ImGui::SameLine();
 		ImGui::TextUnformatted(m_currentDirectory.c_str());
@@ -519,6 +533,14 @@ namespace Engine {
 		if (isDirectory && cardHovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 			QueueNavigate(path);
 		}
+		if (!isDirectory && ext == ".prefab" && cardHovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+			auto   handle  = GetAssetManager().Load<Prefab>(path);
+			Entity spawned = InstantiatePrefab(handle);
+			if (spawned && spawned.IsValid()) {
+				GetUI().m_selectedEntity = spawned;
+				UI::GetEditor().MarkDirty();
+			}
+		}
 
 		if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
 			m_rightClickedFile = path;
@@ -612,7 +634,12 @@ namespace Engine {
 
             auto handle = GetAssetManager().Load<Particle>(path);
             strncpy(payload.id, handle.GetID().c_str(), sizeof(payload.id));
-        }
+        } else if (ext == ".prefab") {
+			payloadType = "ASSET_PREFAB";
+			assetType   = "Prefab";
+			auto handle = GetAssetManager().Load<Prefab>(path);
+			strncpy(payload.id, handle.GetID().c_str(), sizeof(payload.id));
+		}
 
 		payload.type = assetType;
 		payload.id[sizeof(payload.id) - 1] = '\0';
@@ -686,7 +713,7 @@ namespace Engine {
 		ImGui::SetCursorScreenPos(startPos);
 		// Flip UV coordinates only for framebuffer-rendered previews (models and materials)
 		// Regular textures are already right-side up
-		if (ext == ".obj" || ext == ".material") {
+		if (ext == ".obj" || ext == ".material" || ext == ".prefab") {
 			// Framebuffer textures need Y-flip: (0,1) to (1,0)
 			ImGui::Image(iconID, ImVec2(iconSize, iconSize), ImVec2(0, 1), ImVec2(1, 0));
 		} else {
@@ -839,6 +866,40 @@ namespace Engine {
 		}
 		else if (extension == ".efk") {
 			return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_particleIconTexture->GetID()));
+		}
+		else if (extension == ".prefab") {
+			auto handle = GetAssetManager().GetHandleFromPath<Prefab>(path);
+			if (handle.IsValid()) {
+				auto it = m_prefabPreviews.find(handle.GetID());
+				if (it != m_prefabPreviews.end() && it->second.texture) {
+					return reinterpret_cast<void*>(static_cast<intptr_t>(it->second.texture));
+				}
+			}
+			if (!allowLoad || m_failedPreviewPaths.count(path) || m_previewBudget <= 0) {
+				return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_modelIconTexture->GetID()));
+			}
+			--m_previewBudget;
+			try {
+				handle = GetAssetManager().Load<Prefab>(path);
+				Prefab* prefab = GetAssetManager().Get(handle);
+				if (prefab) {
+					auto items = prefab->CollectPreviewDraws();
+					if (!items.empty()) {
+						auto& preview         = m_prefabPreviews[handle.GetID()];
+						preview.width         = static_cast<int>(MODEL_PREVIEW_SIZE);
+						preview.height        = static_cast<int>(MODEL_PREVIEW_SIZE);
+						preview.initialized   = false;
+						preview.Render(items, GetRenderer().GetModelPreviewShader());
+						if (preview.texture) {
+							return reinterpret_cast<void*>(static_cast<intptr_t>(preview.texture));
+						}
+					}
+				}
+			} catch (const std::exception& e) {
+				GetUI().log->warn("Failed to load prefab preview {}: {}", path, e.what());
+			}
+			m_failedPreviewPaths.insert(path);
+			return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_modelIconTexture->GetID()));
 		}
 
 		// Generic file icon for unknown types

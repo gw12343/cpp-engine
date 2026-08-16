@@ -74,7 +74,7 @@ namespace Engine {
 			void                             RenderEntityTreeNode(Entity entity);
 			void                             DrawAddEntityMenu();
 
-			enum class HierarchyCommand { None, Delete, Duplicate, CreateChild };
+			enum class HierarchyCommand { None, Delete, Duplicate, CreateChild, SavePrefab, InstantiatePrefab };
 			HierarchyCommand m_hierarchyCommand = HierarchyCommand::None;
 			Entity           m_hierarchyCommandEntity;
 			std::string      m_renamingGuid;

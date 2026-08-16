@@ -1,0 +1,114 @@
+{
+    "name": "Bullet",
+    "rootGuid": "0bbf205e9f4ad8705a735a69ae7c07a6",
+    "entities": [
+        {
+            "EntityMetadata": {
+                "name": "Bullet",
+                "tag": "",
+                "active": true,
+                "guid": "0bbf205e9f4ad8705a735a69ae7c07a6",
+                "parentEntity": {
+                    "guid": ""
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": false,
+                "data": {
+                    "scriptPath": "scripts\\prefab_created.lua",
+                    "variables": []
+                }
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 0.25,
+                        "y": 0.25,
+                        "z": 0.25
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "model": {
+                        "guid": "16ab47c200b25ccb2b9dbcf46297059f"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": "4f843329315c8297e0905d030736e961"
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": false,
+                "data": {
+                    "motionType": 2,
+                    "mass": 1.0,
+                    "friction": 0.5,
+                    "restitution": 0.0,
+                    "gravityFactor": 1.0,
+                    "shapeType": "Sphere",
+                    "shapeSize": {
+                        "x": 0.125,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "meshSelection": [],
+                    "colliderModel": {
+                        "guid": ""
+                    }
+                }
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            },
+            "Text3DComponent": {
+                "nullopt": true
+            },
+            "PrefabInstance": {
+                "nullopt": true
+            }
+        }
+    ]
+}

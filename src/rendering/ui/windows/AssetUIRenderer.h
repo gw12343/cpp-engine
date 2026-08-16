@@ -94,6 +94,7 @@ namespace Engine {
 		
 		// For previews
 		std::unordered_map<std::string, ModelPreview> m_modelPreviews;
+		std::unordered_map<std::string, ModelPreview> m_prefabPreviews;
 		std::unordered_map<std::string, MaterialPreview> m_materialPreviews;
 		std::unordered_map<std::string, unsigned int> m_texturePreviewIds;
 		std::unordered_set<std::string> m_loadedModelPaths;

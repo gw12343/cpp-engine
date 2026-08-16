@@ -211,7 +211,7 @@ function Update()
     -- Shoot Balls
     if input:isKeyPressedThisFrame(KEY_E) then
         local shape = SphereShape(0.5 / 2)
-        ShootObject("resources/models/sphere.obj", shape, variables.SHOOT_POWER, 0.5)
+        ShootObject("assets/models/sphere.obj", shape, variables.SHOOT_POWER, 0.5)
     end
 end
 

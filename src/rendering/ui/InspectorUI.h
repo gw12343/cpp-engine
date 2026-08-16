@@ -18,6 +18,7 @@ namespace Engine {
 	class Texture;
 	class Material;
 	class Scene;
+	class Prefab;
 	class Particle;
 	namespace Terrain {
 		class TerrainTile;
@@ -64,6 +65,7 @@ namespace Engine {
 	LL_ASSET(Material, Material);
 	LL_ASSET(Animation, Animation);
 	LL_ASSET(Skeleton, Skeleton);
+	LL_ASSET(Prefab, Prefab);
 
 	bool LeftLabelEntity(const char* label, EntityHandle* assetRef);
 	bool LeftLabelEntityVector(const char* label, std::vector<EntityHandle>& assetRef);

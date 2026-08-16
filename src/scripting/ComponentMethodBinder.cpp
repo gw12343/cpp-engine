@@ -18,6 +18,7 @@
 #include "components/impl/SkinnedMeshComponent.h"
 #include "components/impl/ParticleSystemComponent.h"
 #include "components/AllComponents.h"
+#include "assets/Prefab.h"
 
 namespace Engine {
 
@@ -41,10 +42,14 @@ namespace Engine {
                 &Entity::SetName,
                 "setParent",
                 &Entity::SetParent,
+                "getHandle",
+                &Entity::GetEntityHandle,
                 "getChildren",
                 &Entity::GetChildren,
                 "destroy",
                 &Entity::MarkForDestruction,
+                "instantiatePrefab",
+                [](Entity& parent, const PrefabHandle& handle) { return InstantiatePrefab(handle, parent.GetEntityHandle()); },
                 COMPONENT_LIST COMPONENT_METHODS(Components::EntityMetadata, EntityMetadata));
     #undef X
     }

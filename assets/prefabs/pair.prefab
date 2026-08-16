@@ -1,0 +1,334 @@
+{
+    "name": "PrefabPair",
+    "rootGuid": "4b010650a2fedb1f6cae3702be7a6d15",
+    "entities": [
+        {
+            "EntityMetadata": {
+                "name": "PrefabPair",
+                "tag": "",
+                "active": true,
+                "guid": "4b010650a2fedb1f6cae3702be7a6d15",
+                "parentEntity": {
+                    "guid": ""
+                },
+                "children": [
+                    {
+                        "guid": "3754f8147ebea18490f6c6c1354da5c9"
+                    },
+                    {
+                        "guid": "a001fa274707f669281d0470feb2a43e"
+                    }
+                ]
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": true
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            },
+            "Text3DComponent": {
+                "nullopt": true
+            },
+            "PrefabInstance": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "PairA",
+                "tag": "",
+                "active": true,
+                "guid": "3754f8147ebea18490f6c6c1354da5c9",
+                "parentEntity": {
+                    "guid": "4b010650a2fedb1f6cae3702be7a6d15"
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": false,
+                "data": {
+                    "scriptPath": "scripts/prefab_pair.lua",
+                    "variables": [
+                        {
+                            "key": "other",
+                            "value": {
+                                "index": 12,
+                                "data": {
+                                    "guid": "a001fa274707f669281d0470feb2a43e"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": -1.2000000476837159,
+                        "y": 1.5,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 0.800000011920929,
+                        "y": 0.800000011920929,
+                        "z": 0.800000011920929
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": false,
+                    "model": {
+                        "guid": "e319e2b8747bee49f54e67e706d42f67"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": ""
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            },
+            "Text3DComponent": {
+                "nullopt": false,
+                "data": {
+                    "text": "PairA",
+                    "fontPath": "resources/fonts/Roboto-Regular.ttf",
+                    "size": 0.18000000715255738,
+                    "atlasPixelHeight": 64,
+                    "color": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0,
+                        "w": 1.0
+                    },
+                    "billboard": true,
+                    "billboardYLock": false,
+                    "alignment": 1,
+                    "letterSpacing": 0.0,
+                    "outlineWidth": 0.07999999821186066,
+                    "outlineColor": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                }
+            },
+            "PrefabInstance": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "PairB",
+                "tag": "",
+                "active": true,
+                "guid": "a001fa274707f669281d0470feb2a43e",
+                "parentEntity": {
+                    "guid": "4b010650a2fedb1f6cae3702be7a6d15"
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": false,
+                "data": {
+                    "scriptPath": "scripts/prefab_pair.lua",
+                    "variables": [
+                        {
+                            "key": "other",
+                            "value": {
+                                "index": 12,
+                                "data": {
+                                    "guid": "3754f8147ebea18490f6c6c1354da5c9"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 1.2000000476837159,
+                        "y": 1.5,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 0.800000011920929,
+                        "y": 0.800000011920929,
+                        "z": 0.800000011920929
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": false,
+                    "model": {
+                        "guid": "e319e2b8747bee49f54e67e706d42f67"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": ""
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            },
+            "Text3DComponent": {
+                "nullopt": false,
+                "data": {
+                    "text": "PairB",
+                    "fontPath": "resources/fonts/Roboto-Regular.ttf",
+                    "size": 0.18000000715255738,
+                    "atlasPixelHeight": 64,
+                    "color": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0,
+                        "w": 1.0
+                    },
+                    "billboard": true,
+                    "billboardYLock": false,
+                    "alignment": 1,
+                    "letterSpacing": 0.0,
+                    "outlineWidth": 0.07999999821186066,
+                    "outlineColor": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                }
+            },
+            "PrefabInstance": {
+                "nullopt": true
+            }
+        }
+    ]
+}

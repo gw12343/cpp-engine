@@ -77,7 +77,12 @@ function AssetHandle:clear() end
 ---@class ParticleHandle : AssetHandle
 ---@class SoundHandle : AssetHandle
 ---@class AnimationHandle : AssetHandle
+---@class PrefabHandle : AssetHandle
 ---@class EntityHandle : AssetHandle
+
+---@param parent? EntityHandle
+---@return Entity
+function PrefabHandle:instantiate(parent) end
 
 ---@return TextureHandle
 function tex() end
@@ -104,6 +109,15 @@ function sound() end
 function animation() end
 
 ---@param guid? string
+---@return PrefabHandle
+function prefab(guid) end
+
+---@param handle PrefabHandle
+---@param parent? EntityHandle
+---@return Entity
+function instantiatePrefab(handle, parent) end
+
+---@param guid? string
 ---@return EntityHandle
 function ehandle(guid) end
 
@@ -125,6 +139,7 @@ function AssetVector:size() end
 ---@class ParticleVector : AssetVector
 ---@class SoundVector : AssetVector
 ---@class AnimationVector : AssetVector
+---@class PrefabVector : AssetVector
 
 --------------------------------------------------------------------------------
 -- Physics shapes
@@ -854,6 +869,13 @@ function Entity:getTag() end
 
 ---@param handle EntityHandle
 function Entity:setParent(handle) end
+
+---@return EntityHandle
+function Entity:getHandle() end
+
+---@param handle PrefabHandle
+---@return Entity
+function Entity:instantiatePrefab(handle) end
 
 ---@return EntityHandle[]
 function Entity:getChildren() end

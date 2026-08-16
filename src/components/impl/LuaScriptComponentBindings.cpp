@@ -48,6 +48,7 @@ namespace Engine
 				}
 
 				self.variables[name] = value;
+				self.SyncFromLua();
 			},
 
 			// getter

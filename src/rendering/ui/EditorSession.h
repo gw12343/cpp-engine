@@ -57,6 +57,9 @@ namespace Engine::UI {
 		void SaveSceneAs();
 		bool LoadSceneFromPath(const std::string& path);
 
+		bool   SaveEntityAsPrefab(Entity root);
+		Entity InstantiatePrefabDialog(const EntityHandle& parent = EntityHandle());
+
 		void Play();
 		void Pause();
 		void Stop();

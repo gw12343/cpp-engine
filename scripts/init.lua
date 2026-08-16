@@ -1,6 +1,7 @@
 
 function EditorInit()
     print("Editor init called!")
+    dofile("scripts/prefab_pair_setup.lua")
 
     --[[local floor = createEntity("Floor")
     local tr = floor:AddTransform()
@@ -8,7 +9,7 @@ function EditorInit()
     local rb = floor:AddRigidBodyComponent();
     tr.scale = vec3(60, 2, 60)
 
-    mr:setModel("resources/models/cube.obj")
+    mr:setModel("assets/models/cube.obj")
     rb:setKinematic(true)
     rb:setBoxShape(BoxShape(vec3(30.0, 1.0, 30.0)))--]]
 end
@@ -23,6 +24,15 @@ end
 local ui = getUI()
 
 function EditorUpdate(dt)
+    imgui.Begin("Prefab Pair Test")
+    imgui.Text("1. Build pair (A.other <-> B.other)")
+    imgui.Text("2. Play — labels show my GUID / other GUID")
+    imgui.Text("3. Save PrefabPair as prefab and instantiate")
+    imgui.Text("4. New labels must show NEW GUIDs that still match")
+    if imgui.Button("Build Prefab Pair") then
+        BuildPrefabPair()
+    end
+    imgui.End()
    -- local selectedEntity = ui:getSelectedEntity()
    --
    --
