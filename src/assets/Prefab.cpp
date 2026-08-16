@@ -1,6 +1,7 @@
 #include "Prefab.h"
 
 #include "assets/AssetManager.h"
+#include "components/impl/ModelRendererComponent.h"
 #include "components/impl/LuaScriptComponent.h"
 #include "components/impl/PrefabInstanceComponent.h"
 #include "components/impl/TransformComponent.h"
@@ -10,7 +11,9 @@
 #include "utils/Logger.h"
 
 #include <algorithm>
+#include <functional>
 #include <map>
+#include <unordered_map>
 #include <unordered_set>
 
 namespace Engine {
@@ -251,6 +254,65 @@ namespace Engine {
 		}
 
 		return rootEntity;
+	}
+
+	std::vector<PreviewDrawItem> Prefab::CollectPreviewDraws() const
+	{
+		std::unordered_map<std::string, const SerializedEntity*> byGuid;
+		byGuid.reserve(entities.size());
+		for (const auto& se : entities) {
+			if (!se.meta.guid.empty()) {
+				byGuid[se.meta.guid] = &se;
+			}
+		}
+
+		std::unordered_map<std::string, glm::mat4> world;
+		world.reserve(entities.size());
+
+		std::function<glm::mat4(const std::string&)> computeWorld = [&](const std::string& guid) -> glm::mat4 {
+			auto cached = world.find(guid);
+			if (cached != world.end()) {
+				return cached->second;
+			}
+			auto it = byGuid.find(guid);
+			if (it == byGuid.end()) {
+				return glm::mat4(1.0f);
+			}
+			const SerializedEntity& se = *it->second;
+			glm::mat4               local(1.0f);
+			if (se.Transform.has_value()) {
+				local = se.Transform->GetLocalMatrix();
+			}
+			glm::mat4 parentWorld(1.0f);
+			const std::string& parentId = se.meta.parentEntity.GetID();
+			if (!parentId.empty() && byGuid.count(parentId) && parentId != guid) {
+				parentWorld = computeWorld(parentId);
+			}
+			const glm::mat4 w = parentWorld * local;
+			world[guid]       = w;
+			return w;
+		};
+
+		std::vector<PreviewDrawItem> items;
+		for (const auto& se : entities) {
+			if (!se.ModelRenderer.has_value() || !se.ModelRenderer->visible) {
+				continue;
+			}
+			const ModelHandle& handle = se.ModelRenderer->model;
+			if (!handle.IsValid()) {
+				continue;
+			}
+			Rendering::Model* model = GetAssetManager().Get(handle);
+			if (!model) {
+				continue;
+			}
+			PreviewDrawItem item;
+			item.model              = model;
+			item.world              = computeWorld(se.meta.guid);
+			item.materialOverrides  = se.ModelRenderer->materialOverrides;
+			items.push_back(std::move(item));
+		}
+		return items;
 	}
 
 	Entity InstantiatePrefab(const PrefabHandle& handle, const EntityHandle& parent)

@@ -37,7 +37,41 @@ namespace Engine {
 	}
 
 
+	static void EncapsulateTransformedAabb(glm::vec3& outMin, glm::vec3& outMax, bool& any, const glm::mat4& world, const glm::vec3& bmin, const glm::vec3& bmax)
+	{
+		const glm::vec3 corners[8] = {
+		    {bmin.x, bmin.y, bmin.z},
+		    {bmax.x, bmin.y, bmin.z},
+		    {bmin.x, bmax.y, bmin.z},
+		    {bmax.x, bmax.y, bmin.z},
+		    {bmin.x, bmin.y, bmax.z},
+		    {bmax.x, bmin.y, bmax.z},
+		    {bmin.x, bmax.y, bmax.z},
+		    {bmax.x, bmax.y, bmax.z},
+		};
+		for (const glm::vec3& c : corners) {
+			const glm::vec3 w = glm::vec3(world * glm::vec4(c, 1.0f));
+			if (!any) {
+				outMin = outMax = w;
+				any             = true;
+			}
+			else {
+				outMin = glm::min(outMin, w);
+				outMax = glm::max(outMax, w);
+			}
+		}
+	}
+
 	void ModelPreview::Render(Rendering::Model* model, Shader& shader)
+	{
+		if (!model) return;
+		PreviewDrawItem item;
+		item.model = model;
+		item.world = glm::mat4(1.0f);
+		Render(std::vector<PreviewDrawItem>{item}, shader);
+	}
+
+	void ModelPreview::Render(const std::vector<PreviewDrawItem>& items, Shader& shader)
 	{
 		if (!initialized) {
 			width = height = MODEL_PREVIEW_SIZE;
@@ -49,42 +83,56 @@ namespace Engine {
 		glEnable(GL_DEPTH_TEST);
 		GLfloat prevClear[4];
 		glGetFloatv(GL_COLOR_CLEAR_VALUE, prevClear);
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		glClearColor(0.12f, 0.12f, 0.14f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glm::vec3 bmin(0.0f);
+		glm::vec3 bmax(0.0f);
+		bool      any = false;
+		for (const auto& item : items) {
+			if (!item.model) continue;
+			EncapsulateTransformedAabb(bmin, bmax, any, item.world, item.model->m_boundsMin, item.model->m_boundsMax);
+		}
+		if (!any) {
+			glClearColor(prevClear[0], prevClear[1], prevClear[2], prevClear[3]);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			return;
+		}
 
 		shader.Bind();
 
-		// Compute bounding box center and extents
-		glm::vec3 center  = (model->m_boundsMin + model->m_boundsMax) * 0.5f;
-		glm::vec3 extents = model->m_boundsMax - model->m_boundsMin;
-		float     radius  = glm::length(extents) * 0.5f;
+		const glm::vec3 center  = (bmin + bmax) * 0.5f;
+		const glm::vec3 extents = bmax - bmin;
+		float           radius  = glm::length(extents) * 0.5f;
+		if (radius < 1e-4f) {
+			radius = 0.5f;
+		}
 
-		// Camera setup: position along diagonal to view model from a nice angle
-		glm::vec3 camDir = glm::normalize(glm::vec3(1.0f, 1.0f, 1.0f));
-		
-		// Calculate distance based on FOV to ensure entire model fits in view
-		// Use the radius (half diagonal of bounding box) to ensure model fits
-		float fov = 45.0f;
-		float distance = radius / glm::tan(glm::radians(fov * 0.5f));
-		
-		// Add safety margin - increase distance by 50% to give breathing room
-		distance *= 1.5f;
-		
-		glm::vec3 camPos = center + camDir * distance;
+		const glm::vec3 camDir   = glm::normalize(glm::vec3(1.0f, 0.85f, 1.0f));
+		const float     fov      = 40.0f;
+		float           distance = radius / glm::tan(glm::radians(fov * 0.5f));
+		distance *= 1.35f;
+		const glm::vec3 camPos = center + camDir * distance;
 
-		// Set up projection with appropriate near/far planes
-		float nearPlane = glm::max(0.01f, distance - radius * 2.0f);
-		float farPlane  = distance + radius * 2.0f;
-		
-		glm::mat4 proj     = glm::perspective(glm::radians(fov), 1.f, nearPlane, farPlane);
-		glm::mat4 view     = glm::lookAt(camPos, center, glm::vec3(0, 1, 0));
-		auto      modelMat = glm::mat4(1.0f);
+		const float   nearPlane = glm::max(0.01f, distance - radius * 2.5f);
+		const float   farPlane  = distance + radius * 2.5f;
+		glm::mat4     proj      = glm::perspective(glm::radians(fov), 1.f, nearPlane, farPlane);
+		glm::mat4     view      = glm::lookAt(camPos, center, glm::vec3(0, 1, 0));
 
 		shader.SetMat4("projection", &proj);
 		shader.SetMat4("view", &view);
-		shader.SetMat4("model", &modelMat);
 
-		model->Draw(shader, false, true);
+		for (const auto& item : items) {
+			if (!item.model) continue;
+			glm::mat4 modelMat = item.world;
+			shader.SetMat4("model", &modelMat);
+			if (item.materialOverrides.empty()) {
+				item.model->Draw(shader, false, true);
+			}
+			else {
+				item.model->Draw(shader, false, true, item.materialOverrides);
+			}
+		}
 
 		glClearColor(prevClear[0], prevClear[1], prevClear[2], prevClear[3]);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);

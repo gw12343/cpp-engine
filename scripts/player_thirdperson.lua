@@ -7,7 +7,7 @@
 --   Left Shift / LB             run
 --   Space / A                   jump (or jump-off wall while climbing)
 --   Mouse / right stick         orbit camera
---   E / X / RB                  shoot
+--   E / X / RB                  shoot PROJECTILE_PREFAB
 --   Hold into a steep wall      BOTW-style climb attach (physics)
 
 variables = {
@@ -72,11 +72,11 @@ variables = {
     -- SkeletonReference asset — assign in inspector / scene JSON.
     SKELETON       = skeleton(),
 
-    SHOOT_POWER     = 15,
-    BULLET_PARENT   = ehandle(),
-    BULLET_MATERIAL = material(),
-    shootSound      = sound(),
-    victorySound    = sound(),
+    SHOOT_POWER       = 15,
+    PROJECTILE_PREFAB = prefab(), -- assign a .prefab (e.g. a cube with prefab_created.lua)
+    BULLET_PARENT     = ehandle(),
+    shootSound        = sound(),
+    victorySound      = sound(),
 }
 
 local orbitYaw         = -90.0
@@ -594,9 +594,38 @@ function Start()
     info("third-person controller ready")
 end
 
-ballCount = 0
+local function offsetHierarchy(entity, dx, dy, dz, vel)
+    if entity:HasRigidBodyComponent() then
+        local rb = entity:GetRigidBodyComponent()
+        local p = rb:getPosition()
+        rb:setPosition(vec3(p.x + dx, p.y + dy, p.z + dz))
+        if vel then
+            rb:addLinearVelocity(vel)
+        end
+    elseif entity:HasTransform() then
+        local tr = entity:GetTransform()
+        local p = tr.position
+        tr.position = vec3(p.x + dx, p.y + dy, p.z + dz)
+    end
+    local kids = entity:getChildren()
+    if not kids then
+        return
+    end
+    for i = 1, kids:size() do
+        local child = getEntityFromHandle(kids[i])
+        if child and child:isValid() then
+            offsetHierarchy(child, dx, dy, dz, vel)
+        end
+    end
+end
 
-function ShootObject(model, shape, speed, scale)
+function ShootPrefab()
+    local prefab = variables.PROJECTILE_PREFAB
+    if not prefab or not prefab:isValid() then
+        print("[player] assign PROJECTILE_PREFAB on the third-person controller")
+        return
+    end
+
     local cam = getCamera()
     local cr = gameObject:GetPlayerControllerComponent()
     local body = cr:getPosition()
@@ -611,37 +640,22 @@ function ShootObject(model, shape, speed, scale)
         body.z + fwdZ * variables.SHOOT_FORWARD_OFFSET
     )
 
-    local newBall = createEntity("Ball" .. ballCount)
-    ballCount = ballCount + 1
-
-    local tr = newBall:AddTransform()
-    local mr = newBall:AddModelRenderer()
-    mr:setMaterial(variables.BULLET_MATERIAL)
-
-    local rb = newBall:AddRigidBodyComponent()
-    local sc = newBall:AddLuaScript()
-    newBall:AddShadowCaster()
-    newBall:setParent(variables.BULLET_PARENT)
-
-    tr.scale = vec3(scale, scale, scale)
-    mr:setModel(model)
-
-    rb:setPosition(spawnPos)
-    rb:addLinearVelocity(vec3(aim.x * speed, aim.y * speed, aim.z * speed))
-
-    local t = shape:getType()
-    if t == "BoxShape" then
-        rb:setBoxShape(shape)
-    elseif t == "SphereShape" then
-        rb:setSphereShape(shape)
-    elseif t == "CapsuleShape" then
-        rb:setCapsuleShape(shape)
-    elseif t == "CylinderShape" then
-        rb:setCylinderShape(shape)
-    elseif t == "TriangleShape" then
-        rb:setTriangleShape(shape)
+    local root = instantiatePrefab(prefab)
+    if not root or not root:isValid() then
+        print("[player] instantiatePrefab failed")
+        return
     end
-    sc:setScript(newBall, "scripts/bullet.lua")
+
+    if variables.BULLET_PARENT and variables.BULLET_PARENT:isValid() then
+        root:setParent(variables.BULLET_PARENT)
+    end
+
+    local origin = spawnPos
+    if root:HasTransform() then
+        origin = root:GetTransform().position
+    end
+    local vel = vec3(aim.x * variables.SHOOT_POWER, aim.y * variables.SHOOT_POWER, aim.z * variables.SHOOT_POWER)
+    offsetHierarchy(root, spawnPos.x - origin.x, spawnPos.y - origin.y, spawnPos.z - origin.z, vel)
 end
 
 function Update()
@@ -897,7 +911,7 @@ function Update()
     if input:isKeyPressedThisFrame(KEY_E)
         or input:isGamepadButtonPressedThisFrame(GAMEPAD_X)
         or input:isGamepadButtonPressedThisFrame(GAMEPAD_RIGHT_BUMPER) then
-        ShootObject("resources/models/sphere.obj", SphereShape(0.25), variables.SHOOT_POWER, 0.5)
+        ShootPrefab()
     end
 end
 

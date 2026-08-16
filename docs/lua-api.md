@@ -281,7 +281,7 @@ tr.scale = vec3(0.5, 0.5, 0.5)
 
 ```lua
 local mr = entity:AddModelRenderer()
-mr:setModel("resources/models/sphere.obj")
+mr:setModel("asset/models/sphere.obj")
 mr:setMaterial(variables.BULLET_MATERIAL)
 ```
 

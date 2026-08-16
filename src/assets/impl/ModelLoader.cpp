@@ -125,7 +125,7 @@ namespace Engine {
 
 				std::filesystem::path oldPath(rawStr);
 
-				std::filesystem::path fullPath1 = std::filesystem::path("resources/textures") / oldPath.filename();
+				std::filesystem::path fullPath1 = std::filesystem::path("resources/engine") / oldPath.filename();
 				std::filesystem::path fullPath2 = std::filesystem::path(directory) / oldPath.filename();
 
 				std::string fullPathStr = std::filesystem::exists(fullPath2) ? fullPath2.string() : fullPath1.string();

@@ -9,7 +9,7 @@ function EditorInit()
     local rb = floor:AddRigidBodyComponent();
     tr.scale = vec3(60, 2, 60)
 
-    mr:setModel("resources/models/cube.obj")
+    mr:setModel("assets/models/cube.obj")
     rb:setKinematic(true)
     rb:setBoxShape(BoxShape(vec3(30.0, 1.0, 30.0)))--]]
 end
