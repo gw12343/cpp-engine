@@ -64,7 +64,7 @@ variables = {
 }
 ```
 
-Supported default factories: `tex()`, `model()`, `material()`, `scene()`, `terrainTile()`, `particle()`, `sound()`, `animation()`, `ehandle()`.
+Supported default factories: `tex()`, `model()`, `material()`, `scene()`, `terrainTile()`, `particle()`, `sound()`, `animation()`, `prefab()`, `ehandle()`.
 
 ---
 
@@ -205,6 +205,8 @@ Built-in names used by the engine include `OnCollisionEnter` and `OnPlayerCollis
 | `setName(name)` | | |
 | `getTag()` | `string` | Tag |
 | `setParent(handle)` | | Parent by `EntityHandle` |
+| `getHandle()` | `EntityHandle` | This entity's handle |
+| `instantiatePrefab(handle)` | `Entity` | Spawn a prefab parented to this entity |
 | `getChildren()` | `EntityHandle[]` | Child handles |
 | `destroy()` | | Mark for destruction next update |
 
@@ -236,6 +238,8 @@ For each component type `Name`, Entity has:
 | `PlayerControllerComponent` | Character controller |
 | `RmlUIComponent` | RmlUi document |
 | `GizmoComponent` | Gizmo |
+| `Text3DComponent` | 3D text |
+| `PrefabInstance` | Prefab link (`prefab` handle) |
 | `EntityMetadata` | Metadata |
 
 ```lua
@@ -691,11 +695,16 @@ Empty handles for `variables` and assignment. Assigned in the editor or by loadi
 | `particle()` | `ParticleHandle` | same |
 | `sound()` | `SoundHandle` | same |
 | `animation()` | `AnimationHandle` | same |
+| `prefab()` / `prefab(guid)` | `PrefabHandle` | same + `instantiate([parentHandle])` |
 | `ehandle()` / `ehandle(guid)` | `EntityHandle` | same |
+
+`instantiatePrefab(handle [, parentHandle])` spawns a prefab into the active scene and returns the root `Entity`. Inner entity GUIDs (parent/child links and script `ehandle` fields that pointed at entities inside the prefab) are remapped; handles that pointed outside the prefab are left unchanged. Asset handles and other script variables are copied as authored.
+
+`entity:instantiatePrefab(handle)` is the same, parenting the instance under `entity`.
 
 ### Vectors (1-based index)
 
-`EntityVector`, `TextureVector`, `ModelVector`, `MaterialVector`, `SceneVector`, `TerrainTileVector`, `ParticleVector`, `SoundVector`, `AnimationVector`:
+`EntityVector`, `TextureVector`, `ModelVector`, `MaterialVector`, `SceneVector`, `TerrainTileVector`, `ParticleVector`, `SoundVector`, `AnimationVector`, `PrefabVector`:
 
 - `push_back(item)`
 - `size()`

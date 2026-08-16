@@ -29,6 +29,7 @@ namespace Engine
 	class Material;
 	class Animation;
 	class Skeleton;
+	class Prefab;
 }
 
 namespace Engine {
@@ -58,6 +59,7 @@ namespace Engine {
 	// Preferred name for skeleton assets (serializable handle).
 	using SkeletonReference = AssetHandle<Engine::Skeleton>;
 	using SkeletonHandle    = SkeletonReference;
+	using PrefabHandle      = AssetHandle<Engine::Prefab>;
 
 	using TextureHandleList = std::vector<TextureHandle>;
 	using ModelHandleList = std::vector<ModelHandle>;
@@ -69,6 +71,7 @@ namespace Engine {
 	using AnimationHandleList = std::vector<AnimationHandle>;
 	using SkeletonHandleList  = std::vector<SkeletonHandle>;
 	using SkeletonReferenceList = SkeletonHandleList;
+	using PrefabHandleList      = std::vector<PrefabHandle>;
 
 } // namespace Engine
 

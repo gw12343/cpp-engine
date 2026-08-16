@@ -15,6 +15,8 @@
 #include "animation/Skeleton.h"
 #include "rendering/ui/UIManager.h"
 #include "rendering/ui/EditorSession.h"
+#include "assets/Prefab.h"
+#include "core/Entity.h"
 #include "rendering/ui/IconsFontAwesome6.h"
 
 
@@ -519,6 +521,14 @@ namespace Engine {
 		if (isDirectory && cardHovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 			QueueNavigate(path);
 		}
+		if (!isDirectory && ext == ".prefab" && cardHovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+			auto   handle  = GetAssetManager().Load<Prefab>(path);
+			Entity spawned = InstantiatePrefab(handle);
+			if (spawned && spawned.IsValid()) {
+				GetUI().m_selectedEntity = spawned;
+				UI::GetEditor().MarkDirty();
+			}
+		}
 
 		if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
 			m_rightClickedFile = path;
@@ -612,7 +622,12 @@ namespace Engine {
 
             auto handle = GetAssetManager().Load<Particle>(path);
             strncpy(payload.id, handle.GetID().c_str(), sizeof(payload.id));
-        }
+        } else if (ext == ".prefab") {
+			payloadType = "ASSET_PREFAB";
+			assetType   = "Prefab";
+			auto handle = GetAssetManager().Load<Prefab>(path);
+			strncpy(payload.id, handle.GetID().c_str(), sizeof(payload.id));
+		}
 
 		payload.type = assetType;
 		payload.id[sizeof(payload.id) - 1] = '\0';
@@ -839,6 +854,9 @@ namespace Engine {
 		}
 		else if (extension == ".efk") {
 			return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_particleIconTexture->GetID()));
+		}
+		else if (extension == ".prefab") {
+			return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_modelIconTexture->GetID()));
 		}
 
 		// Generic file icon for unknown types

@@ -10,7 +10,9 @@
 #include "components/Components.h"
 
 #include <cereal/cereal.hpp>
+#include <cereal/types/unordered_map.hpp>
 #include <cereal/types/variant.hpp>
+#include <unordered_map>
 #include <sol/environment.hpp>
 
 
@@ -59,7 +61,9 @@ namespace Engine {
 	                                    AnimationHandle,                          // 21
 	                                    AnimationHandleList,                      // 22
 	                                    SkeletonReference,                        // 23
-	                                    SkeletonHandleList>;                      // 24
+	                                    SkeletonHandleList,                       // 24
+	                                    PrefabHandle,                             // 25
+	                                    PrefabHandleList>;                        // 26
 
 	namespace Components {
 

@@ -150,7 +150,7 @@ namespace Engine {
 		// Limit the number of collision steps to the maximum number of available jobs
 		cCollisionSteps = std::min(cCollisionSteps, maxJobs);
 		// Step the world
-		if (GetState() == PLAYING) {
+		if (IsSimulating()) {
 			// Update Character controller
 			{
 				ZoneScopedNC("Update Player Controller", 0x46556D);
@@ -164,9 +164,9 @@ namespace Engine {
 			}
 		}
 
-		// Only pull physics → transform while playing. Doing this in the editor
+		// Only pull physics → transform while simulating. Doing this in the editor
 		// overwrote authored local rotations (quat_cast on a scaled matrix) every frame.
-		if (GetState() == PLAYING) {
+		if (IsSimulating()) {
 			{
 				ZoneScopedNC("Sync Physics Characters", 0x46556D);
 				SyncCharacterEntities();

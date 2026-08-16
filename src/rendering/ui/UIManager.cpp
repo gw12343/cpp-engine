@@ -36,6 +36,7 @@
 #include "rendering/particles/Particle.h"
 #include "components/impl/ParticleSystemComponent.h"
 #include "assets/impl/MaterialLoader.h"
+#include "assets/Prefab.h"
 
 
 #include <nfd.h>
@@ -178,6 +179,9 @@ namespace Engine::UI {
 				if (ImGui::MenuItem("Open Scene...", "Ctrl+O")) editor.OpenSceneDialog();
 				if (ImGui::MenuItem("Save Scene", "Ctrl+S")) editor.SaveScene();
 				if (ImGui::MenuItem("Save Scene As...")) editor.SaveSceneAs();
+				if (ImGui::MenuItem("Save Selection as Prefab...", nullptr, false, m_selectedEntity && m_selectedEntity.IsValid())) {
+					editor.SaveEntityAsPrefab(m_selectedEntity);
+				}
 				ImGui::Separator();
 				if (ImGui::MenuItem("Build Game")) {
 					std::string path = SelectFolder();
@@ -450,6 +454,16 @@ namespace Engine::UI {
 				GetEditor().MarkDirty();
 				break;
 			}
+			case HierarchyCommand::SavePrefab:
+				GetEditor().SaveEntityAsPrefab(target);
+				break;
+			case HierarchyCommand::InstantiatePrefab: {
+				Entity spawned = GetEditor().InstantiatePrefabDialog(target.GetEntityHandle());
+				if (spawned && spawned.IsValid()) {
+					m_selectedEntity = spawned;
+				}
+				break;
+			}
 			case HierarchyCommand::None:
 				break;
 		}
@@ -510,6 +524,7 @@ namespace Engine::UI {
 		if (entity.HasComponent<Components::Text3DComponent>()) return ICON_FA_FONT;
 		if (entity.HasComponent<Components::RmlUIComponent>()) return ICON_FA_WINDOW_MAXIMIZE;
 		if (entity.HasComponent<Components::AnimationComponent>()) return ICON_FA_FILM;
+		if (entity.HasComponent<Components::PrefabInstance>()) return ICON_FA_BOX_OPEN;
 		return ICON_FA_CUBE;
 	}
 
@@ -555,6 +570,12 @@ namespace Engine::UI {
 			entity.AddComponent<Components::ParticleSystem>();
 			m_selectedEntity = entity;
 			GetEditor().MarkDirty();
+		}
+		if (ImGui::MenuItem("Instantiate Prefab...")) {
+			Entity spawned = GetEditor().InstantiatePrefabDialog();
+			if (spawned && spawned.IsValid()) {
+				m_selectedEntity = spawned;
+			}
 		}
 	}
 
@@ -615,6 +636,16 @@ namespace Engine::UI {
 						_newChild    = child;
 						_newParent   = parentHandle;
 						changeParent = true;
+					}
+				}
+			}
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_PREFAB")) {
+				if (payload->DataSize == sizeof(PayloadData)) {
+					const auto* data = static_cast<const PayloadData*>(payload->Data);
+					Entity spawned = InstantiatePrefab(PrefabHandle(data->id));
+					if (spawned && spawned.IsValid()) {
+						m_selectedEntity = spawned;
+						GetEditor().MarkDirty();
 					}
 				}
 			}
@@ -731,6 +762,16 @@ namespace Engine::UI {
 					}
 				}
 			}
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_PREFAB")) {
+				if (payload->DataSize == sizeof(PayloadData)) {
+					const auto* data = static_cast<const PayloadData*>(payload->Data);
+					Entity spawned = InstantiatePrefab(PrefabHandle(data->id), EntityHandle(guid));
+					if (spawned && spawned.IsValid()) {
+						m_selectedEntity = spawned;
+						GetEditor().MarkDirty();
+					}
+				}
+			}
 			ImGui::EndDragDropTarget();
 		}
 
@@ -765,6 +806,15 @@ namespace Engine::UI {
 				}
 				if (ImGui::MenuItem("Create Child")) {
 					m_hierarchyCommand       = HierarchyCommand::CreateChild;
+					m_hierarchyCommandEntity = entity;
+				}
+				if (ImGui::MenuItem("Instantiate Prefab as Child...")) {
+					m_hierarchyCommand       = HierarchyCommand::InstantiatePrefab;
+					m_hierarchyCommandEntity = entity;
+				}
+				ImGui::Separator();
+				if (ImGui::MenuItem("Save as Prefab...")) {
+					m_hierarchyCommand       = HierarchyCommand::SavePrefab;
 					m_hierarchyCommandEntity = entity;
 				}
 				ImGui::Separator();

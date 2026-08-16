@@ -11,6 +11,7 @@
 #include "animation/AnimationManager.h"
 #include "scripting/ScriptManager.h"
 #include "rendering/ui/InspectorUI.h"
+#include "assets/Prefab.h"
 
 
 
@@ -162,6 +163,7 @@ namespace Engine::Components {
 							ASSET_CHK(Sound, Audio::SoundBuffer)
 							ASSET_CHK(Animation, Animation)
 							ASSET_CHK(Skeleton, Skeleton)
+							ASSET_CHK(Prefab, Prefab)
 							else if (obj.is<EntityHandle>())
 							{
 								auto handle = obj.as<EntityHandle>();
@@ -201,6 +203,7 @@ namespace Engine::Components {
 							ASSET_VEC_CHK(Sound, Audio::SoundBuffer)
 							ASSET_VEC_CHK(Animation, Animation)
 							ASSET_VEC_CHK(Skeleton, Skeleton)
+							ASSET_VEC_CHK(Prefab, Prefab)
 
 							break;
 						}
@@ -298,6 +301,12 @@ namespace Engine::Components {
 			}
 			else if (kv.second.is<SkeletonHandleList>()) {
 				cppVariables[key] = kv.second.as<SkeletonHandleList>();
+			}
+			else if (kv.second.is<PrefabHandle>()) {
+				cppVariables[key] = kv.second.as<PrefabHandle>();
+			}
+			else if (kv.second.is<PrefabHandleList>()) {
+				cppVariables[key] = kv.second.as<PrefabHandleList>();
 			}
 			else {
 				SPDLOG_WARN("TRYING TO LOAD INVALID VAR VALUE FROM LUA");

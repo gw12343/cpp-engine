@@ -20,6 +20,7 @@
 #include "impl/RmlUIComponent.h"
 #include "impl/GizmoComponent.h"
 #include "impl/Text3DComponent.h"
+#include "impl/PrefabInstanceComponent.h"
 
 #define COMPONENT_LIST                                                                                                                                                                                                                         \
 	X(Components::LuaScript, LuaScript, ICON_FA_SCROLL " Script")                                                                                                                                                                              \
@@ -35,6 +36,7 @@
 	X(Components::PlayerControllerComponent, PlayerControllerComponent, "Player Controller")                                                                                                                                                   \
 	X(Components::RmlUIComponent, RmlUIComponent, ICON_FA_WINDOW_MAXIMIZE " RmlUI")                                                                                                                                                            \
 	X(Components::GizmoComponent, GizmoComponent, ICON_FA_GLOBE " Gizmo")                                                                                                                                                                       \
-	X(Components::Text3DComponent, Text3DComponent, ICON_FA_FONT " Text 3D")
+	X(Components::Text3DComponent, Text3DComponent, ICON_FA_FONT " Text 3D")                                                                                                                                                                   \
+	X(Components::PrefabInstance, PrefabInstance, ICON_FA_CUBE " Prefab")
 
 #endif // CPP_ENGINE_ALLCOMPONENTS_H

@@ -34,6 +34,8 @@
 #include "assets/impl/BinarySceneLoader.h"
 #include "assets/impl/AnimationLoader.h"
 #include "assets/impl/SkeletonLoader.h"
+#include "assets/impl/PrefabLoader.h"
+#include "assets/Prefab.h"
 #include "animation/Skeleton.h"
 #include "components/impl/AnimationComponent.h"
 #include "components/impl/EntityMetadataComponent.h"
@@ -89,6 +91,7 @@ namespace Engine {
 		GetAssetManager().RegisterLoader<Material>(std::make_unique<MaterialLoader>());
 		GetAssetManager().RegisterLoader<Animation>(std::make_unique<AnimationLoader>());
 		GetAssetManager().RegisterLoader<Skeleton>(std::make_unique<SkeletonLoader>());
+		GetAssetManager().RegisterLoader<Prefab>(std::make_unique<PrefabLoader>());
 
 		// Initialize Modules
 		Get().script    = std::make_shared<ScriptManager>();
@@ -209,6 +212,7 @@ namespace Engine {
 		    {".ozz", [loadOzzByMeta](const std::string& p) { loadOzzByMeta(p); }},
 		    {".bin", [this](const std::string& p) { GetAssetManager().Load<Terrain::TerrainTile>(p); }},
 		    {".efk", [this](const std::string& p) { GetAssetManager().Load<Particle>(p); }},
+		    {".prefab", [this](const std::string& p) { GetAssetManager().Load<Prefab>(p); }},
 		};
 
 		auto loadFromAssetSubfolder = [&](const std::string& assetSubfolder) {

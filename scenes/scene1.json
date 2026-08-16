@@ -61,12 +61,12 @@
                     "playbackSpeed": 1.0,
                     "current": {
                         "clip": {
-                            "guid": ""
+                            "guid": "7ff3140d9873436465d8bb5eb079a474"
                         },
                         "time": 0.0,
                         "speed": 1.0,
                         "looping": true,
-                        "active": false
+                        "active": true
                     }
                 }
             },
@@ -94,6 +94,9 @@
             },
             "Text3DComponent": {
                 "nullopt": true
+            },
+            "PrefabInstance": {
+                "nullopt": true
             }
         },
         {
@@ -117,19 +120,26 @@
                     "scriptPath": "scripts/player_thirdperson.lua",
                     "variables": [
                         {
-                            "key": "WALK_ANIM",
+                            "key": "CLIMB_MANTLE_FORWARD",
                             "value": {
-                                "index": 21,
+                                "index": 0,
+                                "data": 0.550000011920929
+                            }
+                        },
+                        {
+                            "key": "SKELETON",
+                            "value": {
+                                "index": 23,
                                 "data": {
-                                    "guid": "143950bbcc17af70eb0da3ba15412923"
+                                    "guid": "67c4343cd65864997e096ed75fcbfa3f"
                                 }
                             }
                         },
                         {
-                            "key": "CLIMB_JUMP_PUSH",
+                            "key": "SHOOT_POWER",
                             "value": {
                                 "index": 0,
-                                "data": 7.0
+                                "data": 14.800000190734864
                             }
                         },
                         {
@@ -142,13 +152,6 @@
                             }
                         },
                         {
-                            "key": "JUMP_POWER",
-                            "value": {
-                                "index": 0,
-                                "data": 8.0
-                            }
-                        },
-                        {
                             "key": "CAMERA_MAX_DISTANCE",
                             "value": {
                                 "index": 0,
@@ -156,163 +159,17 @@
                             }
                         },
                         {
-                            "key": "CAMERA_MIN_DISTANCE",
-                            "value": {
-                                "index": 0,
-                                "data": 2.0
-                            }
-                        },
-                        {
-                            "key": "CLIMB_JUMP_UP",
-                            "value": {
-                                "index": 0,
-                                "data": 5.0
-                            }
-                        },
-                        {
-                            "key": "CLIMB_MANTLE_DURATION",
-                            "value": {
-                                "index": 0,
-                                "data": 0.550000011920929
-                            }
-                        },
-                        {
-                            "key": "CLIMB_LOST_MAX",
+                            "key": "JUMP_POWER",
                             "value": {
                                 "index": 0,
                                 "data": 8.0
                             }
                         },
                         {
-                            "key": "victorySound",
-                            "value": {
-                                "index": 11,
-                                "data": {
-                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
-                                }
-                            }
-                        },
-                        {
-                            "key": "CLIMB_MANTLE_ARC",
+                            "key": "CAMERA_MIN_DISTANCE",
                             "value": {
                                 "index": 0,
-                                "data": 0.20000000298023225
-                            }
-                        },
-                        {
-                            "key": "TURN_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 381.6000061035156
-                            }
-                        },
-                        {
-                            "key": "RUN_ANIM",
-                            "value": {
-                                "index": 21,
-                                "data": {
-                                    "guid": "790de0f9242134e98fbd1827fed1799c"
-                                }
-                            }
-                        },
-                        {
-                            "key": "CLIMB_ATTACH_DIST",
-                            "value": {
-                                "index": 0,
-                                "data": 0.949999988079071
-                            }
-                        },
-                        {
-                            "key": "CAMERA_ZOOM_OUT_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 4.0
-                            }
-                        },
-                        {
-                            "key": "CAMERA_COLLISION_MIN_DIST",
-                            "value": {
-                                "index": 0,
-                                "data": 0.25
-                            }
-                        },
-                        {
-                            "key": "CLIMB_TOP_PROBE",
-                            "value": {
-                                "index": 0,
-                                "data": 0.8500000238418579
-                            }
-                        },
-                        {
-                            "key": "shootSound",
-                            "value": {
-                                "index": 0,
-                                "data": 14.800000190734864
-                            }
-                        },
-                        {
-                            "key": "CLIMB_MAX_NORMAL_Y",
-                            "value": {
-                                "index": 0,
-                                "data": 0.550000011920929
-                            }
-                        },
-                        {
-                            "key": "SHOOT_HEAD_HEIGHT",
-                            "value": {
-                                "index": 0,
-                                "data": 1.100000023841858
-                            }
-                        },
-                        {
-                            "key": "CAMERA_PITCH_MAX",
-                            "value": {
-                                "index": 0,
-                                "data": 60.0
-                            }
-                        },
-                        {
-                            "key": "WALK_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 3.5999999046325685
-                            }
-                        },
-                        {
-                            "key": "MOUSE_SENSITIVITY",
-                            "value": {
-                                "index": 0,
-                                "data": 0.10000000149011612
-                            }
-                        },
-                        {
-                            "key": "BULLET_PARENT",
-                            "value": {
-                                "index": 12,
-                                "data": {
-                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
-                                }
-                            }
-                        },
-                        {
-                            "key": "RUN_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 7.199999809265137
-                            }
-                        },
-                        {
-                            "key": "CLIMB_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 3.5
-                            }
-                        },
-                        {
-                            "key": "CAMERA_DISTANCE",
-                            "value": {
-                                "index": 0,
-                                "data": 5.0
+                                "data": 2.0
                             }
                         },
                         {
@@ -339,65 +196,33 @@
                             }
                         },
                         {
-                            "key": "CAMERA_COLLISION_OFFSET",
+                            "key": "CAMERA_DISTANCE",
                             "value": {
                                 "index": 0,
-                                "data": 0.20000000298023225
+                                "data": 5.0
                             }
                         },
                         {
-                            "key": "CLIMB_DOWN_ANIM",
+                            "key": "CLIMB_JUMP_PUSH",
+                            "value": {
+                                "index": 0,
+                                "data": 7.0
+                            }
+                        },
+                        {
+                            "key": "WALK_ANIM",
                             "value": {
                                 "index": 21,
                                 "data": {
-                                    "guid": "fe2216824d7ec409241a153af705f2af"
+                                    "guid": "143950bbcc17af70eb0da3ba15412923"
                                 }
                             }
                         },
                         {
-                            "key": "SHOOT_POWER",
+                            "key": "CAMERA_PITCH_MAX",
                             "value": {
                                 "index": 0,
-                                "data": 14.800000190734864
-                            }
-                        },
-                        {
-                            "key": "SKELETON",
-                            "value": {
-                                "index": 23,
-                                "data": {
-                                    "guid": "67c4343cd65864997e096ed75fcbfa3f"
-                                }
-                            }
-                        },
-                        {
-                            "key": "CLIMB_MANTLE_FORWARD",
-                            "value": {
-                                "index": 0,
-                                "data": 0.550000011920929
-                            }
-                        },
-                        {
-                            "key": "CLIMB_UP_ANIM",
-                            "value": {
-                                "index": 21,
-                                "data": {
-                                    "guid": "01dc5c917229fcccef27486eb6b97c02"
-                                }
-                            }
-                        },
-                        {
-                            "key": "ANIM_FADE",
-                            "value": {
-                                "index": 0,
-                                "data": 0.20000000298023225
-                            }
-                        },
-                        {
-                            "key": "SHOOT_FORWARD_OFFSET",
-                            "value": {
-                                "index": 0,
-                                "data": 1.0
+                                "data": 60.0
                             }
                         },
                         {
@@ -415,24 +240,40 @@
                             }
                         },
                         {
-                            "key": "ZOOM_SENSITIVITY",
+                            "key": "SHOOT_HEAD_HEIGHT",
                             "value": {
                                 "index": 0,
-                                "data": 0.5
+                                "data": 1.100000023841858
                             }
                         },
                         {
-                            "key": "CLIMB_MANTLE_DOWN",
+                            "key": "shootSound",
                             "value": {
                                 "index": 0,
-                                "data": 1.600000023841858
+                                "data": 14.800000190734864
                             }
                         },
                         {
-                            "key": "CLIMB_MIN_NORMAL_Y",
+                            "key": "CLIMB_MAX_NORMAL_Y",
                             "value": {
                                 "index": 0,
-                                "data": -0.25
+                                "data": 0.550000011920929
+                            }
+                        },
+                        {
+                            "key": "CLIMB_STICK_SKIN",
+                            "value": {
+                                "index": 0,
+                                "data": 0.05999999865889549
+                            }
+                        },
+                        {
+                            "key": "victorySound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                }
                             }
                         },
                         {
@@ -445,6 +286,71 @@
                             }
                         },
                         {
+                            "key": "CLIMB_MANTLE_DOWN",
+                            "value": {
+                                "index": 0,
+                                "data": 1.600000023841858
+                            }
+                        },
+                        {
+                            "key": "BULLET_PARENT",
+                            "value": {
+                                "index": 12,
+                                "data": {
+                                    "guid": "30d5b8aa2b9d926bcd2f4f0a0cdaac0a"
+                                }
+                            }
+                        },
+                        {
+                            "key": "CLIMB_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 3.5
+                            }
+                        },
+                        {
+                            "key": "RUN_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 7.199999809265137
+                            }
+                        },
+                        {
+                            "key": "MOUSE_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.10000000149011612
+                            }
+                        },
+                        {
+                            "key": "WALK_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 3.5999999046325685
+                            }
+                        },
+                        {
+                            "key": "ANIM_FADE",
+                            "value": {
+                                "index": 0,
+                                "data": 0.20000000298023225
+                            }
+                        },
+                        {
+                            "key": "CLIMB_TOP_PROBE",
+                            "value": {
+                                "index": 0,
+                                "data": 0.8500000238418579
+                            }
+                        },
+                        {
+                            "key": "SHOOT_FORWARD_OFFSET",
+                            "value": {
+                                "index": 0,
+                                "data": 1.0
+                            }
+                        },
+                        {
                             "key": "FALL_IDLE_ANIM",
                             "value": {
                                 "index": 21,
@@ -454,10 +360,59 @@
                             }
                         },
                         {
+                            "key": "CAMERA_COLLISION_OFFSET",
+                            "value": {
+                                "index": 0,
+                                "data": 0.20000000298023225
+                            }
+                        },
+                        {
                             "key": "CLIMB_MANTLE_MIN_NY",
                             "value": {
                                 "index": 0,
                                 "data": 0.6499999761581421
+                            }
+                        },
+                        {
+                            "key": "CLIMB_MIN_NORMAL_Y",
+                            "value": {
+                                "index": 0,
+                                "data": -0.25
+                            }
+                        },
+                        {
+                            "key": "CLIMB_MANTLE_ARC",
+                            "value": {
+                                "index": 0,
+                                "data": 0.20000000298023225
+                            }
+                        },
+                        {
+                            "key": "CLIMB_MANTLE_DURATION",
+                            "value": {
+                                "index": 0,
+                                "data": 0.550000011920929
+                            }
+                        },
+                        {
+                            "key": "CLIMB_JUMP_UP",
+                            "value": {
+                                "index": 0,
+                                "data": 5.0
+                            }
+                        },
+                        {
+                            "key": "TURN_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 381.6000061035156
+                            }
+                        },
+                        {
+                            "key": "CLIMB_LOST_MAX",
+                            "value": {
+                                "index": 0,
+                                "data": 8.0
                             }
                         },
                         {
@@ -475,10 +430,58 @@
                             }
                         },
                         {
-                            "key": "CLIMB_STICK_SKIN",
+                            "key": "RUN_ANIM",
+                            "value": {
+                                "index": 21,
+                                "data": {
+                                    "guid": "790de0f9242134e98fbd1827fed1799c"
+                                }
+                            }
+                        },
+                        {
+                            "key": "CLIMB_UP_ANIM",
+                            "value": {
+                                "index": 21,
+                                "data": {
+                                    "guid": "01dc5c917229fcccef27486eb6b97c02"
+                                }
+                            }
+                        },
+                        {
+                            "key": "ZOOM_SENSITIVITY",
                             "value": {
                                 "index": 0,
-                                "data": 0.05999999865889549
+                                "data": 0.5
+                            }
+                        },
+                        {
+                            "key": "CLIMB_DOWN_ANIM",
+                            "value": {
+                                "index": 21,
+                                "data": {
+                                    "guid": "fe2216824d7ec409241a153af705f2af"
+                                }
+                            }
+                        },
+                        {
+                            "key": "CAMERA_ZOOM_OUT_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 4.0
+                            }
+                        },
+                        {
+                            "key": "CAMERA_COLLISION_MIN_DIST",
+                            "value": {
+                                "index": 0,
+                                "data": 0.25
+                            }
+                        },
+                        {
+                            "key": "CLIMB_ATTACH_DIST",
+                            "value": {
+                                "index": 0,
+                                "data": 0.949999988079071
                             }
                         }
                     ]
@@ -555,6 +558,9 @@
             },
             "Text3DComponent": {
                 "nullopt": true
+            },
+            "PrefabInstance": {
+                "nullopt": true
             }
         },
         {
@@ -609,6 +615,132 @@
             },
             "Text3DComponent": {
                 "nullopt": true
+            },
+            "PrefabInstance": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "PairA",
+                "tag": "",
+                "active": true,
+                "guid": "3754f8147ebea18490f6c6c1354da5c9",
+                "parentEntity": {
+                    "guid": "4b010650a2fedb1f6cae3702be7a6d15"
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": false,
+                "data": {
+                    "scriptPath": "scripts/prefab_pair.lua",
+                    "variables": [
+                        {
+                            "key": "other",
+                            "value": {
+                                "index": 12,
+                                "data": {
+                                    "guid": "a001fa274707f669281d0470feb2a43e"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": -1.2000000476837159,
+                        "y": 1.5,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 0.800000011920929,
+                        "y": 0.800000011920929,
+                        "z": 0.800000011920929
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": false,
+                    "model": {
+                        "guid": "e319e2b8747bee49f54e67e706d42f67"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": ""
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            },
+            "Text3DComponent": {
+                "nullopt": false,
+                "data": {
+                    "text": "PairA",
+                    "fontPath": "resources/fonts/Roboto-Regular.ttf",
+                    "size": 0.18000000715255738,
+                    "atlasPixelHeight": 64,
+                    "color": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0,
+                        "w": 1.0
+                    },
+                    "billboard": true,
+                    "billboardYLock": false,
+                    "alignment": 1,
+                    "letterSpacing": 0.0,
+                    "outlineWidth": 0.07999999821186066,
+                    "outlineColor": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                }
+            },
+            "PrefabInstance": {
+                "nullopt": true
             }
         },
         {
@@ -623,6 +755,15 @@
                 "children": [
                     {
                         "guid": "79f9411633681be1a4403b5f95e31371"
+                    },
+                    {
+                        "guid": "65fa175f9febf5941369714af6022d6e"
+                    },
+                    {
+                        "guid": "e86e596f94bc4482d6c95183a7f8db46"
+                    },
+                    {
+                        "guid": "8ff172d61d1f5b9da7b394d268e4ec4a"
                     }
                 ]
             },
@@ -684,6 +825,9 @@
                 "nullopt": true
             },
             "Text3DComponent": {
+                "nullopt": true
+            },
+            "PrefabInstance": {
                 "nullopt": true
             }
         },
@@ -19372,6 +19516,91 @@
             },
             "Text3DComponent": {
                 "nullopt": true
+            },
+            "PrefabInstance": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "PrefabPair",
+                "tag": "",
+                "active": true,
+                "guid": "4b010650a2fedb1f6cae3702be7a6d15",
+                "parentEntity": {
+                    "guid": ""
+                },
+                "children": [
+                    {
+                        "guid": "3754f8147ebea18490f6c6c1354da5c9"
+                    },
+                    {
+                        "guid": "a001fa274707f669281d0470feb2a43e"
+                    }
+                ]
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": true
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            },
+            "Text3DComponent": {
+                "nullopt": true
+            },
+            "PrefabInstance": {
+                "nullopt": true
             }
         },
         {
@@ -19381,7 +19610,7 @@
                 "active": true,
                 "guid": "65fa175f9febf5941369714af6022d6e",
                 "parentEntity": {
-                    "guid": "77b9ef246028ea5757c8bd10a7a21f9b"
+                    "guid": "3d72e61fdb662a2b9e719652cfcee7d3"
                 },
                 "children": []
             },
@@ -19473,6 +19702,9 @@
             },
             "Text3DComponent": {
                 "nullopt": true
+            },
+            "PrefabInstance": {
+                "nullopt": true
             }
         },
         {
@@ -19482,7 +19714,7 @@
                 "active": true,
                 "guid": "68fc2cdf7be87576e72a5ffd492bc8f3",
                 "parentEntity": {
-                    "guid": ""
+                    "guid": "e86e596f94bc4482d6c95183a7f8db46"
                 },
                 "children": []
             },
@@ -19496,9 +19728,9 @@
                 "nullopt": false,
                 "data": {
                     "position": {
-                        "x": 16.373958587646486,
-                        "y": 15.3284912109375,
-                        "z": -23.955463409423829
+                        "x": 0.32747918367385867,
+                        "y": 0.3414245843887329,
+                        "z": 0.5445384979248047
                     },
                     "rotation": {
                         "x": 0.0,
@@ -19507,8 +19739,8 @@
                         "w": 1.0
                     },
                     "scale": {
-                        "x": 1.0,
-                        "y": 1.0,
+                        "x": 0.020000001415610315,
+                        "y": 0.05000000074505806,
                         "z": 1.0
                     }
                 }
@@ -19567,81 +19799,8 @@
                         "z": 0.0
                     }
                 }
-            }
-        },
-        {
-            "EntityMetadata": {
-                "name": "Map",
-                "tag": "",
-                "active": true,
-                "guid": "77b9ef246028ea5757c8bd10a7a21f9b",
-                "parentEntity": {
-                    "guid": ""
-                },
-                "children": [
-                    {
-                        "guid": "65fa175f9febf5941369714af6022d6e"
-                    }
-                ]
             },
-            "LuaScript": {
-                "nullopt": true
-            },
-            "ShadowCaster": {
-                "nullopt": true
-            },
-            "Transform": {
-                "nullopt": false,
-                "data": {
-                    "position": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
-                    },
-                    "rotation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0,
-                        "w": 1.0
-                    },
-                    "scale": {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
-                    }
-                }
-            },
-            "TerrainRenderer": {
-                "nullopt": true
-            },
-            "ModelRenderer": {
-                "nullopt": true
-            },
-            "RigidBodyComponent": {
-                "nullopt": true
-            },
-            "AudioSource": {
-                "nullopt": true
-            },
-            "AnimationComponent": {
-                "nullopt": true
-            },
-            "SkinnedMeshComponent": {
-                "nullopt": true
-            },
-            "ParticleSystem": {
-                "nullopt": true
-            },
-            "PlayerControllerComponent": {
-                "nullopt": true
-            },
-            "RmlUIComponent": {
-                "nullopt": true
-            },
-            "GizmoComponent": {
-                "nullopt": true
-            },
-            "Text3DComponent": {
+            "PrefabInstance": {
                 "nullopt": true
             }
         },
@@ -19724,6 +19883,9 @@
                 "nullopt": true
             },
             "Text3DComponent": {
+                "nullopt": true
+            },
+            "PrefabInstance": {
                 "nullopt": true
             }
         },
@@ -19827,6 +19989,9 @@
             },
             "Text3DComponent": {
                 "nullopt": true
+            },
+            "PrefabInstance": {
+                "nullopt": true
             }
         },
         {
@@ -19896,6 +20061,9 @@
                 "nullopt": true
             },
             "Text3DComponent": {
+                "nullopt": true
+            },
+            "PrefabInstance": {
                 "nullopt": true
             }
         },
@@ -19999,16 +20167,19 @@
             },
             "Text3DComponent": {
                 "nullopt": true
+            },
+            "PrefabInstance": {
+                "nullopt": true
             }
         },
         {
             "EntityMetadata": {
-                "name": "Copy of Floor",
+                "name": "LeftWall",
                 "tag": "",
                 "active": true,
                 "guid": "8ff172d61d1f5b9da7b394d268e4ec4a",
                 "parentEntity": {
-                    "guid": ""
+                    "guid": "3d72e61fdb662a2b9e719652cfcee7d3"
                 },
                 "children": []
             },
@@ -20027,7 +20198,7 @@
                         "z": 0.0
                     },
                     "rotation": {
-                        "x": 0.00017205849871970713,
+                        "x": 0.00017205855692736804,
                         "y": 0.0,
                         "z": 0.0,
                         "w": 1.0
@@ -20100,6 +20271,342 @@
             },
             "Text3DComponent": {
                 "nullopt": true
+            },
+            "PrefabInstance": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "PairA",
+                "tag": "",
+                "active": true,
+                "guid": "9351e88b22331cba7032393a217a53d2",
+                "parentEntity": {
+                    "guid": "a6fdf6c7467356554be9a97baaa71b1e"
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": false,
+                "data": {
+                    "scriptPath": "scripts/prefab_pair.lua",
+                    "variables": [
+                        {
+                            "key": "other",
+                            "value": {
+                                "index": 12,
+                                "data": {
+                                    "guid": "fbfeea9dea7c719f075876e9eadf5247"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": -1.2000000476837159,
+                        "y": 1.5,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 0.800000011920929,
+                        "y": 0.800000011920929,
+                        "z": 0.800000011920929
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": false,
+                    "model": {
+                        "guid": "e319e2b8747bee49f54e67e706d42f67"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": ""
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            },
+            "Text3DComponent": {
+                "nullopt": false,
+                "data": {
+                    "text": "PairA",
+                    "fontPath": "resources/fonts/Roboto-Regular.ttf",
+                    "size": 0.18000000715255738,
+                    "atlasPixelHeight": 64,
+                    "color": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0,
+                        "w": 1.0
+                    },
+                    "billboard": true,
+                    "billboardYLock": false,
+                    "alignment": 1,
+                    "letterSpacing": 0.0,
+                    "outlineWidth": 0.07999999821186066,
+                    "outlineColor": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                }
+            },
+            "PrefabInstance": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "PairB",
+                "tag": "",
+                "active": true,
+                "guid": "a001fa274707f669281d0470feb2a43e",
+                "parentEntity": {
+                    "guid": "4b010650a2fedb1f6cae3702be7a6d15"
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": false,
+                "data": {
+                    "scriptPath": "scripts/prefab_pair.lua",
+                    "variables": [
+                        {
+                            "key": "other",
+                            "value": {
+                                "index": 12,
+                                "data": {
+                                    "guid": "3754f8147ebea18490f6c6c1354da5c9"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 1.2000000476837159,
+                        "y": 1.5,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 0.800000011920929,
+                        "y": 0.800000011920929,
+                        "z": 0.800000011920929
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": false,
+                    "model": {
+                        "guid": "e319e2b8747bee49f54e67e706d42f67"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": ""
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            },
+            "Text3DComponent": {
+                "nullopt": false,
+                "data": {
+                    "text": "PairB",
+                    "fontPath": "resources/fonts/Roboto-Regular.ttf",
+                    "size": 0.18000000715255738,
+                    "atlasPixelHeight": 64,
+                    "color": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0,
+                        "w": 1.0
+                    },
+                    "billboard": true,
+                    "billboardYLock": false,
+                    "alignment": 1,
+                    "letterSpacing": 0.0,
+                    "outlineWidth": 0.07999999821186066,
+                    "outlineColor": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                }
+            },
+            "PrefabInstance": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "PrefabPair",
+                "tag": "",
+                "active": true,
+                "guid": "a6fdf6c7467356554be9a97baaa71b1e",
+                "parentEntity": {
+                    "guid": ""
+                },
+                "children": [
+                    {
+                        "guid": "9351e88b22331cba7032393a217a53d2"
+                    },
+                    {
+                        "guid": "fbfeea9dea7c719f075876e9eadf5247"
+                    }
+                ]
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 0.0,
+                        "y": 1.338358998298645,
+                        "z": -4.182632923126221
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": true
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            },
+            "Text3DComponent": {
+                "nullopt": true
+            },
+            "PrefabInstance": {
+                "nullopt": false,
+                "data": {
+                    "prefab": {
+                        "guid": "73f1be5f8cfa9c63327c632af3d1d79d"
+                    }
+                }
             }
         },
         {
@@ -20202,6 +20709,105 @@
             },
             "Text3DComponent": {
                 "nullopt": true
+            },
+            "PrefabInstance": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "PrefabSpawner",
+                "tag": "",
+                "active": true,
+                "guid": "bb52f7e3919773ba4a68a380f06ec0d7",
+                "parentEntity": {
+                    "guid": ""
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": false,
+                "data": {
+                    "scriptPath": "scripts/prefab_spawner.lua",
+                    "variables": [
+                        {
+                            "key": "spacing",
+                            "value": {
+                                "index": 0,
+                                "data": 4.0
+                            }
+                        },
+                        {
+                            "key": "pairPrefab",
+                            "value": {
+                                "index": 25,
+                                "data": {
+                                    "guid": ""
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": true
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            },
+            "Text3DComponent": {
+                "nullopt": true
+            },
+            "PrefabInstance": {
+                "nullopt": true
             }
         },
         {
@@ -20259,6 +20865,9 @@
                 "nullopt": true
             },
             "Text3DComponent": {
+                "nullopt": true
+            },
+            "PrefabInstance": {
                 "nullopt": true
             }
         },
@@ -20322,18 +20931,25 @@
             },
             "Text3DComponent": {
                 "nullopt": true
+            },
+            "PrefabInstance": {
+                "nullopt": true
             }
         },
         {
             "EntityMetadata": {
-                "name": "Copy of Floor",
+                "name": "RightWall",
                 "tag": "",
                 "active": true,
                 "guid": "e86e596f94bc4482d6c95183a7f8db46",
                 "parentEntity": {
-                    "guid": ""
+                    "guid": "3d72e61fdb662a2b9e719652cfcee7d3"
                 },
-                "children": []
+                "children": [
+                    {
+                        "guid": "68fc2cdf7be87576e72a5ffd492bc8f3"
+                    }
+                ]
             },
             "LuaScript": {
                 "nullopt": true
@@ -20422,6 +21038,132 @@
                 "nullopt": true
             },
             "Text3DComponent": {
+                "nullopt": true
+            },
+            "PrefabInstance": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "PairB",
+                "tag": "",
+                "active": true,
+                "guid": "fbfeea9dea7c719f075876e9eadf5247",
+                "parentEntity": {
+                    "guid": "a6fdf6c7467356554be9a97baaa71b1e"
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": false,
+                "data": {
+                    "scriptPath": "scripts/prefab_pair.lua",
+                    "variables": [
+                        {
+                            "key": "other",
+                            "value": {
+                                "index": 12,
+                                "data": {
+                                    "guid": "9351e88b22331cba7032393a217a53d2"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "ShadowCaster": {
+                "nullopt": true
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 1.2000000476837159,
+                        "y": 1.5,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 0.800000011920929,
+                        "y": 0.800000011920929,
+                        "z": 0.800000011920929
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": false,
+                "data": {
+                    "visible": false,
+                    "model": {
+                        "guid": "e319e2b8747bee49f54e67e706d42f67"
+                    },
+                    "backfaceCulling": true,
+                    "materialOverrides": [
+                        {
+                            "guid": ""
+                        }
+                    ]
+                }
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            },
+            "Text3DComponent": {
+                "nullopt": false,
+                "data": {
+                    "text": "PairB",
+                    "fontPath": "resources/fonts/Roboto-Regular.ttf",
+                    "size": 0.18000000715255738,
+                    "atlasPixelHeight": 64,
+                    "color": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0,
+                        "w": 1.0
+                    },
+                    "billboard": true,
+                    "billboardYLock": false,
+                    "alignment": 1,
+                    "letterSpacing": 0.0,
+                    "outlineWidth": 0.07999999821186066,
+                    "outlineColor": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                }
+            },
+            "PrefabInstance": {
                 "nullopt": true
             }
         }

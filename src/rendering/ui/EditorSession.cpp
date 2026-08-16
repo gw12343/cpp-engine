@@ -5,6 +5,8 @@
 #include "windows/SceneViewWindow.h"
 
 #include "assets/impl/JSONSceneLoader.h"
+#include "assets/impl/PrefabLoader.h"
+#include "assets/Prefab.h"
 #include "components/AllComponents.h"
 #include "components/impl/EntityMetadataComponent.h"
 #include "core/EngineData.h"
@@ -49,6 +51,42 @@ namespace Engine::UI {
 			const bool hasJson = path.size() >= 5 && path.compare(path.size() - 5, 5, ".json") == 0;
 			if (!hasJson) {
 				path += ".json";
+			}
+		}
+		return path;
+	}
+
+	static std::string PrefabDialogFolder()
+	{
+		std::error_code ec;
+		fs::path        dir = fs::absolute("assets/prefabs", ec);
+		if (ec) {
+			dir = fs::current_path() / "assets" / "prefabs";
+		}
+		fs::create_directories(dir, ec);
+		return dir.lexically_normal().make_preferred().string();
+	}
+
+	static std::string PickPrefabFile(bool save)
+	{
+		const std::string defaultDir = PrefabDialogFolder();
+		nfdchar_t*        outPath    = nullptr;
+		nfdresult_t       result     = save ? NFD_SaveDialog("prefab", defaultDir.c_str(), &outPath)
+		                                    : NFD_OpenDialog("prefab", defaultDir.c_str(), &outPath);
+		if (result == NFD_CANCEL) {
+			return {};
+		}
+		if (result != NFD_OKAY || !outPath) {
+			const char* err = NFD_GetError();
+			GetDefaultLogger()->error("Prefab file dialog failed: {}", err ? err : "unknown NFD error");
+			return {};
+		}
+		std::string path(outPath);
+		free(outPath);
+		if (save) {
+			const bool hasExt = path.size() >= 7 && path.compare(path.size() - 7, 7, ".prefab") == 0;
+			if (!hasExt) {
+				path += ".prefab";
 			}
 		}
 		return path;
@@ -172,6 +210,46 @@ namespace Engine::UI {
 		}
 		scenePath = path;
 		SaveScene();
+	}
+
+	bool EditorSession::SaveEntityAsPrefab(Entity root)
+	{
+		if (!root || !root.IsValid()) {
+			return false;
+		}
+		std::string path = PickPrefabFile(true);
+		if (path.empty()) {
+			return false;
+		}
+
+		Prefab prefab;
+		if (!Prefab::CaptureFromEntity(root, prefab)) {
+			GetDefaultLogger()->error("Failed to capture prefab from '{}'", root.GetName());
+			return false;
+		}
+		if (prefab.m_name.empty()) {
+			prefab.m_name = fs::path(path).stem().string();
+		}
+		if (!PrefabLoader::SaveToFile(prefab, path)) {
+			return false;
+		}
+		GetAssetManager().Load<Prefab>(path);
+		GetDefaultLogger()->info("Saved prefab: {}", path);
+		return true;
+	}
+
+	Entity EditorSession::InstantiatePrefabDialog(const EntityHandle& parent)
+	{
+		std::string path = PickPrefabFile(false);
+		if (path.empty()) {
+			return {};
+		}
+		PrefabHandle handle = GetAssetManager().Load<Prefab>(path);
+		Entity       root   = InstantiatePrefab(handle, parent);
+		if (root && root.IsValid()) {
+			MarkDirty();
+		}
+		return root;
 	}
 
 	void EditorSession::Play()
