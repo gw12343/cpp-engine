@@ -13,24 +13,27 @@
 #include "misc/cpp/imgui_stdlib.h"
 #include "assets/impl/MaterialLoader.h"
 #include "rendering/Renderer.h"
+#include "rendering/ui/UIManager.h"
+#include <algorithm>
 
 namespace Engine {
 
 	void MaterialEditor::RenderMaterialEditor(MaterialHandle matRef)
 	{
-		ImGui::Begin(ICON_FA_PALETTE " Material Editor");
+		const char* title = m_dirty ? ICON_FA_PALETTE " Material Editor*" : ICON_FA_PALETTE " Material Editor";
+		ImGui::Begin(title);
 
 		auto loader = ((MaterialLoader*) (GetAssetManager().GetStorage<Material>().loader.get()));
 
 		if (!matRef.IsValid()) {
-			ImGui::Text("Invalid material selected.");
+			ImGui::Text("No material selected. Click a .material in Assets.");
 		}
 		else {
 			Material* material = GetAssetManager().Get(matRef);
 
 			// Two-column layout: properties on left, preview on right
-			float previewSize = 512.0f;
 			float availWidth = ImGui::GetContentRegionAvail().x;
+			float previewSize = std::clamp(availWidth * 0.4f, 180.0f, 420.0f);
 			float propertiesWidth = availWidth - previewSize - 20.0f; // 20px spacing
 
 			// Left column: Material properties
@@ -41,15 +44,16 @@ namespace Engine {
 				std::string name = material->GetName();
 				if (LeftLabelInputText("Name", &name)) {
 					material->SetName(name);
+					m_dirty = true;
 				}
 			}
 
 			ImGui::Separator();
 
-			LeftLabelAssetTexture("Diffuse Texture", &material->m_diffuseTexture);
-			LeftLabelAssetTexture("Normal Texture", &material->m_normalTexture);
-			LeftLabelAssetTexture("Specular Texture", &material->m_specularTexture);
-			LeftLabelAssetTexture("Height Texture", &material->m_heightTexture);
+			m_dirty |= LeftLabelAssetTexture("Diffuse Texture", &material->m_diffuseTexture);
+			m_dirty |= LeftLabelAssetTexture("Normal Texture", &material->m_normalTexture);
+			m_dirty |= LeftLabelAssetTexture("Specular Texture", &material->m_specularTexture);
+			m_dirty |= LeftLabelAssetTexture("Height Texture", &material->m_heightTexture);
 
 			ImGui::Separator();
 
@@ -59,23 +63,25 @@ namespace Engine {
 			glm::vec3 ambient  = material->GetAmbientColor();
 			glm::vec3 emissive = material->GetEmissiveColor();
 
-			if (LeftLabelColorEdit3("Diffuse Color", &diffuse.x)) material->SetDiffuseColor(diffuse);
-			if (LeftLabelColorEdit3("Specular Color", &specular.x)) material->SetSpecularColor(specular);
-			if (LeftLabelColorEdit3("Ambient Color", &ambient.x)) material->SetAmbientColor(ambient);
-			if (LeftLabelColorEdit3("Emissive Color", &emissive.x)) material->SetEmissiveColor(emissive);
+			if (LeftLabelColorEdit3("Diffuse Color", &diffuse.x)) { material->SetDiffuseColor(diffuse); m_dirty = true; }
+			if (LeftLabelColorEdit3("Specular Color", &specular.x)) { material->SetSpecularColor(specular); m_dirty = true; }
+			if (LeftLabelColorEdit3("Ambient Color", &ambient.x)) { material->SetAmbientColor(ambient); m_dirty = true; }
+			if (LeftLabelColorEdit3("Emissive Color", &emissive.x)) { material->SetEmissiveColor(emissive); m_dirty = true; }
 
 			glm::vec2 scale = material->GetTextureScale();
-			if (LeftLabelDragFloat2("Texture Scale", &scale.x, 0.05, 0.0)) material->SetTextureScale(scale);
+			if (LeftLabelDragFloat2("Texture Scale", &scale.x, 0.05, 0.0)) { material->SetTextureScale(scale); m_dirty = true; }
 
 
 			float shininess = material->GetShininess();
 			if (LeftLabelSliderFloat("Shininess", &shininess, 0.0f, 512.0f)) {
 				material->SetShininess(shininess);
+				m_dirty = true;
 			}
 
 			ImGui::Spacing();
-			if (ImGui::Button("Save")) {
+			if (ImGui::Button(m_dirty ? "Save*" : "Save")) {
 				loader->SaveMaterial(*material, material->m_path);
+				m_dirty = false;
 			}
 
 			ImGui::EndChild();
@@ -85,26 +91,30 @@ namespace Engine {
 			RenderPreviewPanel(material);
 		}
 
-		if (ImGui::Button("Create New Material+")) {
-			static const char chars[] = "0123456789"
-			                            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-			                            "abcdefghijklmnopqrstuvwxyz";
-
-			static thread_local std::mt19937       rng{std::random_device{}()};
-			static std::uniform_int_distribution<> dist(0, sizeof(chars) - 2);
-
-			std::string result = "mat";
-			for (int i = 0; i < 5; i++)
-				result += chars[dist(rng)];
-
-			Material newMat;
-
-			newMat.m_path = "resources/materials/" + result + ".material";
-			newMat.SetName(result);
-
-
-			loader->SaveMaterial(newMat, newMat.m_path);
-			GetAssetManager().Load<Material>(newMat.m_path);
+		if (ImGui::Button("Create New Material")) {
+			m_promptNew = true;
+			std::snprintf(m_newName, sizeof(m_newName), "NewMaterial");
+		}
+		if (m_promptNew) {
+			ImGui::OpenPopup("New Material");
+			m_promptNew = false;
+		}
+		if (ImGui::BeginPopupModal("New Material", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+			ImGui::InputText("Name", m_newName, sizeof(m_newName));
+			if (ImGui::Button("Create") || ImGui::IsKeyPressed(ImGuiKey_Enter)) {
+				std::string result = m_newName;
+				if (result.empty()) result = "NewMaterial";
+				Material newMat;
+				newMat.m_path = "resources/materials/" + result + ".material";
+				newMat.SetName(result);
+				loader->SaveMaterial(newMat, newMat.m_path);
+				GetUI().m_selectedMaterial = GetAssetManager().Load<Material>(newMat.m_path);
+				m_dirty = false;
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Cancel")) ImGui::CloseCurrentPopup();
+			ImGui::EndPopup();
 		}
 
 		ImGui::End();

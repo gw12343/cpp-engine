@@ -10,6 +10,7 @@
 #include "rendering/particles/ParticleManager.h"
 #include "animation/AnimationManager.h"
 #include "scripting/ScriptManager.h"
+#include "rendering/ui/InspectorUI.h"
 
 
 
@@ -82,6 +83,12 @@ namespace Engine::Components {
 	void LuaScript::RenderInspector(Engine::Entity& entity)
 	{
 		if (LeftLabelInputText("Script Path", &scriptPath)) {
+			GetScriptManager().log->info("Reloading script.");
+			OnRemoved(entity);
+			LoadScript(entity, scriptPath);
+		}
+		ImGui::SameLine();
+		if (BrowsePathButton("script", "lua", "scripts", &scriptPath)) {
 			GetScriptManager().log->info("Reloading script.");
 			OnRemoved(entity);
 			LoadScript(entity, scriptPath);

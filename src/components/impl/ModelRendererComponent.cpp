@@ -105,11 +105,17 @@ namespace Engine::Components {
 
 
 		if (model.IsValid()) {
-			ImGui::Text("Model: Loaded");
-			// TODO add more model info here
+			Rendering::Model* m = GetAssetManager().Get(model);
+			if (m) {
+				ImGui::Text("Model: %s", m->m_name.c_str());
+				ImGui::Text("Meshes: %d", (int) m->GetMeshes().size());
+			}
+			else {
+				ImGui::TextDisabled("Model handle is stale");
+			}
 		}
 		else {
-			ImGui::Text("Model: Invalid");
+			ImGui::TextDisabled("No model assigned — drag one from Assets");
 		}
 	}
 	void ModelRenderer::SetMaterial(MaterialHandle mat)

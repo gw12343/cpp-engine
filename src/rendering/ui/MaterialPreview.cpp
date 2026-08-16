@@ -188,6 +188,9 @@ namespace Engine {
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		glViewport(0, 0, width, height);
 		glEnable(GL_DEPTH_TEST);
+		GLfloat prevClear[4];
+		glGetFloatv(GL_COLOR_CLEAR_VALUE, prevClear);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		shader.Bind();
@@ -244,6 +247,7 @@ namespace Engine {
 		glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
+		glClearColor(prevClear[0], prevClear[1], prevClear[2], prevClear[3]);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -257,6 +261,9 @@ void MaterialPreview::Render(Material* material, Shader& shader, float yaw, floa
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glViewport(0, 0, width, height);
 	glEnable(GL_DEPTH_TEST);
+	GLfloat prevClear[4];
+	glGetFloatv(GL_COLOR_CLEAR_VALUE, prevClear);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	shader.Bind();
@@ -322,6 +329,7 @@ void MaterialPreview::Render(Material* material, Shader& shader, float yaw, floa
 	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 
+	glClearColor(prevClear[0], prevClear[1], prevClear[2], prevClear[3]);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 

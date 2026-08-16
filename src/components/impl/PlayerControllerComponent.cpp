@@ -27,11 +27,15 @@ namespace Engine::Components {
 	void PlayerControllerComponent::RenderInspector(Engine::Entity& entity)
 	{
 		auto pos = GetPosition();
-		ImGui::Text("Position: (%f, %f, %f)", pos.x, pos.y, pos.z);
+		ImGui::Text("Position: (%.2f, %.2f, %.2f)", pos.x, pos.y, pos.z);
+		ImGui::Text("On Ground: %s", IsOnGround() ? "yes" : "no");
 		ImGui::Text("Climbing: %s", IsClimbing() ? "yes" : "no");
+		ImGui::Text("Capsule: r=%.2f  halfH=%.2f", GetCapsuleRadius(), GetCapsuleHalfHeight());
 		if (mHasClimbSurface) {
 			ImGui::Text("Climb N: (%.2f, %.2f, %.2f)", mClimbNormal.x, mClimbNormal.y, mClimbNormal.z);
 		}
+		ImGui::TextDisabled("Move / slope settings live in PlayerSettings.h");
+		(void) entity;
 	}
 
 

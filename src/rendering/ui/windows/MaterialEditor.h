@@ -21,6 +21,9 @@ namespace Engine {
 		float m_previewYaw = 45.0f;   // Horizontal rotation angle
 		float m_previewPitch = 30.0f; // Vertical rotation angle
 		bool m_isDragging = false;
+		bool m_dirty = false;
+		bool m_promptNew = false;
+		char m_newName[64] = "NewMaterial";
 	};
 } // namespace Engine
 #endif // CPP_ENGINE_MATERIALEDITOR_H

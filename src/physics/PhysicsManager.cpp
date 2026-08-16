@@ -141,7 +141,7 @@ namespace Engine {
 		// Limit the number of collision steps to the maximum number of available jobs
 		cCollisionSteps = std::min(cCollisionSteps, maxJobs);
 		// Step the world
-		if (GetState() == PLAYING) {
+		if (IsSimulating()) {
 			// Update Character controller
 			{
 				ZoneScopedNC("Update Player Controller", 0x46556D);
@@ -166,7 +166,7 @@ namespace Engine {
 
 		// Camera follow / other post-physics script work (must see character pose
 		// after ExtendedUpdate, not the pre-step position).
-		if (GetState() == PLAYING) {
+		if (IsSimulating()) {
 			GetScriptManager().RunLateUpdates(dt);
 		}
 	}

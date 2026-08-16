@@ -7,6 +7,9 @@
 
 #include <unordered_map>
 #include <unordered_set>
+#include <atomic>
+#include <mutex>
+#include <vector>
 #include <efsw/efsw.hpp>
 
 
@@ -15,8 +18,11 @@
 
 
 namespace Engine {
+	class AssetUIRenderer;
+
 	class AssetWatcher : public efsw::FileWatchListener {
 	  public:
+		AssetUIRenderer* owner = nullptr;
 		void  handleFileAction( efsw::WatchID watchid, const std::string& dir,
 								   const std::string& filename, efsw::Action action,
 								   const std::string& oldFilename) override;
@@ -31,7 +37,7 @@ namespace Engine {
 		// File browser rendering methods
 		void RenderDirectoryTree();
 		void RenderFileGrid();
-		void RenderFileCard(const std::string& path, const std::string& filename, bool isDirectory);
+		void RenderFileCard(std::string path, std::string filename, bool isDirectory);
 		void RenderContextMenu();
 
 		// File operations
@@ -40,12 +46,20 @@ namespace Engine {
 		void RenameFile(const std::string& oldPath, const std::string& newPath);
 		void ScanDirectory(const std::string& dirPath);
 		void RefreshCurrentDirectory();
+		void RequestRefresh() { m_fsDirty = true; }
+		void QueuePreviewInvalidation(std::string path);
+		void NavigateTo(const std::string& path);
+		void GoUp();
+		void QueueNavigate(std::string path);
+		void QueueRefresh();
+		void ApplyQueuedBrowserOps();
 
 		// Directory tree traversal
 		void RenderDirectoryTreeNode(const std::string& dirPath, const std::string& dirName);
 
-		// Helper to get icon for file type
-		void* GetIconForFile(const std::string& path, const std::string& extension, bool isDirectory);
+		// Helper to get icon for file type. allowLoad: visible cards may spend
+		// the per-frame preview budget to generate a thumbnail once.
+		void* GetIconForFile(const std::string& path, const std::string& extension, bool isDirectory, bool allowLoad);
 
 		static bool SelectableBackground(ImVec2 textSize, std::string id, const char* type, const char* typeName);
 
@@ -66,17 +80,32 @@ namespace Engine {
 		std::vector<FileEntry> m_currentFiles;
 		std::string m_selectedFile;
 		std::string m_rightClickedFile;
+		std::atomic<bool> m_fsDirty{false};
+		std::string m_pendingDelete;
+		bool m_confirmDelete = false;
+		std::string m_queuedNavigate;
+		bool m_queuedRefresh = false;
 		
-		// Rename state
+		// Rename state (modal lives on the Assets window, not the file card)
 		bool m_renamingFile = false;
+		bool m_openRenamePopup = false;
+		bool m_renameIsDirectory = false;
 		char m_renameBuffer[256];
 		
 		// For previews
 		std::unordered_map<std::string, ModelPreview> m_modelPreviews;
 		std::unordered_map<std::string, MaterialPreview> m_materialPreviews;
-		// Cache to avoid reloading assets every frame
+		std::unordered_map<std::string, unsigned int> m_texturePreviewIds;
 		std::unordered_set<std::string> m_loadedModelPaths;
 		std::unordered_set<std::string> m_loadedMaterialPaths;
+		std::unordered_set<std::string> m_failedPreviewPaths;
+		int m_previewBudget = 0;
+
+		std::mutex              m_previewMutex;
+		std::vector<std::string> m_pendingPreviewInvalidations;
+
+		void FlushPreviewInvalidations();
+		void InvalidatePreview(const std::string& path);
 	};
 } // namespace Engine
 

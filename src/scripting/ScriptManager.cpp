@@ -152,7 +152,7 @@ namespace Engine {
 		if (GetState() == EDITOR) {
 
 		}
-		else if (GetState() == PLAYING) {
+		else if (IsSimulating()) {
 			// Dispatch all queued events before processing scripts
 			eventBus.DispatchEvents();
 
@@ -234,7 +234,7 @@ namespace Engine {
 
 	void ScriptManager::RunLateUpdates(float dt)
 	{
-		if (GetState() != PLAYING) {
+		if (!IsSimulating()) {
 			return;
 		}
 

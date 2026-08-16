@@ -17,12 +17,18 @@ namespace Engine {
 			return;
 		}
 
+		static char search[128] = "";
+
 		// Toolbar
 		if (ImGui::Button("Clear")) {
 			sink->clear();
 		}
 		ImGui::SameLine();
 		ImGui::Checkbox("Auto-scroll", &autoScroll);
+
+		ImGui::SameLine();
+		ImGui::SetNextItemWidth(160);
+		ImGui::InputTextWithHint("##clog", "Search...", search, IM_ARRAYSIZE(search));
 
 		ImGui::SameLine();
 		// Log level filter
@@ -46,9 +52,10 @@ namespace Engine {
 		visible.clear();
 		visible.reserve(messages.size());
 		for (int i = 0; i < static_cast<int>(messages.size()); ++i) {
-			if (messages[static_cast<size_t>(i)].level >= filterLevel) {
-				visible.push_back(i);
-			}
+			const auto& msg = messages[static_cast<size_t>(i)];
+			if (msg.level < filterLevel) continue;
+			if (search[0] != '\0' && msg.message.find(search) == std::string::npos) continue;
+			visible.push_back(i);
 		}
 
 		ImGuiListClipper clipper;
@@ -85,10 +92,24 @@ namespace Engine {
 				ImGui::PushStyleColor(ImGuiCol_Text, color);
 				ImGui::TextUnformatted(msg.message.c_str());
 				ImGui::PopStyleColor();
+				if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+					ImGui::SetClipboardText(msg.message.c_str());
+				}
 			}
 		}
 
-		if (autoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) ImGui::SetScrollHereY(1.0f);
+		if (ImGui::GetScrollY() < ImGui::GetScrollMaxY() - 8.0f) {
+			// user scrolled up
+		}
+		else if (autoScroll) {
+			ImGui::SetScrollHereY(1.0f);
+		}
+		if (ImGui::IsWindowHovered() && ImGui::GetIO().MouseWheel > 0.0f) {
+			autoScroll = false;
+		}
+		if (ImGui::IsWindowHovered() && ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {
+			autoScroll = true;
+		}
 
 		ImGui::EndChild();
 

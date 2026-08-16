@@ -23,40 +23,40 @@ end
 local ui = getUI()
 
 function EditorUpdate(dt)
-    local selectedEntity = ui:getSelectedEntity()
-
-
-    imgui.Begin("Mesh Extractor")
-
-
-   if selectedEntity:isValid() then
-       imgui.Text("Selected: " .. selectedEntity:getName())
-
-        if selectedEntity:HasModelRenderer() then
-            imgui.Text("Model Renderer yay")
-            local mr = selectedEntity:GetModelRenderer()
-
-            local model = mr.model
-
-            imgui.Text("Model Renderer has "..model:getGuid())
-            imgui.Text("Model Renderer valid:  ".. tostring(model:isValid()))
-
-            if imgui.Button("Extract") then
-            end
-
-        else
-            imgui.Text("NO MODEL RENDERER")
-        end
-
-
-   else
-       imgui.Text("No valid entity selected")
-   end
-
-
-
-
-    imgui.End()
+   -- local selectedEntity = ui:getSelectedEntity()
+   --
+   --
+   -- imgui.Begin("Mesh Extractor")
+   --
+   --
+   --if selectedEntity:isValid() then
+   --    imgui.Text("Selected: " .. selectedEntity:getName())
+   --
+   --     if selectedEntity:HasModelRenderer() then
+   --         imgui.Text("Model Renderer yay")
+   --         local mr = selectedEntity:GetModelRenderer()
+   --
+   --         local model = mr.model
+   --
+   --         imgui.Text("Model Renderer has "..model:getGuid())
+   --         imgui.Text("Model Renderer valid:  ".. tostring(model:isValid()))
+   --
+   --         if imgui.Button("Extract") then
+   --         end
+   --
+   --     else
+   --         imgui.Text("NO MODEL RENDERER")
+   --     end
+   --
+   --
+   --else
+   --    imgui.Text("No valid entity selected")
+   --end
+   --
+   --
+   --
+   --
+   -- imgui.End()
 
 
     --info("hello editor ui")

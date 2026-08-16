@@ -10,6 +10,7 @@
 
 
 #include "rendering/ui/UIManager.h"
+#include "rendering/ui/EditorSession.h"
 #include "components/impl/TransformComponent.h"
 
 
@@ -88,22 +89,21 @@ namespace Engine {
 
 		ImVec2 sizeOut = ImGui::GetContentRegionAvail();
 
-		float aspect = (float) sizeOut.y / (float) sizeOut.x;
-
-		float width, height;
-		float offsetX, offsetY;
-
-		if (sizeOut.y / sizeOut.x > aspect) {
-			width   = sizeOut.x;
-			height  = width * aspect;
-			offsetY = (sizeOut.y - height) / 2.0f;
-			ImGui::SetCursorPosY(ImGui::GetCursorPosY() + offsetY);
-		}
-		else {
-			height  = sizeOut.y;
-			width   = height / aspect;
-			offsetX = (sizeOut.x - width) / 2.0f;
-			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offsetX);
+		auto& editor = UI::GetEditor();
+		float width  = sizeOut.x;
+		float height = sizeOut.y;
+		if (editor.lockAspect && sizeOut.x > 1.0f && sizeOut.y > 1.0f) {
+			const float target = editor.lockedAspect;
+			if (sizeOut.x / sizeOut.y > target) {
+				height = sizeOut.y;
+				width  = height * target;
+				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (sizeOut.x - width) * 0.5f);
+			}
+			else {
+				width  = sizeOut.x;
+				height = width / target;
+				ImGui::SetCursorPosY(ImGui::GetCursorPosY() + (sizeOut.y - height) * 0.5f);
+			}
 		}
 
 		ImVec2 topLeft = ImGui::GetCursorScreenPos();
@@ -121,41 +121,38 @@ namespace Engine {
 
 
 		if (GetState() != PLAYING) {
-			if (*selectedEntity && GetCurrentSceneRegistry().valid(selectedEntity->GetENTTHandle())) {
+			ImGuizmo::SetOrthographic(false);
+			ImGuizmo::SetDrawlist(ImGui::GetCurrentWindow()->DrawList);
+			ImGuizmo::SetRect(topLeft.x, topLeft.y, width, height);
+
+			glm::mat4 view       = GetCamera().GetViewMatrix();
+			glm::mat4 projection = GetCamera().GetProjectionMatrix();
+
+			const bool canManipulate = *selectedEntity && GetCurrentSceneRegistry().valid(selectedEntity->GetENTTHandle()) &&
+			                           selectedEntity->HasComponent<Components::Transform>() &&
+			                           !editor.IsEntityLocked(*selectedEntity);
+
+			if (*selectedEntity && GetCurrentSceneRegistry().valid(selectedEntity->GetENTTHandle()) &&
+			    selectedEntity->HasComponent<Components::Transform>()) {
 				auto& meta = selectedEntity->GetComponent<Components::EntityMetadata>();
+				auto& tr   = selectedEntity->GetComponent<Components::Transform>();
+				glm::mat4 model = tr.GetWorldMatrix();
 
+				if (canManipulate) {
+					const bool snapOn = editor.snapEnabled || GetInput().IsKeyPressed(GLFW_KEY_LEFT_CONTROL) ||
+					                    GetInput().IsKeyPressed(GLFW_KEY_RIGHT_CONTROL) ||
+					                    GetInput().IsKeyPressed(GLFW_KEY_LEFT_SUPER) ||
+					                    GetInput().IsKeyPressed(GLFW_KEY_RIGHT_SUPER);
 
-				if (selectedEntity->HasComponent<Components::Transform>()) {
-					auto& tr = selectedEntity->GetComponent<Components::Transform>();
-
-					ImGuizmo::SetOrthographic(false);
-					ImGuizmo::SetDrawlist(ImGui::GetCurrentWindow()->DrawList);
-					ImGuizmo::SetRect(topLeft.x, topLeft.y, width, height);
-
-					// Copies — ImGuizmo may write view; keep camera matrices intact
-					glm::mat4 view       = GetCamera().GetViewMatrix();
-					glm::mat4 projection = GetCamera().GetProjectionMatrix();
-					glm::mat4 model      = tr.GetWorldMatrix();
-
-					// Hold Ctrl (or Super) to snap translate / rotate / scale.
-					const bool snapHeld = GetInput().IsKeyPressed(GLFW_KEY_LEFT_CONTROL) ||
-					                      GetInput().IsKeyPressed(GLFW_KEY_RIGHT_CONTROL) ||
-					                      GetInput().IsKeyPressed(GLFW_KEY_LEFT_SUPER) ||
-					                      GetInput().IsKeyPressed(GLFW_KEY_RIGHT_SUPER);
-
-					// ImGuizmo: translate uses xyz snap; rotate uses degrees in .x; scale uses .x
-					float snapValues[3] = {0.5f, 0.5f, 0.5f};
+					float snapValues[3] = {editor.snapTranslate, editor.snapTranslate, editor.snapTranslate};
 					if (mCurrentGizmoOperation == ImGuizmo::ROTATE) {
-						snapValues[0] = snapValues[1] = snapValues[2] = 15.0f; // degrees
+						snapValues[0] = snapValues[1] = snapValues[2] = editor.snapRotateDeg;
 					}
-					else if (mCurrentGizmoOperation == ImGuizmo::SCALE ||
-					         mCurrentGizmoOperation == ImGuizmo::SCALEU ||
+					else if (mCurrentGizmoOperation == ImGuizmo::SCALE || mCurrentGizmoOperation == ImGuizmo::SCALEU ||
 					         mCurrentGizmoOperation == ImGuizmo::BOUNDS) {
-						snapValues[0] = snapValues[1] = snapValues[2] = 0.1f;
+						snapValues[0] = snapValues[1] = snapValues[2] = editor.snapScale;
 					}
 
-					// Manipulate returns true only when the matrix changes this frame.
-					// Do NOT re-decompose every IsUsing frame — that causes rotation drift.
 					const bool changed = ImGuizmo::Manipulate(
 					    glm::value_ptr(view),
 					    glm::value_ptr(projection),
@@ -163,20 +160,18 @@ namespace Engine {
 					    mCurrentGizmoMode,
 					    glm::value_ptr(model),
 					    nullptr,
-					    snapHeld ? snapValues : nullptr);
+					    snapOn ? snapValues : nullptr);
 
 					if (changed) {
 						glm::vec3 worldPos, worldScale;
 						glm::quat worldRot;
 						ExtractTRS(model, worldPos, worldRot, worldScale);
 
-						// Keep TRS + world matrix consistent with the gizmo matrix
 						tr.SetWorldPosition(worldPos);
 						tr.SetWorldRotation(worldRot);
 						tr.SetWorldScale(worldScale);
 						tr.SetWorldMatrix(ComposeTRS(worldPos, worldRot, worldScale));
 
-						// Local = parent^-1 * world (hierarchy)
 						if (meta.parentEntity.IsValid()) {
 							auto parentEntity = GetCurrentScene()->Get(meta.parentEntity);
 							if (parentEntity && parentEntity.HasComponent<Components::Transform>()) {
@@ -199,31 +194,13 @@ namespace Engine {
 						}
 
 						tr.SyncWithPhysics(*selectedEntity);
+						editor.MarkDirty();
 					}
 				}
-			}
 
-
-			if (GetInput().IsKeyPressed(GLFW_KEY_LEFT_CONTROL) && GetInput().IsKeyPressedThisFrame(GLFW_KEY_D) && !GetInput().IsMousePressed(GLFW_MOUSE_BUTTON_RIGHT)) {
-				if (*selectedEntity && GetCurrentScene()->GetRegistry()->valid(selectedEntity->GetENTTHandle())) {
-					GetDefaultLogger()->warn("DUPLICATING");
-
-					std::string newName = selectedEntity->GetComponent<Components::EntityMetadata>().name;
-					if (!newName.rfind("Copy of ", 0) == 0) {
-						newName = "Copy of " + newName;
-					}
-					Entity copy = Entity::Create(newName, selectedEntity->m_scene);
-
-					// TODO COPY CONSTRUCTORS FOR COMPONENTS WITH DYNAMICALLY ALLOCATED MEMORY!!!!!!!
-#define X(type, name, fancy)                                                                                                                                                                                                                   \
-	if (selectedEntity->HasComponent<type>()) {                                                                                                                                                                                                \
-		copy.AddComponent<type>(selectedEntity->GetComponent<type>());                                                                                                                                                                         \
-		GetDefaultLogger()->warn("adding cmp: {}", fancy);                                                                                                                                                                                     \
-	}
-					COMPONENT_LIST
-#undef X
-
-					GetUI().m_selectedEntity = copy;
+				if (GetUI().isOverSceneView() && !ImGui::GetIO().WantTextInput && ImGui::IsKeyPressed(ImGuiKey_F, false)) {
+					const glm::vec3 pos = tr.GetWorldPosition();
+					GetCamera().SetPosition(pos - GetCamera().GetFront() * 6.0f);
 				}
 			}
 		}
@@ -238,7 +215,8 @@ namespace Engine {
 
 		// GPU readback is a full pipeline stall — only pick on click, never every frame.
 		if (GetState() != PLAYING && GetInput().IsMousePositionInViewport() &&
-		    !GetUI().m_inspectorRenderer->m_openPopup && GetInput().IsMouseClicked(0) && !ImGuizmo::IsOver()) {
+		    !GetUI().m_inspectorRenderer->m_openPopup && GetInput().IsMouseClicked(0) && !ImGuizmo::IsOver() &&
+		    !GetInput().IsKeyPressed(GLFW_KEY_LEFT_ALT) && !GetInput().IsKeyPressed(GLFW_KEY_RIGHT_ALT)) {
 			Engine::Window::GetFramebuffer(Window::FramebufferID::MOUSE_PICKING)->Bind();
 			glm::vec2 pos = GetInput().GetMousePositionInViewportScaledFlipped();
 
