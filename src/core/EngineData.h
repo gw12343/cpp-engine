@@ -62,6 +62,7 @@ namespace Engine {
 		std::shared_ptr<GameUIManager>           gameUI;
 		std::unique_ptr<ThreadPool>              threadPool;
 		EngineState                              state;
+		bool                                     stepOneFrame = false;
         RenderSettings*                          renderSettings;
 		ModuleManager*                           manager;
 	};
@@ -86,6 +87,11 @@ namespace Engine {
 	inline void SetState(EngineState st)
 	{
 		Get().state = st;
+	}
+
+	inline bool IsSimulating()
+	{
+		return Get().state == PLAYING || Get().stepOneFrame;
 	}
 
 	// Convenience inline accessors

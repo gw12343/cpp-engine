@@ -6,10 +6,15 @@
 
 #include "components/AllComponents.h"
 #include "rendering/ui/UIManager.h"
+#include "rendering/ui/EditorSession.h"
 #include "rendering/ui/IconsFontAwesome6.h"
+#include "rendering/ui/InspectorUI.h"
 #include "imgui_internal.h"
 
 #include "misc/cpp/imgui_stdlib.h"
+#include <cstring>
+#include <functional>
+#include <vector>
 
 
 namespace Engine {
@@ -37,56 +42,37 @@ namespace Engine {
 		ImGui::Begin("Inspector");
 
 		if ((*m_selectedEntityP)) {
-			// Display entity name at the top
 			auto& metadata = (*m_selectedEntityP).GetComponent<Components::EntityMetadata>();
 
-			ImGui::Text("guid: %s", metadata.guid.c_str());
-
-			// Top row: active checkbox + name
 			ImGui::BeginGroup();
 			ImGui::PushID("isActiveTop");
-			ImGui::Checkbox("", &metadata.active);
+			ImGui::Checkbox("Active", &metadata.active);
 			ImGui::PopID();
 			ImGui::SameLine();
 			ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 			ImGui::InputText("##nameTop", &metadata.name);
-			ImGui::Spacing();
 
-			// Tag row with Delete button
-			const char* deleteLabel = "Delete";
-			ImVec2      deleteSize  = ImGui::CalcTextSize(deleteLabel);
-			float       deleteWidth = deleteSize.x + ImGui::GetStyle().FramePadding.x * 2.0f;
-			float       spacing     = ImGui::GetStyle().ItemSpacing.x;
-			float       availWidth  = ImGui::GetContentRegionAvail().x;
-			float       tagWidth    = availWidth - (deleteWidth + spacing);
-
-			ImGui::PushItemWidth(tagWidth);
-			ImGui::InputText("##Taginspector", &metadata.tag);
-			ImGui::PopItemWidth();
-
-			ImGui::SameLine(0.0f, spacing);
-
-			// Red delete button
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.3f, 0.3f, 1.0f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.7f, 0.1f, 0.1f, 1.0f));
-
-			if (ImGui::Button(deleteLabel, ImVec2(deleteWidth, 0))) {
-				GetUI().m_selectedEntity.Destroy();
-				GetUI().m_selectedEntity = Entity();
-				ImGui::PopStyleColor(3);
-				ImGui::EndGroup();
-				ImGui::End();
-				return;
-			}
-
-			ImGui::PopStyleColor(3);
+			LeftLabelInputText("Tag", &metadata.tag);
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Optional tag / layer label");
 
 			EntityHandle newParent = metadata.parentEntity;
-			if (LeftLabelEntity("parent", &newParent)) {
+			if (LeftLabelEntity("Parent", &newParent)) {
 				m_selectedEntityP->SetParent(newParent);
+				UI::GetEditor().MarkDirty();
 			}
 
+			if (ImGui::SmallButton("Copy GUID")) {
+				ImGui::SetClipboardText(metadata.guid.c_str());
+			}
+			ImGui::SameLine();
+			ImGui::TextDisabled("%s", metadata.guid.c_str());
+
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
+			if (ImGui::Button("Delete Entity")) {
+				UI::GetEditor().pendingDeleteEntity  = *m_selectedEntityP;
+				UI::GetEditor().pendingConfirmDelete = true;
+			}
+			ImGui::PopStyleColor();
 
 			ImGui::EndGroup();
 
@@ -94,6 +80,9 @@ namespace Engine {
 			ImGui::Separator();
 			ImGui::Spacing();
 
+
+			static std::function<void()> pendingRemove;
+			static bool                  confirmRemove = false;
 
 			std::vector<std::function<void()>> pendingRemovals;
 
@@ -105,7 +94,8 @@ namespace Engine {
 		bool open  = ComponentHeader(fancy, &trash);                                                                                                                                                                                           \
 		if (trash) {                                                                                                                                                                                                                           \
 			auto entityPtr = m_selectedEntityP;                                                                                                                                                                                                \
-			pendingRemovals.emplace_back([entityPtr]() { (*entityPtr).RemoveComponent<type>(); });                                                                                                                                             \
+			pendingRemove  = [entityPtr]() { (*entityPtr).RemoveComponent<type>(); };                                                                                                                                                          \
+			confirmRemove  = true;                                                                                                                                                                                                             \
 		}                                                                                                                                                                                                                                      \
 		if (open) {                                                                                                                                                                                                                            \
 			ImGui::Indent();                                                                                                                                                                                                                   \
@@ -113,18 +103,30 @@ namespace Engine {
 			ImGui::Unindent();                                                                                                                                                                                                                 \
 			ImGui::Spacing();                                                                                                                                                                                                                  \
 		}                                                                                                                                                                                                                                      \
-                                                                                                                                                                                                                                               \
-                                                                                                                                                                                                                                               \
 		ImGui::PopID();                                                                                                                                                                                                                        \
 	}
 			COMPONENT_LIST
 #undef X
 
-
-			for (auto& remove : pendingRemovals) {
-				remove();
+			if (confirmRemove) {
+				ImGui::OpenPopup("Remove Component##confirm");
+				confirmRemove = false;
 			}
-			pendingRemovals.clear();
+			if (ImGui::BeginPopupModal("Remove Component##confirm", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+				ImGui::TextUnformatted("Remove this component?");
+				if (ImGui::Button("Remove", ImVec2(120, 0))) {
+					if (pendingRemove) pendingRemove();
+					pendingRemove = nullptr;
+					UI::GetEditor().MarkDirty();
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+					pendingRemove = nullptr;
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
+			}
 
 
 			ImGui::Separator();
@@ -158,26 +160,54 @@ namespace Engine {
 				// Escape closes popup
 				if (ImGui::IsKeyPressed(ImGuiKey_Escape)) ImGui::CloseCurrentPopup();
 
-				int i = 0;
-
-
+				struct CompEntry {
+					const char* display;
+					int         index;
+				};
+				static std::vector<CompEntry> visible;
+				visible.clear();
+				int raw = 0;
 #define X(type, name, fancy)                                                                                                                                                                                                                   \
-	if (matches_search(#name, searchBuffer) && !(*m_selectedEntityP).HasComponent<type>()) {                                                                                                                                                   \
-		bool selected = (i == selectedIndex);                                                                                                                                                                                                  \
-		if (ImGui::Selectable(#name, selected, ImGuiSelectableFlags_AllowDoubleClick)) {                                                                                                                                                       \
-			selectedIndex = i;                                                                                                                                                                                                                 \
-			GetDefaultLogger()->info("selected {}", #name);                                                                                                                                                                                    \
-			(*m_selectedEntityP).AddComponent<type>();                                                                                                                                                                                         \
-			ImGui::CloseCurrentPopup();                                                                                                                                                                                                        \
-		}                                                                                                                                                                                                                                      \
-	}                                                                                                                                                                                                                                          \
-	i++;
-
+				if (matches_search(fancy, searchBuffer) && !(*m_selectedEntityP).HasComponent<type>()) {                                                                                                                                       \
+					visible.push_back({fancy, raw});                                                                                                                                                                                           \
+				}                                                                                                                                                                                                                              \
+				++raw;
 				COMPONENT_LIST
 #undef X
-				// Handle up/down key navigation
-				if (ImGui::IsKeyPressed(ImGuiKey_DownArrow)) selectedIndex = (selectedIndex + 1) % i;
-				if (ImGui::IsKeyPressed(ImGuiKey_UpArrow)) selectedIndex = (selectedIndex - 1 + i) % i;
+
+				if (selectedIndex >= (int) visible.size()) selectedIndex = 0;
+
+				if (ImGui::IsKeyPressed(ImGuiKey_DownArrow) && !visible.empty()) {
+					selectedIndex = (selectedIndex + 1) % (int) visible.size();
+				}
+				if (ImGui::IsKeyPressed(ImGuiKey_UpArrow) && !visible.empty()) {
+					selectedIndex = (selectedIndex - 1 + (int) visible.size()) % (int) visible.size();
+				}
+
+				auto addAt = [&](int visIndex) {
+#define X(type, name, fancy)                                                                                                                                                                                                                   \
+					if (visible[visIndex].display == (const char*) fancy || std::strcmp(visible[visIndex].display, fancy) == 0) {                                                                                                              \
+						(*m_selectedEntityP).AddComponent<type>();                                                                                                                                                                             \
+						UI::GetEditor().MarkDirty();                                                                                                                                                                                           \
+						ImGui::CloseCurrentPopup();                                                                                                                                                                                            \
+						return;                                                                                                                                                                                                                \
+					}
+					COMPONENT_LIST
+#undef X
+				};
+
+				for (int i = 0; i < (int) visible.size(); ++i) {
+					bool selected = (i == selectedIndex);
+					if (ImGui::Selectable(visible[i].display, selected, ImGuiSelectableFlags_AllowDoubleClick)) {
+						selectedIndex = i;
+						addAt(i);
+					}
+					if (selected) ImGui::SetItemDefaultFocus();
+				}
+
+				if (ImGui::IsKeyPressed(ImGuiKey_Enter) && !visible.empty()) {
+					addAt(selectedIndex);
+				}
 
 				ImGui::EndPopup();
 			}

@@ -52,6 +52,8 @@ namespace Engine {
 			// Selected entity
 			Entity m_selectedEntity = Entity();
 
+			Entity DuplicateEntity(Entity source);
+
 			std::unique_ptr<InspectorRenderer> m_inspectorRenderer;
 			bool                               isOverSceneView() const;
             [[nodiscard]] const Engine::Entity& getSelectedEntity() const { return m_selectedEntity; }
@@ -63,12 +65,21 @@ namespace Engine {
 			void  RenderPauseOverlay();
             void RenderGBufferDebug(std::shared_ptr<GBuffer> gbuffer);
             void RenderModelDebug(AssetHandle<Engine::Rendering::Model> handle);
+			void FlushHierarchyCommands();
 
 			bool                             m_overSceneView = false;
 			std::unique_ptr<AssetUIRenderer> m_uiAssetRenderer;
 			std::unique_ptr<MaterialEditor>  m_materialEditor;
 			int                              m_selectedTheme = 0;
 			void                             RenderEntityTreeNode(Entity entity);
+			void                             DrawAddEntityMenu();
+
+			enum class HierarchyCommand { None, Delete, Duplicate, CreateChild };
+			HierarchyCommand m_hierarchyCommand = HierarchyCommand::None;
+			Entity           m_hierarchyCommandEntity;
+			std::string      m_renamingGuid;
+			char             m_renameBuffer[256] = {};
+			bool             m_renameFocusRequested = false;
 
         };
 	} // namespace UI

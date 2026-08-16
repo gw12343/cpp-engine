@@ -14,6 +14,8 @@
 #include "animation/Animation.h"
 #include "animation/Skeleton.h"
 #include "rendering/ui/UIManager.h"
+#include "rendering/ui/EditorSession.h"
+#include "rendering/ui/IconsFontAwesome6.h"
 
 
 #include <functional>
@@ -21,6 +23,7 @@
 #include <cstring>
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include <cstdlib>
 
 #define DEFAULT_ICON_SIZE 128.0f
 namespace fs = std::filesystem;
@@ -28,6 +31,21 @@ namespace fs = std::filesystem;
 namespace Engine {
 
 	float iconSize = DEFAULT_ICON_SIZE;
+
+	static void OpenInSystemFileViewer(const std::string& path, bool isDirectory)
+	{
+#ifdef _WIN32
+		std::error_code ec;
+		fs::path abs = fs::absolute(path, ec);
+		if (ec) {
+			abs = fs::path(path);
+		}
+		abs = abs.lexically_normal().make_preferred();
+		const std::string p = abs.string();
+		const std::string cmd = isDirectory ? ("explorer \"" + p + "\"") : ("explorer /select,\"" + p + "\"");
+		std::system(cmd.c_str());
+#endif
+	}
 
 #define DELETE_IF(name, type, extt, fp)                                                                                                                                                                                                        \
 	void DeleteAssetIf_##name(const std::string& filePath, std::string metaPath, const std::string& ext, const std::string& dir)                                                                                                               \
@@ -64,8 +82,21 @@ namespace Engine {
 		std::string ext      = filePath.extension().string();
 
 
-		// TODO add loading
+		if (owner) {
+			owner->RequestRefresh();
+			if (action == efsw::Actions::Modified || action == efsw::Actions::Moved ||
+			    action == efsw::Actions::Delete || action == efsw::Actions::Add) {
+				owner->QueuePreviewInvalidation(filePath.string());
+				if (action == efsw::Actions::Moved && !oldFilename.empty()) {
+					owner->QueuePreviewInvalidation((fs::path(dir) / oldFilename).string());
+				}
+			}
+		}
 		switch (action) {
+			case efsw::Actions::Add:
+			case efsw::Actions::Modified:
+			case efsw::Actions::Moved:
+				break;
 			case efsw::Actions::Delete:
 				GetUI().log->debug("Detected deleted file: {}", filePath.string());
 
@@ -84,16 +115,165 @@ namespace Engine {
 
 	AssetUIRenderer::AssetUIRenderer()
 	{
+		listener.owner     = this;
 		m_currentDirectory = "resources";
 		ScanDirectory(m_currentDirectory);
 	}
 
 
+	void AssetUIRenderer::NavigateTo(const std::string& path)
+	{
+		m_currentDirectory = path;
+		ScanDirectory(m_currentDirectory);
+	}
+
+	void AssetUIRenderer::QueueNavigate(std::string path)
+	{
+		m_queuedNavigate = std::move(path);
+	}
+
+	void AssetUIRenderer::QueueRefresh()
+	{
+		m_queuedRefresh = true;
+	}
+
+	static std::string PreviewCacheKey(std::string p)
+	{
+		for (char& c : p) {
+			if (c == '\\') c = '/';
+		}
+		constexpr const char* meta = ".meta";
+		if (p.size() > 5 && p.compare(p.size() - 5, 5, meta) == 0) {
+			p.resize(p.size() - 5);
+		}
+		return p;
+	}
+
+	void AssetUIRenderer::QueuePreviewInvalidation(std::string path)
+	{
+		std::lock_guard<std::mutex> lock(m_previewMutex);
+		m_pendingPreviewInvalidations.push_back(std::move(path));
+	}
+
+	void AssetUIRenderer::InvalidatePreview(const std::string& path)
+	{
+		const std::string key = PreviewCacheKey(path);
+		const auto slash = key.find_last_of('/');
+		const std::string file = (slash == std::string::npos) ? key : key.substr(slash + 1);
+		if (file.empty()) {
+			return;
+		}
+
+		auto matches = [&](const std::string& k) {
+			const std::string n = PreviewCacheKey(k);
+			if (n == key) {
+				return true;
+			}
+			const auto s = n.find_last_of('/');
+			const std::string name = (s == std::string::npos) ? n : n.substr(s + 1);
+			return name == file;
+		};
+
+		auto eraseSet = [&](std::unordered_set<std::string>& set) {
+			for (auto it = set.begin(); it != set.end();) {
+				if (matches(*it)) {
+					it = set.erase(it);
+				} else {
+					++it;
+				}
+			}
+		};
+		auto eraseTex = [&]() {
+			for (auto it = m_texturePreviewIds.begin(); it != m_texturePreviewIds.end();) {
+				if (matches(it->first)) {
+					it = m_texturePreviewIds.erase(it);
+				} else {
+					++it;
+				}
+			}
+		};
+
+		eraseSet(m_loadedModelPaths);
+		eraseSet(m_loadedMaterialPaths);
+		eraseSet(m_failedPreviewPaths);
+		eraseTex();
+
+		auto dropGuid = [&](const std::string& p) {
+			auto model = GetAssetManager().GetHandleFromPath<Rendering::Model>(p);
+			if (model.IsValid()) {
+				m_modelPreviews.erase(model.GetID());
+			}
+			auto mat = GetAssetManager().GetHandleFromPath<Material>(p);
+			if (mat.IsValid()) {
+				m_materialPreviews.erase(mat.GetID());
+			}
+		};
+		dropGuid(path);
+		dropGuid(key);
+		std::string win = key;
+		for (char& c : win) {
+			if (c == '/') c = '\\';
+		}
+		dropGuid(win);
+	}
+
+	void AssetUIRenderer::FlushPreviewInvalidations()
+	{
+		std::vector<std::string> pending;
+		{
+			std::lock_guard<std::mutex> lock(m_previewMutex);
+			pending.swap(m_pendingPreviewInvalidations);
+		}
+		for (const auto& p : pending) {
+			InvalidatePreview(p);
+		}
+	}
+
+	void AssetUIRenderer::ApplyQueuedBrowserOps()
+	{
+		if (!m_queuedNavigate.empty()) {
+			const std::string dest = std::move(m_queuedNavigate);
+			m_queuedNavigate.clear();
+			m_queuedRefresh = false;
+			NavigateTo(dest);
+			return;
+		}
+		if (m_queuedRefresh) {
+			m_queuedRefresh = false;
+			RefreshCurrentDirectory();
+		}
+	}
+
+	void AssetUIRenderer::GoUp()
+	{
+		fs::path p(m_currentDirectory);
+		if (p.has_parent_path() && p != p.root_path()) {
+			NavigateTo(p.parent_path().string());
+		}
+	}
+
 	void AssetUIRenderer::RenderAssetWindow()
 	{
 		ImGui::Begin("Assets");
+		m_previewBudget = 4;
+		FlushPreviewInvalidations();
 
-		ImGui::SliderFloat("Icon Size", &iconSize, 16.0f, 256.0f, "%.0f", ImGuiSliderFlags_AlwaysClamp);
+		if (m_fsDirty.exchange(false) && !m_renamingFile) {
+			RefreshCurrentDirectory();
+		}
+
+		if (ImGui::Button("Up")) {
+			GoUp();
+		}
+		ImGui::SameLine();
+		ImGui::TextUnformatted(m_currentDirectory.c_str());
+		if (ImGui::IsItemClicked()) {
+			ImGui::SetClipboardText(m_currentDirectory.c_str());
+		}
+
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		ImGui::InputTextWithHint("##asset_search", ICON_FA_MAGNIFYING_GLASS " Search this folder...", UI::GetEditor().assetFilter, IM_ARRAYSIZE(UI::GetEditor().assetFilter));
+		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Ctrl+Scroll to resize icons");
 
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		if (window && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup)) {
@@ -130,6 +310,57 @@ namespace Engine {
 
 		ImGui::Columns(1);
 
+		if (m_confirmDelete) {
+			ImGui::OpenPopup("Delete Asset##confirm");
+			m_confirmDelete = false;
+		}
+		if (ImGui::BeginPopupModal("Delete Asset##confirm", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+			ImGui::Text("Delete '%s'?", m_pendingDelete.c_str());
+			if (ImGui::Button("Delete", ImVec2(120, 0))) {
+				DelFile(m_pendingDelete);
+				m_pendingDelete.clear();
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+				m_pendingDelete.clear();
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+
+		if (m_openRenamePopup) {
+			ImGui::OpenPopup("Rename Asset");
+			m_openRenamePopup = false;
+		}
+		if (ImGui::BeginPopupModal("Rename Asset", &m_renamingFile, ImGuiWindowFlags_AlwaysAutoResize)) {
+			ImGui::Text("Rename:");
+			if (ImGui::IsWindowAppearing()) {
+				ImGui::SetKeyboardFocusHere();
+			}
+			ImGui::InputText("##rename", m_renameBuffer, sizeof(m_renameBuffer));
+
+			const bool appearing = ImGui::IsWindowAppearing();
+			if ((ImGui::Button("OK") || (!appearing && ImGui::IsKeyPressed(ImGuiKey_Enter))) && m_renameBuffer[0] != '\0') {
+				fs::path oldPath(m_rightClickedFile);
+				fs::path newName(m_renameBuffer);
+				if (!m_renameIsDirectory && newName.extension().empty() && !oldPath.extension().empty()) {
+					newName.replace_extension(oldPath.extension());
+				}
+				const std::string newPath = (oldPath.parent_path() / newName).string();
+				RenameFile(m_rightClickedFile, newPath);
+				m_renamingFile = false;
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Cancel") || (!appearing && ImGui::IsKeyPressed(ImGuiKey_Escape))) {
+				m_renamingFile = false;
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+
+		ApplyQueuedBrowserOps();
 		ImGui::End();
 	}
 
@@ -223,10 +454,18 @@ namespace Engine {
 
 		ImGui::Columns(columnCount, nullptr, false);
 
-		// Render files and directories
-		for (const auto& fileEntry : m_currentFiles) {
-			RenderFileCard(fileEntry.path, fileEntry.filename, fileEntry.isDirectory);
+		const char* filter = UI::GetEditor().assetFilter;
+		for (size_t i = 0; i < m_currentFiles.size(); ++i) {
+			FileEntry fileEntry = m_currentFiles[i];
+			if (filter[0] && !fileEntry.isDirectory &&
+			    !UI::EditorSession::MatchesFilter(fileEntry.filename, filter)) {
+				continue;
+			}
+			RenderFileCard(std::move(fileEntry.path), std::move(fileEntry.filename), fileEntry.isDirectory);
 			ImGui::NextColumn();
+			if (!m_queuedNavigate.empty()) {
+				break;
+			}
 		}
 
 		ImGui::Columns(1);
@@ -236,11 +475,24 @@ namespace Engine {
 			if (ImGui::MenuItem("Refresh")) {
 				RefreshCurrentDirectory();
 			}
+			if (ImGui::MenuItem("New Folder")) {
+				fs::path dest = fs::path(m_currentDirectory) / "New Folder";
+				int n = 1;
+				while (fs::exists(dest)) {
+					dest = fs::path(m_currentDirectory) / ("New Folder " + std::to_string(n++));
+				}
+				std::error_code ec;
+				fs::create_directory(dest, ec);
+				RefreshCurrentDirectory();
+			}
+			if (ImGui::MenuItem("Open in File Explorer")) {
+				OpenInSystemFileViewer(m_currentDirectory, true);
+			}
 			ImGui::EndPopup();
 		}
 	}
 
-	void AssetUIRenderer::RenderFileCard(const std::string& path, const std::string& filename, bool isDirectory)
+	void AssetUIRenderer::RenderFileCard(std::string path, std::string filename, bool isDirectory)
 	{
 		ImGui::PushID(path.c_str());
 
@@ -251,26 +503,26 @@ namespace Engine {
 		float wrapWidth = iconSize;
 		ImVec2 textSize = ImGui::CalcTextSize(filename.c_str(), nullptr, false, wrapWidth);
 
-		// Get appropriate icon
-		void* iconID = GetIconForFile(path, ext, isDirectory);
-
 		// Card background and interaction
 		ImVec2 startPos = ImGui::GetCursorScreenPos();
 		ImVec2 itemSize(iconSize, iconSize + textSize.y + 7.0f);
+		const bool inView = ImGui::IsRectVisible(itemSize);
+
+		void* iconID = GetIconForFile(path, ext, isDirectory, inView);
 
 		std::string btnId = "card_" + path;
 		bool clicked = ImGui::InvisibleButton(btnId.c_str(), itemSize);
+		const bool cardHovered = ImGui::IsItemHovered();
 
-		// Handle double-click on directory to navigate into it
-		if (clicked && isDirectory && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-			m_currentDirectory = path;
-			ScanDirectory(m_currentDirectory);
+		// Double-click a folder to enter it. Check hover + double-click (not
+		// InvisibleButton's clicked, which fires on release after double-click expired).
+		if (isDirectory && cardHovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+			QueueNavigate(path);
 		}
 
-		// Handle right-click for context menu
 		if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
 			m_rightClickedFile = path;
-			ImGui::OpenPopup("FileContextMenu");
+			m_selectedFile     = path;
 		}
 
 		// Drag-drop source for asset files
@@ -285,7 +537,7 @@ namespace Engine {
 		const char* payloadType = "ASSET_FILE";
 		const char* assetType = "Unknown";
 
-		if (ext == ".png") {
+		if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".dds" || ext == ".tga") {
 			payloadType = "ASSET_TEXTURE";
 			assetType = "Texture";
 			
@@ -304,7 +556,7 @@ namespace Engine {
 			
 			auto handle = GetAssetManager().Load<Material>(path);
 			strncpy(payload.id, handle.GetID().c_str(), sizeof(payload.id));
-		} else if (ext == ".wav") {
+		} else if (ext == ".wav" || ext == ".mp3" || ext == ".ogg") {
 			payloadType = "ASSET_SOUND";
 			assetType = "Audio::SoundBuffer";
 			
@@ -369,7 +621,47 @@ namespace Engine {
 		ImGui::Text("%s: %s", assetType, filename.c_str());
 
 		ImGui::EndDragDropSource();
-	}	
+	}
+
+		// Must stay immediately after the card button so the popup is tied to that
+		// item. Manual OpenPopup-on-press closes when RMB is released.
+		if (ImGui::BeginPopupContextItem("FileContextMenu")) {
+			m_rightClickedFile = path;
+			ImGui::Text("%s", filename.c_str());
+			ImGui::Separator();
+			if (isDirectory && ImGui::MenuItem("Open")) {
+				QueueNavigate(path);
+				ImGui::CloseCurrentPopup();
+			}
+			if (ImGui::MenuItem("Open in File Explorer")) {
+				OpenInSystemFileViewer(path, isDirectory);
+				ImGui::CloseCurrentPopup();
+			}
+			if (ImGui::MenuItem("Copy Path")) {
+				ImGui::SetClipboardText(path.c_str());
+				ImGui::CloseCurrentPopup();
+			}
+			if (ImGui::MenuItem("Rename")) {
+				m_rightClickedFile    = path;
+				m_renameIsDirectory   = isDirectory;
+				m_renamingFile        = true;
+				m_openRenamePopup     = true;
+				strncpy(m_renameBuffer, filename.c_str(), sizeof(m_renameBuffer));
+				m_renameBuffer[sizeof(m_renameBuffer) - 1] = '\0';
+				ImGui::CloseCurrentPopup();
+			}
+			if (!isDirectory && ImGui::MenuItem("Duplicate")) {
+				DuplicateFile(path);
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::Separator();
+			if (ImGui::MenuItem("Delete")) {
+				m_pendingDelete = path;
+				m_confirmDelete = true;
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
 
 		// Selection/hover effect
 		bool isSelected = (m_selectedFile == path);
@@ -378,19 +670,16 @@ namespace Engine {
 			ImGui::GetWindowDrawList()->AddRectFilled(startPos, ImVec2(startPos.x + itemSize.x, startPos.y + itemSize.y), col, 6.0f);
 		}
 
-		if (clicked && !isDirectory) {
+		if (clicked) {
 			m_selectedFile = path;
-			
-			// If it's a material file, select it in the material editor
-			if (ext == ".material") {
+			if (!isDirectory && ext == ".material") {
 				auto handle = GetAssetManager().Load<Material>(path);
 				GetUI().m_selectedMaterial = handle;
 			}
-
-            if (ext == ".obj") {
-                auto handle = GetAssetManager().Load<Rendering::Model>(path);
-                GetUI().m_selectedModel = handle;
-            }
+			if (!isDirectory && ext == ".obj") {
+				auto handle = GetAssetManager().Load<Rendering::Model>(path);
+				GetUI().m_selectedModel = handle;
+			}
 		}
 
 		// Draw icon
@@ -411,141 +700,102 @@ namespace Engine {
 		ImGui::TextWrapped("%s", filename.c_str());
 		ImGui::PopTextWrapPos();
 
-		// Context menu popup
-		if (ImGui::BeginPopup("FileContextMenu")) {
-			if (m_rightClickedFile == path) {
-				ImGui::Text("%s", filename.c_str());
-				ImGui::Separator();
-				
-				if (ImGui::MenuItem("Delete")) {
-					DelFile(path);
-					ImGui::CloseCurrentPopup();
-				}
-				
-				if (!isDirectory && ImGui::MenuItem("Duplicate")) {
-					DuplicateFile(path);
-					ImGui::CloseCurrentPopup();
-				}
-				
-				if (ImGui::MenuItem("Rename")) {
-					m_renamingFile = true;
-					strncpy(m_renameBuffer, filename.c_str(), sizeof(m_renameBuffer));
-					m_renameBuffer[sizeof(m_renameBuffer) - 1] = '\0';
-					ImGui::CloseCurrentPopup();
-				}
-			}
-			ImGui::EndPopup();
-		}
-
-		// Rename modal
-		if (m_renamingFile && m_rightClickedFile == path) {
-			ImGui::OpenPopup("Rename File");
-		}
-
-		if (ImGui::BeginPopupModal("Rename File", &m_renamingFile, ImGuiWindowFlags_AlwaysAutoResize)) {
-			ImGui::Text("Enter new name:");
-			ImGui::InputText("##rename", m_renameBuffer, sizeof(m_renameBuffer));
-			
-			if (ImGui::Button("OK") || ImGui::IsKeyPressed(ImGuiKey_Enter)) {
-				fs::path parentPath = fs::path(path).parent_path();
-				std::string newPath = parentPath.string() + "/" + std::string(m_renameBuffer);
-				RenameFile(path, newPath);
-				m_renamingFile = false;
-				ImGui::CloseCurrentPopup();
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Cancel") || ImGui::IsKeyPressed(ImGuiKey_Escape)) {
-				m_renamingFile = false;
-				ImGui::CloseCurrentPopup();
-			}
-			
-			ImGui::EndPopup();
-		}
-
 		ImGui::PopID();
 	}
 
-	void* AssetUIRenderer::GetIconForFile(const std::string& path, const std::string& extension, bool isDirectory)
+	void* AssetUIRenderer::GetIconForFile(const std::string& path, const std::string& extension, bool isDirectory, bool allowLoad)
 	{
 		if (isDirectory) {
 			return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_folderIconTexture->GetID()));
 		}
 
-		// Return appropriate icon based on file extension
-		if (extension == ".png" || extension == ".jpg" || extension == ".jpeg") {
-			// For textures, show the actual texture
+		auto cachedTex = m_texturePreviewIds.find(path);
+		if (cachedTex != m_texturePreviewIds.end()) {
+			return reinterpret_cast<void*>(static_cast<intptr_t>(cachedTex->second));
+		}
+
+		const bool isTexture = (extension == ".png" || extension == ".jpg" || extension == ".jpeg" ||
+		                        extension == ".dds" || extension == ".tga");
+		if (isTexture) {
+			if (m_failedPreviewPaths.count(path) || !allowLoad || m_previewBudget <= 0) {
+				return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_fileIconTexture->GetID()));
+			}
+			--m_previewBudget;
 			try {
-				auto handle = GetAssetManager().Load<Texture>(path);
-				auto* tex = GetAssetManager().Get(handle);
+				auto  handle = GetAssetManager().Load<Texture>(path);
+				auto* tex    = GetAssetManager().Get(handle);
 				if (tex) {
+					m_texturePreviewIds[path] = tex->GetID();
 					return reinterpret_cast<void*>(static_cast<intptr_t>(tex->GetID()));
 				}
 			} catch (const std::exception& e) {
 				GetUI().log->warn("Failed to load texture for preview {}: {}", path, e.what());
 			}
+			m_failedPreviewPaths.insert(path);
 			return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_fileIconTexture->GetID()));
 		}
-		else if (extension == ".obj") {
-			// For models, render preview with error handling
-			// Check if we've already tried to load this model
-			if (m_loadedModelPaths.find(path) == m_loadedModelPaths.end()) {
-				// First time seeing this model, try to load it
-				m_loadedModelPaths.insert(path);
-				try {
-					GetUI().log->debug("Loading model for preview: {}", path);
-					auto handle = GetAssetManager().Load<Rendering::Model>(path);
-					auto* model = GetAssetManager().Get(handle);
-					if (model) {
-						auto& preview = m_modelPreviews[handle.GetID()];
-						preview.width = static_cast<int>(MODEL_PREVIEW_SIZE);
-						preview.height = static_cast<int>(MODEL_PREVIEW_SIZE);
-						preview.Render(model, GetRenderer().GetModelPreviewShader());
-					}
-				} catch (const std::exception& e) {
-					GetUI().log->warn("Failed to load model for preview {}: {}", path, e.what());
-				}
-			}
-			
-			// Try to get the preview from cache
+
+		if (extension == ".obj") {
 			auto handle = GetAssetManager().GetHandleFromPath<Rendering::Model>(path);
 			if (handle.IsValid()) {
 				auto it = m_modelPreviews.find(handle.GetID());
-				if (it != m_modelPreviews.end()) {
+				if (it != m_modelPreviews.end() && it->second.texture) {
 					return reinterpret_cast<void*>(static_cast<intptr_t>(it->second.texture));
 				}
 			}
+			if (!allowLoad || m_failedPreviewPaths.count(path) || m_previewBudget <= 0) {
+				return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_modelIconTexture->GetID()));
+			}
+			--m_previewBudget;
+			try {
+				handle = GetAssetManager().Load<Rendering::Model>(path);
+				auto* model = GetAssetManager().Get(handle);
+				if (model) {
+					auto& preview  = m_modelPreviews[handle.GetID()];
+					preview.width  = static_cast<int>(MODEL_PREVIEW_SIZE);
+					preview.height = static_cast<int>(MODEL_PREVIEW_SIZE);
+					preview.initialized = false;
+					preview.Render(model, GetRenderer().GetModelPreviewShader());
+					if (preview.texture) {
+						return reinterpret_cast<void*>(static_cast<intptr_t>(preview.texture));
+					}
+				}
+			} catch (const std::exception& e) {
+				GetUI().log->warn("Failed to load model for preview {}: {}", path, e.what());
+			}
+			m_failedPreviewPaths.insert(path);
 			return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_modelIconTexture->GetID()));
 		}
-		else if (extension == ".material") {
-			// For materials, render preview on sphere with error handling
-			// Check if we've already tried to load this material
 
-			if (m_loadedMaterialPaths.find(path) == m_loadedMaterialPaths.end()) {
-				// First time seeing this material, try to load it
-				m_loadedMaterialPaths.insert(path);
-				try {
-					auto handle = GetAssetManager().Load<Material>(path);
-					auto* mat = GetAssetManager().Get(handle);
-					if (mat) {
-						auto& preview = m_materialPreviews[handle.GetID()];
-						preview.width = static_cast<int>(MATERIAL_PREVIEW_SIZE);
-						preview.height = static_cast<int>(MATERIAL_PREVIEW_SIZE);
-						preview.Render(mat, GetRenderer().GetMaterialPreviewShader());
-					}
-				} catch (const std::exception& e) {
-					GetUI().log->warn("Failed to load material for preview {}: {}", path, e.what());
-				}
-			}
-			
-			// Try to get the preview from cache
+		if (extension == ".material") {
 			auto handle = GetAssetManager().GetHandleFromPath<Material>(path);
 			if (handle.IsValid()) {
 				auto it = m_materialPreviews.find(handle.GetID());
-				if (it != m_materialPreviews.end()) {
+				if (it != m_materialPreviews.end() && it->second.texture) {
 					return reinterpret_cast<void*>(static_cast<intptr_t>(it->second.texture));
 				}
 			}
-            GetDefaultLogger()->warn("got here");
+			if (!allowLoad || m_failedPreviewPaths.count(path) || m_previewBudget <= 0) {
+				return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_materialIconTexture->GetID()));
+			}
+			--m_previewBudget;
+			try {
+				handle = GetAssetManager().Load<Material>(path);
+				auto* mat = GetAssetManager().Get(handle);
+				if (mat) {
+					auto& preview  = m_materialPreviews[handle.GetID()];
+					preview.width  = static_cast<int>(MATERIAL_PREVIEW_SIZE);
+					preview.height = static_cast<int>(MATERIAL_PREVIEW_SIZE);
+					preview.initialized = false;
+					preview.Render(mat, GetRenderer().GetMaterialPreviewShader());
+					if (preview.texture) {
+						return reinterpret_cast<void*>(static_cast<intptr_t>(preview.texture));
+					}
+				}
+			} catch (const std::exception& e) {
+				GetUI().log->warn("Failed to load material for preview {}: {}", path, e.what());
+			}
+			m_failedPreviewPaths.insert(path);
 			return reinterpret_cast<void*>(static_cast<intptr_t>(GetUI().m_materialIconTexture->GetID()));
 		}
 		else if (extension == ".wav" || extension == ".mp3" || extension == ".ogg") {
@@ -622,9 +872,12 @@ namespace Engine {
 				
 				// Check if it's a known asset type
 				fileEntry.isAsset = (fileEntry.extension == ".png" || fileEntry.extension == ".jpg" ||
+				                     fileEntry.extension == ".jpeg" || fileEntry.extension == ".dds" ||
 				                     fileEntry.extension == ".obj" || fileEntry.extension == ".material" ||
-				                     fileEntry.extension == ".wav" || fileEntry.extension == ".anim" ||
-				                     fileEntry.extension == ".bin" || fileEntry.extension == ".efk");
+				                     fileEntry.extension == ".wav" || fileEntry.extension == ".mp3" ||
+				                     fileEntry.extension == ".ogg" || fileEntry.extension == ".anim" ||
+				                     fileEntry.extension == ".bin" || fileEntry.extension == ".efk" ||
+				                     fileEntry.extension == ".ozz");
 				
 				files.push_back(fileEntry);
 			} else {
@@ -705,7 +958,8 @@ namespace Engine {
 		}
 
 		GetUI().log->info("Deleted: {}", path);
-		RefreshCurrentDirectory();
+		InvalidatePreview(path);
+		QueueRefresh();
 	}
 
 	void AssetUIRenderer::DuplicateFile(const std::string& path)
@@ -746,7 +1000,24 @@ namespace Engine {
 		GetAssetManager().EnsureMetaFile<Texture>(newPath); // Use any type, just need to generate GUID
 
 		GetUI().log->info("Duplicated: {} -> {}", path, newPath);
-		RefreshCurrentDirectory();
+		QueueRefresh();
+	}
+
+	static void RenameSidecarMeta(const std::string& oldPath, const std::string& newPath)
+	{
+		const std::string oldMeta = oldPath + ".meta";
+		const std::string newMeta = newPath + ".meta";
+		if (!fs::exists(oldMeta)) {
+			return;
+		}
+		std::error_code ec;
+		if (fs::exists(newMeta)) {
+			fs::remove(newMeta, ec);
+		}
+		fs::rename(oldMeta, newMeta, ec);
+		if (ec) {
+			GetUI().log->error("Failed to rename meta: {} -> {} ({})", oldMeta, newMeta, ec.message());
+		}
 	}
 
 	void AssetUIRenderer::RenameFile(const std::string& oldPath, const std::string& newPath)
@@ -762,34 +1033,29 @@ namespace Engine {
 		}
 
 		std::error_code ec;
-		
-		// Use AssetManager's rename for supported assets
-		fs::path fsPath(oldPath);
-		std::string ext = fsPath.extension().string();
-		
-		// Only Texture and Model types support RenameAsset (have m_name field)
-		if (ext == ".png") {
+		fs::rename(oldPath, newPath, ec);
+		if (ec) {
+			GetUI().log->error("Failed to rename file: {} - {}", oldPath, ec.message());
+			return;
+		}
+
+		RenameSidecarMeta(oldPath, newPath);
+
+		const std::string ext = fs::path(newPath).extension().string();
+		if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".dds" || ext == ".tga") {
 			GetAssetManager().RenameAsset<Texture>(oldPath, newPath);
 		} else if (ext == ".obj") {
 			GetAssetManager().RenameAsset<Rendering::Model>(oldPath, newPath);
-		} else {
-			// For other file types, use filesystem rename
-			fs::rename(oldPath, newPath, ec);
-			if (ec) {
-				GetUI().log->error("Failed to rename file: {} - {}", oldPath, ec.message());
-				return;
-			}
-			
-			// Also rename .meta file if it exists
-			std::string oldMetaPath = oldPath + ".meta";
-			std::string newMetaPath = newPath + ".meta";
-			if (fs::exists(oldMetaPath)) {
-				fs::rename(oldMetaPath, newMetaPath, ec);
-			}
 		}
 
+		if (m_selectedFile == oldPath) {
+			m_selectedFile = newPath;
+		}
+		m_rightClickedFile = newPath;
+
 		GetUI().log->info("Renamed: {} -> {}", oldPath, newPath);
-		RefreshCurrentDirectory();
+		InvalidatePreview(oldPath);
+		QueueRefresh();
 	}
 
 	void AssetUIRenderer::RenderContextMenu()

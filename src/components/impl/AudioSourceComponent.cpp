@@ -50,6 +50,9 @@ namespace Engine::Components {
 				Stop();
 			}
 		}
+		else if (ImGui::Button("Play")) {
+			Play();
+		}
 	}
 
 

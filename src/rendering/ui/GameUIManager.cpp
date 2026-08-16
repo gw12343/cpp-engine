@@ -4,6 +4,7 @@
 #include "core/Input.h"
 #include "core/Window.h"
 #include "core/EngineData.h"
+#include "core/Scene.h"
 #include "scripting/ScriptManager.h"
 
 
@@ -161,30 +162,42 @@ namespace Engine {
 		// from UIManager::Play() only in editor mode
 	}
 
-	void GameUIManager::resetDocuments() {
-		if (m_rmlContext && m_rmlLuaInitialized) {
-			log->info("Reloading RmlUi documents...");
-
-			// Close all existing documents to clean up old Lua subscriptions
-			while (m_rmlContext->GetNumDocuments() > 0) {
-				auto* doc = m_rmlContext->GetDocument(0);
-				if (doc) {
-					doc->Close();
-				}
+	void GameUIManager::CloseAllDocuments() {
+		if (!m_rmlContext) {
+			return;
+		}
+		while (m_rmlContext->GetNumDocuments() > 0) {
+			auto* doc = m_rmlContext->GetDocument(0);
+			if (doc) {
+				doc->Close();
+			} else {
+				break;
 			}
+		}
+	}
 
-			// Force stylesheet reload by clearing the cache
-			// This ensures .rcss files are reloaded from disk
-			Rml::Factory::ClearStyleSheetCache();
+	void GameUIManager::resetDocuments() {
+		if (!m_rmlContext || !m_rmlLuaInitialized) {
+			return;
+		}
 
-			// Reload all RmlUI components
-			auto view = GetCurrentSceneRegistry().view<Components::RmlUIComponent>();
-			for (auto entity : view) {
-				auto& rmlComponent = view.get<Components::RmlUIComponent>(entity);
-				Entity e(entity, GetCurrentScene());
-				if (!rmlComponent.GetDocumentPath().empty()) {
-					rmlComponent.LoadDocument(rmlComponent.GetDocumentPath(), e);
-				}
+		log->info("Reloading RmlUi documents...");
+		CloseAllDocuments();
+		Rml::Factory::ClearStyleSheetCache();
+
+		// Stop / New / Open unload the scene before a replacement is loaded.
+		// Never walk the registry unless a scene is actually live.
+		Scene* scene = GetCurrentScene();
+		if (!scene || !scene->GetRegistry()) {
+			return;
+		}
+
+		auto view = scene->GetRegistry()->view<Components::RmlUIComponent>();
+		for (auto entity : view) {
+			auto& rmlComponent = view.get<Components::RmlUIComponent>(entity);
+			Entity e(entity, scene);
+			if (!rmlComponent.GetDocumentPath().empty()) {
+				rmlComponent.LoadDocument(rmlComponent.GetDocumentPath(), e);
 			}
 		}
 	}

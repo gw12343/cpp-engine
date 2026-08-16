@@ -20,8 +20,10 @@ namespace Engine::Components {
 	{
 	}
 
-	void ShadowCaster::RenderInspector(Entity& entity)
+	void ShadowCaster::RenderInspector(Entity& /*entity*/)
 	{
-		ImGui::Text("hi");
+		ImGui::TextWrapped("This entity contributes to the directional shadow cascade. "
+		                   "Place it on lights or large occluders you want in the shadow map.");
+		ImGui::TextDisabled("Cascade resolution and splits are in Editor Settings / RenderSettings.");
 	}
 } // namespace Engine::Components

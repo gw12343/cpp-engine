@@ -14,6 +14,7 @@
 #include <filesystem>
 #include <string>
 #include <vector>
+#include <nfd.h>
 
 namespace Engine {
 	namespace fs = std::filesystem;
@@ -210,9 +211,16 @@ namespace Engine {
 			}
 
 			ImGui::TextWrapped(
-			    "Drop a .fbx file from File Explorer onto the zone below. "
-			    "Runs fbx2ozz.exe (must be on PATH), extracts to a temp folder, "
-			    "and copies the non-skeleton .ozz to resources/animations/{fbx-name}.anim");
+			    "Drop a .fbx file onto the zone below, or use Browse. "
+			    "Runs fbx2ozz.exe (must be on PATH) and copies the clip to resources/animations/{name}.anim");
+
+			if (ImGui::Button("Browse .fbx...")) {
+				nfdchar_t*  outPath = nullptr;
+				if (NFD_OpenDialog("fbx", nullptr, &outPath) == NFD_OKAY && outPath) {
+					ImportFbxToAnimationsFolder(fs::path(outPath));
+					free(outPath);
+				}
+			}
 
 			ImGui::Spacing();
 
@@ -270,10 +278,6 @@ namespace Engine {
 	{
 		ImGui::Begin("Animation");
 
-		if (ImGui::CollapsingHeader("Animation")) {
-			// reserved for future skeleton/mesh stats
-		}
-
 		if (ImGui::CollapsingHeader("Rendering Options")) {
 			auto& animManager    = GetAnimationManager();
 			auto& draw_skeleton  = animManager.GetDrawSkeleton();
@@ -294,8 +298,6 @@ namespace Engine {
 			ImGui::Checkbox("Wireframe", &render_options.wireframe);
 			ImGui::Checkbox("Skip skinning", &render_options.skip_skinning);
 		}
-
-		ImGui::SliderFloat("fov", &GetCamera().m_fov, 45, 120);
 
 		ImGui::Separator();
 		DrawFbxImportUtility();

@@ -199,6 +199,9 @@ namespace Engine {
 
 		std::unordered_map<std::string, LoaderFn> loaders = {
 		    {".png", [this](const std::string& p) { GetAssetManager().Load<Texture>(p); }},
+		    {".jpg", [this](const std::string& p) { GetAssetManager().Load<Texture>(p); }},
+		    {".jpeg", [this](const std::string& p) { GetAssetManager().Load<Texture>(p); }},
+		    {".dds", [this](const std::string& p) { GetAssetManager().Load<Texture>(p); }},
 		    {".material", [this](const std::string& p) { GetAssetManager().Load<Material>(p); }},
 		    {".obj", [this](const std::string& p) { GetAssetManager().Load<Rendering::Model>(p); }},
 		    {".wav", [this](const std::string& p) { GetAssetManager().Load<Audio::SoundBuffer>(p); }},
@@ -315,6 +318,7 @@ namespace Engine {
 
 			GetAssetManager().Update();
 			m_moduleManager->UpdateAll(m_deltaTime);
+			Get().stepOneFrame = false;
 			//FrameMarkEnd("main");
 		}
 	}

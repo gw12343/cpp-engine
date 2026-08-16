@@ -5,6 +5,7 @@
 #include "scripting/ScriptManager.h"
 
 #include "rendering/ui/GameUIManager.h"
+#include "rendering/ui/InspectorUI.h"
 #include <RmlUi/Lua.h>
 
 namespace Engine::Components {
@@ -116,6 +117,10 @@ namespace Engine::Components {
 		
 		if (ImGui::InputText("Document Path", pathBuffer, sizeof(pathBuffer))) {
 			m_documentPath = pathBuffer;
+		}
+		ImGui::SameLine();
+		if (BrowsePathButton("rml", "rml", "resources/ui", &m_documentPath)) {
+			strncpy(pathBuffer, m_documentPath.c_str(), sizeof(pathBuffer) - 1);
 		}
 		
 		if (ImGui::Checkbox("Visible", &m_isVisible)) {

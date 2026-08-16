@@ -10,6 +10,7 @@
 #include "scripting/ScriptManager.h"
 
 #include "rendering/ui/UIManager.h"
+#include "components/impl/TransformComponent.h"
 namespace Engine {
 
 	Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) : m_front(glm::vec3(0.0f, 0.0f, -1.0f)), m_movementSpeed(2.5f), m_mouseSensitivity(0.1f), m_fov(90.0f)
@@ -33,6 +34,30 @@ namespace Engine {
 #ifndef GAME_BUILD
 		// Editor free-fly camera (ImGui-aware). Game builds drive the camera from scripts.
 		if (GetState() != PLAYING) {
+			if (GetUI().isOverSceneView() && !ImGui::GetIO().WantTextInput) {
+				const float scroll = GetInput().GetMouseScrollDelta();
+				if (scroll != 0.0f) {
+					m_position += m_front * scroll * m_movementSpeed * 0.75f;
+				}
+			}
+
+			const bool orbiting = GetUI().isOverSceneView() &&
+			                      (GetInput().IsKeyPressed(GLFW_KEY_LEFT_ALT) || GetInput().IsKeyPressed(GLFW_KEY_RIGHT_ALT)) &&
+			                      GetInput().IsMousePressed(GLFW_MOUSE_BUTTON_LEFT);
+			if (orbiting) {
+				glm::vec3 pivot = m_position + m_front * 5.0f;
+				Entity    sel   = GetUI().m_selectedEntity;
+				if (sel && sel.IsValid() && sel.HasComponent<Components::Transform>()) {
+					pivot = sel.GetComponent<Components::Transform>().GetWorldPosition();
+				}
+				glm::vec2 mouseDelta = GetInput().GetMouseDelta();
+				m_yaw += mouseDelta.x * m_mouseSensitivity;
+				m_pitch = std::clamp(m_pitch + mouseDelta.y * m_mouseSensitivity, -89.0f, 89.0f);
+				UpdateCameraVectors();
+				const float dist = glm::max(0.25f, glm::length(m_position - pivot));
+				m_position       = pivot - m_front * dist;
+			}
+
 			// Handle camera movement based on right mouse button state
 			if (GetInput().IsMousePressed(GLFW_MOUSE_BUTTON_RIGHT) && GetUI().isOverSceneView()) {
 				// Only capture cursor if it's not already captured
@@ -70,6 +95,8 @@ namespace Engine {
 		}
 #endif
 
+
+		GetInput().ResetScroll();
 
 		UpdateCameraVectors();
 

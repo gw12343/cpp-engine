@@ -1,0 +1,38 @@
+{
+    "colors": {
+        "ambient": [
+            0.29411765933036804,
+            0.29411765933036804,
+            0.29411765933036804
+        ],
+        "diffuse": [
+            1.0,
+            0.5980066061019897,
+            0.0
+        ],
+        "emissive": [
+            1.0,
+            0.43853819370269775,
+            0.0
+        ],
+        "specular": [
+            0.5,
+            0.5,
+            0.5
+        ]
+    },
+    "name": "OrangeGrid",
+    "properties": {
+        "shininess": 32.0,
+        "textureScale": [
+            10.0,
+            10.0
+        ]
+    },
+    "textures": {
+        "diffuse": "",
+        "height": "",
+        "normal": "",
+        "specular": ""
+    }
+}
