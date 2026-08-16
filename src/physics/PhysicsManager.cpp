@@ -14,6 +14,7 @@
 #include "PlayerController.h"
 #include "components/impl/PlayerControllerComponent.h"
 #include "components/impl/EntityMetadataComponent.h"
+#include "core/SceneManager.h"
 #include "core/ThreadPool.h"
 #include <vector>
 
@@ -131,6 +132,14 @@ namespace Engine {
 		character  = controller->InitPlayer(physics, allocater);
 	}
 
+	void PhysicsManager::onGameStart()
+	{
+		// Bodies are created in OnAdded from whatever world cache existed at load
+		// (often just a copy of local). Rebuild the hierarchy and push kinematic
+		// poses before the first physics step.
+		GetSceneManager().UpdateTransforms();
+	}
+
 	void PhysicsManager::onUpdate(float dt)
 	{
 		ZoneScopedNC("Physics Update", 0x46556D);
@@ -155,18 +164,20 @@ namespace Engine {
 			}
 		}
 
-		{
-			ZoneScopedNC("Sync Physics Characters", 0x46556D);
-			SyncCharacterEntities();
-		}
-		{
-			ZoneScopedNC("Sync Physics Entities", 0x46556D);
-			SyncPhysicsEntities();
-		}
-
-		// Camera follow / other post-physics script work (must see character pose
-		// after ExtendedUpdate, not the pre-step position).
+		// Only pull physics → transform while playing. Doing this in the editor
+		// overwrote authored local rotations (quat_cast on a scaled matrix) every frame.
 		if (GetState() == PLAYING) {
+			{
+				ZoneScopedNC("Sync Physics Characters", 0x46556D);
+				SyncCharacterEntities();
+			}
+			{
+				ZoneScopedNC("Sync Physics Entities", 0x46556D);
+				SyncPhysicsEntities();
+			}
+
+			// Camera follow / other post-physics script work (must see character pose
+			// after ExtendedUpdate, not the pre-step position).
 			GetScriptManager().RunLateUpdates(dt);
 		}
 	}
@@ -338,27 +349,16 @@ namespace Engine {
 				// Root: local == world so later Scene::UpdateTransforms keeps the capsule pose.
 				tr.SetLocalPosition(worldPos);
 				tr.SetLocalRotation(worldRot);
-				tr.SetWorldPosition(worldPos);
-				tr.SetWorldRotation(worldRot);
 			}
 			else {
-				// Child: world -> local
 				auto parentEntity = GetCurrentScene()->Get(hr.parentEntity);
 				if (parentEntity && parentEntity.HasComponent<Engine::Components::Transform>()) {
-					auto&     parentTr  = parentEntity.GetComponent<Engine::Components::Transform>();
-					glm::mat4 parentInv = glm::inverse(parentTr.GetWorldMatrix());
-
-					glm::mat4 worldMatrix = glm::translate(glm::mat4(1.0f), worldPos) * glm::toMat4(worldRot) * glm::scale(glm::mat4(1.0f), tr.GetWorldScale());
-
-					glm::mat4 localMatrix = parentInv * worldMatrix;
-
-					tr.SetLocalPosition(glm::vec3(localMatrix[3]));
-					tr.SetLocalRotation(glm::quat_cast(localMatrix));
-					tr.SetLocalScale(glm::vec3(glm::length(glm::vec3(localMatrix[0])), glm::length(glm::vec3(localMatrix[1])), glm::length(glm::vec3(localMatrix[2]))));
+					auto& parentTr = parentEntity.GetComponent<Engine::Components::Transform>();
+					tr.SetLocalFromWorld(parentTr.GetWorldMatrix(), worldPos, worldRot, tr.GetWorldScale());
 				}
 			}
 
-			tr.SetWorldMatrix(glm::translate(glm::mat4(1.0f), worldPos) * glm::toMat4(worldRot) * glm::scale(glm::mat4(1.0f), tr.GetWorldScale()));
+			tr.SetWorldFromMatrix(Components::Transform::ComposeTRS(worldPos, worldRot, tr.GetWorldScale()));
 		}
 	}
 
@@ -378,6 +378,8 @@ namespace Engine {
 		auto physicsView = GetCurrentSceneRegistry().view<Engine::Components::Transform, Engine::Components::RigidBodyComponent>();
 		for (auto [entity, tr, rb] : physicsView.each()) {
 			if (rb.bodyID.IsInvalid()) continue;
+			// Kinematic / static bodies are driven by the transform hierarchy.
+			if (rb.motionType != static_cast<int>(EMotionType::Dynamic)) continue;
 			items.push_back(SyncItem{entity, &tr, &rb});
 		}
 
@@ -408,33 +410,18 @@ namespace Engine {
 			auto& hr = GetCurrentSceneRegistry().get<Components::EntityMetadata>(item.entity);
 
 			if (!hr.parentEntity.IsValid()) {
-				tr.SetWorldPosition(worldPos);
 				tr.SetLocalPosition(worldPos);
-				tr.SetWorldRotation(worldRot);
 				tr.SetLocalRotation(worldRot);
 			}
 			else {
 				auto parentEntity = GetCurrentScene()->Get(hr.parentEntity);
 				if (parentEntity && parentEntity.HasComponent<Components::Transform>()) {
-					auto&     parentTr  = parentEntity.GetComponent<Components::Transform>();
-					glm::mat4 parentInv = glm::inverse(parentTr.GetWorldMatrix());
-
-					glm::mat4 worldMatrix = glm::translate(glm::mat4(1.0f), worldPos) * glm::toMat4(worldRot) *
-					                        glm::scale(glm::mat4(1.0f), tr.GetWorldScale());
-
-					glm::mat4 localMatrix = parentInv * worldMatrix;
-
-					tr.SetLocalPosition(glm::vec3(localMatrix[3]));
-					tr.SetLocalRotation(glm::quat_cast(localMatrix));
-					tr.SetLocalScale(glm::vec3(glm::length(glm::vec3(localMatrix[0])),
-					                           glm::length(glm::vec3(localMatrix[1])),
-					                           glm::length(glm::vec3(localMatrix[2]))));
+					auto& parentTr = parentEntity.GetComponent<Components::Transform>();
+					tr.SetLocalFromWorld(parentTr.GetWorldMatrix(), worldPos, worldRot, tr.GetWorldScale());
 				}
 			}
 
-			// Update world matrix for consistency (optional if Scene::UpdateTransforms runs afterward)
-			tr.SetWorldMatrix(glm::translate(glm::mat4(1.0f), tr.GetWorldPosition()) * glm::toMat4(tr.GetWorldRotation()) *
-			                  glm::scale(glm::mat4(1.0f), tr.GetWorldScale()));
+			tr.SetWorldFromMatrix(Components::Transform::ComposeTRS(worldPos, worldRot, tr.GetWorldScale()));
 		});
 	}
 

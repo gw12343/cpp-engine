@@ -235,35 +235,25 @@ namespace Engine {
 		auto& hr = GetComponent<Components::EntityMetadata>();
 		auto& tr = GetComponent<Components::Transform>();
 
-		worldPosition = worldPosition;
-		worldRotation = worldRotation;
-
-
 		if (!hr.parentEntity.IsValid()) {
-			// Root player: local == world
 			tr.SetLocalPosition(worldPosition);
 			tr.SetLocalRotation(worldRotation);
+			tr.SetLocalScale(worldScale);
 		}
 		else {
-			// Child player: world -> local
 			auto parentEntity = GetCurrentScene()->Get(hr.parentEntity);
 			if (parentEntity && parentEntity.HasComponent<Engine::Components::Transform>()) {
-				auto&     parentTr  = parentEntity.GetComponent<Engine::Components::Transform>();
-				glm::mat4 parentInv = glm::inverse(parentTr.GetWorldMatrix());
-
-				glm::mat4 worldMatrix = glm::translate(glm::mat4(1.0f), worldPosition) * glm::toMat4(worldRotation) * glm::scale(glm::mat4(1.0f), tr.GetWorldScale());
-
-				glm::mat4 localMatrix = parentInv * worldMatrix;
-
-				tr.SetLocalPosition(glm::vec3(localMatrix[3]));
-				tr.SetLocalRotation(glm::quat_cast(localMatrix));
-				tr.SetLocalScale(glm::vec3(glm::length(glm::vec3(localMatrix[0])), glm::length(glm::vec3(localMatrix[1])), glm::length(glm::vec3(localMatrix[2]))));
+				auto& parentTr = parentEntity.GetComponent<Engine::Components::Transform>();
+				tr.SetLocalFromWorld(parentTr.GetWorldMatrix(), worldPosition, worldRotation, worldScale);
+			}
+			else {
+				tr.SetLocalPosition(worldPosition);
+				tr.SetLocalRotation(worldRotation);
+				tr.SetLocalScale(worldScale);
 			}
 		}
 
-
-		// Update world matrix for consistency (optional if Scene::UpdateTransforms runs afterward)
-		tr.SetWorldMatrix(glm::translate(glm::mat4(1.0f), tr.GetWorldPosition()) * glm::toMat4(tr.GetWorldRotation()) * glm::scale(glm::mat4(1.0f), tr.GetWorldScale()));
+		tr.SetWorldFromMatrix(Components::Transform::ComposeTRS(worldPosition, worldRotation, worldScale));
 	}
 	std::vector<EntityHandle> Entity::GetChildren()
 	{

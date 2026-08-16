@@ -44,36 +44,6 @@ namespace Engine {
 			dl->AddText(pos, IM_COL32(180, 255, 120, 255), buf);
 		}
 
-		// Extract TRS from a column-major affine matrix without glm::decompose
-		// (glm::decompose param order is easy to swap and can flip rotations).
-		void ExtractTRS(const glm::mat4& m, glm::vec3& translation, glm::quat& rotation, glm::vec3& scale)
-		{
-			translation = glm::vec3(m[3]);
-
-			const float sx = glm::length(glm::vec3(m[0]));
-			const float sy = glm::length(glm::vec3(m[1]));
-			const float sz = glm::length(glm::vec3(m[2]));
-			scale          = glm::vec3(sx, sy, sz);
-
-			glm::mat3 rot(1.0f);
-			const float eps = 1e-8f;
-			rot[0]          = (sx > eps) ? (glm::vec3(m[0]) / sx) : glm::vec3(1.f, 0.f, 0.f);
-			rot[1]          = (sy > eps) ? (glm::vec3(m[1]) / sy) : glm::vec3(0.f, 1.f, 0.f);
-			rot[2]          = (sz > eps) ? (glm::vec3(m[2]) / sz) : glm::vec3(0.f, 0.f, 1.f);
-
-			// Handle reflection (negative scale) so quat_cast stays valid
-			if (glm::determinant(rot) < 0.0f) {
-				scale.x = -scale.x;
-				rot[0]  = -rot[0];
-			}
-
-			rotation = glm::normalize(glm::quat_cast(rot));
-		}
-
-		glm::mat4 ComposeTRS(const glm::vec3& translation, const glm::quat& rotation, const glm::vec3& scale)
-		{
-			return glm::translate(glm::mat4(1.0f), translation) * glm::mat4_cast(rotation) * glm::scale(glm::mat4(1.0f), scale);
-		}
 	} // namespace
 
 	ImGuizmo::OPERATION SceneViewWindow::mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
@@ -168,28 +138,15 @@ namespace Engine {
 					if (changed) {
 						glm::vec3 worldPos, worldScale;
 						glm::quat worldRot;
-						ExtractTRS(model, worldPos, worldRot, worldScale);
-
-						// Keep TRS + world matrix consistent with the gizmo matrix
-						tr.SetWorldPosition(worldPos);
-						tr.SetWorldRotation(worldRot);
-						tr.SetWorldScale(worldScale);
-						tr.SetWorldMatrix(ComposeTRS(worldPos, worldRot, worldScale));
+						Components::Transform::ExtractTRS(model, worldPos, worldRot, worldScale);
+						tr.SetWorldFromMatrix(model);
 
 						// Local = parent^-1 * world (hierarchy)
 						if (meta.parentEntity.IsValid()) {
 							auto parentEntity = GetCurrentScene()->Get(meta.parentEntity);
 							if (parentEntity && parentEntity.HasComponent<Components::Transform>()) {
-								auto&     parentTr    = parentEntity.GetComponent<Components::Transform>();
-								glm::mat4 localMatrix = glm::inverse(parentTr.GetWorldMatrix()) * model;
-
-								glm::vec3 localPos, localScale;
-								glm::quat localRot;
-								ExtractTRS(localMatrix, localPos, localRot, localScale);
-
-								tr.SetLocalPosition(localPos);
-								tr.SetLocalRotation(localRot);
-								tr.SetLocalScale(localScale);
+								auto& parentTr = parentEntity.GetComponent<Components::Transform>();
+								tr.SetLocalFromWorld(parentTr.GetWorldMatrix(), worldPos, worldRot, worldScale);
 							}
 						}
 						else {

@@ -78,13 +78,24 @@ namespace Engine {
 			[[nodiscard]] glm::vec3 GetEulerAngles() const { return glm::degrees(glm::eulerAngles(localRotation)); }
 
 			// Local transform matrix
-			[[nodiscard]] glm::mat4 GetLocalMatrix() const
+			[[nodiscard]] glm::mat4 GetLocalMatrix() const { return ComposeTRS(localPosition, localRotation, localScale); }
+
+			// T * R * S. Inverse of ExtractTRS for positive scales.
+			static glm::mat4 ComposeTRS(const glm::vec3& translation, const glm::quat& rotation, const glm::vec3& scale)
 			{
-				glm::mat4 m = glm::translate(glm::mat4(1.0f), localPosition);
-				m *= glm::toMat4(localRotation);
-				m = glm::scale(m, localScale);
-				return m;
+				return glm::translate(glm::mat4(1.0f), translation) * glm::mat4_cast(glm::normalize(rotation)) * glm::scale(glm::mat4(1.0f), scale);
 			}
+
+			// Recover T / R / S from a column-major affine matrix.
+			// glm::quat_cast on a matrix that still contains scale is wrong — always
+			// strip scale (and a possible reflection) from the 3x3 first.
+			static void ExtractTRS(const glm::mat4& m, glm::vec3& translation, glm::quat& rotation, glm::vec3& scale);
+
+			// Bake a world-space pose into local TRS given the parent's world matrix.
+			void SetLocalFromWorld(const glm::mat4& parentWorld, const glm::vec3& worldPos, const glm::quat& worldRot, const glm::vec3& worldScale);
+
+			// Write world cache from a composed world matrix (used by the hierarchy update).
+			void SetWorldFromMatrix(const glm::mat4& world);
 
 
 			// Sync physics

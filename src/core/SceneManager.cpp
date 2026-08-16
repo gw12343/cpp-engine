@@ -81,28 +81,26 @@ namespace Engine {
 		GetThreadPool().ParallelForIndex(n, /*minPerTask=*/2, [&](int i) {
 			UpdateTransformRecursive(roots[static_cast<size_t>(i)], glm::mat4(1.0f), false);
 		});
+
+		// Kinematic / static bodies follow the authored transform (including parented
+		// platforms). Dynamic bodies are written the other way in PhysicsManager.
+		// Sequential: Jolt BodyInterface is not safe to call from the transform workers.
+		if (GetState() == PLAYING) {
+			auto kinematicView = GetCurrentSceneRegistry().view<Components::Transform, Components::RigidBodyComponent>();
+			for (auto [entity, transform, rb] : kinematicView.each()) {
+				if (rb.bodyID.IsInvalid()) continue;
+				if (rb.motionType == static_cast<int>(JPH::EMotionType::Dynamic)) continue;
+				Entity wrapped(entity, GetCurrentScene());
+				transform.SyncWithPhysics(wrapped);
+			}
+		}
 	}
 	void SceneManager::UpdateTransformRecursive(Entity entity, const glm::mat4& parentMatrix, bool hasParent)
 	{
 		if (!entity.HasComponent<Components::Transform>()) return;
 		auto& transform = entity.GetComponent<Components::Transform>();
 
-		glm::mat4 localMatrix = glm::translate(glm::mat4(1.0f), transform.GetLocalPosition()) * glm::mat4_cast(transform.GetLocalRotation()) * glm::scale(glm::mat4(1.0f), transform.GetLocalScale());
-
-		transform.SetWorldMatrix(parentMatrix * localMatrix);
-		transform.SetWorldPosition(glm::vec3(transform.GetWorldMatrix()[3]));
-		transform.SetWorldRotation(glm::quat_cast(transform.GetWorldMatrix()));
-		transform.SetWorldScale(glm::vec3(glm::length(glm::vec3(transform.GetWorldMatrix()[0])), glm::length(glm::vec3(transform.GetWorldMatrix()[1])), glm::length(glm::vec3(transform.GetWorldMatrix()[2]))));
-
-		// TODO fixme physics? independent simulations?
-		// if (hasParent && entity.HasComponent<Components::RigidBodyComponent>()) {
-		// 	auto& rb = entity.GetComponent<Components::RigidBodyComponent>();
-		// 	// Ensure kinematic if parented
-		// 	rb.SetKinematic(true);
-		// 	rb.SetPosition(transform.GetWorldPosition());
-		// 	// TODO fixme
-		// 	// rb.SetRotation(transform.GetWorldRotation());
-		// }
+		transform.SetWorldFromMatrix(parentMatrix * transform.GetLocalMatrix());
 
 		// Update children
 		auto& hierarchy = entity.GetComponent<Components::EntityMetadata>();

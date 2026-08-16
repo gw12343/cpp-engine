@@ -22,11 +22,53 @@ namespace Engine::Components {
 	void Transform::OnRemoved(Entity& entity)
 	{
 	}
+	void Transform::ExtractTRS(const glm::mat4& m, glm::vec3& translation, glm::quat& rotation, glm::vec3& scale)
+	{
+		translation = glm::vec3(m[3]);
+
+		const float sx = glm::length(glm::vec3(m[0]));
+		const float sy = glm::length(glm::vec3(m[1]));
+		const float sz = glm::length(glm::vec3(m[2]));
+		scale          = glm::vec3(sx, sy, sz);
+
+		glm::mat3 rot(1.0f);
+		const float eps = 1e-8f;
+		rot[0]          = (sx > eps) ? (glm::vec3(m[0]) / sx) : glm::vec3(1.f, 0.f, 0.f);
+		rot[1]          = (sy > eps) ? (glm::vec3(m[1]) / sy) : glm::vec3(0.f, 1.f, 0.f);
+		rot[2]          = (sz > eps) ? (glm::vec3(m[2]) / sz) : glm::vec3(0.f, 0.f, 1.f);
+
+		// Negative determinant means a reflection; fold it into scale so quat_cast
+		// sees a proper rotation.
+		if (glm::determinant(rot) < 0.0f) {
+			scale.x = -scale.x;
+			rot[0]  = -rot[0];
+		}
+
+		rotation = glm::normalize(glm::quat_cast(rot));
+		// q and -q are the same rotation; keep w >= 0 so serialization is stable.
+		if (rotation.w < 0.0f) {
+			rotation = -rotation;
+		}
+	}
+
+	void Transform::SetLocalFromWorld(const glm::mat4& parentWorld, const glm::vec3& worldPos, const glm::quat& worldRot, const glm::vec3& worldScale)
+	{
+		const glm::mat4 localMatrix = glm::inverse(parentWorld) * ComposeTRS(worldPos, worldRot, worldScale);
+		ExtractTRS(localMatrix, localPosition, localRotation, localScale);
+	}
+
+	void Transform::SetWorldFromMatrix(const glm::mat4& world)
+	{
+		worldMatrix = world;
+		ExtractTRS(world, worldPosition, worldRotation, worldScale);
+	}
+
 	void Transform::OnAdded(Entity& entity)
 	{
 		worldPosition = localPosition;
 		worldRotation = localRotation;
 		worldScale    = localScale;
+		worldMatrix   = GetLocalMatrix();
 	}
 
 	void Transform::SyncWithPhysics(Entity& entity)
@@ -86,12 +128,7 @@ namespace Engine::Components {
 				}
 			}
 
-			glm::mat4 localMatrix = glm::translate(glm::mat4(1.0f), GetLocalPosition()) * glm::mat4_cast(GetLocalRotation()) * glm::scale(glm::mat4(1.0f), GetLocalScale());
-			//GetDefaultLogger()->info("updating");
-			SetWorldMatrix(parentMatrix * localMatrix);
-			SetWorldPosition(glm::vec3(GetWorldMatrix()[3]));
-			SetWorldRotation(glm::quat_cast(GetWorldMatrix()));
-			SetWorldScale(glm::vec3(glm::length(glm::vec3(GetWorldMatrix()[0])), glm::length(glm::vec3(GetWorldMatrix()[1])), glm::length(glm::vec3(GetWorldMatrix()[2]))));
+			SetWorldFromMatrix(parentMatrix * GetLocalMatrix());
 			SyncWithPhysics(entity);
 		}
 	}
