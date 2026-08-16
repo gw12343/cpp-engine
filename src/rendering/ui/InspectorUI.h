@@ -33,20 +33,21 @@ namespace Engine {
 
 
 	// Reusable helpers (unchanged, but included for completeness)
-	bool LeftLabelCheckbox(const char* label, bool* value, float labelWidth = 100.0f);
+	// labelWidth <= 0: auto-fit a shared column in this window (won't clip names).
+	bool LeftLabelCheckbox(const char* label, bool* value, float labelWidth = 0.0f);
 
-	bool LeftLabelInputText(const char* label, char* buf, size_t buf_size, float labelWidth = 100.0f, ImGuiInputTextFlags flags = 0);
-	bool LeftLabelInputText(const char* label, std::string* str, float labelWidth = 100.0f, ImGuiInputTextFlags flags = 0);
+	bool LeftLabelInputText(const char* label, char* buf, size_t buf_size, float labelWidth = 0.0f, ImGuiInputTextFlags flags = 0);
+	bool LeftLabelInputText(const char* label, std::string* str, float labelWidth = 0.0f, ImGuiInputTextFlags flags = 0);
 
-	bool LeftLabelSliderFloat(const char* label, float* v, float v_min, float v_max, const char* format = "%.3f", ImGuiSliderFlags flags = 0, float labelWidth = 100.0f);
-	bool LeftLabelDragFloat(const char* label, float* v, float speed = 0.1f, float labelWidth = 100.0f);
-	bool LeftLabelDragFloat2(const char* label, float v[2], float speed = 0.1f, float labelWidth = 100.0f);
-	bool LeftLabelDragFloat3(const char* label, float v[3], float speed = 0.1f, float labelWidth = 100.0f);
+	bool LeftLabelSliderFloat(const char* label, float* v, float v_min, float v_max, const char* format = "%.3f", ImGuiSliderFlags flags = 0, float labelWidth = 0.0f);
+	bool LeftLabelDragFloat(const char* label, float* v, float speed = 0.1f, float labelWidth = 0.0f);
+	bool LeftLabelDragFloat2(const char* label, float v[2], float speed = 0.1f, float labelWidth = 0.0f);
+	bool LeftLabelDragFloat3(const char* label, float v[3], float speed = 0.1f, float labelWidth = 0.0f);
 
-	bool LeftLabelColorEdit3(const char* label, float col[3], ImGuiColorEditFlags flags = 0, float labelWidth = 100.0f);
+	bool LeftLabelColorEdit3(const char* label, float col[3], ImGuiColorEditFlags flags = 0, float labelWidth = 0.0f);
 
-	bool LeftLabelCombo(const char* label, int* currentItem, const char* const items[], int itemsCount, float labelWidth = 100.0f);
-	bool LeftLabelBeginCombo(const char* label, const char* preview_value, ImGuiComboFlags flags = 0, float labelWidth = 100.0f);
+	bool LeftLabelCombo(const char* label, int* currentItem, const char* const items[], int itemsCount, float labelWidth = 0.0f);
+	bool LeftLabelBeginCombo(const char* label, const char* preview_value, ImGuiComboFlags flags = 0, float labelWidth = 0.0f);
 	void LeftLabelEndCombo();
 	template <typename T, typename EditorFunc>
 	bool LeftLabelEditVector(const char* label, std::vector<T>& vec, EditorFunc editor);

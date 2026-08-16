@@ -25,211 +25,178 @@
 
 
 namespace Engine {
-	// Reusable helpers (unchanged, but included for completeness)
+	namespace {
+		constexpr float kLabelPad       = 10.0f;
+		constexpr float kMinWidgetWidth = 112.0f;
+
+		float CurrentLeftLabelWidth()
+		{
+			ImGuiWindow* window = ImGui::GetCurrentWindow();
+			if (!window) {
+				return kLabelPad;
+			}
+			return ImGui::GetStateStorage()->GetFloat(window->GetID("##LLW"), kLabelPad);
+		}
+
+		// Shared among rows in the current ID scope (component / Variables tree).
+		// Width is exactly the longest label — not the remaining panel width.
+		float ResolveLeftLabelWidth(const char* label, float requested)
+		{
+			const float avail      = ImGui::GetContentRegionAvail().x;
+			const float maxAllowed = ImMax(kLabelPad, avail - kMinWidgetWidth);
+
+			float needed = 0.0f;
+			if (label && label[0] != '\0') {
+				needed = ImGui::CalcTextSize(label).x + kLabelPad;
+			}
+			if (requested > 0.0f) {
+				needed = ImMax(needed, requested);
+			}
+
+			ImGuiWindow* window = ImGui::GetCurrentWindow();
+			if (!window) {
+				return ImMin(needed, maxAllowed);
+			}
+
+			ImGuiStorage* st        = ImGui::GetStateStorage();
+			const ImGuiID idW       = window->GetID("##LLW");
+			const ImGuiID idP       = window->GetID("##LLP");
+			const ImGuiID idF       = window->GetID("##LLF");
+			const int     frame     = ImGui::GetFrameCount();
+			const int     prevFrame = st->GetInt(idF, -1);
+			if (prevFrame != frame) {
+				if (prevFrame != -1) {
+					st->SetFloat(idW, st->GetFloat(idP, 0.0f));
+				}
+				st->SetFloat(idP, 0.0f);
+				st->SetInt(idF, frame);
+			}
+
+			const float pending = ImMax(st->GetFloat(idP, 0.0f), needed);
+			st->SetFloat(idP, pending);
+
+			const float committed = st->GetFloat(idW, 0.0f);
+			return ImMin(ImMax(committed, pending), maxAllowed);
+		}
+
+		void BeginLeftLabelRow(const char* label, float requestedWidth = 0.0f)
+		{
+			// Measure before PushID so every field in this scope shares one width.
+			const float w = ResolveLeftLabelWidth(label, requestedWidth);
+			ImGui::PushID(label ? label : "");
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 6));
+
+			const ImVec2 p = ImGui::GetCursorScreenPos();
+			ImGui::Dummy(ImVec2(w, ImGui::GetFrameHeight()));
+			ImGui::SetCursorScreenPos(p);
+			ImGui::AlignTextToFramePadding();
+			ImGui::TextUnformatted(label ? label : "");
+			ImGui::SetCursorScreenPos(ImVec2(p.x + w, p.y));
+			ImGui::SetNextItemWidth(ImMax(kMinWidgetWidth, ImGui::GetContentRegionAvail().x));
+		}
+
+		void EndLeftLabelRow()
+		{
+			ImGui::PopStyleVar();
+			ImGui::PopID();
+		}
+	} // namespace
+
 	bool LeftLabelCheckbox(const char* label, bool* value, float labelWidth)
 	{
-		ImGui::PushID(label);
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 6));
-		ImGui::Columns(2, nullptr, false);
-		ImGui::SetColumnWidth(0, labelWidth);
-		ImGui::AlignTextToFramePadding();
-		ImGui::TextUnformatted(label);
-		ImGui::NextColumn();
-
-		bool changed = ImGui::Checkbox("", value);
-
-		ImGui::Columns(1);
-		ImGui::PopStyleVar();
-		ImGui::PopID();
+		BeginLeftLabelRow(label, labelWidth);
+		bool changed = ImGui::Checkbox("##v", value);
+		EndLeftLabelRow();
 		return changed;
 	}
 
 	bool LeftLabelInputText(const char* label, char* buf, size_t buf_size, float labelWidth, ImGuiInputTextFlags flags)
 	{
-		ImGui::PushID(label);
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 6));
-		ImGui::Columns(2, nullptr, false);
-		ImGui::SetColumnWidth(0, labelWidth);
-		ImGui::AlignTextToFramePadding();
-		ImGui::TextUnformatted(label);
-		ImGui::NextColumn();
-
-		ImGui::SetNextItemWidth(-1); // use remaining width
-		bool changed = ImGui::InputText("", buf, buf_size, flags);
-
-		ImGui::Columns(1);
-		ImGui::PopStyleVar();
-		ImGui::PopID();
+		BeginLeftLabelRow(label, labelWidth);
+		ImGui::SetNextItemWidth(-1);
+		bool changed = ImGui::InputText("##v", buf, buf_size, flags);
+		EndLeftLabelRow();
 		return changed;
 	}
 
 	bool LeftLabelInputText(const char* label, std::string* str, float labelWidth, ImGuiInputTextFlags flags)
 	{
-		ImGui::PushID(label);
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 6));
-		ImGui::Columns(2, nullptr, false);
-		ImGui::SetColumnWidth(0, labelWidth);
-		ImGui::AlignTextToFramePadding();
-		ImGui::TextUnformatted(label);
-		ImGui::NextColumn();
-
-		ImGui::SetNextItemWidth(-1); // use remaining width
-		bool changed = ImGui::InputText("", str, flags);
-
-		ImGui::Columns(1);
-		ImGui::PopStyleVar();
-		ImGui::PopID();
+		BeginLeftLabelRow(label, labelWidth);
+		ImGui::SetNextItemWidth(-1);
+		bool changed = ImGui::InputText("##v", str, flags);
+		EndLeftLabelRow();
 		return changed;
 	}
 
 	bool LeftLabelDragFloat3(const char* label, float v[3], float speed, float labelWidth)
 	{
-		ImGui::PushID(label);
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 6));
-		ImGui::Columns(2, nullptr, false);
-		ImGui::SetColumnWidth(0, labelWidth);
-		ImGui::AlignTextToFramePadding();
-		ImGui::TextUnformatted(label);
-		ImGui::NextColumn();
-
+		BeginLeftLabelRow(label, labelWidth);
 		ImGui::SetNextItemWidth(-1);
-		bool changed = ImGui::DragFloat3("", v, speed, -FLT_MAX, FLT_MAX, "%.3f");
-
-		ImGui::Columns(1);
-		ImGui::PopStyleVar();
-		ImGui::PopID();
+		bool changed = ImGui::DragFloat3("##v", v, speed, -FLT_MAX, FLT_MAX, "%.3f");
+		EndLeftLabelRow();
 		return changed;
 	}
 
 	bool LeftLabelColorEdit3(const char* label, float col[3], ImGuiColorEditFlags flags, float labelWidth)
 	{
-		ImGui::PushID(label);
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 6));
-		ImGui::Columns(2, nullptr, false);
-		ImGui::SetColumnWidth(0, labelWidth);
-		ImGui::AlignTextToFramePadding();
-		ImGui::TextUnformatted(label);
-		ImGui::NextColumn();
-
+		BeginLeftLabelRow(label, labelWidth);
 		ImGui::SetNextItemWidth(-1);
 		bool changed = ImGui::ColorEdit3("##color", col, flags);
-
-		ImGui::Columns(1);
-		ImGui::PopStyleVar();
-		ImGui::PopID();
+		EndLeftLabelRow();
 		return changed;
 	}
 
 	bool LeftLabelDragFloat2(const char* label, float v[2], float speed, float labelWidth)
 	{
-		ImGui::PushID(label);
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 6));
-		ImGui::Columns(2, nullptr, false);
-		ImGui::SetColumnWidth(0, labelWidth);
-		ImGui::AlignTextToFramePadding();
-		ImGui::TextUnformatted(label);
-		ImGui::NextColumn();
-
+		BeginLeftLabelRow(label, labelWidth);
 		ImGui::SetNextItemWidth(-1);
-		bool changed = ImGui::DragFloat2("", v, speed, -FLT_MAX, FLT_MAX, "%.3f");
-
-		ImGui::Columns(1);
-		ImGui::PopStyleVar();
-		ImGui::PopID();
+		bool changed = ImGui::DragFloat2("##v", v, speed, -FLT_MAX, FLT_MAX, "%.3f");
+		EndLeftLabelRow();
 		return changed;
 	}
 
 	bool LeftLabelSliderFloat(const char* label, float* v, float v_min, float v_max, const char* format, ImGuiSliderFlags flags, float labelWidth)
 	{
-		ImGui::PushID(label);
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 6));
-		ImGui::Columns(2, nullptr, false);
-		ImGui::SetColumnWidth(0, labelWidth);
-		ImGui::AlignTextToFramePadding();
-		ImGui::TextUnformatted(label);
-		ImGui::NextColumn();
-
+		BeginLeftLabelRow(label, labelWidth);
 		ImGui::SetNextItemWidth(-1);
-		bool changed = ImGui::SliderFloat("", v, v_min, v_max, format, flags);
-
-		ImGui::Columns(1);
-		ImGui::PopStyleVar();
-		ImGui::PopID();
+		bool changed = ImGui::SliderFloat("##v", v, v_min, v_max, format, flags);
+		EndLeftLabelRow();
 		return changed;
 	}
 
 	bool LeftLabelDragFloat(const char* label, float* v, float speed, float labelWidth)
 	{
-		ImGui::PushID(label);
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 6));
-		ImGui::Columns(2, nullptr, false);
-		ImGui::SetColumnWidth(0, labelWidth);
-		ImGui::AlignTextToFramePadding();
-		ImGui::TextUnformatted(label);
-		ImGui::NextColumn();
-
+		BeginLeftLabelRow(label, labelWidth);
 		ImGui::SetNextItemWidth(-1);
-		bool changed = ImGui::DragFloat("", v, speed, -FLT_MAX, FLT_MAX, "%.3f");
-
-		ImGui::Columns(1);
-		ImGui::PopStyleVar();
-		ImGui::PopID();
+		bool changed = ImGui::DragFloat("##v", v, speed, -FLT_MAX, FLT_MAX, "%.3f");
+		EndLeftLabelRow();
 		return changed;
 	}
 
 	bool LeftLabelCombo(const char* label, int* currentItem, const char* const items[], int itemsCount, float labelWidth)
 	{
-		ImGui::PushID(label);
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 6));
-
-		ImGui::Columns(2, nullptr, false);
-		ImGui::SetColumnWidth(0, labelWidth);
-		ImGui::AlignTextToFramePadding();
-		ImGui::TextUnformatted(label);
-		ImGui::NextColumn();
-
+		BeginLeftLabelRow(label, labelWidth);
 		ImGui::SetNextItemWidth(-1);
-		bool changed = ImGui::Combo("", currentItem, items, itemsCount);
-
-		ImGui::Columns(1);
-		ImGui::PopStyleVar();
-		ImGui::PopID();
+		bool changed = ImGui::Combo("##v", currentItem, items, itemsCount);
+		EndLeftLabelRow();
 		return changed;
 	}
 
-
 	bool LeftLabelBeginCombo(const char* label, const char* preview_value, ImGuiComboFlags flags, float labelWidth)
 	{
-		ImGui::PushID(label);
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 6));
-
-		ImGui::Columns(2, nullptr, false);
-		ImGui::SetColumnWidth(0, labelWidth);
-		ImGui::AlignTextToFramePadding();
-		ImGui::TextUnformatted(label);
-		ImGui::NextColumn();
-
+		BeginLeftLabelRow(label, labelWidth);
 		ImGui::SetNextItemWidth(-1);
 		bool opened = ImGui::BeginCombo("##combo", preview_value, flags);
-
-		// Always clean up regardless of whether combo opened
 		if (!opened) {
-			ImGui::NextColumn();
-			ImGui::Columns(1);
-			ImGui::PopStyleVar();
-			ImGui::PopID();
+			EndLeftLabelRow();
 		}
-
 		return opened;
 	}
 
 	void LeftLabelEndCombo()
 	{
 		ImGui::EndCombo();
-		ImGui::NextColumn(); // Move back to first column
-		ImGui::Columns(1);   // End column layout
-		ImGui::PopStyleVar();
-		ImGui::PopID();
+		EndLeftLabelRow();
 	}
 
 	template <typename T, typename EditorFunc>
@@ -280,12 +247,7 @@ namespace Engine {
 	bool LeftLabelAsset##name(const char* label, AssetHandle<atype>* assetRef)                                                                                                                                                                 \
 	{                                                                                                                                                                                                                                          \
 		bool used = false;                                                                                                                                                                                                                     \
-		ImGui::PushID(label);                                                                                                                                                                                                                  \
-		ImGui::Columns(2, nullptr, false);                                                                                                                                                                                                     \
-		ImGui::SetColumnWidth(0, 100.0f);                                                                                                                                                                                                      \
-		ImGui::AlignTextToFramePadding();                                                                                                                                                                                                      \
-		ImGui::TextUnformatted(label);                                                                                                                                                                                                         \
-		ImGui::NextColumn();                                                                                                                                                                                                                   \
+		BeginLeftLabelRow(label);                                                                                                                                                                                                              \
 		std::string preview = "None";                                                                                                                                                                                                          \
 		bool        valid   = false;                                                                                                                                                                                                           \
 		if (assetRef->IsValid()) {                                                                                                                                                                                                             \
@@ -347,8 +309,7 @@ namespace Engine {
 			ImGui::EndChild();                                                                                                                                                                                                                 \
 			ImGui::EndPopup();                                                                                                                                                                                                                 \
 		}                                                                                                                                                                                                                                      \
-		ImGui::Columns(1);                                                                                                                                                                                                                     \
-		ImGui::PopID();                                                                                                                                                                                                                        \
+		EndLeftLabelRow();                                                                                                                                                                                                                     \
 		return used;                                                                                                                                                                                                                           \
 	} \
 	bool LeftLabelAssetVector##name(const char* label, std::vector<AssetHandle<atype>>& assetRef)                                                                                                                                              \
@@ -402,7 +363,7 @@ namespace Engine {
 			ImGui::EndDragDropTarget();
 		}
 
-		ImGui::Indent(120);
+		ImGui::Indent(CurrentLeftLabelWidth());
 		bool drawDefault = false;
 		if (assetRef->IsValid()) {
 			Entity assetPtr = GetCurrentScene()->Get(*assetRef);
@@ -423,7 +384,7 @@ namespace Engine {
 			ImGui::Text("^^^ Invalid Entity");
 			ImGui::PopStyleColor();
 		}
-		ImGui::Unindent(120);
+		ImGui::Unindent(CurrentLeftLabelWidth());
 
 		return used;
 	}
