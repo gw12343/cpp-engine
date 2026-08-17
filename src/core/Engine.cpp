@@ -42,6 +42,7 @@
 #include "core/Entity.h"
 #include "core/Scene.h"
 #include "utils/Logger.h"
+#include "utils/StartupScene.h"
 #include "assets/AssetWatcher.h"
 
 #if defined(__clang__) || defined(__GNUC__)
@@ -161,7 +162,13 @@ namespace Engine {
 		}
 		{
 			ZoneScopedN("Load Scene 1");
+#ifdef GAME_BUILD
+			const std::string startupScene = ReadStartupScenePath();
+			GetDefaultLogger()->info("Loading game scene: {}", startupScene);
+			GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>(startupScene));
+#else
 			GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>(SCENE1));
+#endif
 		}
 
 #ifdef GAME_BUILD

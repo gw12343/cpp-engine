@@ -120,63 +120,24 @@
                     "scriptPath": "scripts/player_thirdperson.lua",
                     "variables": [
                         {
-                            "key": "shootSound",
+                            "key": "CAMERA_PITCH_MAX",
                             "value": {
                                 "index": 0,
-                                "data": 14.800000190734864
+                                "data": 60.0
                             }
                         },
                         {
-                            "key": "CLIMB_MAX_NORMAL_Y",
+                            "key": "ANIM_FADE",
                             "value": {
                                 "index": 0,
-                                "data": 0.550000011920929
+                                "data": 0.20000000298023225
                             }
                         },
                         {
-                            "key": "SHOOT_HEAD_HEIGHT",
+                            "key": "CLIMB_ATTACH_DIST",
                             "value": {
                                 "index": 0,
-                                "data": 1.100000023841858
-                            }
-                        },
-                        {
-                            "key": "WALK_ANIM",
-                            "value": {
-                                "index": 21,
-                                "data": {
-                                    "guid": "143950bbcc17af70eb0da3ba15412923"
-                                }
-                            }
-                        },
-                        {
-                            "key": "CLIMB_JUMP_PUSH",
-                            "value": {
-                                "index": 0,
-                                "data": 7.0
-                            }
-                        },
-                        {
-                            "key": "CLIMB_LOST_MAX",
-                            "value": {
-                                "index": 0,
-                                "data": 8.0
-                            }
-                        },
-                        {
-                            "key": "SHOOT_FORWARD_OFFSET",
-                            "value": {
-                                "index": 0,
-                                "data": 1.0
-                            }
-                        },
-                        {
-                            "key": "CLIMB_DOWN_ANIM",
-                            "value": {
-                                "index": 21,
-                                "data": {
-                                    "guid": "fe2216824d7ec409241a153af705f2af"
-                                }
+                                "data": 0.949999988079071
                             }
                         },
                         {
@@ -194,54 +155,10 @@
                             }
                         },
                         {
-                            "key": "CLIMB_ATTACH_DIST",
-                            "value": {
-                                "index": 0,
-                                "data": 0.949999988079071
-                            }
-                        },
-                        {
-                            "key": "CAMERA_MIN_DISTANCE",
-                            "value": {
-                                "index": 0,
-                                "data": 2.0
-                            }
-                        },
-                        {
-                            "key": "WALK_SPEED",
-                            "value": {
-                                "index": 0,
-                                "data": 3.5999999046325685
-                            }
-                        },
-                        {
-                            "key": "MOUSE_SENSITIVITY",
-                            "value": {
-                                "index": 0,
-                                "data": 0.10000000149011612
-                            }
-                        },
-                        {
-                            "key": "CAMERA_PITCH_MAX",
-                            "value": {
-                                "index": 0,
-                                "data": 60.0
-                            }
-                        },
-                        {
                             "key": "CAMERA_DISTANCE",
                             "value": {
                                 "index": 0,
                                 "data": 5.0
-                            }
-                        },
-                        {
-                            "key": "FALL_LAND_ANIM",
-                            "value": {
-                                "index": 21,
-                                "data": {
-                                    "guid": "dc23f2bb2553858c43a93bfe1e3ca2d2"
-                                }
                             }
                         },
                         {
@@ -259,40 +176,56 @@
                             }
                         },
                         {
-                            "key": "CLIMB_INTO_DOT",
+                            "key": "FALL_LAND_ANIM",
                             "value": {
-                                "index": 0,
-                                "data": 0.25
-                            }
-                        },
-                        {
-                            "key": "victorySound",
-                            "value": {
-                                "index": 11,
+                                "index": 21,
                                 "data": {
-                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                    "guid": "dc23f2bb2553858c43a93bfe1e3ca2d2"
                                 }
                             }
                         },
                         {
-                            "key": "ANIM_FADE",
+                            "key": "GAMEPAD_LOOK_SENSITIVITY",
                             "value": {
                                 "index": 0,
-                                "data": 0.20000000298023225
+                                "data": 2.5
                             }
                         },
                         {
-                            "key": "CLIMB_JUMP_UP",
+                            "key": "CAMERA_MIN_DISTANCE",
                             "value": {
                                 "index": 0,
-                                "data": 5.0
+                                "data": 2.0
                             }
                         },
                         {
-                            "key": "CLIMB_MANTLE_DURATION",
+                            "key": "MOUSE_SENSITIVITY",
                             "value": {
                                 "index": 0,
-                                "data": 0.550000011920929
+                                "data": 0.10000000149011612
+                            }
+                        },
+                        {
+                            "key": "WALK_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 3.5999999046325685
+                            }
+                        },
+                        {
+                            "key": "CLIMB_DOWN_ANIM",
+                            "value": {
+                                "index": 21,
+                                "data": {
+                                    "guid": "fe2216824d7ec409241a153af705f2af"
+                                }
+                            }
+                        },
+                        {
+                            "key": "RUN_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 7.199999809265137
                             }
                         },
                         {
@@ -312,37 +245,95 @@
                             }
                         },
                         {
-                            "key": "RUN_SPEED",
+                            "key": "SKELETON",
                             "value": {
-                                "index": 0,
-                                "data": 7.199999809265137
-                            }
-                        },
-                        {
-                            "key": "CLIMB_TOP_PROBE",
-                            "value": {
-                                "index": 0,
-                                "data": 0.8500000238418579
-                            }
-                        },
-                        {
-                            "key": "CLIMB_UP_ANIM",
-                            "value": {
-                                "index": 21,
+                                "index": 23,
                                 "data": {
-                                    "guid": "01dc5c917229fcccef27486eb6b97c02"
+                                    "guid": "67c4343cd65864997e096ed75fcbfa3f"
                                 }
                             }
                         },
                         {
-                            "key": "CLIMB_STICK_SKIN",
+                            "key": "CLIMB_MANTLE_FORWARD",
                             "value": {
                                 "index": 0,
-                                "data": 0.05999999865889549
+                                "data": 0.550000011920929
                             }
                         },
                         {
-                            "key": "CAMERA_COLLISION_OFFSET",
+                            "key": "CLIMB_JUMP_PUSH",
+                            "value": {
+                                "index": 0,
+                                "data": 7.0
+                            }
+                        },
+                        {
+                            "key": "WALK_ANIM",
+                            "value": {
+                                "index": 21,
+                                "data": {
+                                    "guid": "143950bbcc17af70eb0da3ba15412923"
+                                }
+                            }
+                        },
+                        {
+                            "key": "CLIMB_INTO_DOT",
+                            "value": {
+                                "index": 0,
+                                "data": 0.25
+                            }
+                        },
+                        {
+                            "key": "ZOOM_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.5
+                            }
+                        },
+                        {
+                            "key": "CAMERA_HEIGHT",
+                            "value": {
+                                "index": 0,
+                                "data": 1.2000000476837159
+                            }
+                        },
+                        {
+                            "key": "GRAVITY_SCALE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
+                            }
+                        },
+                        {
+                            "key": "CLIMB_MAX_NORMAL_Y",
+                            "value": {
+                                "index": 0,
+                                "data": 0.550000011920929
+                            }
+                        },
+                        {
+                            "key": "SHOOT_HEAD_HEIGHT",
+                            "value": {
+                                "index": 0,
+                                "data": 1.100000023841858
+                            }
+                        },
+                        {
+                            "key": "shootSound",
+                            "value": {
+                                "index": 0,
+                                "data": 14.800000190734864
+                            }
+                        },
+                        {
+                            "key": "TURN_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 381.6000061035156
+                            }
+                        },
+                        {
+                            "key": "CLIMB_MANTLE_ARC",
                             "value": {
                                 "index": 0,
                                 "data": 0.20000000298023225
@@ -367,65 +358,24 @@
                             }
                         },
                         {
-                            "key": "CLIMB_MIN_NORMAL_Y",
+                            "key": "CAMERA_COLLISION_OFFSET",
                             "value": {
                                 "index": 0,
-                                "data": -0.25
+                                "data": 0.20000000298023225
                             }
                         },
                         {
-                            "key": "SKELETON",
-                            "value": {
-                                "index": 23,
-                                "data": {
-                                    "guid": "67c4343cd65864997e096ed75fcbfa3f"
-                                }
-                            }
-                        },
-                        {
-                            "key": "CLIMB_MANTLE_FORWARD",
+                            "key": "CLIMB_MANTLE_DURATION",
                             "value": {
                                 "index": 0,
                                 "data": 0.550000011920929
                             }
                         },
                         {
-                            "key": "RUN_ANIM",
-                            "value": {
-                                "index": 21,
-                                "data": {
-                                    "guid": "790de0f9242134e98fbd1827fed1799c"
-                                }
-                            }
-                        },
-                        {
-                            "key": "ZOOM_SENSITIVITY",
+                            "key": "CLIMB_JUMP_UP",
                             "value": {
                                 "index": 0,
-                                "data": 0.5
-                            }
-                        },
-                        {
-                            "key": "FALL_IDLE_ANIM",
-                            "value": {
-                                "index": 21,
-                                "data": {
-                                    "guid": "d989f6ff19c382aed3a4d789e4d8051d"
-                                }
-                            }
-                        },
-                        {
-                            "key": "CAMERA_HEIGHT",
-                            "value": {
-                                "index": 0,
-                                "data": 1.2000000476837159
-                            }
-                        },
-                        {
-                            "key": "GRAVITY_SCALE",
-                            "value": {
-                                "index": 0,
-                                "data": 2.0
+                                "data": 5.0
                             }
                         },
                         {
@@ -443,17 +393,35 @@
                             }
                         },
                         {
-                            "key": "CLIMB_MANTLE_ARC",
+                            "key": "victorySound",
                             "value": {
-                                "index": 0,
-                                "data": 0.20000000298023225
+                                "index": 11,
+                                "data": {
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                }
                             }
                         },
                         {
-                            "key": "CLIMB_MANTLE_MIN_NY",
+                            "key": "CLIMB_TOP_PROBE",
                             "value": {
                                 "index": 0,
-                                "data": 0.6499999761581421
+                                "data": 0.8500000238418579
+                            }
+                        },
+                        {
+                            "key": "SHOOT_FORWARD_OFFSET",
+                            "value": {
+                                "index": 0,
+                                "data": 1.0
+                            }
+                        },
+                        {
+                            "key": "FALL_IDLE_ANIM",
+                            "value": {
+                                "index": 21,
+                                "data": {
+                                    "guid": "d989f6ff19c382aed3a4d789e4d8051d"
+                                }
                             }
                         },
                         {
@@ -464,10 +432,42 @@
                             }
                         },
                         {
-                            "key": "TURN_SPEED",
+                            "key": "CLIMB_UP_ANIM",
+                            "value": {
+                                "index": 21,
+                                "data": {
+                                    "guid": "01dc5c917229fcccef27486eb6b97c02"
+                                }
+                            }
+                        },
+                        {
+                            "key": "CLIMB_LOST_MAX",
                             "value": {
                                 "index": 0,
-                                "data": 381.6000061035156
+                                "data": 8.0
+                            }
+                        },
+                        {
+                            "key": "RUN_ANIM",
+                            "value": {
+                                "index": 21,
+                                "data": {
+                                    "guid": "790de0f9242134e98fbd1827fed1799c"
+                                }
+                            }
+                        },
+                        {
+                            "key": "CLIMB_MANTLE_MIN_NY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.6499999761581421
+                            }
+                        },
+                        {
+                            "key": "CLIMB_MIN_NORMAL_Y",
+                            "value": {
+                                "index": 0,
+                                "data": -0.25
                             }
                         },
                         {
@@ -478,10 +478,10 @@
                             }
                         },
                         {
-                            "key": "GAMEPAD_LOOK_SENSITIVITY",
+                            "key": "CLIMB_STICK_SKIN",
                             "value": {
                                 "index": 0,
-                                "data": 2.5
+                                "data": 0.05999999865889549
                             }
                         }
                     ]

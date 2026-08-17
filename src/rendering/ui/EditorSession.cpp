@@ -19,6 +19,7 @@
 #include "rendering/ui/GameUIManager.h"
 #include "rendering/ui/IconsFontAwesome6.h"
 #include "scripting/ScriptManager.h"
+#include "utils/StartupScene.h"
 
 #include <nfd.h>
 #include <algorithm>
@@ -143,6 +144,7 @@ namespace Engine::UI {
 		GetGameUIManager().resetDocuments();
 		scenePath         = path;
 		playSnapshotValid = false;
+		WriteStartupScenePath(SceneBinPathFromSource(path));
 		ClearDirty();
 		return true;
 	}
@@ -577,6 +579,53 @@ namespace Engine::UI {
 		std::transform(a.begin(), a.end(), a.begin(), [](unsigned char c) { return (char) std::tolower(c); });
 		std::transform(b.begin(), b.end(), b.begin(), [](unsigned char c) { return (char) std::tolower(c); });
 		return a.find(b) != std::string::npos;
+	}
+
+} // namespace Engine::UI
+
+#else // GAME_BUILD — editor UI TUs still compile and call these.
+
+namespace Engine::UI {
+
+	EditorSession& GetEditor()
+	{
+		static EditorSession session;
+		return session;
+	}
+
+	void EditorSession::MarkDirty() { dirty = true; }
+	void EditorSession::ClearDirty() { dirty = false; }
+
+	void EditorSession::NewScene() {}
+	void EditorSession::OpenSceneDialog() {}
+	void EditorSession::SaveScene() {}
+	void EditorSession::SaveSceneAs() {}
+	bool EditorSession::LoadSceneFromPath(const std::string&) { return false; }
+
+	bool EditorSession::SaveEntityAsPrefab(Entity) { return false; }
+	Entity EditorSession::InstantiatePrefabDialog(const EntityHandle&) { return {}; }
+
+	void EditorSession::Play() {}
+	void EditorSession::Pause() {}
+	void EditorSession::Stop() {}
+	void EditorSession::Step() {}
+
+	void EditorSession::HandleShortcuts() {}
+	void EditorSession::DrawShortcutsOverlay() {}
+	void EditorSession::DrawSettingsWindow() {}
+	void EditorSession::DrawConfirmModals() {}
+	void EditorSession::UpdateWindowTitle() const {}
+
+	bool EditorSession::CanUseEditorShortcuts() const { return false; }
+	bool EditorSession::IsEntityLocked(Entity) const { return false; }
+	void EditorSession::ToggleEntityLocked(Entity) {}
+
+	bool EditorSession::MatchesFilter(const std::string& text, const char* filter)
+	{
+		if (!filter || filter[0] == '\0') {
+			return true;
+		}
+		return text.find(filter) != std::string::npos;
 	}
 
 } // namespace Engine::UI

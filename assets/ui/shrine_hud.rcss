@@ -1,0 +1,73 @@
+/* Shrine HUD */
+
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	background-color: transparent;
+}
+
+#hud {
+	position: fixed;
+	top: 20px;
+	right: 20px;
+	min-width: 280px;
+	padding: 16px 22px;
+	background-color: rgba(18, 10, 4, 0.72);
+	border-width: 1px;
+	border-color: #c9a227;
+	font-family: Roboto;
+	color: #f4e6c3;
+	text-align: right;
+}
+
+#title {
+	display: block;
+	margin: 0 0 8px 0;
+	font-size: 18px;
+	color: #e8c547;
+	letter-spacing: 2px;
+}
+
+#hud p {
+	display: block;
+	margin: 4px 0;
+	font-size: 28px;
+	font-weight: bold;
+}
+
+#lanterns {
+	color: #ffb347;
+	font-size: 32px;
+}
+
+#score {
+	color: #ffd76a;
+	font-size: 24px;
+}
+
+#instructions {
+	font-size: 18px;
+	color: #b8a88a;
+	font-weight: normal;
+	margin-top: 10px;
+}
+
+#win-message {
+	display: none;
+	position: fixed;
+	left: 0;
+	width: 100%;
+	text-align: center;
+	font-family: Roboto;
+	font-size: 72px;
+	color: #ffd76a;
+	font-weight: bold;
+	font-effect: outline(2px black);
+}
+
+#win-message.show {
+	display: block;
+	padding-top: 64px;
+}

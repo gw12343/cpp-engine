@@ -14,6 +14,8 @@
 #include <fstream>
 
 #include "core/SceneManager.h"
+#include "rendering/ui/EditorSession.h"
+#include "utils/StartupScene.h"
 
 namespace Engine {
 	namespace fs = std::filesystem;
@@ -199,21 +201,34 @@ namespace Engine {
 		}
 	}
 
-		// Save scene
-		// TODO multi-scene?
-		fs::path outScenesDir = outPath / "scenes";
-
+		// Export the scene currently open in the editor (not a hardcoded scene1).
+		const std::string sceneBinRel = SceneBinPathFromSource(UI::GetEditor().scenePath);
+		fs::path          outScenesDir = outPath / "scenes";
 		fs::create_directories(outScenesDir);
 
-		if (!fs::exists(outScenesDir) || !fs::is_directory(outScenesDir)) {
-			GetDefaultLogger()->warn("scenes/ folder does not exist!");
-			return;
+		const fs::path outBin  = outPath / sceneBinRel;
+		const fs::path projBin = fs::current_path() / sceneBinRel;
+		fs::create_directories(outBin.parent_path());
+
+		BinarySceneLoader::SerializeScene(GetSceneManager().GetActiveScene(), outBin.string());
+		GetDefaultLogger()->info("Packed current scene {} -> {}", UI::GetEditor().scenePath, outBin.string());
+
+		{
+			std::error_code ec;
+			fs::create_directories(projBin.parent_path(), ec);
+			fs::copy_file(outBin, projBin, fs::copy_options::overwrite_existing, ec);
+			if (ec) {
+				GetDefaultLogger()->warn("Could not copy packed scene to {}: {}", projBin.string(), ec.message());
+			}
 		}
 
-        BinarySceneLoader::SerializeScene(
-                GetSceneManager().GetActiveScene(),
-                (outScenesDir / "scene1.bin").string()
-        );
+		WriteStartupScenePath(sceneBinRel);
+		{
+			std::ofstream startupOut(outScenesDir / "startup", std::ios::trunc);
+			if (startupOut) {
+				startupOut << sceneBinRel << '\n';
+			}
+		}
 
 		// Copy and run the game executable
 		fs::path buildDir = fs::current_path() / "build";

@@ -72,9 +72,8 @@ namespace Engine {
 		void        OnFilesDropped(int count, const char** paths);
 		bool        InitGLFW();
 		static bool InitGLAD();
-#ifndef GAME_BUILD
+		// Game builds still run an ImGui frame (NewFrame/Render in onUpdate/SwapBuffers).
 		bool        InitImGui();
-#endif
 
 	};
 } // namespace Engine
