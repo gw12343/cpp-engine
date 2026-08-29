@@ -12,6 +12,8 @@
 #include "scripting/ScriptManager.h"
 #include "rendering/ui/InspectorUI.h"
 #include "assets/Prefab.h"
+#include "core/EnginePaths.h"
+#include "core/ProjectSettings.h"
 
 
 
@@ -89,7 +91,8 @@ namespace Engine::Components {
 			LoadScript(entity, scriptPath);
 		}
 		ImGui::SameLine();
-		if (BrowsePathButton("script", "lua", "scripts", &scriptPath)) {
+		const std::string scriptsDir = GetProject().IsOpen() ? GetProject().ScriptsDirectory() : std::string("scripts");
+		if (BrowsePathButton("script", "lua", scriptsDir.c_str(), &scriptPath)) {
 			GetScriptManager().log->info("Reloading script.");
 			OnRemoved(entity);
 			LoadScript(entity, scriptPath);
@@ -383,11 +386,12 @@ namespace Engine::Components {
 			if (loadPath.size() >= 4 && loadPath.substr(loadPath.size() - 4) == ".lua") {
 				loadPath = loadPath.substr(0, loadPath.size() - 4) + ".luac";
 			}
+			loadPath = ResolvePath(loadPath);
 			GetScriptManager().log->info("Loading compiled script: {}", loadPath);
 			GetScriptManager().lua.script_file(loadPath, env);
 #else
 			// In editor mode, load source .lua files
-			GetScriptManager().lua.script_file(scriptPath, env);
+			GetScriptManager().lua.script_file(ResolvePath(scriptPath), env);
 #endif
 
 			// Bind lifecycle functions

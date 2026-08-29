@@ -19,11 +19,13 @@
 #include "rendering/ui/GameUIManager.h"
 #include "rendering/ui/IconsFontAwesome6.h"
 #include "scripting/ScriptManager.h"
-#include "utils/StartupScene.h"
+#include "core/ProjectSettings.h"
+#include "core/EnginePaths.h"
 
 #include <nfd.h>
 #include <algorithm>
 #include <cctype>
+#include <cstdio>
 #include <fstream>
 #include <filesystem>
 
@@ -39,10 +41,20 @@ namespace Engine::UI {
 		return session;
 	}
 
+	static std::string SceneDialogFolder()
+	{
+		std::error_code ec;
+		fs::path        dir = fs::absolute(GetProject().ScenesDirectory(), ec);
+		fs::create_directories(dir, ec);
+		return dir.lexically_normal().make_preferred().string();
+	}
+
 	static std::string PickJsonFile(bool save)
 	{
-		nfdchar_t*  outPath = nullptr;
-		nfdresult_t result  = save ? NFD_SaveDialog("json", "scenes", &outPath) : NFD_OpenDialog("json", "scenes", &outPath);
+		const std::string defaultDir = SceneDialogFolder();
+		nfdchar_t*        outPath    = nullptr;
+		nfdresult_t       result     = save ? NFD_SaveDialog("json", defaultDir.c_str(), &outPath)
+		                                    : NFD_OpenDialog("json", defaultDir.c_str(), &outPath);
 		if (result != NFD_OKAY || !outPath) {
 			return {};
 		}
@@ -60,10 +72,7 @@ namespace Engine::UI {
 	static std::string PrefabDialogFolder()
 	{
 		std::error_code ec;
-		fs::path        dir = fs::absolute("assets/prefabs", ec);
-		if (ec) {
-			dir = fs::current_path() / "assets" / "prefabs";
-		}
+		fs::path dir = fs::path(GetProject().AssetsDirectory()) / "prefabs";
 		fs::create_directories(dir, ec);
 		return dir.lexically_normal().make_preferred().string();
 	}
@@ -93,28 +102,9 @@ namespace Engine::UI {
 		return path;
 	}
 
-	static void ClearPhysicsBodies()
-	{
-		auto&        physics = GetPhysics();
-		BodyIDVector outBodies;
-		physics.GetPhysicsSystem()->GetBodies(outBodies);
-		for (auto body : outBodies) {
-			if (physics.GetPhysicsSystem()->GetBodyInterface().IsAdded(body)) {
-				physics.GetPhysicsSystem()->GetBodyInterface().RemoveBody(body);
-			}
-		}
-	}
-
 	static void UnloadActiveScene()
 	{
-		GetUI().m_selectedEntity = Entity();
-		GetParticleManager().ResetInternalManager();
-		GetScriptManager().GetEventBus().ClearAllSubscriptions();
-		ClearPhysicsBodies();
-		// Close Rml docs before destroying the registry — resetDocuments() must
-		// not run here because GetCurrentScene() is null after Unload.
-		GetGameUIManager().CloseAllDocuments();
-		GetAssetManager().Unload<Scene>(GetSceneManager().GetActiveScene());
+		GetSceneManager().UnloadActive();
 	}
 
 	void EditorSession::MarkDirty()
@@ -133,18 +123,19 @@ namespace Engine::UI {
 
 	bool EditorSession::LoadSceneFromPath(const std::string& path)
 	{
-		if (path.empty() || !fs::exists(path)) {
+		if (path.empty() || !GetEnginePaths().Exists(path)) {
 			GetDefaultLogger()->error("Scene does not exist: {}", path);
 			return false;
 		}
 
-		UnloadActiveScene();
+		if (!GetSceneManager().LoadScenePath(path, false)) {
+			return false;
+		}
 		SetState(EDITOR);
-		GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>(path));
-		GetGameUIManager().resetDocuments();
 		scenePath         = path;
 		playSnapshotValid = false;
-		WriteStartupScenePath(SceneBinPathFromSource(path));
+		GetProject().lastEditorScene = GetProject().NormalizePath(path);
+		GetProject().Save();
 		ClearDirty();
 		return true;
 	}
@@ -159,8 +150,9 @@ namespace Engine::UI {
 			return;
 		}
 
-		fs::create_directories("scenes");
-		const std::string untitled = "scenes/untitled.json";
+		const fs::path scenesDir = GetProject().ScenesDirectory();
+		fs::create_directories(scenesDir);
+		const std::string untitled = (scenesDir / "untitled.json").generic_string();
 		{
 			std::ofstream os(untitled);
 			os << "{\n    \"entities\": []\n}\n";
@@ -196,9 +188,13 @@ namespace Engine::UI {
 			SaveSceneAs();
 			return;
 		}
-		SCENE_LOADER::SerializeScene(GetSceneManager().GetActiveScene(), scenePath);
+		const std::string diskPath = ResolvePath(scenePath);
+		fs::create_directories(fs::path(diskPath).parent_path());
+		SCENE_LOADER::SerializeScene(GetSceneManager().GetActiveScene(), diskPath);
+		GetProject().lastEditorScene = GetProject().NormalizePath(diskPath);
+		GetProject().Save();
 		ClearDirty();
-		GetDefaultLogger()->info("Saved scene: {}", scenePath);
+		GetDefaultLogger()->info("Saved scene: {}", diskPath);
 	}
 
 	void EditorSession::SaveSceneAs()
@@ -263,7 +259,9 @@ namespace Engine::UI {
 		GetCamera().SaveEditorLocation();
 		const bool wasPaused = GetState() == PAUSED;
 		if (GetState() == EDITOR) {
-			fs::create_directories("scenes");
+			const fs::path scenesDir = GetProject().ScenesDirectory();
+			fs::create_directories(scenesDir);
+			playSnapshotPath = (scenesDir / ".play_snapshot.json").generic_string();
 			SCENE_LOADER::SerializeScene(GetSceneManager().GetActiveScene(), playSnapshotPath);
 			playSnapshotValid = true;
 		}
@@ -537,7 +535,9 @@ namespace Engine::UI {
 	void EditorSession::UpdateWindowTitle() const
 	{
 		std::string name = scenePath.empty() ? "Untitled" : fs::path(scenePath).filename().string();
-		std::string title = std::string("cpp-engine - ") + (dirty ? "*" : "") + name;
+		std::string title = GetProject().IsOpen() ? GetProject().name : std::string("cpp-engine");
+		title += " - ";
+		title += (dirty ? "*" : "") + name;
 		if (GetState() == PLAYING) {
 			title += "  [PLAYING]";
 		}

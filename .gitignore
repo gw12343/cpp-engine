@@ -21,3 +21,6 @@ debug
 out
 /scenes/.play_snapshot.json
 /scenes/.play_snapshot.json.meta
+Projects/**/.play_snapshot.json
+Projects/**/.play_snapshot.json.meta
+editor.json

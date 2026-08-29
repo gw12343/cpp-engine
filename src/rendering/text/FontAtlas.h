@@ -35,7 +35,7 @@ namespace Engine {
 		void Destroy();
 
 		[[nodiscard]] const Glyph* GetGlyph(uint32_t codepoint) const;
-		[[nodiscard]] float        MeasureWidth(const std::string& text) const; // atlas pixels
+		[[nodiscard]] float        MeasureWidth(const std::string& text, float extraSpacing = 0.f) const; // atlas pixels
 		[[nodiscard]] float        GetLineHeight() const { return m_lineHeight; }
 		[[nodiscard]] float        GetAscent() const { return m_ascent; }
 		[[nodiscard]] float        GetPixelSize() const { return static_cast<float>(m_pixelHeight); }

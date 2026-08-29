@@ -1001,6 +1001,27 @@ function createEntity(name) end
 ---@return Entity|nil
 function getPlayerEntity() end
 
+--- Queue a switch to the project scene at index (0 is the game startup scene).
+---@param index integer
+function loadScene(index) end
+
+--- Queue a switch to a scene file.
+---@param path string
+function loadScene(path) end
+
+---@return integer
+function getSceneCount() end
+
+---@return integer
+function getActiveSceneIndex() end
+
+---@param index integer
+---@return string
+function getScenePath(index) end
+
+---@return string
+function getProjectName() end
+
 --- Resolve handle to entity (available in entity script environments).
 ---@param handle EntityHandle
 ---@return Entity

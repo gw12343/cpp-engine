@@ -19,6 +19,7 @@
 #include "entt/entt.hpp"
 #include "ozz/animation/runtime/local_to_model_job.h"
 #include "assets/AssetManager.h"
+#include "core/EnginePaths.h"
 #include "scripting/ScriptManager.h"
 #include "core/ThreadPool.h"
 #include <algorithm>
@@ -269,8 +270,9 @@ namespace Engine {
 
 	ozz::vector<AnimatedMesh>* AnimationManager::LoadMeshesFromPath(std::string path)
 	{
+		const std::string disk = ResolvePath(path);
 		auto meshes = new ozz::vector<Engine::AnimatedMesh>();
-		if (!LoadMeshes(path.c_str(), meshes)) {
+		if (!LoadMeshes(disk.c_str(), meshes)) {
 			GetAnimationManager().log->error("Failed to load meshes from path: {}", path);
 			delete meshes;
 			return nullptr;

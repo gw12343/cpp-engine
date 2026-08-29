@@ -18,6 +18,8 @@
 #include "assets/Prefab.h"
 #include "core/Entity.h"
 #include "core/Input.h"
+#include "core/ProjectSettings.h"
+#include "core/EnginePaths.h"
 #include "rendering/ui/IconsFontAwesome6.h"
 
 
@@ -119,8 +121,10 @@ namespace Engine {
 	AssetUIRenderer::AssetUIRenderer()
 	{
 		listener.owner     = this;
-		m_currentDirectory = "resources";
-		ScanDirectory(m_currentDirectory);
+		m_currentDirectory = GetProject().IsOpen() ? GetProject().AssetsDirectory() : std::string{};
+		if (!m_currentDirectory.empty()) {
+			ScanDirectory(m_currentDirectory);
+		}
 	}
 
 
@@ -253,10 +257,22 @@ namespace Engine {
 
 	void AssetUIRenderer::GoUp()
 	{
-		fs::path p(m_currentDirectory);
-		if (p.has_parent_path() && p != p.root_path()) {
-			NavigateTo(p.parent_path().string());
+		if (m_currentDirectory.empty()) {
+			return;
 		}
+		fs::path p(m_currentDirectory);
+		if (!p.has_parent_path() || p == p.root_path()) {
+			return;
+		}
+		const fs::path parent = p.parent_path();
+		if (GetProject().IsOpen()) {
+			std::error_code ec;
+			const fs::path  rel = fs::relative(parent, GetProject().Root(), ec);
+			if (ec || rel.empty() || rel.generic_string().rfind("..", 0) == 0) {
+				return;
+			}
+		}
+		NavigateTo(parent.string());
 	}
 
 	void AssetUIRenderer::RenderAssetWindow()
@@ -264,6 +280,12 @@ namespace Engine {
 		ImGui::Begin("Assets");
 		m_previewBudget = 4;
 		FlushPreviewInvalidations();
+
+		if (GetProject().IsOpen()) {
+			if (m_currentDirectory.empty() || !fs::exists(m_currentDirectory)) {
+				NavigateTo(GetProject().AssetsDirectory());
+			}
+		}
 
 		if (m_fsDirty.exchange(false) && !m_renamingFile) {
 			RefreshCurrentDirectory();
@@ -380,10 +402,13 @@ namespace Engine {
 
 	void AssetUIRenderer::RenderDirectoryTree()
 	{
-		// Render root folders
-		RenderDirectoryTreeNode("resources", "resources");
-		RenderDirectoryTreeNode("scripts", "scripts");
-		RenderDirectoryTreeNode("assets", "assets");
+		if (!GetProject().IsOpen()) {
+			ImGui::TextDisabled("Open a project to browse assets");
+			return;
+		}
+		RenderDirectoryTreeNode(GetProject().AssetsDirectory(), "assets");
+		RenderDirectoryTreeNode(GetProject().ScriptsDirectory(), "scripts");
+		RenderDirectoryTreeNode(GetProject().ScenesDirectory(), "scenes");
 	}
 
 	void AssetUIRenderer::RenderDirectoryTreeNode(const std::string& dirPath, const std::string& dirName)

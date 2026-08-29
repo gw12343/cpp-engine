@@ -1,6 +1,7 @@
 #include "FontAtlas.h"
 
 #include "core/EngineData.h"
+#include "core/EnginePaths.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -108,8 +109,9 @@ namespace Engine {
 		}
 
 		FT_Face face = nullptr;
-		if (FT_New_Face(library, fontPath.c_str(), 0, &face) != 0) {
-			GetDefaultLogger()->error("FontAtlas: failed to load font '{}'", fontPath);
+		const std::string diskFont = ResolvePath(fontPath);
+		if (FT_New_Face(library, diskFont.c_str(), 0, &face) != 0) {
+			GetDefaultLogger()->error("FontAtlas: failed to load font '{}'", diskFont);
 			FT_Done_FreeType(library);
 			return false;
 		}
@@ -312,15 +314,22 @@ namespace Engine {
 		return nullptr;
 	}
 
-	float FontAtlas::MeasureWidth(const std::string& text) const
+	float FontAtlas::MeasureWidth(const std::string& text, float extraSpacing) const
 	{
 		float  w = 0.f;
+		int    n = 0;
 		size_t i = 0;
 		while (i < text.size()) {
 			const uint32_t cp = DecodeUtf8(text, i);
 			if (cp == '\n') continue;
 			const Glyph* g = GetGlyph(cp);
-			if (g) w += g->advance;
+			if (g) {
+				w += g->advance;
+				++n;
+			}
+		}
+		if (n > 1) {
+			w += extraSpacing * static_cast<float>(n - 1);
 		}
 		return w;
 	}

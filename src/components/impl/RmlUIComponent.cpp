@@ -3,6 +3,8 @@
 #include "core/Entity.h"
 #include "core/Window.h"
 #include "scripting/ScriptManager.h"
+#include "core/EnginePaths.h"
+#include "core/ProjectSettings.h"
 
 #include "rendering/ui/GameUIManager.h"
 #include "rendering/ui/InspectorUI.h"
@@ -47,7 +49,7 @@ namespace Engine::Components {
 				lua["gameObject"] = entity;
 
 				// Load the document
-				m_document = context->LoadDocument(path);
+				m_document = context->LoadDocument(ResolvePath(path));
 				if (m_document) {
 					if (m_isVisible) {
 						m_document->Show();
@@ -119,7 +121,8 @@ namespace Engine::Components {
 			m_documentPath = pathBuffer;
 		}
 		ImGui::SameLine();
-		if (BrowsePathButton("rml", "rml", "resources/ui", &m_documentPath)) {
+		const std::string uiDir = GetProject().IsOpen() ? (GetProject().AssetsDirectory() + "/ui") : std::string("assets/ui");
+		if (BrowsePathButton("rml", "rml", uiDir.c_str(), &m_documentPath)) {
 			strncpy(pathBuffer, m_documentPath.c_str(), sizeof(pathBuffer) - 1);
 		}
 		

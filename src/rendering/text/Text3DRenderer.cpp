@@ -170,7 +170,7 @@ namespace Engine {
 		float       penY   = totalH * 0.5f - atlas->GetAscent() * scale;
 
 		for (const auto& line : lines) {
-			const float lineW = atlas->MeasureWidth(line) * scale;
+			const float lineW = atlas->MeasureWidth(line, text.letterSpacing / scale) * scale;
 			float       penX  = 0.f;
 			if (text.alignment == 1) penX = -lineW * 0.5f;
 			else if (text.alignment == 2) penX = -lineW;

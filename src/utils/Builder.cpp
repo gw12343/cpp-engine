@@ -8,24 +8,26 @@
 
 
 #include <cstdlib>
+#include <vector>
 #include "core/EngineData.h"
 #include "assets/impl/BinarySceneLoader.h"
 #include <sol/sol.hpp>
 #include <fstream>
 
 #include "core/SceneManager.h"
+#include "core/ProjectSettings.h"
+#include "core/EnginePaths.h"
 #include "rendering/ui/EditorSession.h"
-#include "utils/StartupScene.h"
 
 namespace Engine {
 	namespace fs = std::filesystem;
 
 
-	void CopyResourcesAssets(const fs::path& sourceRoot, const fs::path& outRoot)
+	void CopyResourcesAssets(const fs::path& engineRoot, const fs::path& projectRoot, const fs::path& outRoot)
 	{
-        fs::path sourceResources = sourceRoot / "resources";
+        fs::path sourceResources = engineRoot / "resources";
 		fs::path outResources    = outRoot / "resources";
-        fs::path sourceAssets = sourceRoot / "assets";
+        fs::path sourceAssets = projectRoot / "assets";
         fs::path outAssets    = outRoot / "assets";
 
 		if (!fs::exists(sourceResources) || !fs::is_directory(sourceResources)) {
@@ -121,24 +123,27 @@ namespace Engine {
 		// Create output directory
 		CreateOutputDirectory(outPath);
 
-		// Copy resources
-        CopyResourcesAssets(fs::current_path(), outPath);
+		const fs::path engineRoot  = GetEnginePaths().EngineRoot();
+		const fs::path projectRoot = GetProject().IsOpen() ? fs::path(GetProject().Root()) : fs::current_path();
+
+		// Engine resources stay global; game content comes from the project folder.
+		CopyResourcesAssets(engineRoot, projectRoot, outPath);
 
 		// Pre-compile scripts
 
-		fs::path scriptsDir    = fs::current_path() / "scripts";
+		fs::path scriptsDir    = projectRoot / "scripts";
 		fs::path outScriptsDir = outPath / "scripts";
 
 		fs::create_directories(outScriptsDir);
 
 		if (!fs::exists(scriptsDir) || !fs::is_directory(scriptsDir)) {
-			GetDefaultLogger()->warn("scripts/ folder does not exist!");
-			return;
+			GetDefaultLogger()->warn("Project scripts/ folder does not exist");
 		}
 
 		// Compile Lua scripts to bytecode
 	sol::state lua;
-	
+
+	if (fs::exists(scriptsDir) && fs::is_directory(scriptsDir))
 	for (const auto& entry : fs::recursive_directory_iterator(scriptsDir)) {
 		if (fs::is_regular_file(entry.status()) && entry.path().extension() == ".lua") {
 			const fs::path& srcPath      = entry.path();
@@ -201,50 +206,126 @@ namespace Engine {
 		}
 	}
 
-		// Export the scene currently open in the editor (not a hardcoded scene1).
-		const std::string sceneBinRel = SceneBinPathFromSource(UI::GetEditor().scenePath);
-		fs::path          outScenesDir = outPath / "scenes";
+		// Pack every project build scene. Scene 0 is the game startup scene.
+		fs::path outScenesDir = outPath / "scenes";
 		fs::create_directories(outScenesDir);
 
-		const fs::path outBin  = outPath / sceneBinRel;
-		const fs::path projBin = fs::current_path() / sceneBinRel;
-		fs::create_directories(outBin.parent_path());
+		auto packScene = [&](const std::string& sourcePath) {
+			const fs::path diskPath = GetEnginePaths().Resolve(sourcePath);
+			if (sourcePath.empty() || !fs::exists(diskPath)) {
+				GetDefaultLogger()->warn("Skipping missing project scene {}", sourcePath);
+				return;
+			}
+			SceneHandle handle = GetAssetManager().Load<Scene>(sourcePath);
+			if (!handle.IsValid() || !GetAssetManager().Get(handle)) {
+				GetDefaultLogger()->error("Failed to load scene for pack: {}", sourcePath);
+				return;
+			}
+			fs::path binRel = fs::path(sourcePath);
+			if (binRel.extension() == ".json") {
+				binRel.replace_extension(".bin");
+			}
+			const fs::path outBin  = outPath / binRel;
+			const fs::path projBin = fs::current_path() / binRel;
+			fs::create_directories(outBin.parent_path());
+			BinarySceneLoader::SerializeScene(handle, outBin.string());
+			GetDefaultLogger()->info("Packed scene {} -> {}", sourcePath, outBin.string());
 
-		BinarySceneLoader::SerializeScene(GetSceneManager().GetActiveScene(), outBin.string());
-		GetDefaultLogger()->info("Packed current scene {} -> {}", UI::GetEditor().scenePath, outBin.string());
-
-		{
 			std::error_code ec;
 			fs::create_directories(projBin.parent_path(), ec);
 			fs::copy_file(outBin, projBin, fs::copy_options::overwrite_existing, ec);
 			if (ec) {
 				GetDefaultLogger()->warn("Could not copy packed scene to {}: {}", projBin.string(), ec.message());
 			}
-		}
 
-		WriteStartupScenePath(sceneBinRel);
-		{
-			std::ofstream startupOut(outScenesDir / "startup", std::ios::trunc);
-			if (startupOut) {
-				startupOut << sceneBinRel << '\n';
+			if (!(handle == GetSceneManager().GetActiveScene())) {
+				GetAssetManager().Unload<Scene>(handle);
+			}
+		};
+
+		auto& project = GetProject();
+		if (project.scenes.empty()) {
+			packScene(UI::GetEditor().scenePath);
+		}
+		else {
+			for (const auto& scenePath : project.scenes) {
+				packScene(scenePath);
 			}
 		}
 
-		// Copy and run the game executable
-		fs::path buildDir = fs::current_path() / "build";
+		project.Save();
+		try {
+			fs::copy_file(GetProject().FilePath(), outPath / "project.json", fs::copy_options::overwrite_existing);
+		}
+		catch (const std::exception& e) {
+			GetDefaultLogger()->error("Failed to copy project.json: {}", e.what());
+		}
+
+		auto copyIfExists = [&](const fs::path& from, const fs::path& to) -> bool {
+			std::error_code ec;
+			if (!fs::exists(from, ec) || !fs::is_regular_file(from, ec)) {
+				return false;
+			}
+			fs::copy_file(from, to, fs::copy_options::overwrite_existing, ec);
+			if (ec) {
+				GetDefaultLogger()->error("Failed to copy {} -> {}: {}", from.string(), to.string(), ec.message());
+				return false;
+			}
+			GetDefaultLogger()->info("Copied {} -> {}", from.string(), to.string());
+			return true;
+		};
+
+#ifdef _WIN32
+		{
+			const char* runtimeDlls[] = {"soft_oal.dll", "assimp.dll", "OpenAL32.dll"};
+			const fs::path exeDir(GetEnginePaths().ExecutableDirectory());
+			for (const char* dll : runtimeDlls) {
+				if (copyIfExists(engineRoot / dll, outPath / dll)) {
+					continue;
+				}
+				if (!exeDir.empty() && copyIfExists(exeDir / dll, outPath / dll)) {
+					continue;
+				}
+				GetDefaultLogger()->warn("Could not find {} next to the engine or editor", dll);
+			}
+		}
+#endif
+
 		fs::path exeName = "cpp-engine_game";
 #ifdef _WIN32
 		exeName += ".exe";
 #endif
-		fs::path sourceExe = buildDir / exeName;
+#ifdef _DEBUG
+		const char* configDir     = "cmake-build-debug";
+		const char* vsConfigDir   = "Debug";
+#else
+		const char* configDir     = "cmake-build-release";
+		const char* vsConfigDir   = "Release";
+#endif
+
+		std::vector<fs::path> exeCandidates;
+		const fs::path        exeDir(GetEnginePaths().ExecutableDirectory());
+		if (!exeDir.empty()) {
+			exeCandidates.push_back(exeDir / exeName);
+		}
+		exeCandidates.push_back(engineRoot / configDir / exeName);
+		exeCandidates.push_back(engineRoot / "build" / vsConfigDir / exeName);
+		exeCandidates.push_back(engineRoot / "build" / exeName);
+		exeCandidates.push_back(engineRoot / exeName);
+
+		fs::path sourceExe;
+		for (const auto& candidate : exeCandidates) {
+			if (fs::exists(candidate) && fs::is_regular_file(candidate)) {
+				sourceExe = candidate;
+				break;
+			}
+		}
+
 		fs::path destExe = outPath / exeName;
-
-		if (fs::exists(sourceExe)) {
+		if (!sourceExe.empty()) {
 			try {
-				fs::copy_file(sourceExe, destExe, fs::copy_options::overwrite_existing);
-				GetDefaultLogger()->info("Copied executable to {}", destExe.string());
+				copyIfExists(sourceExe, destExe);
 
-				// Set executable permissions on Linux/Mac
 #ifndef _WIN32
 				fs::permissions(destExe, fs::perms::owner_all | fs::perms::group_read | fs::perms::group_exec | fs::perms::others_read | fs::perms::others_exec, fs::perm_options::add);
 #endif
@@ -261,8 +342,10 @@ namespace Engine {
 				GetDefaultLogger()->error("Failed to copy or run executable: {}", e.what());
 			}
 		} else {
-			GetDefaultLogger()->warn("Could not find executable at {}", sourceExe.string());
+			GetDefaultLogger()->warn("Could not find {} in the editor folder or {} / {}", exeName.string(), configDir, vsConfigDir);
 		}
 
     }
 } // namespace Engine
+
+#include "assets/AssetManager.inl"

@@ -1,6 +1,6 @@
 # Lua Scripting API
 
-Reference for gameplay scripts in **cpp-engine**. Bindings are registered via sol2 from C++ (`setLuaBindings` / `AddBindings`). EmmyLua stubs for editor autocomplete live in [`scripts/api/engine.d.lua`](../scripts/api/engine.d.lua).
+Reference for gameplay scripts in **cpp-engine**. Bindings are registered via sol2 from C++ (`setLuaBindings` / `AddBindings`). EmmyLua stubs for editor autocomplete live in [`resources/lua/api/engine.d.lua`](../resources/lua/api/engine.d.lua).
 
 When you add or change a Lua binding, update **this file** and **the stubs**.
 
@@ -156,6 +156,27 @@ Loads an animation asset by path.
 
 ```lua
 local clip = loadAnimation("resources/animations/walk_inplace.anim")
+```
+
+### Project / scenes
+
+A project is a folder with `project.json`, `assets/`, `scenes/`, and `scripts/`. Engine files stay in `resources/` (shaders, fonts, editor icons, Lua stubs). The last opened project path is stored in `editor.json` next to the engine and reopened on launch.
+
+Build scene order lives in the open project's `project.json` (editor: **Project → Project Settings**). Scene **0** is the game startup scene.
+
+| Function | Description |
+|----------|-------------|
+| `loadScene(index)` | Queue a switch to project scene `index` (applied at end of frame) |
+| `loadScene(path)` | Queue a switch to a scene file path |
+| `getSceneCount()` | Number of scenes in the project build list |
+| `getActiveSceneIndex()` | Current project index, or `-1` if the open scene is not in the list |
+| `getScenePath(index)` | Source path of that project scene (`.json`) |
+| `getProjectName()` | Project / game name |
+
+```lua
+if remaining <= 0 then
+    loadScene(1) -- next scene in Project Settings
+end
 ```
 
 ---
@@ -763,7 +784,7 @@ end
 
 1. Add/change binding in C++ (`set_function` / `new_usertype` / `AddBindings`).
 2. Update the matching section here (especially **return table fields**).
-3. Update [`scripts/api/engine.d.lua`](../scripts/api/engine.d.lua).
+3. Update [`resources/lua/api/engine.d.lua`](../resources/lua/api/engine.d.lua).
 4. Prefer a short example when the return shape is non-obvious.
 
 ### EmmyLua / LuaLS
@@ -772,7 +793,7 @@ Point the language server at the stubs (repo root [`.luarc.json`](../.luarc.json
 
 ```json
 {
-  "workspace.library": ["scripts/api"]
+  "workspace.library": ["resources/lua/api"]
 }
 ```
 

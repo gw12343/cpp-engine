@@ -8,22 +8,22 @@
 namespace Engine::UI {
 
 	struct EditorSession {
-		std::string scenePath          = "scenes/scene1.json";
-		std::string playSnapshotPath   = "scenes/.play_snapshot.json";
+		std::string scenePath;
+		std::string playSnapshotPath;
 		bool        dirty              = false;
 		bool        playSnapshotValid  = false;
 
-		bool showConsole        = true;
-		bool showHierarchy      = true;
-		bool showInspector      = true;
-		bool showAssets         = true;
-		bool showMaterialEditor = true;
-		bool showAnimation      = false;
-		bool showAudioDebug     = false;
-		bool showGBufferDebug   = false;
-		bool showModelDebug     = false;
-		bool showSettings       = false;
-		bool showShortcuts      = false;
+		bool showConsole         = true;
+		bool showHierarchy       = true;
+		bool showInspector       = true;
+		bool showAssets          = true;
+		bool showMaterialEditor  = true;
+		bool showAnimation       = false;
+		bool showAudioDebug      = false;
+		bool showGBufferDebug    = false;
+		bool showModelDebug      = false;
+		bool showSettings  = false;
+		bool showShortcuts = false;
 
 		bool  snapEnabled    = false;
 		float snapTranslate  = 0.5f;

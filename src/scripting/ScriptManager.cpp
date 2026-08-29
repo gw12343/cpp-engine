@@ -12,6 +12,10 @@
 #include "ComponentMethodBinder.h"
 #include "LuaWatcher.h"
 #include "core/Entity.h"
+#include "core/EnginePaths.h"
+#include "core/ProjectSettings.h"
+
+#include <filesystem>
 
 
 namespace Engine {
@@ -28,7 +32,7 @@ namespace Engine {
 	{
         ZoneScopedN("Initialize ScriptManager");
 		log->info("Initializing Lua scripting...");
-		lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::table, sol::lib::os, sol::lib::string);
+		lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::table, sol::lib::os, sol::lib::string, sol::lib::package);
 
 
 
@@ -37,6 +41,15 @@ namespace Engine {
 
 			// create_entity(name)
 			lua.set_function("createEntity", [](const std::string& name) { return Engine::Entity::Create(name, GetCurrentScene()); });
+
+			lua.set_function("resolvePath", [](const std::string& path) { return ResolvePath(path); });
+			lua.set_function("dofile", [](const std::string& path) {
+				GetScriptManager().lua.script_file(ResolvePath(path));
+			});
+			if (GetProject().IsOpen()) {
+				const std::string scripts = GetProject().ScriptsDirectory();
+				lua.script("package.path = [[" + scripts + "/?.lua;" + scripts + "/?/init.lua;]] .. package.path");
+			}
 
 
 			lua.set_function("getPlayerEntity", []() -> Engine::Entity* {
@@ -112,9 +125,11 @@ namespace Engine {
 		}
 
 #ifndef GAME_BUILD
-		// Watch the scripts folder recursively
-		efsw::WatchID id = fw.addWatch("scripts", &listener, true);
-		fw.watch();
+		const std::string scriptsDir = GetProject().IsOpen() ? GetProject().ScriptsDirectory() : std::string("scripts");
+		if (std::filesystem::exists(scriptsDir)) {
+			fw.addWatch(scriptsDir, &listener, true);
+			fw.watch();
+		}
 #endif
 	}
 
@@ -122,7 +137,10 @@ namespace Engine {
 	{
 #ifndef GAME_BUILD
 		try {
-			lua.script_file("scripts/init.lua");
+			const std::string initPath = ResolvePath("scripts/init.lua");
+			if (std::filesystem::exists(initPath)) {
+				lua.script_file(initPath);
+			}
 			if (lua["EditorInit"].valid()) {
 				lua["EditorInit"]();
 			}

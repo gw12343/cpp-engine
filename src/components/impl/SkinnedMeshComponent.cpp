@@ -15,6 +15,7 @@
 
 #include "animation/AnimationManager.h"
 #include "rendering/ui/InspectorUI.h"
+#include "core/ProjectSettings.h"
 
 namespace Engine::Components {
 	std::unordered_set<std::vector<ozz::math::Float4x4>*> SkinnedMeshComponent::s_skin_mats;
@@ -126,7 +127,8 @@ namespace Engine::Components {
 
 		LeftLabelInputText("Mesh Path", &meshPath);
 		ImGui::SameLine();
-		BrowsePathButton("mesh", "ozz,fbx", "resources/animations", &meshPath);
+		const std::string meshDir = GetProject().IsOpen() ? (GetProject().AssetsDirectory() + "/animations") : std::string("assets/animations");
+		BrowsePathButton("mesh", "ozz,fbx", meshDir.c_str(), &meshPath);
 		if (ImGui::Button("Load Mesh")) {
 			TryLoadMeshes();
 		}

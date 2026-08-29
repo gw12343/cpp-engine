@@ -7,29 +7,73 @@
 
 #include <fstream>
 #include <cstdio>
+#include <filesystem>
+#include <iterator>
 
 #include <nlohmann/json.hpp>
 #include <cereal/cereal.hpp>
 
 #include "rendering/Texture.h"
 #include "utils/Logger.h"
+#include "core/EnginePaths.h"
+#include "core/ProjectSettings.h"
 
 namespace Engine {
     inline std::string NormalizePath(const std::string& path)
     {
-        // Get canonical absolute path, but if file doesn't exist, weakly_canonical or absolute.
-        try {
-            auto p = std::filesystem::weakly_canonical(std::filesystem::path(path));
-            // Make relative to current working directory for determinism
-            auto cwd = std::filesystem::current_path();
-            if (p.string().find(cwd.string()) == 0) {
-                p = std::filesystem::relative(p, cwd);
-            }
-            return p.string();
-        } catch (...) {
-            // fallback if something goes wrong
-            return std::filesystem::absolute(path).string();
+        return GetEnginePaths().ToLogical(path);
+    }
+
+    inline std::string PhysicalPath(const std::string& path)
+    {
+        return GetEnginePaths().Resolve(path);
+    }
+
+    inline std::string FindAssetPathForGuid(const std::string& guid)
+    {
+        if (guid.empty()) {
+            return {};
         }
+
+        auto scanRoot = [&](const std::filesystem::path& root) -> std::string {
+            std::error_code ec;
+            if (root.empty() || !std::filesystem::exists(root, ec)) {
+                return {};
+            }
+            for (const auto& entry : std::filesystem::recursive_directory_iterator(root, ec)) {
+                if (!entry.is_regular_file()) {
+                    continue;
+                }
+                const auto& p = entry.path();
+                if (p.extension() != ".meta") {
+                    continue;
+                }
+                try {
+                    std::ifstream file(p, std::ios::binary);
+                    std::string   text((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+                    if (text.size() >= 3 && static_cast<unsigned char>(text[0]) == 0xEF &&
+                        static_cast<unsigned char>(text[1]) == 0xBB && static_cast<unsigned char>(text[2]) == 0xBF) {
+                        text.erase(0, 3);
+                    }
+                    nlohmann::json j = nlohmann::json::parse(text);
+                    if (j.contains("guid") && j["guid"].get<std::string>() == guid) {
+                        const std::filesystem::path assetFile = p.parent_path() / p.stem();
+                        return GetEnginePaths().ToLogical(assetFile.string());
+                    }
+                }
+                catch (...) {
+                }
+            }
+            return {};
+        };
+
+        // path.stem() on "idle.ozz.meta" is "idle.ozz" — good.
+        if (GetProject().IsOpen()) {
+            if (const std::string found = scanRoot(GetProject().AssetsDirectory()); !found.empty()) {
+                return found;
+            }
+        }
+        return scanRoot(GetEnginePaths().ResourcesDir());
     }
 
 
@@ -37,16 +81,17 @@ namespace Engine {
     AssetHandle<T> AssetManager::Load(const std::string& path)
     {
         std::string normPath = NormalizePath(path);
+        std::string diskPath = PhysicalPath(normPath);
         auto& storage = GetStorage<T>();
 
-        std::string guid = EnsureMetaFile<T>(normPath);
+        std::string guid = EnsureMetaFile<T>(diskPath);
 
         auto it = storage.guidToAsset.find(guid);
         if (it != storage.guidToAsset.end()) return AssetHandle<T>(guid);
 
         assert(storage.loader);
         try {
-            auto asset = storage.loader->LoadFromFile(normPath);
+            auto asset = storage.loader->LoadFromFile(diskPath);
             if (!asset) {
                 Logger::get("core")->error("[AssetManager] LoadFromFile returned null: {}", normPath);
                 return AssetHandle<T>();
@@ -77,9 +122,20 @@ namespace Engine {
 		const std::string& guid    = handle.GetID();
 
 		auto it = storage.guidToAsset.find(guid);
-		if (it == storage.guidToAsset.end()) return nullptr;
+		if (it != storage.guidToAsset.end()) {
+			return it->second.get();
+		}
+		if (!handle.IsValid() || !storage.loader) {
+			return nullptr;
+		}
 
-		return it->second.get();
+		const std::string path = FindAssetPathForGuid(guid);
+		if (path.empty()) {
+			return nullptr;
+		}
+		Load<T>(path);
+		it = storage.guidToAsset.find(guid);
+		return it != storage.guidToAsset.end() ? it->second.get() : nullptr;
 	}
 
 	template <typename T>
@@ -113,7 +169,7 @@ namespace Engine {
 		}
 
 		if (!path.empty()) {
-			if (storage.loader->Reload(*it->second, path)) {
+			if (storage.loader->Reload(*it->second, PhysicalPath(path))) {
 				Logger::get("core")->info("Reloaded asset: {}", path);
 			} else {
 				Logger::get("core")->error("Failed to reload asset: {}", path);
@@ -173,8 +229,8 @@ namespace Engine {
             storage.pathToGuid.erase(it);
             storage.pathToGuid[normNew] = guid;
 
-            std::string oldMetaPath = normOld + ".meta";
-            std::string newMetaPath = normNew + ".meta";
+            std::string oldMetaPath = PhysicalPath(normOld) + ".meta";
+            std::string newMetaPath = PhysicalPath(normNew) + ".meta";
             if (std::filesystem::exists(oldMetaPath)) {
                 std::error_code ec;
                 std::filesystem::rename(oldMetaPath, newMetaPath, ec);

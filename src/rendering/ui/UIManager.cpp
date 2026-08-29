@@ -32,6 +32,7 @@
 #include "windows/AnimationWindow.h"
 
 #include "utils/Builder.h"
+#include "windows/ProjectUI.h"
 #include "components/impl/ModelRendererComponent.h"
 #include "rendering/particles/Particle.h"
 #include "components/impl/ParticleSystemComponent.h"
@@ -194,6 +195,8 @@ namespace Engine::UI {
 				}
 				ImGui::EndMenu();
 			}
+
+			DrawProjectMenu();
 
 
 			if (ImGui::BeginMenu("View")) {
@@ -494,6 +497,7 @@ namespace Engine::UI {
 		if (editor.showAssets) m_uiAssetRenderer->RenderAssetWindow();
 
 		editor.DrawSettingsWindow();
+		DrawProjectWindows();
 		editor.DrawShortcutsOverlay();
 		editor.DrawConfirmModals();
 

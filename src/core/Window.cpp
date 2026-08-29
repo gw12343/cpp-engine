@@ -12,6 +12,7 @@
 #include <utility>
 
 #include "scripting/ScriptManager.h"
+#include "core/ProjectSettings.h"
 #include "rendering/ui/IconsFontAwesome6.h"
 #include "imguizmo/ImGuizmo.h"
 #include "imguizmo/ImGuizmo.h"
@@ -141,7 +142,36 @@ namespace Engine {
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 
+#ifdef GAME_BUILD
+		const auto& project = GetProject();
+		if (!project.name.empty()) {
+			m_title = project.name;
+		}
+		GLFWmonitor* monitor = nullptr;
+		int          createW = project.windowWidth > 0 ? project.windowWidth : m_width;
+		int          createH = project.windowHeight > 0 ? project.windowHeight : m_height;
+		if (project.windowMode == WindowMode::Fullscreen) {
+			monitor = glfwGetPrimaryMonitor();
+			if (const GLFWvidmode* mode = monitor ? glfwGetVideoMode(monitor) : nullptr) {
+				createW = mode->width;
+				createH = mode->height;
+			}
+		}
+		else if (project.windowMode == WindowMode::Borderless) {
+			glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+			if (GLFWmonitor* primary = glfwGetPrimaryMonitor()) {
+				if (const GLFWvidmode* mode = glfwGetVideoMode(primary)) {
+					createW = mode->width;
+					createH = mode->height;
+				}
+			}
+		}
+		m_width  = createW;
+		m_height = createH;
+		m_window = glfwCreateWindow(createW, createH, m_title.c_str(), monitor, nullptr);
+#else
 		m_window = glfwCreateWindow(m_width, m_height, m_title.c_str(), nullptr, nullptr);
+#endif
 		if (!m_window) {
 			spdlog::error("Failed to create GLFW window");
 			glfwTerminate();
@@ -177,7 +207,11 @@ namespace Engine {
 		glfwSetWindowUserPointer(m_window, this);
 
 		glfwMakeContextCurrent(m_window);
-		glfwSwapInterval(1);
+#ifdef GAME_BUILD
+		glfwSwapInterval(GetProject().vsync ? 1 : 0);
+#else
+		glfwSwapInterval(0);
+#endif
 
 		return true;
 	}

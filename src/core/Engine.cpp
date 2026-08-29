@@ -42,7 +42,11 @@
 #include "core/Entity.h"
 #include "core/Scene.h"
 #include "utils/Logger.h"
-#include "utils/StartupScene.h"
+#include "core/ProjectSettings.h"
+#include "core/EnginePaths.h"
+#ifndef GAME_BUILD
+#include "rendering/ui/EditorSession.h"
+#endif
 #include "assets/AssetWatcher.h"
 
 #if defined(__clang__) || defined(__GNUC__)
@@ -59,6 +63,7 @@
 #include "TracyClient.cpp"
 #include "core/ThreadPool.h"
 
+#include <filesystem>
 #include <fstream>
 #include <nlohmann/json.hpp>
 
@@ -132,7 +137,10 @@ namespace Engine {
 #ifndef GAME_BUILD
 		m_assetFileWatcher = std::make_unique<efsw::FileWatcher>();
 		m_assetWatcher     = std::make_unique<HotReloadWatcher>();
-		m_assetFileWatcher->addWatch("resources", m_assetWatcher.get(), true);
+		m_assetFileWatcher->addWatch(GetEnginePaths().ResourcesDir(), m_assetWatcher.get(), true);
+		if (GetProject().IsOpen()) {
+			m_assetFileWatcher->addWatch(GetProject().AssetsDirectory(), m_assetWatcher.get(), true);
+		}
 		m_assetFileWatcher->watch();
 #endif
 	}
@@ -161,13 +169,40 @@ namespace Engine {
 			LoadGameAssets();
 		}
 		{
-			ZoneScopedN("Load Scene 1");
+			ZoneScopedN("Load Scene");
 #ifdef GAME_BUILD
-			const std::string startupScene = ReadStartupScenePath();
-			GetDefaultLogger()->info("Loading game scene: {}", startupScene);
-			GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>(startupScene));
+			if (GetProject().SceneCount() > 0) {
+				GetDefaultLogger()->info("Loading game scene 0: {}", GetProject().RuntimeScenePath(0));
+				GetSceneManager().LoadSceneIndex(0, false);
+			}
+			else {
+				GetDefaultLogger()->error("Project has no scenes in the build list");
+			}
 #else
-			GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>(SCENE1));
+			if (GetProject().IsOpen()) {
+				std::string editorScene = GetProject().lastEditorScene;
+				if (editorScene.empty() || !GetEnginePaths().Exists(editorScene)) {
+					editorScene = GetProject().SourceScenePath(0);
+				}
+				if (!editorScene.empty() && GetEnginePaths().Exists(editorScene)) {
+					GetDefaultLogger()->info("Loading editor scene: {}", editorScene);
+					GetSceneManager().LoadScenePath(editorScene, false);
+					UI::GetEditor().scenePath = editorScene;
+				}
+			}
+			if (!GetCurrentScene()) {
+				if (GetProject().IsOpen()) {
+					UI::GetEditor().NewScene();
+				}
+				else {
+					const fs::path emptyScene = fs::temp_directory_path() / "cpp-engine-empty.json";
+					{
+						std::ofstream os(emptyScene);
+						os << "{\n    \"entities\": []\n}\n";
+					}
+					GetSceneManager().LoadScenePath(emptyScene.string(), false);
+				}
+			}
 #endif
 		}
 
@@ -187,7 +222,7 @@ namespace Engine {
 		// .ozz is shared by clips / skeletons / skinned meshes — only auto-load
 		// files whose .meta type is Animation or Skeleton.
 		auto loadOzzByMeta = [](const std::string& p) {
-			const std::string metaPath = p + ".meta";
+			const std::string metaPath = ResolvePath(p) + ".meta";
 			if (!fs::exists(metaPath)) return;
 			try {
 				std::ifstream file(metaPath);
@@ -222,15 +257,19 @@ namespace Engine {
 		    {".prefab", [this](const std::string& p) { GetAssetManager().Load<Prefab>(p); }},
 		};
 
-		auto loadFromAssetSubfolder = [&](const std::string& assetSubfolder) {
+		auto loadFromAssetSubfolder = [&](const fs::path& root, const std::string& assetSubfolder) {
 			int loadedCount = 0;
 
 			try {
-				// Use current working directory as project root
-				fs::path projectRootCanonical = fs::canonical(fs::current_path());
-
-				// Asset folder absolute path under project root
-				fs::path assetFolderCanonical = fs::canonical(projectRootCanonical / assetSubfolder);
+				if (root.empty() || !fs::exists(root)) {
+					return;
+				}
+				fs::path projectRootCanonical = fs::canonical(root);
+				fs::path folder = projectRootCanonical / assetSubfolder;
+				if (!fs::exists(folder)) {
+					return;
+				}
+				fs::path assetFolderCanonical = fs::canonical(folder);
 
 				for (const auto& entry : fs::recursive_directory_iterator(assetFolderCanonical)) {
 					if (!entry.is_regular_file()) continue;
@@ -278,8 +317,10 @@ namespace Engine {
 		};
 
 
-		loadFromAssetSubfolder("resources");
-		loadFromAssetSubfolder("assets");
+		loadFromAssetSubfolder(GetEnginePaths().EngineRoot(), "resources");
+		if (GetProject().IsOpen()) {
+			loadFromAssetSubfolder(GetProject().Root(), "assets");
+		}
 
 
 		// TODO store assets to be loaded at the start in scene json
@@ -329,6 +370,7 @@ namespace Engine {
 
 			GetAssetManager().Update();
 			m_moduleManager->UpdateAll(m_deltaTime);
+			GetSceneManager().FlushPendingSceneLoad();
 			Get().stepOneFrame = false;
 			//FrameMarkEnd("main");
 		}

@@ -1,0 +1,14 @@
+{
+    "lastEditorScene": "scenes/shrine.json",
+    "name": "TestProject",
+    "scenes": [
+        "../../../../../../../scenes/shrine.json",
+        "../../../../../../../scenes/scene1.json"
+    ],
+    "window": {
+        "height": 1200,
+        "mode": "windowed",
+        "vsync": true,
+        "width": 1600
+    }
+}

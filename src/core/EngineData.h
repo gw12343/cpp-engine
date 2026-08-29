@@ -11,10 +11,8 @@
 
 #ifndef GAME_BUILD
 #define SCENE_LOADER JSONSceneLoader
-#define SCENE1 "scenes/scene1.json"
 #else
 #define SCENE_LOADER BinarySceneLoader
-#define SCENE1 "scenes/scene1.bin"
 #endif
 
 namespace Engine {
