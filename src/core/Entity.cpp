@@ -44,7 +44,9 @@ namespace Engine {
 				// remove as parent of children
 				for (auto& c : em.children) {
 					Entity e = GetCurrentScene()->Get(c);
-					e.SetParent(EntityHandle()); // unparent
+					if (e.IsValid()) {
+						e.SetParent(EntityHandle());
+					}
 				}
 			}
 		}
@@ -53,41 +55,52 @@ namespace Engine {
 
 	void Entity::Destroy()
 	{
+		if (!IsValid()) {
+			return;
+		}
 		auto reg = m_scene->GetRegistry();
 
-		if (reg->valid(GetENTTHandle())) {
-			if (HasComponent<Components::EntityMetadata>()) {
-				auto&        em           = GetComponent<Components::EntityMetadata>();
+		std::vector<EntityHandle> children;
+		EntityHandle              parentHandle;
+		if (HasComponent<Components::EntityMetadata>()) {
+			auto& em     = GetComponent<Components::EntityMetadata>();
+			children     = em.children;
+			parentHandle = em.parentEntity;
+			em.children.clear();
+			em.parentEntity = EntityHandle();
+		}
 
-                std::vector<EntityHandle> entitiesToRemove;
-                entitiesToRemove.insert(entitiesToRemove.end(), em.children.begin(), em.children.end());
-
-                for(auto& childHandle : entitiesToRemove){
-					Entity child = GetCurrentScene()->Get(childHandle);
-                    child.Destroy();
-                }
-
-				EntityHandle parentHandle = em.parentEntity;
-				if (parentHandle.IsValid()) {
-					Entity parent = GetCurrentScene()->Get(parentHandle);
-					parent.RemoveChild(GetEntityHandle());
-				}
-
-				em.OnRemoved(*this);
-				for (auto& c : em.children) {
-					Entity e = GetCurrentScene()->Get(c);
-					e.SetParent(EntityHandle()); // unparent
-					e.Destroy();
-				}
+		for (const auto& childHandle : children) {
+			Entity child = m_scene->Get(childHandle);
+			if (child.IsValid()) {
+				child.Destroy();
 			}
+		}
+
+		// A cycle or overlapping Destroy can kill this entity while we were in children.
+		if (!IsValid()) {
+			return;
+		}
+
+		if (parentHandle.IsValid()) {
+			Entity parent = m_scene->Get(parentHandle);
+			if (parent.IsValid()) {
+				parent.RemoveChild(GetEntityHandle());
+			}
+		}
+
+		if (HasComponent<Components::EntityMetadata>()) {
+			GetComponent<Components::EntityMetadata>().OnRemoved(*this);
+		}
 
 #define X(type, name, fancy)                                                                                                                                                                                                                   \
-	if (HasComponent<type>()) {                                                                                                                                                                                                                \
-		GetComponent<type>().OnRemoved(*this);                                                                                                                                                                                                 \
-	}
-			COMPONENT_LIST
+		if (HasComponent<type>()) {                                                                                                                                                                                                            \
+			GetComponent<type>().OnRemoved(*this);                                                                                                                                                                                             \
+		}
+		COMPONENT_LIST
 #undef X
 
+		if (IsValid()) {
 			reg->destroy(GetENTTHandle());
 		}
 	}
@@ -128,18 +141,22 @@ namespace Engine {
 		auto registry                                              = m_scene->GetRegistry();
 		registry->get<Components::EntityMetadata>(m_handle).active = active;
 	}
-	bool Entity::IsValid()
+	bool Entity::IsValid() const
 	{
 		if (m_handle == entt::null) return false;
 		if (m_scene == nullptr) return false;
-		if (!m_scene->GetRegistry()->valid(m_handle)) return false;
-		return true;
+		auto reg = m_scene->GetRegistry();
+		if (!reg) return false;
+		return reg->valid(m_handle);
 	}
 
 	void Entity::SetParent(const EntityHandle& newParent)
 	{
-		auto& registry = GetCurrentSceneRegistry();
+		if (!IsValid() || !HasComponent<Components::EntityMetadata>()) {
+			return;
+		}
 
+		auto& registry = *m_scene->GetRegistry();
 
 		auto&        childHierarchy = registry.get<Components::EntityMetadata>(m_handle);
 		EntityHandle childHandle    = EntityHandle(childHierarchy.guid);
@@ -149,7 +166,7 @@ namespace Engine {
 		if (childHierarchy.parentEntity.IsValid()) {
 			Entity childHParent = GetCurrentScene()->Get(childHierarchy.parentEntity);
 
-			if (childHParent) {
+			if (childHParent.IsValid()) {
 				auto& oldParentData = childHParent.GetComponent<Components::EntityMetadata>();
 
 				oldParentData.children.erase(std::remove(oldParentData.children.begin(), oldParentData.children.end(), childHandle), oldParentData.children.end());
@@ -162,11 +179,10 @@ namespace Engine {
 			GetDefaultLogger()->info("empty parent");
 			return;
 		}
-		Entity par   = GetCurrentScene()->Get(newParent);
-		Entity child = GetCurrentScene()->Get(childHandle);
+		Entity par = GetCurrentScene()->Get(newParent);
 
 		// entity does not exist, just set to root
-		if (!par) {
+		if (!par.IsValid()) {
 			childHierarchy.parentEntity = EntityHandle();
 			GetDefaultLogger()->info("bad parent");
 			return;
@@ -266,6 +282,9 @@ namespace Engine {
 	}
 	void Entity::RemoveChild(const EntityHandle& handle)
 	{
+		if (!IsValid() || !HasComponent<Components::EntityMetadata>()) {
+			return;
+		}
 		auto& meta = GetComponent<Components::EntityMetadata>();
 		auto& v    = meta.children;
 

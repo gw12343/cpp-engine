@@ -407,8 +407,24 @@ namespace Engine::UI {
 
 	Entity UIManager::DuplicateEntity(Entity source)
 	{
-		if (!source || !source.IsValid()) {
+		if (!source || !source.IsValid() || !source.HasComponent<Components::EntityMetadata>()) {
 			return Entity();
+		}
+
+		Prefab prefab;
+		if (!Prefab::CaptureFromEntity(source, prefab)) {
+			return Entity();
+		}
+
+		// Capture strips PrefabInstance (it's a live asset link). Keep it on a
+		// duplicate so the copy still points at the same prefab asset.
+		if (source.HasComponent<Components::PrefabInstance>()) {
+			for (auto& se : prefab.entities) {
+				if (se.meta.guid == prefab.rootGuid) {
+					se.PrefabInstance = source.GetComponent<Components::PrefabInstance>();
+					break;
+				}
+			}
 		}
 
 		std::string newName = source.GetName();
@@ -416,24 +432,18 @@ namespace Engine::UI {
 			newName = "Copy of " + newName;
 		}
 
-		Entity copy = Entity::Create(newName, source.m_scene);
-
-#define X(type, name, fancy)                                                                                                                                                                                                                   \
-		if (source.HasComponent<type>()) {                                                                                                                                                                                                     \
-			copy.AddComponent<type>(source.GetComponent<type>());                                                                                                                                                                              \
-		}
-		COMPONENT_LIST
-#undef X
-
-		auto& srcMeta = source.GetComponent<Components::EntityMetadata>();
-		if (srcMeta.parentEntity.IsValid()) {
-			copy.SetParent(srcMeta.parentEntity);
+		const EntityHandle parent = source.GetComponent<Components::EntityMetadata>().parentEntity;
+		Entity             copy   = prefab.Instantiate(source.m_scene, parent);
+		if (!copy || !copy.IsValid()) {
+			return Entity();
 		}
 
+		copy.SetName(newName);
 		if (copy.HasComponent<Components::Transform>()) {
 			auto& tr = copy.GetComponent<Components::Transform>();
 			tr.SetLocalPosition(tr.GetLocalPosition() + glm::vec3(1.0f, 0.0f, 0.0f));
 		}
+		GetSceneManager().UpdateTransforms();
 
 		GetUndo().RecordSpawned(copy, "Duplicate Entity");
 		return copy;
@@ -562,6 +572,32 @@ namespace Engine::UI {
 		return false;
 	}
 
+	void UIManager::RevealInHierarchy(Entity entity)
+	{
+		m_hierarchyRevealGuids.clear();
+		m_hierarchyScrollToSelection = false;
+		if (!entity.IsValid() || !entity.HasComponent<Components::EntityMetadata>()) {
+			return;
+		}
+
+		GetEditor().showHierarchy = true;
+		GetEditor().hierarchyFilter[0] = '\0';
+		Entity current            = entity;
+		while (current.IsValid() && current.HasComponent<Components::EntityMetadata>()) {
+			auto& meta = current.GetComponent<Components::EntityMetadata>();
+			if (!meta.parentEntity.IsValid()) {
+				break;
+			}
+			Entity parent = GetCurrentScene()->Get(meta.parentEntity);
+			if (!parent.IsValid() || !parent.HasComponent<Components::EntityMetadata>()) {
+				break;
+			}
+			m_hierarchyRevealGuids.insert(parent.GetComponent<Components::EntityMetadata>().guid);
+			current = parent;
+		}
+		m_hierarchyScrollToSelection = true;
+	}
+
 	void UIManager::DrawAddEntityMenu()
 	{
 		ImGui::Text("Add Entity");
@@ -687,6 +723,7 @@ namespace Engine::UI {
 		}
 
 		FlushHierarchyCommands();
+		m_hierarchyRevealGuids.clear();
 	}
 
 	void UIManager::RenderEntityTreeNode(Entity entity)
@@ -724,7 +761,14 @@ namespace Engine::UI {
 		std::snprintf(label, sizeof(label), "%s %s", HierarchyTypeIcon(entity), metadata.name.c_str());
 		// Later eye/lock buttons overlap this row — allow them to take the click.
 		ImGui::SetNextItemAllowOverlap();
+		if (m_hierarchyRevealGuids.count(guid)) {
+			ImGui::SetNextItemOpen(true, ImGuiCond_Always);
+		}
 		bool nodeOpen = ImGui::TreeNodeEx(label, flags);
+		if (isSelected && m_hierarchyScrollToSelection) {
+			ImGui::SetScrollHereY(0.5f);
+			m_hierarchyScrollToSelection = false;
+		}
 
 		const ImVec2 nodeMin   = ImGui::GetItemRectMin();
 		const ImVec2 nodeSize  = ImGui::GetItemRectSize();

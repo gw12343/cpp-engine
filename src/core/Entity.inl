@@ -23,6 +23,9 @@ namespace Engine {
 	template <typename T>
 	[[nodiscard]] bool Entity::HasComponent() const
 	{
+		if (!IsValid()) {
+			return false;
+		}
 		return m_scene->GetRegistry()->template all_of<T>(m_handle);
 	}
 
@@ -33,6 +36,9 @@ namespace Engine {
 			return;
 		}
 		GetComponent<T>().OnRemoved(*this);
+		if (!IsValid() || !m_scene->GetRegistry()->template all_of<T>(m_handle)) {
+			return;
+		}
 		m_scene->GetRegistry()->template remove<T>(m_handle);
 	}
 

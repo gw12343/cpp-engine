@@ -190,6 +190,9 @@ namespace Engine {
 
 			if (entityID != 0xFFFFFF) {
 				*selectedEntity = Entity{static_cast<entt::entity>(entityID), GetCurrentScene()};
+				if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && selectedEntity->IsValid()) {
+					GetUI().RevealInHierarchy(*selectedEntity);
+				}
 			}
 			else {
 				*selectedEntity = Entity();

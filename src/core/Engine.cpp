@@ -1,6 +1,8 @@
 #include "Engine.h"
 
 #include "components/Components.h"
+#include "components/AllComponents.h"
+#include "rendering/ui/IconsFontAwesome6.h"
 #include "assets/impl/ModelLoader.h"
 #include "Jolt/Physics/Collision/Shape/MeshShape.h"
 #include "core/module/ModuleManager.h"
@@ -384,21 +386,32 @@ namespace Engine {
 
 		if (Get().assetManager && Get().scene) {
 			Scene* scene = GetCurrentScene();
-			if (scene) {
-				std::vector<Entity> roots;
-				roots.reserve(scene->m_entityList.size());
-				for (Entity& e : scene->m_entityList) {
-					if (!e.IsValid()) continue;
-					if (!e.HasComponent<Components::EntityMetadata>()) continue;
-					if (!e.GetComponent<Components::EntityMetadata>().parentEntity.IsValid()) {
-						roots.push_back(e);
+			if (scene && scene->GetRegistry()) {
+				// Do not walk parent/child Destroy here. Cycles or already-freed
+				// children make registry.get assert. OnRemoved still runs per entity.
+				auto reg = scene->GetRegistry();
+				std::vector<entt::entity> ids;
+				auto view = reg->view<Components::EntityMetadata>();
+				ids.reserve(static_cast<size_t>(view.size()));
+				for (auto entity : view) {
+					ids.push_back(entity);
+				}
+				for (entt::entity id : ids) {
+					if (!reg->valid(id)) {
+						continue;
+					}
+					Entity e(id, scene);
+#define X(type, name, fancy)                                                                                                                                                                                                                   \
+					if (e.HasComponent<type>()) {                                                                                                                                                                                              \
+						e.GetComponent<type>().OnRemoved(e);                                                                                                                                                                                   \
+					}
+					COMPONENT_LIST
+#undef X
+					if (e.HasComponent<Components::EntityMetadata>()) {
+						e.GetComponent<Components::EntityMetadata>().OnRemoved(e);
 					}
 				}
-				for (Entity& e : roots) {
-					if (e.IsValid()) {
-						e.Destroy();
-					}
-				}
+				reg->clear();
 				scene->m_entityList.clear();
 				scene->m_entityMap.clear();
 			}

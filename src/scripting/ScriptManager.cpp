@@ -219,34 +219,41 @@ namespace Engine {
 
 
 			// User scripts
-			GetCurrentSceneRegistry().view<Components::LuaScript>().each([this, &dt](entt::entity entity, Components::LuaScript& script) {
+			std::vector<entt::entity> pendingDestroy;
+			GetCurrentSceneRegistry().view<Components::LuaScript>().each([this, &dt, &pendingDestroy](entt::entity entity, Components::LuaScript& script) {
+				if (!GetCurrentSceneRegistry().valid(entity)) {
+					return;
+				}
 				if (script.env) {
 					script.env["deltaTime"] = scriptDeltaTime;
 				}
 
-				// Sync instantiated script Start to loop
-				if (GetCurrentSceneRegistry().get<Components::EntityMetadata>(entity).toBeDestroyedNextUpdate) {
-					Entity(entity, GetCurrentScene()).Destroy();
+				if (GetCurrentSceneRegistry().all_of<Components::EntityMetadata>(entity) &&
+				    GetCurrentSceneRegistry().get<Components::EntityMetadata>(entity).toBeDestroyedNextUpdate) {
+					pendingDestroy.push_back(entity);
+					return;
 				}
-				else {
-					if (!script.hasStarted) {
-						if (script.start) {
-							script.start();
-						}
-						script.hasStarted = true;
+
+				if (!script.hasStarted) {
+					if (script.start) {
+						script.start();
 					}
-					else {
-						// Just update
-						if (script.update.valid()) {
-							sol::protected_function_result result = script.update();
-							if (!result.valid()) {
-								sol::error err = result;
-								log->error("Lua Update() error for entity {}: {}", static_cast<int>(entity), err.what());
-							}
-						}
+					script.hasStarted = true;
+				}
+				else if (script.update.valid()) {
+					sol::protected_function_result result = script.update();
+					if (!result.valid()) {
+						sol::error err = result;
+						log->error("Lua Update() error for entity {}: {}", static_cast<int>(entity), err.what());
 					}
 				}
 			});
+			for (entt::entity id : pendingDestroy) {
+				Entity e(id, GetCurrentScene());
+				if (e.IsValid()) {
+					e.Destroy();
+				}
+			}
 		}
 	}
 

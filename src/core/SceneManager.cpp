@@ -233,7 +233,7 @@ namespace Engine {
 		auto& hierarchy = entity.GetComponent<Components::EntityMetadata>();
 		for (auto& childHandle : hierarchy.children) {
 			auto childEntity = GetCurrentScene()->Get(childHandle);
-			if (childEntity) {
+			if (childEntity.IsValid()) {
 				UpdateTransformRecursive(childEntity, transform.GetWorldMatrix(), true);
 			}
 		}

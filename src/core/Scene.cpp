@@ -19,7 +19,11 @@ namespace Engine {
 
 	Entity Scene::Get(const EntityHandle& handle)
 	{
-		return m_entityMap[handle];
+		auto it = m_entityMap.find(handle);
+		if (it == m_entityMap.end()) {
+			return {};
+		}
+		return it->second;
 	}
 
 } // namespace Engine

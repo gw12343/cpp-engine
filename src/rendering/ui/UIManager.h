@@ -15,8 +15,8 @@
 #include "rendering/effects/ssao/GBuffer.h"
 
 #include <typeindex>
-
 #include <unordered_map>
+#include <unordered_set>
 
 
 namespace Engine {
@@ -53,6 +53,7 @@ namespace Engine {
 			Entity m_selectedEntity = Entity();
 
 			Entity DuplicateEntity(Entity source);
+			void   RevealInHierarchy(Entity entity);
 
 			std::unique_ptr<InspectorRenderer> m_inspectorRenderer;
 			bool                               isOverSceneView() const;
@@ -80,6 +81,8 @@ namespace Engine {
 			std::string      m_renamingGuid;
 			char             m_renameBuffer[256] = {};
 			bool             m_renameFocusRequested = false;
+			std::unordered_set<std::string> m_hierarchyRevealGuids;
+			bool                            m_hierarchyScrollToSelection = false;
 
         };
 	} // namespace UI
