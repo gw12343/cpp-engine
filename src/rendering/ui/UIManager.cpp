@@ -1,5 +1,6 @@
 #include "UIManager.h"
 #include "EditorSession.h"
+#include "UndoSystem.h"
 
 #include "components/Components.h"
 #include "components/AllComponents.h"
@@ -192,6 +193,21 @@ namespace Engine::UI {
 				ImGui::Separator();
 				if (ImGui::MenuItem("Exit")) {
 					glfwSetWindowShouldClose(GetWindow().GetNativeWindow(), GLFW_TRUE);
+				}
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Edit")) {
+				auto& undo = GetUndo();
+				char  undoLabel[128];
+				char  redoLabel[128];
+				std::snprintf(undoLabel, sizeof(undoLabel), "Undo %s", undo.UndoLabel());
+				std::snprintf(redoLabel, sizeof(redoLabel), "Redo %s", undo.RedoLabel());
+				if (ImGui::MenuItem(undoLabel, "Ctrl+Z", false, undo.CanUndo())) {
+					undo.Undo();
+				}
+				if (ImGui::MenuItem(redoLabel, "Ctrl+Y", false, undo.CanRedo())) {
+					undo.Redo();
 				}
 				ImGui::EndMenu();
 			}
@@ -419,7 +435,7 @@ namespace Engine::UI {
 			tr.SetLocalPosition(tr.GetLocalPosition() + glm::vec3(1.0f, 0.0f, 0.0f));
 		}
 
-		GetEditor().MarkDirty();
+		GetUndo().RecordSpawned(copy, "Duplicate Entity");
 		return copy;
 	}
 
@@ -438,14 +454,11 @@ namespace Engine::UI {
 
 		switch (cmd) {
 			case HierarchyCommand::Delete:
-				if (m_selectedEntity == target) {
-					m_selectedEntity = Entity();
-				}
 				if (target.HasComponent<Components::EntityMetadata>() &&
 				    m_renamingGuid == target.GetComponent<Components::EntityMetadata>().guid) {
 					m_renamingGuid.clear();
 				}
-				target.Destroy();
+				GetUndo().DestroyAndRecord(target, "Delete Entity");
 				break;
 			case HierarchyCommand::Duplicate:
 				m_selectedEntity = DuplicateEntity(target);
@@ -454,7 +467,7 @@ namespace Engine::UI {
 				Entity child = Entity::Create("New Entity", target.m_scene);
 				child.SetParent(target.GetEntityHandle());
 				m_selectedEntity = child;
-				GetEditor().MarkDirty();
+				GetUndo().RecordSpawned(child, "Create Child");
 				break;
 			}
 			case HierarchyCommand::SavePrefab:
@@ -500,6 +513,8 @@ namespace Engine::UI {
 		DrawProjectWindows();
 		editor.DrawShortcutsOverlay();
 		editor.DrawConfirmModals();
+
+		GetUndo().Flush(m_selectedEntity);
 
 		if (GetState() == PLAYING) {
 			ImGui::SetNextWindowPos(ImVec2(GetWindow().targetX + 10, GetWindow().targetY + 10), ImGuiCond_Always);
@@ -554,7 +569,7 @@ namespace Engine::UI {
 		if (ImGui::MenuItem("Empty Entity")) {
 			Entity entity    = Entity::Create("New Entity", GetCurrentScene());
 			m_selectedEntity = entity;
-			GetEditor().MarkDirty();
+			GetUndo().RecordSpawned(entity, "Create Entity");
 		}
 
 		glm::vec3 position = GetCamera().GetPosition();
@@ -566,14 +581,14 @@ namespace Engine::UI {
 			entity.AddComponent<Components::Transform>(spawnPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 			entity.AddComponent<Components::ModelRenderer>();
 			m_selectedEntity = entity;
-			GetEditor().MarkDirty();
+			GetUndo().RecordSpawned(entity, "Create Model");
 		}
 		if (ImGui::MenuItem("Add Particle System")) {
 			Entity entity = Entity::Create("New Particle System", GetCurrentScene());
 			entity.AddComponent<Components::Transform>(spawnPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 			entity.AddComponent<Components::ParticleSystem>();
 			m_selectedEntity = entity;
-			GetEditor().MarkDirty();
+			GetUndo().RecordSpawned(entity, "Create Particle System");
 		}
 		if (ImGui::MenuItem("Instantiate Prefab...")) {
 			Entity spawned = GetEditor().InstantiatePrefabDialog();
@@ -649,7 +664,7 @@ namespace Engine::UI {
 					Entity spawned = InstantiatePrefab(PrefabHandle(data->id));
 					if (spawned && spawned.IsValid()) {
 						m_selectedEntity = spawned;
-						GetEditor().MarkDirty();
+						GetUndo().RecordSpawned(spawned, "Instantiate Prefab");
 					}
 				}
 			}
@@ -668,7 +683,7 @@ namespace Engine::UI {
 
 		ImGui::End();
 		if (changeParent) {
-			_newChild.SetParent(_newParent);
+			GetUndo().Modify(_newChild, "Reparent Entity", [&]() { _newChild.SetParent(_newParent); });
 		}
 
 		FlushHierarchyCommands();
@@ -772,7 +787,7 @@ namespace Engine::UI {
 					Entity spawned = InstantiatePrefab(PrefabHandle(data->id), EntityHandle(guid));
 					if (spawned && spawned.IsValid()) {
 						m_selectedEntity = spawned;
-						GetEditor().MarkDirty();
+						GetUndo().RecordSpawned(spawned, "Instantiate Prefab");
 					}
 				}
 			}
@@ -840,15 +855,16 @@ namespace Engine::UI {
 				ImGui::SetKeyboardFocusHere();
 				m_renameFocusRequested = false;
 			}
+			GetUndo().NotifyInteracting(true);
 			const bool committed = ImGui::InputText("##hier_rename", m_renameBuffer, sizeof(m_renameBuffer),
 			                                        ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll);
 			if (committed) {
-				entity.SetName(m_renameBuffer);
+				GetUndo().Modify(entity, "Rename Entity", [&]() { entity.SetName(m_renameBuffer); });
 				m_renamingGuid.clear();
 			}
 			else if (ImGui::IsItemDeactivated()) {
 				if (!ImGui::IsKeyDown(ImGuiKey_Escape)) {
-					entity.SetName(m_renameBuffer);
+					GetUndo().Modify(entity, "Rename Entity", [&]() { entity.SetName(m_renameBuffer); });
 				}
 				m_renamingGuid.clear();
 			}
@@ -864,8 +880,7 @@ namespace Engine::UI {
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1, 1, 1, 0.12f));
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
 			if (ImGui::Button(metadata.active ? ICON_FA_EYE "##vis" : ICON_FA_EYE_SLASH "##vis", ImVec2(btnW, nodeSize.y))) {
-				metadata.active = !metadata.active;
-				GetEditor().MarkDirty();
+				GetUndo().Modify(entity, "Toggle Active", [&]() { metadata.active = !metadata.active; });
 			}
 			ImGui::SameLine(0.0f, 4.0f);
 			const bool locked = GetEditor().IsEntityLocked(entity);
@@ -893,8 +908,7 @@ namespace Engine::UI {
 		ImGui::PopID();
 
 		if (changeParent) {
-			_newChild.SetParent(_newParent);
-			GetEditor().MarkDirty();
+			GetUndo().Modify(_newChild, "Reparent Entity", [&]() { _newChild.SetParent(_newParent); });
 		}
 	}
 

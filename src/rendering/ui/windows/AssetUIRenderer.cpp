@@ -15,6 +15,7 @@
 #include "animation/Skeleton.h"
 #include "rendering/ui/UIManager.h"
 #include "rendering/ui/EditorSession.h"
+#include "rendering/ui/UndoSystem.h"
 #include "assets/Prefab.h"
 #include "core/Entity.h"
 #include "core/Input.h"
@@ -563,7 +564,7 @@ namespace Engine {
 			Entity spawned = InstantiatePrefab(handle);
 			if (spawned && spawned.IsValid()) {
 				GetUI().m_selectedEntity = spawned;
-				UI::GetEditor().MarkDirty();
+				UI::GetUndo().RecordSpawned(spawned, "Instantiate Prefab");
 			}
 		}
 

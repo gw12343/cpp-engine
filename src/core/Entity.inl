@@ -29,6 +29,10 @@ namespace Engine {
 	template <typename T>
 	void Entity::RemoveComponent()
 	{
+		if (!HasComponent<T>()) {
+			return;
+		}
+		GetComponent<T>().OnRemoved(*this);
 		m_scene->GetRegistry()->template remove<T>(m_handle);
 	}
 

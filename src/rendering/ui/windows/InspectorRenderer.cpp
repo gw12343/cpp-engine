@@ -7,6 +7,7 @@
 #include "components/AllComponents.h"
 #include "rendering/ui/UIManager.h"
 #include "rendering/ui/EditorSession.h"
+#include "rendering/ui/UndoSystem.h"
 #include "rendering/ui/IconsFontAwesome6.h"
 #include "rendering/ui/InspectorUI.h"
 #include "imgui_internal.h"
@@ -57,8 +58,7 @@ namespace Engine {
 
 			EntityHandle newParent = metadata.parentEntity;
 			if (LeftLabelEntity("Parent", &newParent)) {
-				m_selectedEntityP->SetParent(newParent);
-				UI::GetEditor().MarkDirty();
+				UI::GetUndo().Modify(*m_selectedEntityP, "Reparent Entity", [&]() { m_selectedEntityP->SetParent(newParent); });
 			}
 
 			if (ImGui::SmallButton("Copy GUID")) {
@@ -211,6 +211,8 @@ namespace Engine {
 
 				ImGui::EndPopup();
 			}
+
+			UI::GetUndo().NotifyInteracting(UI::CurrentWindowOwnsInteraction());
 		}
 		else {
 			ImGui::Text("No entity selected");

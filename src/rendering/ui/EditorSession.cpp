@@ -18,6 +18,7 @@
 #include "rendering/particles/ParticleManager.h"
 #include "rendering/ui/GameUIManager.h"
 #include "rendering/ui/IconsFontAwesome6.h"
+#include "rendering/ui/UndoSystem.h"
 #include "scripting/ScriptManager.h"
 #include "core/ProjectSettings.h"
 #include "core/EnginePaths.h"
@@ -134,6 +135,7 @@ namespace Engine::UI {
 		SetState(EDITOR);
 		scenePath         = path;
 		playSnapshotValid = false;
+		GetUndo().Clear();
 		GetProject().lastEditorScene = GetProject().NormalizePath(path);
 		GetProject().Save();
 		ClearDirty();
@@ -158,6 +160,7 @@ namespace Engine::UI {
 			os << "{\n    \"entities\": []\n}\n";
 		}
 		LoadSceneFromPath(untitled);
+		GetUndo().InvalidateSavePoint();
 		dirty = true;
 		UpdateWindowTitle();
 	}
@@ -193,7 +196,7 @@ namespace Engine::UI {
 		SCENE_LOADER::SerializeScene(GetSceneManager().GetActiveScene(), diskPath);
 		GetProject().lastEditorScene = GetProject().NormalizePath(diskPath);
 		GetProject().Save();
-		ClearDirty();
+		GetUndo().MarkSaved();
 		GetDefaultLogger()->info("Saved scene: {}", diskPath);
 	}
 
@@ -245,6 +248,7 @@ namespace Engine::UI {
 		PrefabHandle handle = GetAssetManager().Load<Prefab>(path);
 		Entity       root   = InstantiatePrefab(handle, parent);
 		if (root && root.IsValid()) {
+			GetUndo().RecordSpawned(root, "Instantiate Prefab");
 			MarkDirty();
 		}
 		return root;
@@ -256,6 +260,7 @@ namespace Engine::UI {
 			return;
 		}
 
+		GetUndo().PrepareForPlay();
 		GetCamera().SaveEditorLocation();
 		const bool wasPaused = GetState() == PAUSED;
 		if (GetState() == EDITOR) {
@@ -293,6 +298,7 @@ namespace Engine::UI {
 		const std::string reload = (playSnapshotValid && fs::exists(playSnapshotPath)) ? playSnapshotPath : scenePath;
 		GetSceneManager().SetActiveScene(GetAssetManager().Load<Scene>(reload));
 		GetGameUIManager().resetDocuments();
+		GetUndo().RestoreAfterStop();
 		UpdateWindowTitle();
 	}
 
@@ -351,6 +357,18 @@ namespace Engine::UI {
 			}
 		}
 
+		if (ctrl && !ImGui::GetIO().WantTextInput && GetState() != PLAYING) {
+			if (shift && ImGui::IsKeyPressed(ImGuiKey_Z, false)) {
+				GetUndo().Redo();
+			}
+			else if (ImGui::IsKeyPressed(ImGuiKey_Z, false)) {
+				GetUndo().Undo();
+			}
+			else if (ImGui::IsKeyPressed(ImGuiKey_Y, false)) {
+				GetUndo().Redo();
+			}
+		}
+
 		if (!CanUseEditorShortcuts()) {
 			return;
 		}
@@ -390,7 +408,6 @@ namespace Engine::UI {
 			Entity selected = GetUI().m_selectedEntity;
 			if (selected && selected.IsValid()) {
 				GetUI().m_selectedEntity = GetUI().DuplicateEntity(selected);
-				MarkDirty();
 			}
 		}
 	}
@@ -405,6 +422,8 @@ namespace Engine::UI {
 			ImGui::End();
 			return;
 		}
+		ImGui::TextUnformatted("Ctrl+Z            Undo");
+		ImGui::TextUnformatted("Ctrl+Y / Ctrl+Shift+Z  Redo");
 		ImGui::TextUnformatted("W / E / R / T     Translate / Rotate / Scale / Bounds");
 		ImGui::TextUnformatted("Q / X             Local / World gizmo");
 		ImGui::TextUnformatted("F                 Frame selection");
@@ -511,11 +530,7 @@ namespace Engine::UI {
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
 			if (ImGui::Button("Delete", ImVec2(120, 0))) {
 				if (pendingDeleteEntity.IsValid()) {
-					if (GetUI().m_selectedEntity == pendingDeleteEntity) {
-						GetUI().m_selectedEntity = Entity();
-					}
-					pendingDeleteEntity.Destroy();
-					MarkDirty();
+					GetUndo().DestroyAndRecord(pendingDeleteEntity, "Delete Entity");
 				}
 				pendingConfirmDelete = false;
 				pendingDeleteEntity  = Entity();

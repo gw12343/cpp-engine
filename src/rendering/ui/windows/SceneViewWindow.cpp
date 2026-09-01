@@ -11,6 +11,7 @@
 
 #include "rendering/ui/UIManager.h"
 #include "rendering/ui/EditorSession.h"
+#include "rendering/ui/UndoSystem.h"
 #include "components/impl/TransformComponent.h"
 
 
@@ -154,6 +155,8 @@ namespace Engine {
 						tr.SyncWithPhysics(*selectedEntity);
 						editor.MarkDirty();
 					}
+
+					UI::GetUndo().NotifyInteracting(ImGuizmo::IsUsing(), "Transform");
 				}
 
 				if (GetUI().isOverSceneView() && !ImGui::GetIO().WantTextInput && ImGui::IsKeyPressed(ImGuiKey_F, false)) {
