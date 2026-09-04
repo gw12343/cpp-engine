@@ -7,6 +7,8 @@
 
 #include "glm/gtx/matrix_decompose.inl"
 
+#include <algorithm>
+
 
 namespace Engine {
 
@@ -156,49 +158,42 @@ namespace Engine {
 			return;
 		}
 
-		auto& registry = *m_scene->GetRegistry();
-
-		auto&        childHierarchy = registry.get<Components::EntityMetadata>(m_handle);
+		auto&        childHierarchy = GetComponent<Components::EntityMetadata>();
 		EntityHandle childHandle    = EntityHandle(childHierarchy.guid);
 
+		if (newParent.IsValid() && newParent == childHandle) {
+			return;
+		}
+		if (childHierarchy.parentEntity == newParent) {
+			return;
+		}
 
-		// --- 1. Remove from old parent's children list ---
 		if (childHierarchy.parentEntity.IsValid()) {
-			Entity childHParent = GetCurrentScene()->Get(childHierarchy.parentEntity);
-
+			Entity childHParent = m_scene->Get(childHierarchy.parentEntity);
 			if (childHParent.IsValid()) {
-				auto& oldParentData = childHParent.GetComponent<Components::EntityMetadata>();
-
-				oldParentData.children.erase(std::remove(oldParentData.children.begin(), oldParentData.children.end(), childHandle), oldParentData.children.end());
+				childHParent.RemoveChild(childHandle);
 			}
 		}
 
-		// parent is empty
 		if (!newParent.IsValid()) {
 			childHierarchy.parentEntity = EntityHandle();
-			GetDefaultLogger()->info("empty parent");
 			return;
 		}
-		Entity par = GetCurrentScene()->Get(newParent);
 
-		// entity does not exist, just set to root
-		if (!par.IsValid()) {
+		Entity par = m_scene->Get(newParent);
+		if (!par.IsValid() || !par.HasComponent<Components::EntityMetadata>()) {
 			childHierarchy.parentEntity = EntityHandle();
-			GetDefaultLogger()->info("bad parent");
 			return;
 		}
 
-		// --- 2. Update parent link ---
 		childHierarchy.parentEntity = newParent;
-
-		// --- 3. Add to new parent's children list ---
-
-		auto& newParentData = par.GetComponent<Components::EntityMetadata>();
-		newParentData.children.push_back(childHandle);
+		auto& newChildren           = par.GetComponent<Components::EntityMetadata>().children;
+		if (std::find(newChildren.begin(), newChildren.end(), childHandle) == newChildren.end()) {
+			newChildren.push_back(childHandle);
+		}
 
 		if (HasComponent<Components::Transform>()) {
-			auto& childTr = registry.get<Components::Transform>(m_handle);
-
+			auto& childTr = GetComponent<Components::Transform>();
 			SetWorldTransform(childTr.GetWorldPosition(), childTr.GetWorldRotation(), childTr.GetWorldScale());
 		}
 		// --- 4. Optional: maintain world transform consistency ---
@@ -257,8 +252,8 @@ namespace Engine {
 			tr.SetLocalScale(worldScale);
 		}
 		else {
-			auto parentEntity = GetCurrentScene()->Get(hr.parentEntity);
-			if (parentEntity && parentEntity.HasComponent<Engine::Components::Transform>()) {
+			auto parentEntity = m_scene->Get(hr.parentEntity);
+			if (parentEntity.IsValid() && parentEntity.HasComponent<Engine::Components::Transform>()) {
 				auto& parentTr = parentEntity.GetComponent<Engine::Components::Transform>();
 				tr.SetLocalFromWorld(parentTr.GetWorldMatrix(), worldPosition, worldRotation, worldScale);
 			}

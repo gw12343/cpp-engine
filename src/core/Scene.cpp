@@ -19,8 +19,14 @@ namespace Engine {
 
 	Entity Scene::Get(const EntityHandle& handle)
 	{
+		if (!handle.IsValid()) {
+			return {};
+		}
 		auto it = m_entityMap.find(handle);
 		if (it == m_entityMap.end()) {
+			return {};
+		}
+		if (!it->second.IsValid()) {
 			return {};
 		}
 		return it->second;

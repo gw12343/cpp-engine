@@ -451,16 +451,25 @@ namespace Engine::UI {
 
 	void UIManager::FlushHierarchyCommands()
 	{
-		if (m_hierarchyCommand == HierarchyCommand::None || !m_hierarchyCommandEntity.IsValid()) {
+		if (m_hierarchyCommand == HierarchyCommand::None) {
+			return;
+		}
+		if (m_hierarchyCommand != HierarchyCommand::DropPrefab && !m_hierarchyCommandEntity.IsValid()) {
 			m_hierarchyCommand       = HierarchyCommand::None;
 			m_hierarchyCommandEntity = Entity();
+			m_hierarchyCommandParent = EntityHandle();
+			m_hierarchyDropPrefabId.clear();
 			return;
 		}
 
 		Entity target = m_hierarchyCommandEntity;
 		const HierarchyCommand cmd = m_hierarchyCommand;
+		const EntityHandle     cmdParent = m_hierarchyCommandParent;
+		const std::string      prefabId  = m_hierarchyDropPrefabId;
 		m_hierarchyCommand       = HierarchyCommand::None;
 		m_hierarchyCommandEntity = Entity();
+		m_hierarchyCommandParent = EntityHandle();
+		m_hierarchyDropPrefabId.clear();
 
 		switch (cmd) {
 			case HierarchyCommand::Delete:
@@ -487,6 +496,17 @@ namespace Engine::UI {
 				Entity spawned = GetEditor().InstantiatePrefabDialog(target.GetEntityHandle());
 				if (spawned && spawned.IsValid()) {
 					m_selectedEntity = spawned;
+				}
+				break;
+			}
+			case HierarchyCommand::Reparent:
+				GetUndo().Modify(target, "Reparent Entity", [&]() { target.SetParent(cmdParent); });
+				break;
+			case HierarchyCommand::DropPrefab: {
+				Entity spawned = InstantiatePrefab(PrefabHandle(prefabId), cmdParent);
+				if (spawned && spawned.IsValid()) {
+					m_selectedEntity = spawned;
+					GetUndo().RecordSpawned(spawned, "Instantiate Prefab");
 				}
 				break;
 			}
@@ -697,11 +717,10 @@ namespace Engine::UI {
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_PREFAB")) {
 				if (payload->DataSize == sizeof(PayloadData)) {
 					const auto* data = static_cast<const PayloadData*>(payload->Data);
-					Entity spawned = InstantiatePrefab(PrefabHandle(data->id));
-					if (spawned && spawned.IsValid()) {
-						m_selectedEntity = spawned;
-						GetUndo().RecordSpawned(spawned, "Instantiate Prefab");
-					}
+					m_hierarchyCommand       = HierarchyCommand::DropPrefab;
+					m_hierarchyCommandEntity = Entity();
+					m_hierarchyCommandParent = EntityHandle();
+					m_hierarchyDropPrefabId  = data->id;
 				}
 			}
 			ImGui::EndDragDropTarget();
@@ -718,8 +737,10 @@ namespace Engine::UI {
 		}
 
 		ImGui::End();
-		if (changeParent) {
-			GetUndo().Modify(_newChild, "Reparent Entity", [&]() { _newChild.SetParent(_newParent); });
+		if (changeParent && _newChild.IsValid()) {
+			m_hierarchyCommand       = HierarchyCommand::Reparent;
+			m_hierarchyCommandEntity = _newChild;
+			m_hierarchyCommandParent = _newParent;
 		}
 
 		FlushHierarchyCommands();
@@ -827,12 +848,11 @@ namespace Engine::UI {
 			}
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_PREFAB")) {
 				if (payload->DataSize == sizeof(PayloadData)) {
-					const auto* data = static_cast<const PayloadData*>(payload->Data);
-					Entity spawned = InstantiatePrefab(PrefabHandle(data->id), EntityHandle(guid));
-					if (spawned && spawned.IsValid()) {
-						m_selectedEntity = spawned;
-						GetUndo().RecordSpawned(spawned, "Instantiate Prefab");
-					}
+					const auto* data             = static_cast<const PayloadData*>(payload->Data);
+					m_hierarchyCommand           = HierarchyCommand::DropPrefab;
+					m_hierarchyCommandEntity     = entity;
+					m_hierarchyCommandParent     = EntityHandle(guid);
+					m_hierarchyDropPrefabId      = data->id;
 				}
 			}
 			ImGui::EndDragDropTarget();
@@ -936,23 +956,26 @@ namespace Engine::UI {
 			ImGui::SetCursorScreenPos(afterNode);
 		}
 
-		// Recursively render children
+		// Recursively render children. Copy the list — SetParent/duplicate must
+		// not erase from the vector we are iterating.
 		if (nodeOpen && !metadata.children.empty()) {
-			const char* filter = GetEditor().hierarchyFilter;
-			for (auto& childHandle : metadata.children) {
-				auto childEntity = GetCurrentScene()->Get(childHandle);
-				if (childEntity && HierarchyMatchesOrHasMatch(childEntity, filter)) {
+			const char*                    filter   = GetEditor().hierarchyFilter;
+			const std::vector<EntityHandle> children = metadata.children;
+			for (const auto& childHandle : children) {
+				Entity childEntity = GetCurrentScene()->Get(childHandle);
+				if (childEntity.IsValid() && HierarchyMatchesOrHasMatch(childEntity, filter)) {
 					RenderEntityTreeNode(childEntity);
 				}
 			}
 			ImGui::TreePop();
 		}
 
-		// Pop the ID
 		ImGui::PopID();
 
-		if (changeParent) {
-			GetUndo().Modify(_newChild, "Reparent Entity", [&]() { _newChild.SetParent(_newParent); });
+		if (changeParent && _newChild.IsValid()) {
+			m_hierarchyCommand       = HierarchyCommand::Reparent;
+			m_hierarchyCommandEntity = _newChild;
+			m_hierarchyCommandParent = _newParent;
 		}
 	}
 

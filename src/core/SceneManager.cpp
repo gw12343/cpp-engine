@@ -231,8 +231,9 @@ namespace Engine {
 
 		// Update children
 		auto& hierarchy = entity.GetComponent<Components::EntityMetadata>();
-		for (auto& childHandle : hierarchy.children) {
-			auto childEntity = GetCurrentScene()->Get(childHandle);
+		const std::vector<EntityHandle> children = hierarchy.children;
+		for (const auto& childHandle : children) {
+			Entity childEntity = entity.m_scene ? entity.m_scene->Get(childHandle) : GetCurrentScene()->Get(childHandle);
 			if (childEntity.IsValid()) {
 				UpdateTransformRecursive(childEntity, transform.GetWorldMatrix(), true);
 			}

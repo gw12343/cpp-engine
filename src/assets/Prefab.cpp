@@ -82,18 +82,19 @@ namespace Engine {
 			    value);
 		}
 
-		void CollectSubtree(Entity entity, std::vector<Entity>& out)
+		void CollectSubtree(Entity entity, std::vector<Entity>& out, std::unordered_set<std::string>& visited)
 		{
-			if (!entity || !entity.IsValid()) {
+			if (!entity.IsValid() || !entity.HasComponent<Components::EntityMetadata>()) {
+				return;
+			}
+			const std::string& guid = entity.GetComponent<Components::EntityMetadata>().guid;
+			if (!visited.insert(guid).second) {
 				return;
 			}
 			out.push_back(entity);
-			if (!entity.HasComponent<Components::EntityMetadata>()) {
-				return;
-			}
-			for (const auto& childHandle : entity.GetComponent<Components::EntityMetadata>().children) {
-				Entity child = entity.m_scene->Get(childHandle);
-				CollectSubtree(child, out);
+			const std::vector<EntityHandle> children = entity.GetComponent<Components::EntityMetadata>().children;
+			for (const auto& childHandle : children) {
+				CollectSubtree(entity.m_scene->Get(childHandle), out, visited);
 			}
 		}
 
@@ -165,8 +166,9 @@ namespace Engine {
 			return false;
 		}
 
-		std::vector<Entity> subtree;
-		CollectSubtree(root, subtree);
+		std::vector<Entity>             subtree;
+		std::unordered_set<std::string> visited;
+		CollectSubtree(root, subtree, visited);
 		if (subtree.empty()) {
 			return false;
 		}

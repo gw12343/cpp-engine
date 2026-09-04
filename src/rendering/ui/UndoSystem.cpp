@@ -194,17 +194,19 @@ namespace Engine::UI {
 			}
 		}
 
-		void CollectSubtree(Entity entity, std::vector<Entity>& out)
+		void CollectSubtree(Entity entity, std::vector<Entity>& out, std::unordered_set<std::string>& visited)
 		{
-			if (!entity || !entity.IsValid()) {
+			if (!entity.IsValid() || !entity.HasComponent<Components::EntityMetadata>()) {
+				return;
+			}
+			const std::string& guid = entity.GetComponent<Components::EntityMetadata>().guid;
+			if (!visited.insert(guid).second) {
 				return;
 			}
 			out.push_back(entity);
-			if (!entity.HasComponent<Components::EntityMetadata>()) {
-				return;
-			}
-			for (const auto& childHandle : entity.GetComponent<Components::EntityMetadata>().children) {
-				CollectSubtree(entity.m_scene->Get(childHandle), out);
+			const std::vector<EntityHandle> children = entity.GetComponent<Components::EntityMetadata>().children;
+			for (const auto& childHandle : children) {
+				CollectSubtree(entity.m_scene->Get(childHandle), out, visited);
 			}
 		}
 
@@ -572,9 +574,10 @@ namespace Engine::UI {
 
 	std::vector<SerializedEntity> UndoHistory::CaptureSubtree(Entity root)
 	{
-		std::vector<SerializedEntity> out;
-		std::vector<Entity>           entities;
-		CollectSubtree(root, entities);
+		std::vector<SerializedEntity>   out;
+		std::vector<Entity>             entities;
+		std::unordered_set<std::string> visited;
+		CollectSubtree(root, entities, visited);
 		out.reserve(entities.size());
 		for (Entity& e : entities) {
 			out.push_back(CaptureEntity(e));

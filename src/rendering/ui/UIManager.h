@@ -75,9 +75,11 @@ namespace Engine {
 			void                             RenderEntityTreeNode(Entity entity);
 			void                             DrawAddEntityMenu();
 
-			enum class HierarchyCommand { None, Delete, Duplicate, CreateChild, SavePrefab, InstantiatePrefab };
+			enum class HierarchyCommand { None, Delete, Duplicate, CreateChild, SavePrefab, InstantiatePrefab, Reparent, DropPrefab };
 			HierarchyCommand m_hierarchyCommand = HierarchyCommand::None;
 			Entity           m_hierarchyCommandEntity;
+			EntityHandle     m_hierarchyCommandParent;
+			std::string      m_hierarchyDropPrefabId;
 			std::string      m_renamingGuid;
 			char             m_renameBuffer[256] = {};
 			bool             m_renameFocusRequested = false;
