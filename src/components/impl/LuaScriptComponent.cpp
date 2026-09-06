@@ -338,12 +338,15 @@ namespace Engine::Components {
 	Entity GetEntityFromHandle(const EntityHandle& handle)
 	{
 		Scene* s = GetCurrentScene();
-		if (s->m_entityMap.count(handle)) {
-			return s->m_entityMap[handle];
+		if (!s) {
+			return {};
 		}
-
-		GetScriptManager().log->warn("Script requested an invalid entity: {}", handle.GetID());
-		return {};
+		Entity found = s->Get(handle);
+		if (!found.IsValid()) {
+			GetScriptManager().log->warn("Script requested an invalid entity: {}", handle.GetID());
+			return {};
+		}
+		return found;
 	}
 
 	void LuaScript::LoadScript(Entity& entity, std::string path)

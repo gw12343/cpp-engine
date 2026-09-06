@@ -343,7 +343,10 @@ namespace Engine {
 			glm::vec3 worldPos = controller.GetPosition();
 			glm::quat worldRot = controller.GetRotation();
 
-			auto hr = GetCurrentSceneRegistry().get<Components::EntityMetadata>(entity);
+			if (!registry.all_of<Components::EntityMetadata>(entity)) {
+				continue;
+			}
+			auto hr = registry.get<Components::EntityMetadata>(entity);
 
 			if (!hr.parentEntity.IsValid()) {
 				// Root: local == world so later Scene::UpdateTransforms keeps the capsule pose.
@@ -352,7 +355,7 @@ namespace Engine {
 			}
 			else {
 				auto parentEntity = GetCurrentScene()->Get(hr.parentEntity);
-				if (parentEntity && parentEntity.HasComponent<Engine::Components::Transform>()) {
+				if (parentEntity.IsValid() && parentEntity.HasComponent<Engine::Components::Transform>()) {
 					auto& parentTr = parentEntity.GetComponent<Engine::Components::Transform>();
 					tr.SetLocalFromWorld(parentTr.GetWorldMatrix(), worldPos, worldRot, tr.GetWorldScale());
 				}
@@ -407,7 +410,11 @@ namespace Engine {
 			tr.SetWorldPosition(worldPos);
 			tr.SetWorldRotation(worldRot);
 
-			auto& hr = GetCurrentSceneRegistry().get<Components::EntityMetadata>(item.entity);
+			auto& syncRegistry = GetCurrentSceneRegistry();
+			if (!syncRegistry.valid(item.entity) || !syncRegistry.all_of<Components::EntityMetadata>(item.entity)) {
+				return;
+			}
+			auto& hr = syncRegistry.get<Components::EntityMetadata>(item.entity);
 
 			if (!hr.parentEntity.IsValid()) {
 				tr.SetLocalPosition(worldPos);
@@ -415,7 +422,7 @@ namespace Engine {
 			}
 			else {
 				auto parentEntity = GetCurrentScene()->Get(hr.parentEntity);
-				if (parentEntity && parentEntity.HasComponent<Components::Transform>()) {
+				if (parentEntity.IsValid() && parentEntity.HasComponent<Components::Transform>()) {
 					auto& parentTr = parentEntity.GetComponent<Components::Transform>();
 					tr.SetLocalFromWorld(parentTr.GetWorldMatrix(), worldPos, worldRot, tr.GetWorldScale());
 				}

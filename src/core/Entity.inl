@@ -8,38 +8,74 @@ namespace Engine {
 	template <typename T, typename... Args>
 	T& Entity::AddComponent(Args&&... args)
 	{
+		if (!IsValid()) {
+			GetDefaultLogger()->error("AddComponent on invalid entity");
+			static T dummy{};
+			return dummy;
+		}
 		T& component = m_scene->GetRegistry()->template emplace<T>(m_handle, std::forward<Args>(args)...);
 		component.OnAdded(*this);
 		return component;
 	}
 
+	template <typename T>
+	T* Entity::TryGetComponent()
+	{
+		if (!IsValid()) {
+			return nullptr;
+		}
+		return m_scene->GetRegistry()->template try_get<T>(m_handle);
+	}
+
+	template <typename T>
+	const T* Entity::TryGetComponent() const
+	{
+		if (!IsValid()) {
+			return nullptr;
+		}
+		return m_scene->GetRegistry()->template try_get<T>(m_handle);
+	}
 
 	template <typename T>
 	T& Entity::GetComponent()
 	{
-		return m_scene->GetRegistry()->template get<T>(m_handle);
+		if (T* p = TryGetComponent<T>()) {
+			return *p;
+		}
+		GetDefaultLogger()->error("GetComponent on invalid entity or missing component");
+		static T dummy{};
+		return dummy;
+	}
+
+	template <typename T>
+	const T& Entity::GetComponent() const
+	{
+		if (const T* p = TryGetComponent<T>()) {
+			return *p;
+		}
+		GetDefaultLogger()->error("GetComponent on invalid entity or missing component");
+		static T dummy{};
+		return dummy;
 	}
 
 	template <typename T>
 	[[nodiscard]] bool Entity::HasComponent() const
 	{
-		if (!IsValid()) {
-			return false;
-		}
-		return m_scene->GetRegistry()->template all_of<T>(m_handle);
+		return TryGetComponent<T>() != nullptr;
 	}
 
 	template <typename T>
 	void Entity::RemoveComponent()
 	{
-		if (!HasComponent<T>()) {
+		T* live = TryGetComponent<T>();
+		if (!live) {
 			return;
 		}
-		GetComponent<T>().OnRemoved(*this);
-		if (!IsValid() || !m_scene->GetRegistry()->template all_of<T>(m_handle)) {
-			return;
+		live->OnRemoved(*this);
+		if (T* still = TryGetComponent<T>()) {
+			(void) still;
+			m_scene->GetRegistry()->template remove<T>(m_handle);
 		}
-		m_scene->GetRegistry()->template remove<T>(m_handle);
 	}
 
 }

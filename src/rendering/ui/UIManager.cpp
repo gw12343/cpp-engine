@@ -518,6 +518,9 @@ namespace Engine::UI {
 	void UIManager::onUpdate(float dt)
 	{
         ZoneScopedN("OnUpdate UI manager");
+		if (!m_selectedEntity.IsValid()) {
+			m_selectedEntity = Entity();
+		}
 		auto& editor = GetEditor();
 		m_selectedTheme = editor.theme;
 		editor.HandleShortcuts();
@@ -587,7 +590,7 @@ namespace Engine::UI {
 		}
 		for (auto& childHandle : meta.children) {
 			Entity child = GetCurrentScene()->Get(childHandle);
-			if (child && HierarchyMatchesOrHasMatch(child, filter)) return true;
+			if (child.IsValid() && HierarchyMatchesOrHasMatch(child, filter)) return true;
 		}
 		return false;
 	}
@@ -749,6 +752,10 @@ namespace Engine::UI {
 
 	void UIManager::RenderEntityTreeNode(Entity entity)
 	{
+		if (!entity.IsValid() || !entity.HasComponent<Components::EntityMetadata>()) {
+			return;
+		}
+
 		bool         changeParent = false;
 		Entity       _newChild;
 		EntityHandle _newParent;

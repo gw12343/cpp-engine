@@ -42,7 +42,7 @@ namespace Engine {
 	{
 		ImGui::Begin("Inspector");
 
-		if ((*m_selectedEntityP)) {
+		if (m_selectedEntityP->IsValid() && m_selectedEntityP->HasComponent<Components::EntityMetadata>()) {
 			auto& metadata = (*m_selectedEntityP).GetComponent<Components::EntityMetadata>();
 
 			ImGui::BeginGroup();

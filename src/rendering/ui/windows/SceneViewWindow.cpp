@@ -6,6 +6,7 @@
 #include "core/EngineData.h"
 #include "core/Entity.h"
 #include "core/Input.h"
+#include "core/Scene.h"
 #include "core/Window.h"
 
 
@@ -99,12 +100,11 @@ namespace Engine {
 			glm::mat4 view       = GetCamera().GetViewMatrix();
 			glm::mat4 projection = GetCamera().GetProjectionMatrix();
 
-			const bool canManipulate = *selectedEntity && GetCurrentSceneRegistry().valid(selectedEntity->GetENTTHandle()) &&
-			                           selectedEntity->HasComponent<Components::Transform>() &&
-			                           !editor.IsEntityLocked(*selectedEntity);
+			const bool selectionLive = selectedEntity->IsValid() && selectedEntity->HasComponent<Components::Transform>() &&
+			                           selectedEntity->HasComponent<Components::EntityMetadata>();
+			const bool canManipulate = selectionLive && !editor.IsEntityLocked(*selectedEntity);
 
-			if (*selectedEntity && GetCurrentSceneRegistry().valid(selectedEntity->GetENTTHandle()) &&
-			    selectedEntity->HasComponent<Components::Transform>()) {
+			if (selectionLive) {
 				auto& meta = selectedEntity->GetComponent<Components::EntityMetadata>();
 				auto& tr   = selectedEntity->GetComponent<Components::Transform>();
 				glm::mat4 model = tr.GetWorldMatrix();
@@ -141,7 +141,7 @@ namespace Engine {
 
 						if (meta.parentEntity.IsValid()) {
 							auto parentEntity = GetCurrentScene()->Get(meta.parentEntity);
-							if (parentEntity && parentEntity.HasComponent<Components::Transform>()) {
+							if (parentEntity.IsValid() && parentEntity.HasComponent<Components::Transform>()) {
 								auto& parentTr = parentEntity.GetComponent<Components::Transform>();
 								tr.SetLocalFromWorld(parentTr.GetWorldMatrix(), worldPos, worldRot, worldScale);
 							}
@@ -188,10 +188,18 @@ namespace Engine {
 			                    (static_cast<uint32_t>(pixelData[1] * 255.0f) << 8) |
 			                    (static_cast<uint32_t>(pixelData[2] * 255.0f) << 16);
 
-			if (entityID != 0xFFFFFF) {
-				*selectedEntity = Entity{static_cast<entt::entity>(entityID), GetCurrentScene()};
-				if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && selectedEntity->IsValid()) {
-					GetUI().RevealInHierarchy(*selectedEntity);
+			Scene* scene = GetCurrentScene();
+			const auto picked = static_cast<entt::entity>(entityID);
+			if (entityID != 0xFFFFFF && scene && scene->GetRegistry() && scene->GetRegistry()->valid(picked)) {
+				Entity found{picked, scene};
+				if (found.HasComponent<Components::EntityMetadata>()) {
+					*selectedEntity = found;
+					if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+						GetUI().RevealInHierarchy(*selectedEntity);
+					}
+				}
+				else {
+					*selectedEntity = Entity();
 				}
 			}
 			else {

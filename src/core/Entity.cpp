@@ -110,38 +110,49 @@ namespace Engine {
 	// Implementation of Entity metadata helpers
 	const std::string& Entity::GetName() const
 	{
-		auto registry = m_scene->GetRegistry();
-		return registry->get<Components::EntityMetadata>(m_handle).name;
+		static const std::string kEmpty;
+		if (const auto* meta = TryGetComponent<Components::EntityMetadata>()) {
+			return meta->name;
+		}
+		return kEmpty;
 	}
 
 	void Entity::SetName(const std::string& name)
 	{
-		auto registry                                            = m_scene->GetRegistry();
-		registry->get<Components::EntityMetadata>(m_handle).name = name;
+		if (auto* meta = TryGetComponent<Components::EntityMetadata>()) {
+			meta->name = name;
+		}
 	}
 
 	[[maybe_unused]] const std::string& Entity::GetTag() const
 	{
-		auto registry = m_scene->GetRegistry();
-		return registry->get<Components::EntityMetadata>(m_handle).tag;
+		static const std::string kEmpty;
+		if (const auto* meta = TryGetComponent<Components::EntityMetadata>()) {
+			return meta->tag;
+		}
+		return kEmpty;
 	}
 
 	[[maybe_unused]] void Entity::SetTag(const std::string& tag)
 	{
-		auto registry                                           = m_scene->GetRegistry();
-		registry->get<Components::EntityMetadata>(m_handle).tag = tag;
+		if (auto* meta = TryGetComponent<Components::EntityMetadata>()) {
+			meta->tag = tag;
+		}
 	}
 
 	bool Entity::IsActive() const
 	{
-		auto registry = m_scene->GetRegistry();
-		return registry->get<Components::EntityMetadata>(m_handle).active;
+		if (const auto* meta = TryGetComponent<Components::EntityMetadata>()) {
+			return meta->active;
+		}
+		return false;
 	}
 
 	[[maybe_unused]] void Entity::SetActive(bool active)
 	{
-		auto registry                                              = m_scene->GetRegistry();
-		registry->get<Components::EntityMetadata>(m_handle).active = active;
+		if (auto* meta = TryGetComponent<Components::EntityMetadata>()) {
+			meta->active = active;
+		}
 	}
 	bool Entity::IsValid() const
 	{
@@ -268,12 +279,17 @@ namespace Engine {
 	}
 	std::vector<EntityHandle> Entity::GetChildren()
 	{
-		auto& meta = GetComponent<Components::EntityMetadata>();
-		return meta.GetChildren();
+		if (auto* meta = TryGetComponent<Components::EntityMetadata>()) {
+			return meta->GetChildren();
+		}
+		return {};
 	}
 	EntityHandle Entity::GetEntityHandle()
 	{
-		return EntityHandle(GetComponent<Components::EntityMetadata>().guid);
+		if (auto* meta = TryGetComponent<Components::EntityMetadata>()) {
+			return EntityHandle(meta->guid);
+		}
+		return {};
 	}
 	void Entity::RemoveChild(const EntityHandle& handle)
 	{

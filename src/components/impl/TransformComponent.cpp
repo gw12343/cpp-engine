@@ -171,7 +171,7 @@ namespace Engine::Components {
 
 			if (em.parentEntity.IsValid()) {
 				Entity parent = GetCurrentScene()->Get(em.parentEntity);
-				if (parent && parent.HasComponent<Transform>()) {
+				if (parent.IsValid() && parent.HasComponent<Transform>()) {
 					auto& parentTr = parent.GetComponent<Transform>();
 					parentMatrix   = parentTr.GetWorldMatrix();
 				}

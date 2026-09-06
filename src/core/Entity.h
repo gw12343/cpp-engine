@@ -21,8 +21,8 @@ namespace Engine {
 		void          Destroy();
 		void          MarkForDestruction();
 
-		// Check if entity is valid
-		explicit operator bool() const { return m_handle != entt::null; }
+		// True only if this handle is still alive in the scene registry.
+		explicit operator bool() const { return IsValid(); }
 
 		bool IsValid() const;
 
@@ -49,6 +49,15 @@ namespace Engine {
 
 		template <typename T>
 		T& GetComponent();
+
+		template <typename T>
+		const T& GetComponent() const;
+
+		template <typename T>
+		T* TryGetComponent();
+
+		template <typename T>
+		const T* TryGetComponent() const;
 
 		template <typename T>
 		[[nodiscard]] bool HasComponent() const;
