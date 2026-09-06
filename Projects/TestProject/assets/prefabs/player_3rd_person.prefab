@@ -1,0 +1,571 @@
+{
+    "name": "Player",
+    "rootGuid": "a11a0000000000000000000000000002",
+    "entities": [
+        {
+            "EntityMetadata": {
+                "name": "Player",
+                "tag": "",
+                "active": true,
+                "guid": "a11a0000000000000000000000000002",
+                "parentEntity": {
+                    "guid": ""
+                },
+                "children": [
+                    {
+                        "guid": "a11a0000000000000000000000000001"
+                    }
+                ]
+            },
+            "LuaScript": {
+                "nullopt": false,
+                "data": {
+                    "scriptPath": "scripts/player_thirdperson.lua",
+                    "variables": [
+                        {
+                            "key": "CLIMB_DOWN_ANIM",
+                            "value": {
+                                "index": 21,
+                                "data": {
+                                    "guid": "fe2216824d7ec409241a153af705f2af"
+                                }
+                            }
+                        },
+                        {
+                            "key": "CLIMB_MANTLE_DURATION",
+                            "value": {
+                                "index": 0,
+                                "data": 0.550000011920929
+                            }
+                        },
+                        {
+                            "key": "CLIMB_JUMP_UP",
+                            "value": {
+                                "index": 0,
+                                "data": 5.0
+                            }
+                        },
+                        {
+                            "key": "RUN_ANIM",
+                            "value": {
+                                "index": 21,
+                                "data": {
+                                    "guid": "790de0f9242134e98fbd1827fed1799c"
+                                }
+                            }
+                        },
+                        {
+                            "key": "SHOOT_FORWARD_OFFSET",
+                            "value": {
+                                "index": 0,
+                                "data": 1.0
+                            }
+                        },
+                        {
+                            "key": "GRAVITY_SCALE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
+                            }
+                        },
+                        {
+                            "key": "CAMERA_HEIGHT",
+                            "value": {
+                                "index": 0,
+                                "data": 1.2000000476837159
+                            }
+                        },
+                        {
+                            "key": "JUMP_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 8.0
+                            }
+                        },
+                        {
+                            "key": "CAMERA_MAX_DISTANCE",
+                            "value": {
+                                "index": 0,
+                                "data": 12.0
+                            }
+                        },
+                        {
+                            "key": "SHOOT_HEAD_HEIGHT",
+                            "value": {
+                                "index": 0,
+                                "data": 1.100000023841858
+                            }
+                        },
+                        {
+                            "key": "CLIMB_MAX_NORMAL_Y",
+                            "value": {
+                                "index": 0,
+                                "data": 0.550000011920929
+                            }
+                        },
+                        {
+                            "key": "shootSound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "3e4fe5a36895b60e21e7a8257e77e0d4"
+                                }
+                            }
+                        },
+                        {
+                            "key": "CAMERA_PITCH_MAX",
+                            "value": {
+                                "index": 0,
+                                "data": 60.0
+                            }
+                        },
+                        {
+                            "key": "CLIMB_MANTLE_MIN_NY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.6499999761581421
+                            }
+                        },
+                        {
+                            "key": "CLIMB_INTO_DOT",
+                            "value": {
+                                "index": 0,
+                                "data": 0.25
+                            }
+                        },
+                        {
+                            "key": "RUN_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 7.199999809265137
+                            }
+                        },
+                        {
+                            "key": "BULLET_PARENT",
+                            "value": {
+                                "index": 12,
+                                "data": {
+                                    "guid": "a11a0000000000000000000000000003"
+                                }
+                            }
+                        },
+                        {
+                            "key": "CLIMB_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 3.5
+                            }
+                        },
+                        {
+                            "key": "CLIMB_TOP_PROBE",
+                            "value": {
+                                "index": 0,
+                                "data": 0.8500000238418579
+                            }
+                        },
+                        {
+                            "key": "CLIMB_PROBE_DIST",
+                            "value": {
+                                "index": 0,
+                                "data": 1.149999976158142
+                            }
+                        },
+                        {
+                            "key": "CAMERA_PITCH_MIN",
+                            "value": {
+                                "index": 0,
+                                "data": -60.0
+                            }
+                        },
+                        {
+                            "key": "FALL_LAND_ANIM",
+                            "value": {
+                                "index": 21,
+                                "data": {
+                                    "guid": "dc23f2bb2553858c43a93bfe1e3ca2d2"
+                                }
+                            }
+                        },
+                        {
+                            "key": "CAMERA_DISTANCE",
+                            "value": {
+                                "index": 0,
+                                "data": 5.0
+                            }
+                        },
+                        {
+                            "key": "CLIMB_UP_ANIM",
+                            "value": {
+                                "index": 21,
+                                "data": {
+                                    "guid": "01dc5c917229fcccef27486eb6b97c02"
+                                }
+                            }
+                        },
+                        {
+                            "key": "CLIMB_MANTLE_ARC",
+                            "value": {
+                                "index": 0,
+                                "data": 0.20000000298023225
+                            }
+                        },
+                        {
+                            "key": "CAMERA_MIN_DISTANCE",
+                            "value": {
+                                "index": 0,
+                                "data": 2.0
+                            }
+                        },
+                        {
+                            "key": "SHOOT_POWER",
+                            "value": {
+                                "index": 0,
+                                "data": 14.800000190734864
+                            }
+                        },
+                        {
+                            "key": "CLIMB_LOST_MAX",
+                            "value": {
+                                "index": 0,
+                                "data": 8.0
+                            }
+                        },
+                        {
+                            "key": "TURN_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 381.6000061035156
+                            }
+                        },
+                        {
+                            "key": "CLIMB_STICK_SKIN",
+                            "value": {
+                                "index": 0,
+                                "data": 0.05999999865889549
+                            }
+                        },
+                        {
+                            "key": "ANIM_FADE",
+                            "value": {
+                                "index": 0,
+                                "data": 0.20000000298023225
+                            }
+                        },
+                        {
+                            "key": "victorySound",
+                            "value": {
+                                "index": 11,
+                                "data": {
+                                    "guid": "fc7c129dee0c3ed73b20d058672a2bc4"
+                                }
+                            }
+                        },
+                        {
+                            "key": "IDLE_ANIM",
+                            "value": {
+                                "index": 21,
+                                "data": {
+                                    "guid": "7ff3140d9873436465d8bb5eb079a474"
+                                }
+                            }
+                        },
+                        {
+                            "key": "PROJECTILE_PREFAB",
+                            "value": {
+                                "index": 25,
+                                "data": {
+                                    "guid": "cb53e2fea9a2bb0042be4c1f153e263a"
+                                }
+                            }
+                        },
+                        {
+                            "key": "CLIMB_MANTLE_FORWARD",
+                            "value": {
+                                "index": 0,
+                                "data": 0.550000011920929
+                            }
+                        },
+                        {
+                            "key": "SKELETON",
+                            "value": {
+                                "index": 23,
+                                "data": {
+                                    "guid": "67c4343cd65864997e096ed75fcbfa3f"
+                                }
+                            }
+                        },
+                        {
+                            "key": "MOUSE_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.10000000149011612
+                            }
+                        },
+                        {
+                            "key": "WALK_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 3.5999999046325685
+                            }
+                        },
+                        {
+                            "key": "CLIMB_ATTACH_DIST",
+                            "value": {
+                                "index": 0,
+                                "data": 0.949999988079071
+                            }
+                        },
+                        {
+                            "key": "CAMERA_COLLISION_MIN_DIST",
+                            "value": {
+                                "index": 0,
+                                "data": 0.25
+                            }
+                        },
+                        {
+                            "key": "CAMERA_ZOOM_OUT_SPEED",
+                            "value": {
+                                "index": 0,
+                                "data": 4.0
+                            }
+                        },
+                        {
+                            "key": "FALL_IDLE_ANIM",
+                            "value": {
+                                "index": 21,
+                                "data": {
+                                    "guid": "d989f6ff19c382aed3a4d789e4d8051d"
+                                }
+                            }
+                        },
+                        {
+                            "key": "CLIMB_JUMP_PUSH",
+                            "value": {
+                                "index": 0,
+                                "data": 7.0
+                            }
+                        },
+                        {
+                            "key": "WALK_ANIM",
+                            "value": {
+                                "index": 21,
+                                "data": {
+                                    "guid": "143950bbcc17af70eb0da3ba15412923"
+                                }
+                            }
+                        },
+                        {
+                            "key": "ZOOM_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 0.5
+                            }
+                        },
+                        {
+                            "key": "CLIMB_MIN_NORMAL_Y",
+                            "value": {
+                                "index": 0,
+                                "data": -0.25
+                            }
+                        },
+                        {
+                            "key": "GAMEPAD_LOOK_SENSITIVITY",
+                            "value": {
+                                "index": 0,
+                                "data": 2.5
+                            }
+                        },
+                        {
+                            "key": "CLIMB_MANTLE_DOWN",
+                            "value": {
+                                "index": 0,
+                                "data": 1.600000023841858
+                            }
+                        },
+                        {
+                            "key": "CAMERA_COLLISION_OFFSET",
+                            "value": {
+                                "index": 0,
+                                "data": 0.20000000298023225
+                            }
+                        }
+                    ]
+                }
+            },
+            "ShadowCaster": {
+                "nullopt": false,
+                "data": {}
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 0.0,
+                        "y": 3.0,
+                        "z": 12.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 2.0,
+                        "y": 2.0,
+                        "z": 2.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": true
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": false,
+                "data": {
+                    "autoPlay": false,
+                    "looping": false,
+                    "volume": 1.0,
+                    "pitch": 1.0,
+                    "isPlaying": false,
+                    "referenceDistance": 1.0,
+                    "maxDistance": 100.0,
+                    "rolloffFactor": 1.0,
+                    "buffer": {
+                        "guid": ""
+                    }
+                }
+            },
+            "AnimationComponent": {
+                "nullopt": true
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": true
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": false,
+                "data": {}
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            },
+            "Text3DComponent": {
+                "nullopt": true
+            },
+            "PrefabInstance": {
+                "nullopt": true
+            }
+        },
+        {
+            "EntityMetadata": {
+                "name": "PlayerVisual",
+                "tag": "",
+                "active": true,
+                "guid": "a11a0000000000000000000000000001",
+                "parentEntity": {
+                    "guid": "a11a0000000000000000000000000002"
+                },
+                "children": []
+            },
+            "LuaScript": {
+                "nullopt": true
+            },
+            "ShadowCaster": {
+                "nullopt": false,
+                "data": {}
+            },
+            "Transform": {
+                "nullopt": false,
+                "data": {
+                    "position": {
+                        "x": 0.0,
+                        "y": -0.8500000238418579,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0,
+                        "w": 1.0
+                    },
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    }
+                }
+            },
+            "TerrainRenderer": {
+                "nullopt": true
+            },
+            "ModelRenderer": {
+                "nullopt": true
+            },
+            "RigidBodyComponent": {
+                "nullopt": true
+            },
+            "AudioSource": {
+                "nullopt": true
+            },
+            "AnimationComponent": {
+                "nullopt": false,
+                "data": {
+                    "skeletonRef": {
+                        "guid": "67c4343cd65864997e096ed75fcbfa3f"
+                    },
+                    "defaultFadeDuration": 0.20000000298023225,
+                    "playbackSpeed": 1.0,
+                    "current": {
+                        "clip": {
+                            "guid": "7ff3140d9873436465d8bb5eb079a474"
+                        },
+                        "time": 0.0,
+                        "speed": 1.0,
+                        "looping": true,
+                        "active": true
+                    }
+                }
+            },
+            "SkinnedMeshComponent": {
+                "nullopt": false,
+                "data": {
+                    "visible": true,
+                    "meshPath": "assets/animations/s.ozz",
+                    "meshMaterial": {
+                        "guid": "48ac579eaa8ac969e99c1fca5ab57c90"
+                    }
+                }
+            },
+            "ParticleSystem": {
+                "nullopt": true
+            },
+            "PlayerControllerComponent": {
+                "nullopt": true
+            },
+            "RmlUIComponent": {
+                "nullopt": true
+            },
+            "GizmoComponent": {
+                "nullopt": true
+            },
+            "Text3DComponent": {
+                "nullopt": true
+            },
+            "PrefabInstance": {
+                "nullopt": true
+            }
+        }
+    ]
+}
