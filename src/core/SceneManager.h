@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "assets/AssetHandle.h"
 #include "core/module/Module.h"
 #include "Scene.h"
 #include "Entity.h"

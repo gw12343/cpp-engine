@@ -1,5 +1,7 @@
 #include "Skeleton.h"
 
+#include "ozz/animation/runtime/skeleton.h"
+
 namespace Engine {
 
 	Skeleton::~Skeleton()
@@ -24,6 +26,16 @@ namespace Engine {
 			other.source = nullptr;
 		}
 		return *this;
+	}
+
+	int Skeleton::NumJoints() const
+	{
+		return source ? source->num_joints() : 0;
+	}
+
+	int Skeleton::NumSoaJoints() const
+	{
+		return source ? source->num_soa_joints() : 0;
 	}
 
 } // namespace Engine

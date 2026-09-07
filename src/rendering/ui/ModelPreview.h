@@ -5,26 +5,25 @@
 #ifndef CPP_ENGINE_MODELPREVIEW_H
 #define CPP_ENGINE_MODELPREVIEW_H
 
+#include "rendering/ui/PreviewDrawItem.h"
 
-#include "assets/AssetHandle.h"
-#include "rendering/Model.h"
+#include <vector>
 
 #define MODEL_PREVIEW_SIZE 128
 
 namespace Engine {
-	struct PreviewDrawItem {
-		Rendering::Model*           model = nullptr;
-		glm::mat4                   world{1.0f};
-		std::vector<MaterialHandle> materialOverrides;
-	};
+	class Shader;
+	namespace Rendering {
+		class Model;
+	}
 
 	struct ModelPreview {
-		GLuint fbo         = 0;
-		GLuint texture     = 0;
-		GLuint depth       = 0;
-		int    width       = MODEL_PREVIEW_SIZE;
-		int    height      = MODEL_PREVIEW_SIZE;
-		bool   initialized = false;
+		unsigned int fbo         = 0;
+		unsigned int texture     = 0;
+		unsigned int depth       = 0;
+		int          width       = MODEL_PREVIEW_SIZE;
+		int          height      = MODEL_PREVIEW_SIZE;
+		bool         initialized = false;
 
 		void Initialize();
 		void Render(Rendering::Model* model, Shader& shader);

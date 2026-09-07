@@ -7,13 +7,15 @@
 
 #pragma once
 
-#include "components/Components.h"
-#include "animation/Animation.h"
-#include "animation/Skeleton.h"
 #include "animation/AnimationPlayer.h"
+#include "assets/AssetHandle.h"
+#include "components/Components.h"
 
 #include <ozz/animation/runtime/sampling_job.h>
+#include <ozz/animation/runtime/skeleton.h>
 #include <ozz/base/containers/vector.h>
+#include <ozz/base/maths/simd_math.h>
+#include <ozz/base/maths/soa_transform.h>
 
 #include <cereal/cereal.hpp>
 #include <string>

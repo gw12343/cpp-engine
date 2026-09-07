@@ -4,6 +4,12 @@
 
 #include "TerrainTile.h"
 #include "core/EngineData.h"
+#include "utils/Utils.h"
+
+#include <Jolt/Physics/Collision/PhysicsMaterial.h>
+#include <Jolt/Physics/Collision/Shape/HeightFieldShape.h>
+
+using namespace JPH;
 
 
 

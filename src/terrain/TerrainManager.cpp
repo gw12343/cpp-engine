@@ -1,6 +1,7 @@
 
 #include "TerrainManager.h"
 #include "core/EngineData.h"
+#include "utils/Utils.h"
 
 #include "rendering/Renderer.h"
 

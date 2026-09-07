@@ -5,7 +5,9 @@
 #pragma once
 
 #include "components/Components.h"
-#include "cereal/cereal.hpp"
+
+#include <cereal/cereal.hpp>
+#include <glm/glm.hpp>
 namespace Engine::Components {
 	// An editor only visualization component
 	class GizmoComponent : public Component {

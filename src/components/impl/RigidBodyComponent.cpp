@@ -6,7 +6,9 @@
 
 #include "components/Components.h"
 
+#include "core/EngineData.h"
 #include "core/Entity.h"
+#include "rendering/ui/InspectorUI.h"
 
 
 
@@ -16,8 +18,11 @@
 #include "scripting/ScriptManager.h"
 #include "physics/PhysicsManager.h"
 #include "RigidBodyComponent.h"
+#include "TransformComponent.h"
 
 #include <rendering/Model.h>
+#include <Jolt/Physics/Collision/Shape/ConvexHullShape.h>
+#include <Jolt/Physics/Collision/Shape/MeshShape.h>
 
 
 namespace Engine::Components {

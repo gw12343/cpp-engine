@@ -1,7 +1,9 @@
 #pragma once
 
-
 #include "utils/Logger.h"
+
+#include <memory>
+#include <string>
 
 namespace Engine {
 	class Module {

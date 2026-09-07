@@ -5,6 +5,7 @@
 #include "components/Components.h"
 #include "components/impl/LuaScriptComponent.h"
 
+#include "core/EngineData.h"
 #include "core/Entity.h"
 
 #include "animation/AnimationManager.h"

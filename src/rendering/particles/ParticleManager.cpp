@@ -1,4 +1,5 @@
 #include "ParticleManager.h"
+#include "Particle.h"
 
 #include "core/EngineData.h"
 #include "components/impl/TransformComponent.h"
@@ -12,6 +13,7 @@
 #include "scripting/ScriptManager.h"
 #include "assets/AssetManager.h"
 #include "utils/Utils.h"
+#include "utils/MathConvert.h"
 
 #include <tracy/Tracy.hpp>
 

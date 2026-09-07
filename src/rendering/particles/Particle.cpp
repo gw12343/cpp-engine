@@ -5,6 +5,7 @@
 #include "Particle.h"
 #include "core/EngineData.h"
 #include "ParticleManager.h"
+#include "utils/Utils.h"
 
 #include <codecvt>
 #include <locale>

@@ -3,6 +3,8 @@
 #include "animation/AnimationUtils.h"
 #include "core/EngineData.h"
 
+#include "ozz/animation/runtime/skeleton.h"
+
 namespace Engine {
 
 	std::unique_ptr<Skeleton> SkeletonLoader::LoadFromFile(const std::string& path)

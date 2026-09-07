@@ -3,16 +3,17 @@
 //
 
 #include "SceneViewWindow.h"
+#include "Camera.h"
 #include "core/EngineData.h"
 #include "core/Entity.h"
 #include "core/Input.h"
 #include "core/Scene.h"
 #include "core/Window.h"
 
-
 #include "rendering/ui/UIManager.h"
 #include "rendering/ui/EditorSession.h"
 #include "rendering/ui/UndoSystem.h"
+#include "rendering/ui/windows/InspectorRenderer.h"
 #include "components/impl/TransformComponent.h"
 
 

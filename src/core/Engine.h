@@ -1,9 +1,6 @@
 #pragma once
 
-
-
 #include <memory>
-#include <spdlog/spdlog.h>
 
 namespace Engine {
 	class HotReloadWatcher;
@@ -15,50 +12,31 @@ namespace efsw {
 	class FileWatcher;
 }
 
+namespace spdlog {
+	class logger;
+}
+
 namespace Engine {
 
-	/**
-	 * @brief Core engine class managing the game loop, systems, and global state.
-	 */
 	class GEngine {
 	  public:
-		/**
-		 * @brief Constructs the engine and initializes the window.
-		 * @param width The width of the window in pixels.
-		 * @param height The height of the window in pixels.
-		 * @param title The window title.
-		 */
 		GEngine(int width, int height, const char* title);
 
-		/**
-		 * @brief Destroys the engine instance.
-		 */
 		~GEngine();
 
-		/**
-		 * @brief Initializes subsystems and resources.
-		 * @return True if initialization was successful, false otherwise.
-		 */
 		bool Initialize();
 
-		/**
-		 * @brief Starts and runs the main engine loop.
-		 */
 		void Run();
 
-		/**
-		 * @brief Shuts down the engine and releases all resources.
-		 */
 		void Shutdown();
-
 
 	  private:
 		void LoadGameAssets();
 
-		std::shared_ptr<spdlog::logger> m_logger; ///< Logger instance.
+		std::shared_ptr<spdlog::logger> m_logger;
 
-		float m_deltaTime; ///< Time elapsed since last frame.
-		float m_lastFrame; ///< Timestamp of last frame.
+		float m_deltaTime;
+		float m_lastFrame;
 
 		std::unique_ptr<ModuleManager> m_moduleManager;
 

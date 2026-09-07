@@ -5,6 +5,11 @@
 #include "ShadowMapRenderer.h"
 #include "glm/ext/matrix_transform.hpp"
 #include "spdlog/spdlog.h"
+#include "utils/MathConvert.h"
+#include "utils/Utils.h"
+#include "components/impl/TransformComponent.h"
+#include "rendering/Model.h"
+#include "rendering/Renderer.h"
 
 
 #include "physics/PhysicsManager.h"

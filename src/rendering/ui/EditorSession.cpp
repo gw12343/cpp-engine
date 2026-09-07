@@ -1,5 +1,6 @@
 #include "EditorSession.h"
 
+#include "Camera.h"
 #include "UIManager.h"
 #include "imgui.h"
 #include "windows/SceneViewWindow.h"

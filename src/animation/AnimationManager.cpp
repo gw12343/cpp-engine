@@ -12,6 +12,7 @@
 #include "components/impl/SkinnedMeshComponent.h"
 
 #include <utils/Utils.h>
+#include <utils/MathConvert.h>
 #include <components/impl/EntityMetadataComponent.h>
 
 #include "core/SceneManager.h"

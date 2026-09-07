@@ -3,7 +3,9 @@
 //
 
 #include "AudioDebugWindow.h"
+#include "Camera.h"
 #include "core/EngineData.h"
+#include "sound/SoundManager.h"
 
 #include "components/Components.h"
 #include "components/impl/EntityMetadataComponent.h"

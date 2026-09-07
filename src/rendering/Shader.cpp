@@ -1,5 +1,6 @@
 #include "Shader.h"
 
+#include "utils/Utils.h"
 
 #include <fstream>
 #include <glm/gtc/type_ptr.hpp>

@@ -1,5 +1,6 @@
 #include "spdlog/spdlog.h"
 #include "Framebuffer.h"
+#include "utils/Utils.h"
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Camera.h"
+#include "assets/AssetHandle.h"
 #include "core/module/Module.h"
 
 

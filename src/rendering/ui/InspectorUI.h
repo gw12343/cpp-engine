@@ -5,13 +5,13 @@
 #ifndef CPP_ENGINE_INSPECTORUI_H
 #define CPP_ENGINE_INSPECTORUI_H
 
-
-
+#include "assets/AssetHandle.h"
 #include "core/EntityHandle.h"
-#include "ozz/animation/runtime/animation.h"
-#include "animation/Animation.h"
 
+#include "imgui.h"
 
+#include <string>
+#include <vector>
 
 namespace Engine {
 
@@ -20,6 +20,8 @@ namespace Engine {
 	class Scene;
 	class Prefab;
 	class Particle;
+	class Animation;
+	class Skeleton;
 	namespace Terrain {
 		class TerrainTile;
 	}
@@ -31,9 +33,6 @@ namespace Engine {
 		class SoundBuffer;
 	}
 
-
-	// Reusable helpers (unchanged, but included for completeness)
-	// labelWidth <= 0: auto-fit a shared column in this window (won't clip names).
 	bool LeftLabelCheckbox(const char* label, bool* value, float labelWidth = 0.0f);
 
 	bool LeftLabelInputText(const char* label, char* buf, size_t buf_size, float labelWidth = 0.0f, ImGuiInputTextFlags flags = 0);
@@ -70,7 +69,6 @@ namespace Engine {
 
 	bool LeftLabelEntity(const char* label, EntityHandle* assetRef);
 	bool LeftLabelEntityVector(const char* label, std::vector<EntityHandle>& assetRef);
-
 
 	bool ComponentHeader(const char* name, bool* removeRequested);
 

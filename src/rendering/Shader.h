@@ -1,8 +1,9 @@
 #pragma once
 
-#include <spdlog/spdlog.h>
+#include <glm/glm.hpp>
 
 #include <optional>
+#include <string>
 
 typedef unsigned int GLuint;
 typedef unsigned int GLenum;

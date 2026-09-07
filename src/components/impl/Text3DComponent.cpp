@@ -1,5 +1,6 @@
 #include "Text3DComponent.h"
 
+#include "core/EngineData.h"
 #include "core/Entity.h"
 #include "scripting/ScriptManager.h"
 #include "rendering/ui/InspectorUI.h"

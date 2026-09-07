@@ -4,24 +4,27 @@
 
 #pragma once
 
-
-
-#include <unordered_map>
-
-#include <spdlog/spdlog.h>
-
-//#include "core/Entity.h"
 #include "EntityHandle.h"
+
+#include <entt/entt.hpp>
+
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace Engine {
 	class Entity;
-	
-	// A single scene, essentially just a wrapper for entt::registry
+
 	class Scene {
 	  public:
 		Scene(std::string name);
-
 		Scene(std::string name, std::vector<Entity> entities);
+		~Scene();
+		Scene(const Scene&)            = delete;
+		Scene& operator=(const Scene&) = delete;
+		Scene(Scene&&) noexcept;
+		Scene& operator=(Scene&&) noexcept;
 
 		std::shared_ptr<entt::registry> GetRegistry() { return m_registry; }
 

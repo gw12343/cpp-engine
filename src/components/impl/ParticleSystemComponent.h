@@ -5,19 +5,19 @@
 #ifndef CPP_ENGINE_PARTICLESYSTEMCOMPONENT_H
 #define CPP_ENGINE_PARTICLESYSTEMCOMPONENT_H
 
+#include "assets/AssetHandle.h"
 #include "components/Components.h"
-#include "rendering/particles/Particle.h"
 
 #include <cereal/cereal.hpp>
+#include <glm/glm.hpp>
 #include <utility>
-
 
 namespace Engine::Components {
 	class ParticleSystem : public Component {
 	  public:
 		ParticleHandle effect{};
-		bool                  autoPlay = true;
-		bool                  looping  = false;
+		bool           autoPlay = true;
+		bool           looping  = false;
 
 		ParticleSystem() = default;
 		explicit ParticleSystem(ParticleHandle particle) : effect(std::move(particle)) {}
@@ -32,12 +32,10 @@ namespace Engine::Components {
 		void OnRemoved(Entity& entity) override;
 		void RenderInspector(Entity& entity) override;
 
-        static void AddBindings();
+		static void AddBindings();
 
+		int handle = -1;
 
-		Effekseer::Handle handle = -1;
-
-		// Cached for skipping SetLocation when the emitter is static.
 		glm::vec3 lastPos{0.f};
 		bool      posValid = false;
 	};

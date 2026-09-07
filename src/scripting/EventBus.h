@@ -12,8 +12,8 @@
 #include <mutex>
 #include <sol/sol.hpp>
 
+#include "assets/AssetHandle.h"
 #include "core/Entity.h"
-
 #include "core/EntityHandle.h"
 
 namespace Engine {

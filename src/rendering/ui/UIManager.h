@@ -1,36 +1,35 @@
 #pragma once
 
-#include "Camera.h"
-#include "animation/rendering/renderer_impl.h"
+#include "assets/AssetHandle.h"
 #include "core/Entity.h"
-#include "sound/SoundManager.h"
-
-
-
+#include "core/EntityHandle.h"
 #include "core/module/Module.h"
-#include "ModelPreview.h"
-#include "rendering/ui/windows/AssetUIRenderer.h"
-#include "rendering/ui/windows/InspectorRenderer.h"
-#include "rendering/ui/windows/MaterialEditor.h"
-#include "rendering/effects/ssao/GBuffer.h"
 
-#include <typeindex>
-#include <unordered_map>
+#include <memory>
+#include <string>
 #include <unordered_set>
-
 
 namespace Engine {
 	class GEngine;
+	class Texture;
+	class GBuffer;
+	class InspectorRenderer;
+	class AssetUIRenderer;
+	class MaterialEditor;
+
 	namespace UI {
 
 		class UIManager : public Module {
 		  public:
+			UIManager();
+			~UIManager() override;
+
 			void                      onInit() override;
 			void                      onUpdate(float dt) override;
 			void                      onGameStart() override {}
 			void                      onShutdown() override;
 			[[nodiscard]] std::string name() const override { return "UIModule"; };
-            void                      setLuaBindings() override;
+			void                      setLuaBindings() override;
 
 			void BeginDockspace(float ht);
 			void EndDockspace();
@@ -46,10 +45,9 @@ namespace Engine {
 			std::shared_ptr<Texture> m_particleIconTexture;
 			std::shared_ptr<Texture> m_materialIconTexture;
 
-			MaterialHandle    m_selectedMaterial;
-			AssetHandle<Engine::Rendering::Model>    m_selectedModel;
+			MaterialHandle                        m_selectedMaterial;
+			AssetHandle<Engine::Rendering::Model> m_selectedModel;
 
-			// Selected entity
 			Entity m_selectedEntity = Entity();
 
 			Entity DuplicateEntity(Entity source);
@@ -57,16 +55,16 @@ namespace Engine {
 
 			std::unique_ptr<InspectorRenderer> m_inspectorRenderer;
 			bool                               isOverSceneView() const;
-            [[nodiscard]] const Engine::Entity& getSelectedEntity() const { return m_selectedEntity; }
+			[[nodiscard]] const Engine::Entity& getSelectedEntity() const { return m_selectedEntity; }
+
 		  private:
-			// UI rendering methods
 			void  RenderHierarchyWindow();
 			float RenderTopBar(float top);
 			float RenderMainMenuBar();
 			void  RenderPauseOverlay();
-            void RenderGBufferDebug(std::shared_ptr<GBuffer> gbuffer);
-            void RenderModelDebug(AssetHandle<Engine::Rendering::Model> handle);
-			void FlushHierarchyCommands();
+			void  RenderGBufferDebug(std::shared_ptr<GBuffer> gbuffer);
+			void  RenderModelDebug(AssetHandle<Engine::Rendering::Model> handle);
+			void  FlushHierarchyCommands();
 
 			bool                             m_overSceneView = false;
 			std::unique_ptr<AssetUIRenderer> m_uiAssetRenderer;
@@ -76,16 +74,15 @@ namespace Engine {
 			void                             DrawAddEntityMenu();
 
 			enum class HierarchyCommand { None, Delete, Duplicate, CreateChild, SavePrefab, InstantiatePrefab, Reparent, DropPrefab };
-			HierarchyCommand m_hierarchyCommand = HierarchyCommand::None;
-			Entity           m_hierarchyCommandEntity;
-			EntityHandle     m_hierarchyCommandParent;
-			std::string      m_hierarchyDropPrefabId;
-			std::string      m_renamingGuid;
-			char             m_renameBuffer[256] = {};
-			bool             m_renameFocusRequested = false;
+			HierarchyCommand                m_hierarchyCommand = HierarchyCommand::None;
+			Entity                          m_hierarchyCommandEntity;
+			EntityHandle                    m_hierarchyCommandParent;
+			std::string                     m_hierarchyDropPrefabId;
+			std::string                     m_renamingGuid;
+			char                            m_renameBuffer[256]     = {};
+			bool                            m_renameFocusRequested  = false;
 			std::unordered_set<std::string> m_hierarchyRevealGuids;
 			bool                            m_hierarchyScrollToSelection = false;
-
-        };
+		};
 	} // namespace UI
 } // namespace Engine

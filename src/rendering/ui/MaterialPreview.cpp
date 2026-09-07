@@ -3,7 +3,7 @@
 //
 
 #include "MaterialPreview.h"
-
+#include "utils/Utils.h"
 
 #include "glm/ext/matrix_clip_space.hpp"
 #include "glm/ext/matrix_transform.hpp"

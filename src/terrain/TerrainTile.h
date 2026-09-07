@@ -6,6 +6,7 @@
 #define CPP_ENGINE_TERRAINTILE_H
 
 #include "Camera.h"
+#include "assets/AssetHandle.h"
 #include "core/Window.h"
 #include "rendering/Shader.h"
 #include "rendering/Texture.h"

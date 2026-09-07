@@ -6,6 +6,8 @@
 
 #include "animation/AnimationManager.h"
 #include "animation/Animation.h"
+#include "animation/Skeleton.h"
+#include "rendering/ui/InspectorUI.h"
 #include "scripting/ScriptManager.h"
 #include "core/EngineData.h"
 #include "core/Scene.h"

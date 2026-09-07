@@ -6,8 +6,11 @@
 
 
 
-#include <unordered_map>
 #include "Module.h"
+#include "utils/Utils.h"
+
+#include <memory>
+#include <unordered_map>
 
 namespace Engine {
 	class ModuleManager {

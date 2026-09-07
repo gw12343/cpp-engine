@@ -6,6 +6,7 @@
 #define CPP_ENGINE_JSONSCENELOADER_H
 
 
+#include "assets/AssetHandle.h"
 #include "assets/IAssetLoader.h"
 #include "core/Scene.h"
 

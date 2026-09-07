@@ -7,6 +7,9 @@
 #include "core/Engine.h"
 #include "core/Entity.h"
 #include "core/EngineData.h"
+#include "rendering/particles/Particle.h"
+#include "rendering/ui/InspectorUI.h"
+#include "utils/Utils.h"
 
 
 

@@ -3,6 +3,7 @@
 //
 
 #include "PlayerControllerComponent.h"
+#include "TransformComponent.h"
 #include "core/EngineData.h"
 #include "physics/PhysicsManager.h"
 #include "physics/PlayerController.h"

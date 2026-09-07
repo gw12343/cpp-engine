@@ -8,10 +8,10 @@
 
 #include "components/Components.h"
 
-
 #include <cereal/cereal.hpp>
-#include <cereal/types/vector.hpp>
-#include <cereal/types/array.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 
 namespace Engine {

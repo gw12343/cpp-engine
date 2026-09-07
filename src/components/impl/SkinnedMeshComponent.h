@@ -8,11 +8,12 @@
 #include <animation/rendering/AnimatedMesh.h>
 #include <animation/SkinnedMeshCache.h>
 
+#include "assets/AssetHandle.h"
 #include "components/Components.h"
-#include "rendering/Renderer.h"
 
 #include "ozz/base/containers/vector.h"
 #include <cereal/cereal.hpp>
+#include <unordered_set>
 
 namespace Engine::Components {
 	class SkinnedMeshComponent : public Component {

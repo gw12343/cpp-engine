@@ -4,6 +4,7 @@
 
 #include "AssetUIRenderer.h"
 
+#include "core/EngineData.h"
 #include "imgui_internal.h"
 #include "functional"
 #include "terrain/TerrainTile.h"
@@ -12,6 +13,7 @@
 
 #include "rendering/particles/Particle.h"
 #include "animation/Animation.h"
+#include "sound/SoundManager.h"
 #include "animation/Skeleton.h"
 #include "rendering/ui/UIManager.h"
 #include "rendering/ui/EditorSession.h"

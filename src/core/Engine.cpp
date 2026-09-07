@@ -9,6 +9,7 @@
 
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include "EngineData.h"
+#include "ThreadPool.h"
 #include "Input.h"
 #include "scripting/ScriptManager.h"
 

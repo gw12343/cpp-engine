@@ -15,8 +15,10 @@
 #include "ozz/base/memory/allocator.h"
 #include "ozz/base/platform.h"
 #include "ozz/geometry/runtime/skinning_job.h"
+#include "assets/AssetManager.h"
 #include "core/EngineData.h"
 #include "rendering/Material.h"
+#include "utils/MathConvert.h"
 
 
 
@@ -2242,3 +2244,5 @@ namespace Engine{
 	// OZZ_DECL_GL_EXT(glDrawArraysInstanced_, PFNGLDRAWARRAYSINSTANCEDPROC);
 	// OZZ_DECL_GL_EXT(glDrawElementsInstanced_, PFNGLDRAWELEMENTSINSTANCEDPROC);
 } // namespace
+
+#include "assets/AssetManager.inl"

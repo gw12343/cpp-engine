@@ -4,10 +4,12 @@
 
 #pragma once
 
-#include "utils/Logger.h"
 #include "RenderSettings.h"
-#include "core/ThreadPool.h"
-#include "entt/entt.hpp"
+#include "assets/AssetManager.h"
+#include "utils/Logger.h"
+
+#include <entt/entt.hpp>
+#include <memory>
 
 #ifndef GAME_BUILD
 #define SCENE_LOADER JSONSceneLoader
@@ -37,13 +39,18 @@ namespace Engine {
 	class Scene;
 	class Input;
 	class GameUIManager;
-
 	class ModuleManager;
+	class ThreadPool;
 
 	enum EngineState { EDITOR, PAUSED, PLAYING };
 
 	class EngineData {
 	  public:
+		EngineData();
+		~EngineData();
+		EngineData(const EngineData&)            = delete;
+		EngineData& operator=(const EngineData&) = delete;
+
 		std::shared_ptr<AssetManager>            assetManager;
 		std::shared_ptr<SceneManager>            scene;
 		std::shared_ptr<Window>                  window;
@@ -61,16 +68,16 @@ namespace Engine {
 		std::unique_ptr<ThreadPool>              threadPool;
 		EngineState                              state;
 		bool                                     stepOneFrame = false;
-        RenderSettings*                          renderSettings;
+		RenderSettings*                          renderSettings;
 		ModuleManager*                           manager;
 	};
 
 	EngineData& Get();
 
-
-    inline RenderSettings* GetRenderSettings() {
-        return Get().renderSettings;
-    }
+	inline RenderSettings* GetRenderSettings()
+	{
+		return Get().renderSettings;
+	}
 
 	inline auto GetDefaultLogger()
 	{
@@ -92,7 +99,6 @@ namespace Engine {
 		return Get().state == PLAYING || Get().stepOneFrame;
 	}
 
-	// Convenience inline accessors
 	inline auto& GetAssetManager()
 	{
 		return *Get().assetManager;
@@ -152,10 +158,7 @@ namespace Engine {
 		return *Get().gameUI;
 	}
 
-	inline ThreadPool& GetThreadPool()
-	{
-		return *Get().threadPool;
-	}
+	ThreadPool& GetThreadPool();
 
 	entt::registry& GetCurrentSceneRegistry();
 	Scene*          GetCurrentScene();

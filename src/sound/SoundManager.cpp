@@ -1,7 +1,9 @@
 #include "SoundManager.h"
 
+#include "Camera.h"
 #include "components/Components.h"
 #include "core/EngineData.h"
+#include "utils/Utils.h"
 #include "components/impl/EntityMetadataComponent.h"
 #include "components/impl/AudioSourceComponent.h"
 #include "components/impl/TransformComponent.h"

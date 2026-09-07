@@ -1,18 +1,15 @@
 //
 // Created by gabe on 6/24/25.
 //
-#include "core/Entity.h"
-
-
-
-#include "misc/cpp/imgui_stdlib.h"
-#include "rendering/particles/ParticleManager.h"
-#include "animation/AnimationManager.h"
-#include "scripting/ScriptManager.h"
-#include "assets/impl/ModelLoader.h"
 #include "ModelRendererComponent.h"
+#include "TransformComponent.h"
 
 #include "core/EngineData.h"
+#include "core/Entity.h"
+#include "rendering/Shader.h"
+#include "rendering/ui/InspectorUI.h"
+#include "scripting/ScriptManager.h"
+#include "assets/impl/ModelLoader.h"
 namespace Engine::Components {
 
 	void ModelRenderer::AddBindings()

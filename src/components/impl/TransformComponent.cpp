@@ -2,7 +2,9 @@
 // Created by gabe on 6/24/25.
 //
 #include "components/Components.h"
+#include "core/EngineData.h"
 #include "core/Entity.h"
+#include "rendering/ui/InspectorUI.h"
 
 
 #include "ozz/animation/runtime/track.h"

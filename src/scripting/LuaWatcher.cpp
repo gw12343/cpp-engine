@@ -5,6 +5,7 @@
 #include "LuaWatcher.h"
 
 #include "ScriptManager.h"
+#include "core/EngineData.h"
 
 namespace Engine
 {

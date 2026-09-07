@@ -5,6 +5,8 @@
 #ifndef CPP_ENGINE_ASSETHANDLE_H
 #define CPP_ENGINE_ASSETHANDLE_H
 
+#include <string>
+#include <vector>
 
 namespace Engine
 {
@@ -30,6 +32,7 @@ namespace Engine
 	class Animation;
 	class Skeleton;
 	class Prefab;
+	class Scene;
 }
 
 namespace Engine {

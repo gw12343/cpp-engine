@@ -5,41 +5,39 @@
 #ifndef CPP_ENGINE_MODELRENDERERCOMPONENT_H
 #define CPP_ENGINE_MODELRENDERERCOMPONENT_H
 
+#include "assets/AssetHandle.h"
 #include "components/Components.h"
-#include "rendering/Renderer.h"
-#include "TransformComponent.h"
-
-#include "core/EngineData.h"
 
 #include <cereal/cereal.hpp>
 #include <cereal/types/vector.hpp>
-#include <cereal/types/array.hpp>
+
+namespace Engine {
+	class Shader;
+}
 
 namespace Engine::Components {
-	// Renderer component for 3D models
+	class Transform;
+
 	class ModelRenderer : public Component {
 	  public:
-		ModelHandle      model;
-		bool                               visible         = true;
-		bool                               backfaceCulling = true;
+		ModelHandle                 model;
+		bool                        visible         = true;
+		bool                        backfaceCulling = true;
 		std::vector<MaterialHandle> materialOverrides;
 		ModelRenderer() = default;
 
 		template <class Archive>
 		void serialize(Archive& ar)
 		{
-			ar(cereal::make_nvp("visible", visible), cereal::make_nvp("model", model), cereal::make_nvp("backfaceCulling", backfaceCulling), cereal::make_nvp("materialOverrides", materialOverrides) // only save GUID
-			);
+			ar(cereal::make_nvp("visible", visible), cereal::make_nvp("model", model), cereal::make_nvp("backfaceCulling", backfaceCulling), cereal::make_nvp("materialOverrides", materialOverrides));
 		}
 
 		explicit ModelRenderer(const ModelHandle& handle) : model(handle) {}
-		// Draw the model with the given shader and transform
-		void Draw(const Shader& shader, Components::Transform& transform, bool uploadMaterial);
+
+		void Draw(const Shader& shader, Transform& transform, bool uploadMaterial);
 
 		void SetModel(const std::string& path);
 		void SetModel(const ModelHandle& handle);
-
-
 
 		void SetMaterial(MaterialHandle mat);
 
@@ -50,6 +48,5 @@ namespace Engine::Components {
 		void RenderInspector(Entity& entity) override;
 	};
 } // namespace Engine::Components
-
 
 #endif // CPP_ENGINE_MODELRENDERERCOMPONENT_H

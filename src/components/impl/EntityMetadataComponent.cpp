@@ -6,6 +6,9 @@
 #include "EntityMetadataComponent.h"
 #include "core/Entity.h"
 
+#include <random>
+#include <sstream>
+
 
 namespace Engine::Components {
 	void EntityMetadata::OnRemoved(Entity& entity)

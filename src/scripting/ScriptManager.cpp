@@ -11,6 +11,7 @@
 
 #include "ComponentMethodBinder.h"
 #include "LuaWatcher.h"
+#include "core/EngineData.h"
 #include "core/Entity.h"
 #include "core/EnginePaths.h"
 #include "core/ProjectSettings.h"

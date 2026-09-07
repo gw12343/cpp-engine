@@ -1,6 +1,7 @@
 #include "Mesh.h"
 
 #include "Shader.h"
+#include "utils/Utils.h"
 #include "core/Engine.h"
 #include "terrain/TerrainManager.h"
 

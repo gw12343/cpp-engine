@@ -1,15 +1,14 @@
 #pragma once
 
-
 #include "Scene.h"
+#include "utils/Logger.h"
 
 namespace Engine {
-	// Template method declarations
 	template <typename T, typename... Args>
 	T& Entity::AddComponent(Args&&... args)
 	{
 		if (!IsValid()) {
-			GetDefaultLogger()->error("AddComponent on invalid entity");
+			Logger::get("core")->error("AddComponent on invalid entity");
 			static T dummy{};
 			return dummy;
 		}
@@ -42,7 +41,7 @@ namespace Engine {
 		if (T* p = TryGetComponent<T>()) {
 			return *p;
 		}
-		GetDefaultLogger()->error("GetComponent on invalid entity or missing component");
+		Logger::get("core")->error("GetComponent on invalid entity or missing component");
 		static T dummy{};
 		return dummy;
 	}
@@ -53,7 +52,7 @@ namespace Engine {
 		if (const T* p = TryGetComponent<T>()) {
 			return *p;
 		}
-		GetDefaultLogger()->error("GetComponent on invalid entity or missing component");
+		Logger::get("core")->error("GetComponent on invalid entity or missing component");
 		static T dummy{};
 		return dummy;
 	}
@@ -78,4 +77,4 @@ namespace Engine {
 		}
 	}
 
-}
+} // namespace Engine

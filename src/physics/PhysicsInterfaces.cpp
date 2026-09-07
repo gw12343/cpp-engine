@@ -4,6 +4,7 @@
 
 #include "core/EngineData.h"
 #include "physics/PhysicsManager.h"
+#include "utils/Utils.h"
 #include "scripting/ScriptManager.h"
 
 using namespace JPH;

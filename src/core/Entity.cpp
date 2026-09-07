@@ -1,6 +1,7 @@
 #include "Entity.h"
 
 #include "Engine.h"
+#include "EngineData.h"
 #include "EntityHandle.h"
 #include "components/impl/EntityMetadataComponent.h"
 #include "components/AllComponents.h"

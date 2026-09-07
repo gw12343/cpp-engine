@@ -3,6 +3,7 @@
 //
 
 #include "EventBus.h"
+#include "core/EngineData.h"
 #include "utils/Logger.h"
 #include <algorithm>
 

@@ -1,6 +1,12 @@
 #include "UIManager.h"
 #include "EditorSession.h"
 #include "UndoSystem.h"
+#include "ModelPreview.h"
+#include "rendering/Texture.h"
+#include "rendering/effects/ssao/GBuffer.h"
+#include "rendering/ui/windows/AssetUIRenderer.h"
+#include "rendering/ui/windows/InspectorRenderer.h"
+#include "rendering/ui/windows/MaterialEditor.h"
 
 #include "components/Components.h"
 #include "components/AllComponents.h"
@@ -68,6 +74,8 @@ std::string SelectFolder()
 
 namespace Engine::UI {
 
+	UIManager::UIManager()  = default;
+	UIManager::~UIManager() = default;
 
 	void UIManager::onShutdown()
 	{

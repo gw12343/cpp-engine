@@ -10,6 +10,7 @@
 
 #include "core/EngineData.h"
 #include "Camera.h"
+#include "utils/Utils.h"
 
 #include "components/impl/LuaScriptComponent.h"
 #include "scripting/ScriptManager.h"

@@ -3,7 +3,10 @@
 //
 
 #include "TerrainRendererComponent.h"
+#include "core/EngineData.h"
 #include "misc/cpp/imgui_stdlib.h"
+#include "rendering/ui/InspectorUI.h"
+#include "terrain/TerrainTile.h"
 
 namespace Engine {
 
@@ -46,3 +49,5 @@ namespace Engine {
 	{
 	}
 } // namespace Engine
+
+#include "assets/AssetManager.inl"

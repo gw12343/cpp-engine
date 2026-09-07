@@ -9,6 +9,7 @@
 #include "physics/PhysicsManager.h"
 #include "scripting/ScriptManager.h"
 #include "components/impl/RigidBodyComponent.h"
+#include "components/impl/TransformComponent.h"
 
 #include "components/impl/EntityMetadataComponent.h"
 #include "core/ProjectSettings.h"

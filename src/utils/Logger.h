@@ -3,10 +3,12 @@
 //
 #pragma once
 
-
 #include <spdlog/spdlog.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include "ImGuiLogSink.h"
+
+#include <memory>
+#include <string>
+
+class ImGuiLogSink;
 
 namespace Engine {
 	class Logger {

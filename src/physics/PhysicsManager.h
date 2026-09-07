@@ -5,14 +5,7 @@
 #endif
 #include <Jolt/Jolt.h>
 
-// Jolt includes
-#include "components/Components.h"
-
-
-
-
 #include "physics/PhysicsInterfaces.h"
-#include "spdlog/spdlog.h"
 #include "core/module/Module.h"
 
 #include <Jolt/Core/Factory.h>
@@ -32,13 +25,18 @@
 #include <Jolt/Physics/Collision/Shape/HeightFieldShape.h>
 #include <Jolt/RegisterTypes.h>
 #include "core/Entity.h"
-#include "components/impl/TransformComponent.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
+
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 using namespace JPH;
 using namespace JPH::literals;
 
 namespace Engine {
+	namespace Components {
+		class Transform;
+	}
 
 	class PlayerController;
 

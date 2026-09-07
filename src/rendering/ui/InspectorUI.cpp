@@ -4,6 +4,7 @@
 
 
 #include "InspectorUI.h"
+#include "core/EngineData.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "rendering/Renderer.h"
 #include <nfd.h>

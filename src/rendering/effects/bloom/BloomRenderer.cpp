@@ -5,6 +5,7 @@
 #include "BloomRenderer.h"
 #include "core/EngineData.h"
 #include "rendering/Renderer.h"
+#include "utils/Utils.h"
 
 
 

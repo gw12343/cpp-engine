@@ -1,6 +1,7 @@
 #include "PrefabInstanceComponent.h"
 
 #include "assets/Prefab.h"
+#include "core/EngineData.h"
 #include "core/Entity.h"
 #include "rendering/ui/InspectorUI.h"
 #include "scripting/ScriptManager.h"

@@ -5,6 +5,7 @@
 #include "MaterialEditor.h"
 
 #include "rendering/ui/IconsFontAwesome6.h"
+#include "rendering/ui/InspectorUI.h"
 
 #include "rendering/Texture.h"
 #include "rendering/Material.h"

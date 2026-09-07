@@ -14,6 +14,7 @@
 #include "PlayerController.h"
 #include "components/impl/PlayerControllerComponent.h"
 #include "components/impl/EntityMetadataComponent.h"
+#include "components/impl/TransformComponent.h"
 #include "core/SceneManager.h"
 #include "core/ThreadPool.h"
 #include <vector>

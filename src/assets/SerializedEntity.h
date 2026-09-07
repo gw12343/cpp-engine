@@ -18,6 +18,9 @@
 #include "components/AllComponents.h"
 #include "core/EntityHandle.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+
 namespace glm {
 	template <class Archive>
 	void serialize(Archive& ar, vec3& v)

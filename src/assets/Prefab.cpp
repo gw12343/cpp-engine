@@ -1,6 +1,7 @@
 #include "Prefab.h"
 
 #include "assets/AssetManager.h"
+#include "rendering/Model.h"
 #include "components/impl/ModelRendererComponent.h"
 #include "components/impl/LuaScriptComponent.h"
 #include "components/impl/PrefabInstanceComponent.h"

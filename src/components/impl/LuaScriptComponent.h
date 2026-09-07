@@ -7,16 +7,15 @@
 
 #include <utility>
 
+#include "assets/AssetHandle.h"
 #include "components/Components.h"
+#include "core/EntityHandle.h"
 
 #include <cereal/cereal.hpp>
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/variant.hpp>
-#include <unordered_map>
 #include <sol/environment.hpp>
-
-
-#include "core/EntityHandle.h"
+#include <unordered_map>
 
 namespace Engine {
 	class Texture;

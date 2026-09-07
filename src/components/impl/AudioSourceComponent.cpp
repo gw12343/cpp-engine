@@ -2,22 +2,40 @@
 // Created by gabe on 6/24/25.
 //
 
-#include "components/Components.h"
 #include "AudioSourceComponent.h"
 
-
+#include "core/EngineData.h"
 #include "core/Entity.h"
-
-
-#include "ozz/animation/runtime/track.h"
-#include "rendering/particles/ParticleManager.h"
-
-#include "animation/AnimationManager.h"
+#include "rendering/ui/InspectorUI.h"
 #include "scripting/ScriptManager.h"
-#include "misc/cpp/imgui_stdlib.h"
-
+#include "sound/SoundManager.h"
 
 namespace Engine::Components {
+	AudioSource::AudioSource(SoundHandle buf, bool loop, float vol, float p, bool play, float refDist, float maxDist, float rolloff)
+	    : autoPlay(play), looping(loop), volume(vol), pitch(p), referenceDistance(refDist), maxDistance(maxDist), rolloffFactor(rolloff), buffer(buf)
+	{
+		source = std::make_shared<Audio::SoundSource>(looping);
+		source->SetGain(volume);
+		source->SetPitch(pitch);
+		source->ConfigureAttenuation(referenceDistance, maxDistance, rolloffFactor);
+		GetDefaultLogger()->info("Created AudioSource with attenuation: ref={}, max={}, rolloff={}", referenceDistance, maxDistance, rolloffFactor);
+	}
+
+	void AudioSource::Play()
+	{
+		if (!source) return;
+		source->Play(buffer);
+		isPlaying = true;
+	}
+
+	void AudioSource::Stop()
+	{
+		if (source) {
+			source->Stop();
+			isPlaying = false;
+		}
+	}
+
 	void AudioSource::OnRemoved(Entity& entity)
 	{
 	}

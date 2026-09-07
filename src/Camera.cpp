@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <utils/Utils.h>
+#include <utils/MathConvert.h>
 #include "core/Window.h"
 
 #include "scripting/ScriptManager.h"

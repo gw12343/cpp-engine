@@ -5,7 +5,10 @@
 #ifndef CPP_ENGINE_ENTITYHANDLE_H
 #define CPP_ENGINE_ENTITYHANDLE_H
 
+#include <string>
 #include <utility>
+#include <vector>
+
 namespace Engine {
 	class EntityHandle {
 		std::string guid;

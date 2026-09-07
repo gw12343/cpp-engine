@@ -5,32 +5,40 @@
 #ifndef CPP_ENGINE_RIGIDBODYCOMPONENT_H
 #define CPP_ENGINE_RIGIDBODYCOMPONENT_H
 
-#include "physics/PhysicsManager.h"
-#include "Jolt/Physics/Collision/Shape/MeshShape.h"
-#include "Jolt/Physics/Collision/Shape/ConvexHullShape.h"
-#include "Jolt/Physics/Collision/Shape/OffsetCenterOfMassShape.h"
+#include "assets/AssetHandle.h"
+#include "components/Components.h"
+
+#include <Jolt/Jolt.h>
+#include <Jolt/Physics/Body/BodyID.h>
+#include <Jolt/Physics/Body/MotionType.h>
+#include <Jolt/Physics/Collision/Shape/BoxShape.h>
+#include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
+#include <Jolt/Physics/Collision/Shape/CylinderShape.h>
+#include <Jolt/Physics/Collision/Shape/Shape.h>
+#include <Jolt/Physics/Collision/Shape/SphereShape.h>
 
 #include <cereal/cereal.hpp>
 #include <cereal/types/vector.hpp>
-#include <cereal/types/array.hpp>
-
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <string>
+#include <vector>
 
 namespace Engine::Components {
 	class RigidBodyComponent : public Component {
 	  public:
 		JPH::BodyID bodyID;
 
-		// Stored physics configuration
 		int         motionType    = (int) JPH::EMotionType::Dynamic;
 		float       mass          = 1.0f;
 		float       friction      = 0.5f;
 		float       restitution   = 0.0f;
 		float       gravityFactor = 1.0f;
-		std::string       shapeType     = "Box";
-		JPH::Vec3         shapeSize     = JPH::Vec3::sReplicate(1.0f); // size/half-extents
-		std::vector<bool> meshSelection;                               // Which meshes from the model are enabled for collision
-		JPH::Vec3         centerOfMassOffset = JPH::Vec3::sZero();     // Offset for convex hull shapes
-		ModelHandle colliderModel;                   // Model used for mesh/convex mesh colliders
+		std::string shapeType     = "Box";
+		JPH::Vec3   shapeSize     = JPH::Vec3::sReplicate(1.0f);
+		std::vector<bool> meshSelection;
+		JPH::Vec3         centerOfMassOffset = JPH::Vec3::sZero();
+		ModelHandle       colliderModel;
 
 		RigidBodyComponent() : bodyID(0) {}
 
@@ -52,8 +60,6 @@ namespace Engine::Components {
 		void SetCollisionShape(const JPH::ShapeSettings& settings);
 		void SetCollisionShapeRef(const JPH::ShapeRefC& shape);
 
-
-		// Useful manipulation methods
 		glm::vec3 GetPosition() const;
 		void      MoveKinematic(const glm::vec3& position, const glm::quat& rotation, float dt);
 		void      SetPosition(const glm::vec3& position);
@@ -83,18 +89,16 @@ namespace Engine::Components {
 		void SetKinematic(bool enable);
 		bool IsKinematic() const;
 
-
-		[[maybe_unused]] void SetSphereShape(const SphereShapeSettings& settings);
-		[[maybe_unused]] void SetBoxShape(const BoxShapeSettings& settings);
-		[[maybe_unused]] void SetCapsuleShape(const CapsuleShapeSettings& settings);
-		[[maybe_unused]] void SetCylinderShape(const CylinderShapeSettings& settings);
+		[[maybe_unused]] void SetSphereShape(const JPH::SphereShapeSettings& settings);
+		[[maybe_unused]] void SetBoxShape(const JPH::BoxShapeSettings& settings);
+		[[maybe_unused]] void SetCapsuleShape(const JPH::CapsuleShapeSettings& settings);
+		[[maybe_unused]] void SetCylinderShape(const JPH::CylinderShapeSettings& settings);
 		[[maybe_unused]] void SetMeshShape(Entity& entity);
 		[[maybe_unused]] void SetConvexMeshShape(Entity& entity);
 
 		void SetRotationEuler(const glm::vec3& eulerAngles);
 
 	  public:
-		// Conversion utilities
 		[[maybe_unused]] static JPH::Vec3 ToJolt(const glm::vec3& v);
 		[[maybe_unused]] static glm::vec3 ToGlm(const JPH::Vec3& v);
 		[[maybe_unused]] static JPH::Quat ToJolt(const glm::quat& q);
